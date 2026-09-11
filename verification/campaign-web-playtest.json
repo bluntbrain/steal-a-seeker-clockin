@@ -1,0 +1,239 @@
+{
+  "status": "passed",
+  "environment": "Headless Chrome with pointer joystick, not physical phone",
+  "checks": [
+    "four actual-input extractions",
+    "unlocks in order",
+    "mission-specific render",
+    "progress restored after reload",
+    "no page errors"
+  ],
+  "sourceHashes": {
+    "src/GameScreen.tsx": "fb80766abc3844e0d72fd36ef5c474a259b73716c2abdb02e5eafc17a1605177",
+    "src/game/level.ts": "45af12145fbd7f606e614ba7f8ee1ea4bd674f18cf79f4b232996dff710ae60d",
+    "src/game/simulation.ts": "855b22a933e0f2570f890fc6868759b86c00119fdea53cb99fbbfeea297336d4",
+    "src/game/guards.ts": "cc44c815c0a7564b4e0188d0bd9099fd81b5e78564bc6715dae809bef9245edf",
+    "src/three/HeistScene.tsx": "cb59d7827590c133786e69c531f803a9bda3e3f0d9c406a635bcb14066449429"
+  },
+  "results": [
+    {
+      "mission": "practice",
+      "attempts": [
+        {
+          "wait": 0,
+          "status": "won",
+          "seconds": 10.833333333333306
+        }
+      ],
+      "result": {
+        "x": 9.428871978996305,
+        "y": 2.0008891396994217,
+        "px": 9.428871978996305,
+        "py": 2.0008891396994217,
+        "vx": 0,
+        "vy": 0,
+        "facing": 3,
+        "walked": 22.766507309416866,
+        "carrying": true,
+        "battery": 100,
+        "pickup": 0,
+        "extraction": 0.9999999999999999,
+        "elapsed": 10.833333333333306,
+        "ticks": 325,
+        "dashLeft": 0,
+        "cooldown": 0,
+        "dashX": 0,
+        "dashY": -1,
+        "dashSeen": 0,
+        "status": "won",
+        "dashes": 0,
+        "score": 12245,
+        "bumps": 0,
+        "mission": "practice",
+        "guards": [],
+        "alert": 0,
+        "caughtBy": -1,
+        "spotted": false
+      }
+    },
+    {
+      "mission": "cone-lesson",
+      "attempts": [
+        {
+          "wait": 0,
+          "status": "won",
+          "seconds": 13.46666666666663
+        }
+      ],
+      "result": {
+        "x": 2.53853980665112,
+        "y": 2.024714027567652,
+        "px": 2.53853980665112,
+        "py": 2.024714027567652,
+        "vx": 0,
+        "vy": 0,
+        "facing": 1,
+        "walked": 29.711552816879003,
+        "carrying": true,
+        "battery": 100,
+        "pickup": 0,
+        "extraction": 0.9999999999999999,
+        "elapsed": 13.46666666666663,
+        "ticks": 404,
+        "dashLeft": 0,
+        "cooldown": 0,
+        "dashX": 0,
+        "dashY": -1,
+        "dashSeen": 0,
+        "status": "won",
+        "dashes": 0,
+        "score": 12380,
+        "bumps": 0,
+        "mission": "cone-lesson",
+        "guards": [
+          {
+            "x": 7.9,
+            "y": 6,
+            "px": 7.9,
+            "py": 6,
+            "angle": -1.5707963267948966,
+            "target": 4,
+            "wait": 0.4,
+            "exposure": 0,
+            "seesPlayer": false,
+            "range": 3.4,
+            "halfAngle": 0.6283185307179586,
+            "spotSeconds": 0.8
+          }
+        ],
+        "alert": 0,
+        "caughtBy": -1,
+        "spotted": false
+      }
+    },
+    {
+      "mission": "battery-dash",
+      "attempts": [
+        {
+          "wait": 3.5,
+          "status": "won",
+          "seconds": 20.633333333333518
+        }
+      ],
+      "result": {
+        "x": 9.380459028895471,
+        "y": 17.62888833258125,
+        "px": 9.380459028895471,
+        "py": 17.62888833258125,
+        "vx": 0,
+        "vy": 0,
+        "facing": 0,
+        "walked": 39.02198419477196,
+        "carrying": true,
+        "battery": 100,
+        "pickup": 0,
+        "extraction": 0.9999999999999999,
+        "elapsed": 20.633333333333518,
+        "ticks": 619,
+        "dashLeft": 0,
+        "cooldown": 0,
+        "dashX": 0,
+        "dashY": -1,
+        "dashSeen": 0,
+        "status": "won",
+        "dashes": 0,
+        "score": 12495,
+        "bumps": 0,
+        "mission": "battery-dash",
+        "guards": [
+          {
+            "x": 10.6,
+            "y": 11.4,
+            "px": 10.6,
+            "py": 11.4,
+            "angle": 1.5707963267948966,
+            "target": 3,
+            "wait": 0.33333333333333337,
+            "exposure": 0,
+            "seesPlayer": false,
+            "range": 3.8,
+            "halfAngle": 0.6283185307179586,
+            "spotSeconds": 0.8
+          }
+        ],
+        "alert": 0,
+        "caughtBy": -1,
+        "spotted": false
+      }
+    },
+    {
+      "mission": "crossing-signals",
+      "attempts": [
+        {
+          "wait": 0,
+          "status": "won",
+          "seconds": 12.766666666666632
+        }
+      ],
+      "result": {
+        "x": 2.528588788526799,
+        "y": 2.000577557821324,
+        "px": 2.528588788526799,
+        "py": 2.000577557821324,
+        "vx": 0,
+        "vy": 0,
+        "facing": 1,
+        "walked": 29.794025706638152,
+        "carrying": true,
+        "battery": 100,
+        "pickup": 0,
+        "extraction": 0.9999999999999999,
+        "elapsed": 12.766666666666632,
+        "ticks": 383,
+        "dashLeft": 0,
+        "cooldown": 0,
+        "dashX": 0,
+        "dashY": -1,
+        "dashSeen": 0,
+        "status": "won",
+        "dashes": 0,
+        "score": 12685,
+        "bumps": 0,
+        "mission": "crossing-signals",
+        "guards": [
+          {
+            "x": 10.9,
+            "y": 16.1,
+            "px": 10.9,
+            "py": 16.1,
+            "angle": 1.5707963267948966,
+            "target": 3,
+            "wait": 0.4,
+            "exposure": 0,
+            "seesPlayer": false,
+            "range": 3.3,
+            "halfAngle": 0.6283185307179586,
+            "spotSeconds": 0.8
+          },
+          {
+            "x": 8.233333333333341,
+            "y": 2,
+            "px": 8.266666666666675,
+            "py": 2,
+            "angle": 3.141592653589793,
+            "target": 3,
+            "wait": 0,
+            "exposure": 0,
+            "seesPlayer": false,
+            "range": 3.3,
+            "halfAngle": 0.6283185307179586,
+            "spotSeconds": 0.8
+          }
+        ],
+        "alert": 0,
+        "caughtBy": -1,
+        "spotted": true
+      }
+    }
+  ]
+}

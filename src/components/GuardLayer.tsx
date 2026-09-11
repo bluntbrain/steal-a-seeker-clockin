@@ -1,7 +1,7 @@
 import React from 'react';
 import {Circle,Group,Oval,Path,RoundedRect,Skia} from '@shopify/react-native-skia';
 import {useDerivedValue,type SharedValue} from 'react-native-reanimated';
-import {GUARD_TUNING} from '../game/level';
+import {getLevel} from '../game/level';
 import {sightDistance} from '../game/guards';
 import type {GameState} from '../game/simulation';
 type Props={game:SharedValue<GameState>;alpha:SharedValue<number>;index:number};
@@ -16,8 +16,8 @@ export default function GuardLayer({game,alpha,index}:Props){
   const p=Skia.Path.Make(),g=game.value.guards[index];if(!g)return p;
   const x=g.px+(g.x-g.px)*alpha.value,y=g.py+(g.y-g.py)*alpha.value;p.moveTo(x,y);
   for(let i=0;i<=32;i++){
-   const a=g.angle-GUARD_TUNING.halfAngle+2*GUARD_TUNING.halfAngle*i/32,dx=Math.cos(a),dy=Math.sin(a);
-   const d=sightDistance(x,y,dx,dy,GUARD_TUNING.range);p.lineTo(x+dx*d,y+dy*d);
+   const a=g.angle-g.halfAngle+2*g.halfAngle*i/32,dx=Math.cos(a),dy=Math.sin(a);
+   const d=sightDistance(x,y,dx,dy,g.range,getLevel(game.value.mission));p.lineTo(x+dx*d,y+dy*d);
   }
   p.close();return p;
  });

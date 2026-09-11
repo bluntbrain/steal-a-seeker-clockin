@@ -8,17 +8,17 @@ Updated 12 September 2026. Goal remains the full game described in COMPLETE-GAME
 | Camera and touch | Screen-relative joystick math test and input-driven browser playthrough pass. Physical-device feel, wall fading and final framing still need testing. |
 | 3D assets | Procedural courier/robot proxy models with articulated walking; final art, animation and outfits remain. |
 | Dynamic guards | Existing patrol/occluded vision renders in 3D. Investigation/search and pickup-triggered security changes still need implementation. |
-| Twelve levels | One geometry and two modes still. Parameterized levels and the other maps remain. |
+| Twelve levels | Four authored warehouse maps with distinct geometry, configurable patrols and mission briefings. All four pass input-driven simulation and browser joystick extraction tests. Eight advanced maps remain. |
 | Native wallet | MWA Kit provider, secure native authorization cache, devnet wallet panel and memo transaction diagnostic implemented. Android build, wallet panel and missing-wallet handling pass on the emulator. Physical Phantom approval and successful devnet transaction remain unverified. |
 | Purchase/backend | PostgreSQL API, signed wallet login, immutable orders, finalized-transfer verification, reference recovery and entitlement restore implemented; 4 integration scenarios pass. Native test shop is wired in source. Live mint/payment, physical Phantom, stable HTTPS deployment and full recovery remain. See server/README.md. |
-| Progress/shop | Not implemented. All catalog products and persistent progression remain. |
+| Progress/shop | Local campaign progress uses SQLite on Android and localStorage in the browser. Stars, personal bests and sequential unlocks implemented; browser reload restore passes. Wallet-scoped cloud sync, paywall and usable catalog delivery remain. |
 | Daily/ranking | Not implemented. Shared deterministic run validation remains. |
 | Test entry/return | Not implemented. Reserve, settlement, recovery and receipt verification remain. |
 | Submission | Current APK is a development-signed test build. Release identity/signing, fresh-clone release evidence, final deck/demo and physical testing remain. |
 
 ## Renderer decision
 
-The selected visual direction is unchanged: native 3D with an angled overhead camera and simple controls. The first implementation uses `@react-three/fiber` with `three` and `expo-gl`, rather than Filament. The installed Fiber version supports our React 19/RN versions, and the shared scene has now rendered on both web and native Android. This preserves browser playtesting without a WebView in gameplay. [Expo GL documentation](https://docs.expo.dev/versions/latest/sdk/gl-view/) describes the native GL surface.
+The selected visual direction is unchanged: native 3D with an angled overhead camera and simple controls. The implementation uses `@react-three/fiber` with `three` and `expo-gl`, rather than Filament. The installed Fiber version supports our React 19/RN versions, and the shared scene has now rendered on both web and native Android. This preserves browser playtesting without a WebView in gameplay. [Expo GL documentation](https://docs.expo.dev/versions/latest/sdk/gl-view/) describes the native GL surface.
 
 The physics/game simulation still uses the existing fixed-step rules. Do not infer replay or reward security merely from the renderer working. Physical phone GPU/thermal behavior remains unmeasured.
 
@@ -31,3 +31,9 @@ The physics/game simulation still uses the existing fixed-step rules. Do not inf
 Local API listens on 8790. `npm run server:test` uses a dedicated PostgreSQL test database and synthetic chain responses; it does not prove a live payment. The public devnet faucet declined the initial funding request. Dedicated signing files are private and outside git. Access enforcement and cosmetic rendering are still outstanding.
 
 Hosting attempt: Railway refused project creation because the account trial expired. No game service or database was created there. Stable HTTPS remains pending; Dockerfile.api and railway.toml prepare the scoped service deployment. Do not treat the local endpoint as reachable from a physical phone.
+
+## Four-mission checkpoint
+
+`verification/campaign-web-playtest.json` records successful pointer-joystick routes for all four warehouse levels and a reload preserving all four completion records. Each passed on the first tested phase. `npm test` passes 24 tests, including collision-safe repeated guard loops, authored input routes and progress/star rules. Native release build and emulator install pass; native mission-map and real GL screenshots are in `verification/campaign-native-*.png`. This does not establish physical-device performance, native full-campaign touch completion or Phantom approval.
+
+`releases/steal-a-seeker-four-missions-devnet-preview.apk` includes four freely accessible development playtest rooms, the native devnet wallet panel and an unconfigured test shop. It is **not the hard-paywall release**. Stable HTTPS is blocked by Railway's expired trial. The other eight maps, playable purchased items, access enforcement, ranking and returns are still required.
