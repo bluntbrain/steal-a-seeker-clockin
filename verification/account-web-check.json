@@ -1,0 +1,26 @@
+{
+  "status": "passed",
+  "checks": [
+    "browser preview remains playable",
+    "touch practice extraction",
+    "collection matches completion",
+    "shop explains native wallet requirement",
+    "wallet-specific provider preserves web playtest save",
+    "reload restores collection",
+    "no runtime errors"
+  ],
+  "notVerified": [
+    "native purchase",
+    "native account sync",
+    "owned item rendering"
+  ],
+  "sourceHashes": {
+    "src/GameScreen.tsx": "0d9da3ab467ae01823796cc0c159c8724c44bdffd1acbc4fcc4d630638c752e5",
+    "src/commerce/account-context.ts": "ef144b16f87eda4f2ef19be001b28cf4554bc78f03c77f01bf3134c97c06e255",
+    "src/commerce/AccountProvider.web.tsx": "6dd049037970d17b51d29afcabbbc392fa94c7c937a32c7c201f398c7269eb0c",
+    "src/components/Hideout.tsx": "1941069228eacb39b6590719dd87112506ec1f5375326e26361f0d0a1d913690",
+    "src/progress/useProgress.ts": "f9b68891b0c29c04a0203aac53c558f896e70360191bd85bc08ea9bf5c674f95",
+    "src/progress/model.ts": "69b5b4d7eeaba6a1b81019fef8cc96f09575f24e26e7ea0f0022c9b8077bd47d",
+    "src/three/HeistScene.tsx": "5ca9b549b830abe7381def79ebd4a5e9ab934f0141c837124430eee39f51faa8"
+  }
+}

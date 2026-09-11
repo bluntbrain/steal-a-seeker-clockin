@@ -1,4 +1,5 @@
 import type {AccountState,Order,ProductId,SignInChallenge} from '../../shared/commerce';
+import type {Progress} from '../progress/model';
 export class ApiError extends Error{constructor(public status:number,message:string){super(message);}}
 export const API_URL=process.env.EXPO_PUBLIC_API_URL;
 export async function api<T>(path:string,options:{token?:string;body?:unknown;method?:string}={}):Promise<T>{
@@ -13,8 +14,10 @@ export const commerceApi={
  me:(token:string)=>api<AccountState>('/me',{token}),
  orders:(token:string)=>api<Order[]>('/orders',{token}),
  order:(token:string,id:string)=>api<Order>(`/orders/${id}`,{token}),
+ prepare:(token:string,id:string)=>api<Order>(`/orders/${id}/prepare`,{token,body:{}}),
  quote:(token:string,sku:ProductId,idempotencyKey:string)=>api<Order>('/orders',{token,body:{sku,idempotencyKey}}),
  attach:(token:string,id:string,signature:string)=>api<Order>(`/orders/${id}/transaction`,{token,body:{signature}}),
  reconcile:(token:string,id:string)=>api<Order>(`/orders/${id}/reconcile`,{token,body:{}}),
  equip:(token:string,sku:ProductId)=>api<AccountState>('/me/equipment',{token,method:'PUT',body:{sku}}),
+ syncProgress:(token:string,progress:Progress)=>api<AccountState>('/me/progress',{token,method:'PUT',body:progress}),
 };

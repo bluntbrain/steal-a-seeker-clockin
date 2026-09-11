@@ -1,0 +1,18 @@
+const {chromium}=require(process.env.PLAYWRIGHT_MODULE||'playwright');
+const fs=require('node:fs'),assert=require('node:assert/strict'),crypto=require('node:crypto');
+(async()=>{const browser=await chromium.launch({headless:true,executablePath:'/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'});try{
+ const page=await browser.newPage({viewport:{width:430,height:932}}),errors=[];page.on('pageerror',e=>errors.push(e.message));
+ await page.goto('http://127.0.0.1:8787');await page.waitForFunction(()=>window.__SEEKER_MVP__?.snapshot().ticks>5);
+ const snapshot=()=>page.evaluate(()=>window.__SEEKER_MVP__.snapshot()),route=JSON.parse(fs.readFileSync('verification/campaign-routes.json')).routes.find(r=>r.mission==='practice');
+ for(const leg of route.legs){for(const p of leg.points){const j=await page.getByTestId('joystick').boundingBox(),a=Math.atan2(6,11),start=Date.now();await page.mouse.move(j.x+54,j.y+54);await page.mouse.down();
+  while(Date.now()-start<10000){const s=await snapshot(),dx=p.x-s.x,dy=p.y-s.y,d=Math.hypot(dx,dy);if(s.status!=='playing'||d<.12)break;const sx=dx*Math.cos(a)-dy*Math.sin(a),sy=dx*Math.sin(a)+dy*Math.cos(a),r=Math.min(36,d*100);await page.mouse.move(j.x+54+sx/d*r,j.y+54+sy/d*r);await page.waitForTimeout(30);}await page.mouse.up();await page.waitForTimeout(130);}
+  if(leg.action==='pickup'){const b=await page.getByTestId('take-button').boundingBox();await page.mouse.move(b.x+b.width/2,b.y+b.height/2);await page.mouse.down();await page.waitForTimeout(600);await page.mouse.up();}else await page.waitForTimeout(1200);
+ }
+ assert.equal((await snapshot()).status,'won');
+ await page.getByRole('button',{name:'Open hideout',exact:true}).click();await page.getByText('1 / 12 missions',{exact:false}).waitFor();await page.screenshot({path:'verification/account-hideout-web.png'});
+ await page.getByRole('button',{name:'Shop / equip owned items'}).click();await page.getByText('Phantom on Android',{exact:true}).waitFor();await page.getByRole('dialog').getByRole('button',{name:'Back to game',exact:true}).click();
+ await page.reload();await page.waitForFunction(()=>window.__SEEKER_MVP__?.snapshot().ticks>5);await page.getByRole('button',{name:'Open hideout',exact:true}).click();await page.getByText('1 / 12 missions',{exact:false}).waitFor();assert.deepEqual(errors,[]);
+ const files=['src/GameScreen.tsx','src/commerce/account-context.ts','src/commerce/AccountProvider.web.tsx','src/components/Hideout.tsx','src/progress/useProgress.ts','src/progress/model.ts','src/three/HeistScene.tsx'];
+ fs.writeFileSync('verification/account-web-check.json',JSON.stringify({status:'passed',checks:['browser preview remains playable','touch practice extraction','collection matches completion','shop explains native wallet requirement','wallet-specific provider preserves web playtest save','reload restores collection','no runtime errors'],notVerified:['native purchase','native account sync','owned item rendering'],sourceHashes:Object.fromEntries(files.map(f=>[f,crypto.createHash('sha256').update(fs.readFileSync(f)).digest('hex')]))},null,2));
+ console.log('Account integration browser smoke passed.');
+ }finally{await browser.close();}})().catch(e=>{console.error(e);process.exit(1);});

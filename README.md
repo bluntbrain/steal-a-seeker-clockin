@@ -1,49 +1,55 @@
-> Development update, 12 September: eight authored 3D missions, local saves, native devnet MWA and a tested local commerce API are implemented. [Current evidence and remaining work](docs/IMPLEMENTATION-STATUS.md) · [Eight-mission development APK](releases/steal-a-seeker-eight-missions-devnet-preview.apk). Four missions, paywall/shop delivery, rankings, settlement and physical Phantom testing remain. The v0.2 information below describes the earlier baseline.
+# Steal a Seeker
 
-# Steal a Seeker · Night Shift prototype
+An Android solo stealth game with an angled overhead 3D camera. Sneak past robot guards, recover a Seeker and reach the exit. Built with React Native, Three.js / React Three Fiber, Expo GL and Solana Mobile Wallet Adapter. Android gameplay uses a native GL surface, not a WebView; the browser is a separate React Native Web playtest.
 
-A native React Native / Skia Android game with two selectable modes on the same warehouse layout. **Quiet Pickup** is the unguarded practice room. **Night Shift** adds two patrol bots, cover-aware sight cones, an alert meter, and a caught/retry loop. These are two mission rulesets, not two distinct room layouts.
+Status: 12 September 2026. The complete goal remains in [the game plan](docs/COMPLETE-GAME-PLAN.md). [Implementation evidence and remaining work](docs/IMPLEMENTATION-STATUS.md) distinguishes tested features from unfinished integration.
 
-[Play locally](http://127.0.0.1:8787) · [v0.2 ARM64 test APK](releases/steal-a-seeker-0.2.0-arm64.apk) · [Next milestones](BUILD-PLAN.md) · [Verification](verification/night-shift.md).
+## Current build
 
-## Play
+- Twelve authored missions: patrol timing, scanners, timed gates, decoys, investigation, a Warden, power switching, relay doors and two-phone deliveries.
+- Fixed 30 Hz simulation, touch joystick, pickup/action, battery-powered dash, mission tools, cover-aware vision, capture/retry and pause.
+- Local stars, best runs, sequential unlocks and a collection display. Android saves are scoped to the connected wallet; cloud sync preserves each device's best records.
+- Native campaign paywall and secure cache of verified ownership for offline use. Catalog equipment drives 3D courier materials, an escape trail, a profile frame and a collection-rack finish.
+- Native devnet wallet connection, signed login, checkout/restore, finalized-transfer verification and durable payment lifetimes. Resumed approvals reuse identical transaction bytes.
+- Bounded server replay verification. Run tickets, client recording, online ranks and the separate paid-entry/success-return mode are still outstanding.
 
-Drag the left stick. Stop by the glowing phone and hold **TAKE** for 0.4 seconds. Carry it to **EXIT** and stay inside for one second. **DASH** costs 20 charge with a two-second cooldown. Zero charge still permits walking and extraction. Reset replays the selected mission. Choose Practice or Night Shift above the room; changing missions starts a fresh run.
+**Live purchases are not ready:** the current APK has no configured HTTPS API, the devnet test mint awaits funding, and physical Phantom sign-in/payment/restore remain unverified. TEST SKR has no monetary value. Mainnet SKR payments are not enabled.
 
-Web: **WASD / arrows**, **E** to hold pickup, **Space** to dash, **Esc** to pause, **R** to reset. Tap the FPS label for p95 frame time. Sound can be muted. Carrying is slower (2.6 versus 3.2 tiles/second). The score target is 60 seconds; the hard limit is 120 seconds.
+## Try it
 
-In Night Shift, amber cones show where guards can see. Walls, racks and crates block their view. Exposure fills a guard's alert in 0.8 seconds; get out of sight before it fills to avoid capture. Suspecting guards stop while watching the courier. When you break sight, alert drains and patrol resumes. Pause/backgrounding freezes both guards and the player. There is no pursuit pathfinding yet.
+[Browser gameplay preview](http://127.0.0.1:8787) · [12-mission development playtest APK](releases/steal-a-seeker-twelve-missions-devnet-preview.apk) · [Account/paywall preview APK](releases/steal-a-seeker-account-devnet-preview.apk)
+
+APKs are local, ignored release artifacts; they are not uploaded to GitHub. Both are development-signed ARM64 builds, not production store releases. The twelve-mission checkpoint allows free development playtesting. The newer account build enforces the requested campaign gate and needs the purchase service to unlock it.
+
+Drag the stick to move. Stop beside the phone and hold **TAKE**. At switches the button becomes **ACT**. Carry the phone into **EXIT** and hold position for one second. **DASH** spends 20 charge; zero charge still permits walking and extraction. The decoy button appears in missions that supply decoys. Campaign retries are unlimited after buying access.
+
+Browser controls: WASD/arrows, E to take/activate, Space to dash, Q for decoy, Esc to pause, R to restart. The mission map explains each room. Open **Hideout** for personal stars and recovered fictional phones. A recovered collectible does not promise a physical device reward.
 
 ## Run and build
 
-Use a supported Node version (20.19.4+ in Node 20.x works here), Java 17 and Android SDK 36. Dependencies are pinned by package-lock.json: Expo SDK 55, RN 0.83.10, Skia 2.4.18, Reanimated 4.2.1 and Worklets 0.7.4.
+Use Node 22+, Java 17 and Android SDK 36. Dependencies are pinned in package-lock.json. Configure ANDROID_HOME or ignored android/local.properties. Gradle needs several GB of free disk.
 
-- `npm ci`
-- `npm start` — Metro, port 8082.
-- `npm run web` — browser playtest.
-- `npm run android` — build/install on an emulator or phone.
-- `npm run build:apk` — standalone release-mode test APK.
-- `npm run export:web` — static output in dist.
-- `npm run preview` — serve the export locally at http://127.0.0.1:8787.
+```sh
+npm ci
+npm start
+npm run android
+npm run export:web
+npm run preview
+npm run build:apk
+```
 
-Set ANDROID_HOME or ignored android/local.properties (`sdk.dir=/your/Android/sdk`). The Android project targets ARM64, matching Seeker and the local emulator. Test APKs use the generated development key, not a production store signing identity. Allow several GB of free disk for Gradle's intermediate native libraries.
+Metro uses 8082; the static gameplay preview uses 8787. Set `EXPO_PUBLIC_API_URL` before building a connected Android APK. Physical devices need a reachable HTTPS endpoint. See [the commerce service README](server/README.md) for PostgreSQL, test-token provisioning, migrations and API startup.
 
-## Verify
+## Verification
 
-`npm run typecheck` and `npm test` cover types and mechanics. `node scripts/playtest.cjs` tests actual pointer/keyboard controls through extraction and retry, plus desktop/phone layouts. It requires Playwright and Chrome; PLAYWRIGHT_MODULE, CHROME_PATH and MVP_URL can override local defaults. It has read-only diagnostics, no teleport or forced-win path.
+`npm run typecheck`, `npm test` and `npm run server:test` currently pass: 46 game/client tests and 14 server tests. Server tests require the dedicated local `seeker_clockin_test` database; they use synthetic chain responses and never establish a live token payment.
 
-`node scripts/playtest-patrol.cjs` additionally checks mission switching, capture, frozen patrols, retry and an actual-input escape. `scripts/playtest-patrol-android.py` checks native touch capture/retry/background pause on the observed emulator layout. Verification evidence lives in verification/. Chrome/emulator measurements do not establish physical-Seeker performance. The on-screen counter makes device testing possible.
+`scripts/playtest-campaign.cjs` exercised all twelve rooms through pointer joystick input, with no teleport or forced-win hooks. Results and source hashes are in [the campaign report](verification/campaign-web-playtest.json). After account integration, `scripts/playtest-account.cjs` verifies extraction, collection, wallet guidance and reload restoration. Both require Playwright and Chrome. Earlier v0.2 patrol scripts/reports are historical evidence and predate current navigation.
 
-## Implementation
+Android builds/install and native GL startup pass on the emulator. The paywall and missing-wallet return are checked separately. Full native campaign completion, owned-item rendering after a real purchase, physical Phantom, cross-device live sync and sustained phone performance remain to be tested. The FPS label measures frame-callback cadence, not GPU presentation.
 
-`src/game/level.ts` is the map/tuning source. `simulation.ts` implements a fixed 30 Hz worklet-compatible simulation, normalized input, acceleration, wall sliding, collision substeps, pickup, battery/dash, extraction and score. Android runs it on Reanimated's UI runtime; Skia interpolates positions at display cadence. React updates the HUD rather than moving the sprite each frame.
+## Code layout
 
-`guards.ts` shares wall-ray intersections between visibility rules and the clipped Skia cones in `GuardLayer.tsx`. Patrol simulation runs at the same fixed step and resets deterministically.
+`src/game` contains shared maps, deterministic rules, navigation and scoring. `src/three` renders the native/browser 3D scene; `src/components/GameCanvas.tsx` preserves the 2D diagnostic renderer. `src/commerce` handles wallet account state, checkout, access and equipment. `src/progress` stores campaign bests. `server` owns authenticated records, payment verification, migrations and replay workers. Client-reported campaign saves never authorize ranks or payouts.
 
-`assets/warehouse-floor-v1.png` provides the textured warehouse floor. `art.ts` records reusable obstacle/environment shapes once above it. `GameCanvas.tsx` draws the atlas and effects. `GameScreen.tsx` handles controls, audio, pause/retry and statistics. All runtime assets are local. The broader research remains in ../seeker-plan/.
-
-The FPS display measures UI frame-callback cadence over the latest 120 frames, not GPU presentation. Native build flags omit C++ debug symbols to keep ARM64 intermediates compact. The renderer and gameplay remain intact.
-
-## Not built yet
-
-Persistent progression, distinct additional room layouts, wallet integration, SKR purchases/rewards, backend run verification and an online leaderboard. The prototype is private test access, not the planned commercial paywall. See `BUILD-PLAN.md` for the order of implementation and release gates.
+Private deployment, refunds/support, daily rankings, paid-entry settlement, final art polish, physical validation and submission packaging remain required before calling the game complete.

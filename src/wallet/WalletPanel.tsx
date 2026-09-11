@@ -26,7 +26,7 @@ export default function WalletPanel({visible,onClose}:{visible:boolean;onClose:(
   setMessage('Still pending. Check the receipt before submitting another transaction.');
  }
  return <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}><View style={styles.backdrop}><ScrollView style={styles.card} contentContainerStyle={{padding:24,gap:16}}>
-  <Text style={styles.tag}>SOLANA DEVNET</Text><Text style={styles.title}>Your wallet</Text><Text style={styles.body}>Connect Phantom on this Android device. Testnet Mode must be enabled in Phantom. Only devnet SOL is used here.</Text>
+  <Text style={styles.tag}>SOLANA DEVNET</Text><Text style={styles.title}>Your wallet</Text><Text style={styles.body}>Connect Phantom on this Android device. Testnet Mode must be enabled in Phantom. Use devnet SOL for fees and TEST SKR for shop purchases. These test tokens have no monetary value.</Text>
   <View style={styles.account}><Text selectable style={styles.address}>{wallet.account?.address||'No wallet connected'}</Text><Text style={styles.body}>{balance===undefined?'':`${balance} devnet SOL`}</Text></View>
   {!wallet.account?<Pressable accessibilityRole="button" disabled={busy} style={styles.primary} onPress={()=>act(async()=>{await wallet.connect();setMessage('Wallet connected on devnet.');})}><Text style={styles.primaryText}>{busy?'OPENING WALLET…':'CONNECT PHANTOM / WALLET'}</Text></Pressable>:<>
    <Text style={styles.body}>Developer test: sign a small memo transaction. It costs a devnet network fee and does not buy campaign access.</Text>

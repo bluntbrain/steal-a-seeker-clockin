@@ -12,7 +12,8 @@ import type {Order,SignInChallenge} from '../shared/commerce';
 const b58=(b:Uint8Array)=>getBase58Decoder().decode(b),pub=()=>b58(randomBytes(32));
 const pool=database('postgresql://localhost/seeker_clockin_test');
 const transactions=new Map<string,unknown>(),references=new Map<string,string[]>();
-const chain:PaymentChain={ready:async()=>{},verify:async(o,s)=>verifyPayment(o,s,transactions.get(s)??null),find:async r=>references.get(r)||[]};
+let chainHeight=100,chainUnavailable=false;
+const chain:PaymentChain={ready:async()=>{},verify:async(o,s)=>verifyPayment(o,s,transactions.get(s)??null),find:async r=>{if(chainUnavailable)throw new Error('RPC unavailable');return references.get(r)||[];},lifetime:async()=>({blockhash:pub(),lastValidBlockHeight:String(chainHeight+150),contextSlot:String(chainHeight+1000)}),height:async()=>chainHeight};
 let service:CommerceService,app:Awaited<ReturnType<typeof createApp>>;
 before(async()=>{assert.equal((await pool.query('SELECT current_database() AS name')).rows[0].name,'seeker_clockin_test');await migrate(pool);await pool.query('TRUNCATE wallets,auth_challenges,sessions,orders,order_attempts,payment_receipts,entitlements CASCADE');const mint=pub(),recipient=pub();const [destination]=await findAssociatedTokenPda({owner:address(recipient),mint:address(mint),tokenProgram:address(TOKEN_PROGRAM)});service=new CommerceService(pool,chain,{mint,recipient,destination,decimals:6,identityUri:'https://github.com/bluntbrain'});app=await createApp(service);});
 after(async()=>{await app.close();await pool.end();});
@@ -66,4 +67,31 @@ test('campaign progress sync requires access, preserves best records and isolate
  assert.deepEqual((await service.me(user.wallet)).progress,better);assert.deepEqual((await service.me(other.wallet)).progress,{});
  assert.equal((await app.inject({method:'PUT',url:'/me/progress',headers:user.headers,payload:{...payload,wallet:other.wallet}})).statusCode,400);
  assert.equal((await app.inject({method:'PUT',url:'/me/progress',headers:user.headers,payload:{version:1,missions:{practice:{...payload.missions.practice,stars:8}}}})).statusCode,400);
+});
+
+test('payment preparation is wallet-bound and concurrent retries reuse the same transaction lifetime',async()=>{
+ const user=await login(),other=await login(),o=await quote(user);
+ const prepare=()=>app.inject({method:'POST',url:`/orders/${o.id}/prepare`,headers:user.headers,payload:{}});
+ assert.equal((await app.inject({method:'POST',url:`/orders/${o.id}/prepare`,headers:other.headers,payload:{}})).statusCode,404);
+ const [a,b]=await Promise.all([prepare(),prepare()]);assert.equal(a.statusCode,200,a.body);assert.equal(b.statusCode,200,b.body);
+ assert.deepEqual(a.json().payment,b.json().payment);assert.equal(a.json().status,'verifying');
+ assert.deepEqual((await prepare()).json().payment,a.json().payment);
+});
+test('expired approval rotates only after finalized reference scan; missing callback restores the purchase',async()=>{
+ const user=await login(),o=await quote(user),first=await service.preparePayment(user.wallet,o.id);
+ chainHeight=Number(first.payment!.lastValidBlockHeight)+1;
+ chainUnavailable=true;try{await assert.rejects(service.preparePayment(user.wallet,o.id),/RPC unavailable/);}finally{chainUnavailable=false;}
+ assert.deepEqual((await service.getOrder(user.wallet,o.id)).payment,first.payment,'RPC failure must preserve pending authorization');
+ const next=await service.preparePayment(user.wallet,o.id);assert.notEqual(next.payment!.id,first.payment!.id);
+ const sig=b58(randomBytes(64));transactions.set(sig,paidTx(next,sig));references.set(next.reference,[sig]);
+ chainHeight=Number(next.payment!.lastValidBlockHeight)+1;
+ const restored=await service.preparePayment(user.wallet,o.id);assert.equal(restored.status,'fulfilled');assert.equal(restored.payment!.id,next.payment!.id,'No new payment is prepared after recovery');
+ assert.deepEqual((await service.me(user.wallet)).entitlements,['campaign']);
+});
+test('incomplete finalized RPC history blocks reapproval; an expired unpaid quote can be replaced',async()=>{
+ const user=await login(),o=await quote(user),first=await service.preparePayment(user.wallet,o.id);chainHeight=Number(first.payment!.lastValidBlockHeight)+1;
+ const sig=b58(randomBytes(64));references.set(o.reference,[sig]);await assert.rejects(service.preparePayment(user.wallet,o.id),/reconciliation/);assert.deepEqual((await service.getOrder(user.wallet,o.id)).payment,first.payment);
+ references.set(o.reference,[]);await pool.query("UPDATE orders SET expires_at=now()-interval '1 minute' WHERE id=$1",[o.id]);
+ const expired=await service.preparePayment(user.wallet,o.id);assert.equal(expired.status,'quoted');assert.equal(expired.payment,undefined);
+ const replacement=await quote(user);assert.notEqual(replacement.id,o.id);
 });

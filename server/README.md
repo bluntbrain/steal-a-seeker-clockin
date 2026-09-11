@@ -31,9 +31,9 @@ The helper validates the devnet genesis hash before transactions. It uses explic
 
 ## Android connection
 
-Set `EXPO_PUBLIC_API_URL` before bundling. A physical phone needs a reachable HTTPS test service. An emulator can reach the host through `10.0.2.2`, but release Android network policy should not be broadly weakened to allow HTTP. The current distributed APK predates this commerce increment; build a new APK after configuring its endpoint. Do not hardcode a temporary tunnel as the production API.
+Set `EXPO_PUBLIC_API_URL` before bundling. A physical phone needs a reachable HTTPS test service. An emulator can reach the host through `10.0.2.2`, but release Android network policy should not be broadly weakened to allow HTTP. The account preview APK includes the commerce client, but its endpoint is not configured. Build a new APK after configuring the endpoint. Do not hardcode a temporary tunnel as the production API.
 
-The native test shop is inside the wallet panel after connection. It performs wallet sign-in, gets a quote, separately asks for payment approval, and restores purchases. It does not yet enforce the campaign gate or render owned cosmetics; those remain game integration work. It deliberately labels content as in development and uses test assets.
+The native test shop is inside the wallet panel after connection. It performs wallet sign-in, gets a quote, separately asks for payment approval, and restores purchases. The native campaign gate now requires a wallet-owned pass. Secure local ownership cache supports offline play; 3D outfits, an escape trail, profile frame and collection finish consume equipped items. Browser gameplay stays an explicitly separate playtest preview. Physical purchase-to-game delivery is still unverified.
 
 ## Payment authority and recovery
 
@@ -41,13 +41,13 @@ The server freezes wallet, SKU, mint/program, amount, recipient, token accounts,
 
 Verification fetches [getTransaction](https://solana.com/docs/rpc/http/gettransaction) at finalized commitment. It checks execution, signer, exact transfer, token account ownership, treasury balance increase and order binding. Final fulfillment and unique receipt allocation occur in one database transaction. An existing item with a second payment or a transfer outside the quote window becomes review work; neither is silently called fulfilled.
 
-The current worker scans recent open orders; explicit restore/reconcile can revisit older ones. Pending signatures whose blockhash expires, high-volume reference pagination and operator refunds need further recovery work before commerce is called complete. No retry path automatically signs a second transfer.
+The current worker scans recent open orders; explicit restore/reconcile can revisit older ones. `POST /orders/:id/prepare` persists a blockhash and last-valid block height before wallet approval. Resuming an active authorization compiles identical transaction bytes. A replacement requires finalized block height beyond expiry and a finalized reference scan; missing/incomplete RPC results fail closed. A reference with 1,000 results fails closed for manual reconciliation instead of silently dropping older transfers. Operator refunds remain outstanding.
 
 ## Evidence and next gates
 
-`server/commerce.test.ts` uses genuine Ed25519 signatures and a real PostgreSQL database. It checks nonce reuse, wrong nonce, expired/revoked session handling through the API, cross-wallet isolation, immutable quote requests, duplicate callbacks, loss of callback, restore from a new service instance, unowned equipment, and tampered transfer fields. Expiry edge coverage is being expanded; it does not substitute for live chain verification.
+`server/commerce.test.ts` uses genuine Ed25519 signatures and a real PostgreSQL database. It checks nonce reuse, wrong nonce, expired/revoked session handling through the API, cross-wallet isolation, immutable quote requests, duplicate callbacks, loss of callback, restore from a new service instance, unowned equipment, and tampered transfer fields. Tests also cover concurrent preparation, expired approval, unavailable RPC, incomplete transaction data, quote replacement and byte-identical resumed approvals. This does not substitute for live chain verification.
 
-Remaining: live test mint/payment, physical Phantom round trip, stable HTTPS deployment, payment-expiry recovery, user-visible pending status refresh, access enforcement, usable cosmetic delivery, progression sync, rankings and reward settlement. Mainnet commerce is not enabled.
+Remaining: live test mint/payment, physical Phantom round trip, stable HTTPS deployment, operator refunds, purchase-to-game/equipment validation on Android, rankings and reward settlement. Mainnet commerce is not enabled.
 
 ## Hosting status
 
@@ -55,4 +55,8 @@ Railway creation was rejected on 12 September because the account trial expired.
 
 ## Campaign progress endpoint
 
-`PUT /me/progress` requires signed authentication and a campaign entitlement. It validates a versioned payload and merges stars, best time, score, battery and completion count without regressing either device's best values. Repeated sync is idempotent. The native client is not wired to this endpoint yet. These client-reported saves are not trusted for daily ranks or returns. Docker packaging includes the shared game definitions so the API uses the same mission IDs.
+`PUT /me/progress` requires signed authentication and a campaign entitlement. It validates a versioned payload and merges stars, best time, score, battery and completion count without regressing either device's best values. Repeated sync is idempotent. The native client now merges wallet-scoped local progress and syncs through an existing signed session without opening Phantom unexpectedly. Sign-in/restore refreshes the account; a failed sync retains local progress. These client-reported saves are not trusted for daily ranks or returns. Docker packaging includes the shared game definitions so the API uses the same mission IDs.
+
+## Migration 002
+
+`002-payment-lifetimes.sql` adds durable payment authorization to orders. Migration 001 remains byte-for-byte unchanged. The migration runner applies both under the same advisory lock and verifies each stored checksum.

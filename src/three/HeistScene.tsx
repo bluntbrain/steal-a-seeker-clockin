@@ -5,8 +5,9 @@ import type {SharedValue} from 'react-native-reanimated';
 import {targetPhone,type GameState} from '../game/simulation';
 import {getLevel, type LevelDefinition} from '../game/level';
 import {sightDistance} from '../game/guards';
+import {courierPalette,type Appearance} from '../commerce/appearance';
 
-export type SceneProps = {game:SharedValue<GameState>;alpha:SharedValue<number>;clock:SharedValue<number>;level:LevelDefinition};
+export type SceneProps = {game:SharedValue<GameState>;alpha:SharedValue<number>;clock:SharedValue<number>;level:LevelDefinition;appearance?:Appearance};
 const colors={floor:'#263938',edge:'#142425',mint:'#a8ecd7',cream:'#e8ebda',dark:'#17282d',amber:'#ffcb75'};
 function Box({position,scale,color,emissive}: {position:[number,number,number];scale:[number,number,number];color:string;emissive?:boolean}) {
  return <mesh position={position} castShadow receiveShadow><boxGeometry args={scale}/><meshStandardMaterial color={color} roughness={.72} emissive={emissive?color:'#000000'} emissiveIntensity={emissive?.65:0}/></mesh>;
@@ -15,7 +16,8 @@ function Ball({position,scale,color}: {position:[number,number,number];scale:[nu
  return <mesh position={position} scale={scale} castShadow><sphereGeometry args={[1,12,8]}/><meshStandardMaterial color={color} roughness={.68}/></mesh>;
 }
 function Phone(){return <group><Box position={[0,.35,0]} scale={[.35,.65,.075]} color={colors.cream}/><Box position={[0,.35,.045]} scale={[.27,.50,.012]} color={colors.mint} emissive/><Box position={[0,.63,.055]} scale={[.07,.02,.01]} color={colors.dark}/></group>;}
-function Courier({game,alpha,clock}:SceneProps){
+function Courier({game,alpha,clock,appearance}:SceneProps){
+ const colors=courierPalette(appearance?.outfit);
  const root=useRef<THREE.Group>(null),body=useRef<THREE.Group>(null),left=useRef<THREE.Group>(null),right=useRef<THREE.Group>(null),carry=useRef<THREE.Group>(null);
  useFrame(()=>{const s=game.value,a=alpha.value;if(!root.current)return;
   root.current.position.set(s.px+(s.x-s.px)*a,0,s.py+(s.y-s.py)*a);
@@ -41,6 +43,16 @@ function Courier({game,alpha,clock}:SceneProps){
   <Box position={[0,.78,-.39]} scale={[.24,.10,.02]} color={colors.dark}/>
   <group ref={carry} position={[.26,.51,.36]} rotation={[.3,0,-.2]} scale={.65}><Phone/></group>
  </group></group>;
+}
+function EscapeTrail({game,appearance}:Pick<SceneProps,'game'|'appearance'>){
+ const root=useRef<THREE.Group>(null),last=useRef(-1),cursor=useRef(0),points=useRef(Array.from({length:12},()=>({x:0,y:0,t:-100})));
+ useFrame(()=>{const state=game.value;if(!root.current)return;const on=appearance?.trail==='escape-trail'&&!appearance.reducedEffects;
+  root.current.visible=on;if(!on)return;
+  if(state.elapsed<last.current){for(const p of points.current)p.t=-100;last.current=-1;}
+  if(state.carrying&&state.status==='playing'&&Math.hypot(state.vx,state.vy)>.2&&state.elapsed-last.current>.06){const p=points.current[cursor.current++%12]!;p.x=state.x;p.y=state.y;p.t=state.elapsed;last.current=state.elapsed;}
+  root.current.children.forEach((object,i)=>{const p=points.current[i]!,age=state.elapsed-p.t,mesh=object as THREE.Mesh;mesh.visible=age>=0&&age<.75;mesh.position.set(p.x,.045,p.y);mesh.scale.setScalar(Math.max(.01,1-age/.75));(mesh.material as THREE.MeshBasicMaterial).opacity=Math.max(0,.45*(1-age/.75));});
+ });
+ return <group ref={root}>{points.current.map((_,i)=><mesh key={i} rotation={[-Math.PI/2,0,0]}><circleGeometry args={[.19,8]}/><meshBasicMaterial color="#b2f3d8" transparent opacity={.4} depthWrite={false}/></mesh>)}</group>;
 }
 function Robot({index,game,alpha,clock,level}:SceneProps & {index:number}){
  const root=useRef<THREE.Group>(null),visor=useRef<THREE.MeshStandardMaterial>(null);
@@ -100,7 +112,7 @@ function FollowCamera({game}:Pick<SceneProps,'game'>){const {camera}=useThree();
 export default function HeistScene(props:SceneProps){return <>
  <color attach="background" args={['#101c20']}/><fog attach="fog" args={['#101c20',32,65]}/>
  <hemisphereLight args={['#d1eee0','#273639',2.2]}/><directionalLight position={[-4,15,4]} intensity={3} color="#fff1d8" castShadow shadow-mapSize-width={1024} shadow-mapSize-height={1024} shadow-camera-left={-16} shadow-camera-right={16} shadow-camera-top={16} shadow-camera-bottom={-16} shadow-camera-far={50} shadow-normalBias={.04}/>
- <Warehouse level={props.level}/>{props.level.gates?.map((_,index)=><Gate key={index} level={props.level} game={props.game} index={index}/>)}{props.level.switches?.map((_,index)=><SwitchPad key={index} level={props.level} game={props.game} index={index}/>)}<Objective {...props}/><Courier {...props}/><Decoy game={props.game}/>
+ <Warehouse level={props.level}/>{props.level.gates?.map((_,index)=><Gate key={index} level={props.level} game={props.game} index={index}/>)}{props.level.switches?.map((_,index)=><SwitchPad key={index} level={props.level} game={props.game} index={index}/>)}<Objective {...props}/><Courier {...props}/><EscapeTrail {...props}/><Decoy game={props.game}/>
  {props.level.patrols.map((_,index)=><React.Fragment key={index}><Robot {...props} index={index}/><Vision game={props.game} index={index}/></React.Fragment>)}
  <FollowCamera game={props.game}/>
  </>;}

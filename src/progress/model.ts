@@ -3,6 +3,11 @@ import type {GameState} from '../game/simulation';
 export type Best={stars:number;seconds:number;score:number;battery:number;completions:number};
 export type Progress={version:1;missions:Partial<Record<MissionId,Best>>};
 export const freshProgress=():Progress=>({version:1,missions:{}});
+export function mergeBests(local:Progress,remote:Progress):Progress{
+ const missions={...local.missions};
+ for(const id of CAMPAIGN_IDS){const next=remote.missions[id];if(!next)continue;const old=missions[id];missions[id]=old?{stars:Math.max(old.stars,next.stars),seconds:Math.min(old.seconds,next.seconds),score:Math.max(old.score,next.score),battery:Math.max(old.battery,next.battery),completions:Math.max(old.completions,next.completions)}:{...next};}
+ const result:Progress={version:1,missions};return JSON.stringify(result)===JSON.stringify(local)?local:result;
+}
 export function starsFor(s:GameState){return s.status==='won'?1+Number(s.battery>=40)+Number(!s.spotted&&s.elapsed<=getLevel(s.mission).targetSeconds):0;}
 export function recordWin(progress:Progress,s:GameState):Progress{
  if(s.status!=='won'||!CAMPAIGN_IDS.includes(s.mission))return progress;

@@ -20,6 +20,7 @@ export async function createApp(service:CommerceService){
  app.get('/orders',async req=>service.orders((await account(req.headers.authorization)).wallet));
  app.post('/orders',async req=>{const a=await account(req.headers.authorization),b=z.object({sku,idempotencyKey:uuid}).strict().parse(req.body);return service.createOrder(a.wallet,b.sku,b.idempotencyKey);});
  app.get('/orders/:id',async req=>{const a=await account(req.headers.authorization),{id}=z.object({id:uuid}).parse(req.params);return service.getOrder(a.wallet,id);});
+ app.post('/orders/:id/prepare',async req=>{const a=await account(req.headers.authorization),{id}=z.object({id:uuid}).parse(req.params);z.object({}).strict().parse(req.body);return service.preparePayment(a.wallet,id);});
  app.post('/orders/:id/transaction',async req=>{const a=await account(req.headers.authorization),{id}=z.object({id:uuid}).parse(req.params),body=z.object({signature:z.string().refine(v=>{try{validateSignature(v);return true;}catch{return false;}})}).strict().parse(req.body);return service.attach(a.wallet,id,body.signature);});
  app.post('/orders/:id/reconcile',async req=>{const a=await account(req.headers.authorization),{id}=z.object({id:uuid}).parse(req.params);await service.getOrder(a.wallet,id);await service.reconcile(id);return service.getOrder(a.wallet,id);});
  app.put('/me/progress',async req=>service.syncProgress((await account(req.headers.authorization)).wallet,progressInput.parse(req.body)));
