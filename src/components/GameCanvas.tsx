@@ -8,6 +8,7 @@ import frames from '../../assets/courier.frames.json';
 import GuardLayer from './GuardLayer';
 type Props={size:number;game:SharedValue<GameState>;alpha:SharedValue<number>;clock:SharedValue<number>;level:LevelDefinition};
 const cleanAlpha=[1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,1.5,-.5];
+function GateLayer({game,level,index}:Pick<Props,'game'|'level'>&{index:number}){const b=level.gates![index]!.box,color=useDerivedValue(()=>game.value.closedGates[index]?'#edb768':'#99dfc4'),opacity=useDerivedValue(()=>game.value.closedGates[index]?.85:.2);return <RoundedRect x={b.x} y={b.y} width={b.w} height={b.h} r={.04} color={color} opacity={opacity}/>;}
 export default memo(function GameCanvas({size,game,alpha,clock,level}:Props){
  const world=useMemo(()=>makeWarehouse(level.mission!=='practice'&&level.mission!=='night-shift',level),[level]),fallbackWorld=useMemo(()=>makeWarehouse(true,level),[level]);
  const floor=useImage(require('../../assets/warehouse-floor-v1.png'));
@@ -31,7 +32,7 @@ export default memo(function GameCanvas({size,game,alpha,clock,level}:Props){
  return <Canvas style={{width:size,height:size*20/12}} accessible={false}>
   <Group transform={[{scale:size/12}]}>
    <Image image={floor} x={0} y={0} width={12} height={20} fit="fill"/>
-   <Picture picture={floor?world:fallbackWorld}/>
+   <Picture picture={floor?world:fallbackWorld}/>{level.gates?.map((_,index)=><GateLayer key={index} game={game} level={level} index={index}/>)}
    <RoundedRect x={level.exit.x} y={level.exit.y} width={level.exit.w} height={level.exit.h} r={.1} color="#b9e6d6" opacity={glow}/>
    <RoundedRect x={level.exit.x} y={level.exit.y+level.exit.h-.10} width={extract} height={.08} r={.02} color="#e3fff5"/>
    <Group opacity={target}>

@@ -17,7 +17,7 @@ export function parseProgress(raw:string|null):Progress{
  const missions:Progress['missions']={};
  for(const [key,v]of Object.entries(parsed.missions)){
   if(!CAMPAIGN_IDS.includes(key as MissionId)||!v||typeof v!=='object')continue;
-  const b=v as Best;if(!Number.isInteger(b.stars)||b.stars<1||b.stars>3||!Number.isFinite(b.seconds)||b.seconds<=0||b.seconds>3600||!Number.isSafeInteger(b.score)||b.score<0||b.score>100000||!Number.isFinite(b.battery)||b.battery<0||b.battery>100||!Number.isSafeInteger(b.completions)||b.completions<1)continue;
+  const b=v as Best;if(!Number.isInteger(b.stars)||b.stars<1||b.stars>3||!Number.isFinite(b.seconds)||b.seconds<=0||b.seconds>3600||!Number.isSafeInteger(b.score)||b.score<0||b.score>100000||!Number.isFinite(b.battery)||b.battery<0||b.battery>100||!Number.isSafeInteger(b.completions)||b.completions<1)throw new Error('Damaged mission progress.');
   missions[key as MissionId]={stars:b.stars,seconds:b.seconds,score:b.score,battery:b.battery,completions:b.completions};
  }
  return {version:1,missions};

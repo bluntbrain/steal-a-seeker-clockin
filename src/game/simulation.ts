@@ -1,4 +1,5 @@
 import { LEVEL, getLevel, TUNING, type Box, type MissionId, type LevelDefinition } from './level';
+import {intersectsBox,blockedBy} from './geometry';
 import { makeGuards, updateGuards, type Guard } from './guards';
 export type Input = { x: number; y: number; interact: boolean; dash: number };
 export type GameState = {
@@ -7,7 +8,7 @@ export type GameState = {
   pickup: number; extraction: number; elapsed: number; ticks: number;
   dashLeft: number; cooldown: number; dashX: number; dashY: number; dashSeen: number;
   status: 'playing' | 'won' | 'timeout' | 'caught'; dashes: number; score: number; bumps: number;
-  mission: MissionId; guards: Guard[]; alert: number; caughtBy: number; spotted:boolean;
+  mission: MissionId; guards: Guard[]; alert: number; caughtBy: number; spotted:boolean;closedGates:boolean[];blockers:Box[];
 };
 export function initialState(mission:MissionId='practice'): GameState {
   'worklet';
@@ -16,18 +17,25 @@ export function initialState(mission:MissionId='practice'): GameState {
     vx: 0, vy: 0, facing: 2, walked: 0, carrying: false, battery: 100,
     pickup: 0, extraction: 0, elapsed: 0, ticks: 0, dashLeft: 0, cooldown: 0,
     dashX: 0, dashY: -1, dashSeen: 0, status: 'playing', dashes: 0, score: 0, bumps: 0,
-    mission,guards:makeGuards(mission),alert:0,caughtBy:-1,spotted:false };
+    mission,guards:makeGuards(mission),alert:0,caughtBy:-1,spotted:false,closedGates:(level.gates??[]).map(g=>g.phase%g.period>=g.openSeconds),blockers:[...level.blockers,...(level.gates??[]).filter(g=>g.phase%g.period>=g.openSeconds).map(g=>g.box)] };
 }
 export function idleInput(): Input { 'worklet'; return { x: 0, y: 0, interact: false, dash: 0 }; }
 export function clamp(n: number, lo: number, hi: number) { 'worklet'; return Math.max(lo, Math.min(hi, n)); }
 export function nearPhone(s: GameState) { 'worklet'; return !s.carrying && Math.hypot(s.x - getLevel(s.mission).phone.x, s.y - getLevel(s.mission).phone.y) <= TUNING.pickupRadius; }
 export function inExit(s: GameState) { 'worklet'; const e=getLevel(s.mission).exit; return s.x >= e.x && s.x <= e.x+e.w && s.y >= e.y && s.y <= e.y+e.h; }
-export function intersects(x: number, y: number, b: Box) {
-  'worklet';
-  const cx=clamp(x,b.x,b.x+b.w),cy=clamp(y,b.y,b.y+b.h);
-  return (x-cx)*(x-cx)+(y-cy)*(y-cy) < TUNING.radius*TUNING.radius-1e-8;
+export const intersects=intersectsBox;
+export function blocked(x:number,y:number,level:LevelDefinition=LEVEL){'worklet';return blockedBy(x,y,level.blockers);}
+function updateGates(s:GameState){
+ 'worklet';const level=getLevel(s.mission),gates=level.gates;if(!gates)return;
+ let changed=false;
+ for(let i=0;i<gates.length;i++){
+  const gate=gates[i]!,wantsClosed=(s.elapsed+gate.phase)%gate.period>=gate.openSeconds;
+  // Never materialize a gate on a body; it closes after the doorway clears.
+  const occupied=intersectsBox(s.x,s.y,gate.box,.4)||s.guards.some(g=>intersectsBox(g.x,g.y,gate.box,.45));
+  const closed=wantsClosed&&(s.closedGates[i]||!occupied);if(closed!==s.closedGates[i]){s.closedGates[i]=closed;changed=true;}
+ }
+ if(changed)s.blockers=[...level.blockers,...gates.filter((_,i)=>s.closedGates[i]).map(g=>g.box)];
 }
-export function blocked(x: number,y: number,level:LevelDefinition=LEVEL) { 'worklet'; for(let i=0;i<level.blockers.length;i++){const b=level.blockers[i]!;if(intersects(x,y,b))return true;}return false; }
 function approach(value: number,target: number,amount: number) { 'worklet'; return value<target?Math.min(value+amount,target):Math.max(value-amount,target); }
 function move(s: GameState,dx: number,dy: number) {
   'worklet';
@@ -35,14 +43,14 @@ function move(s: GameState,dx: number,dy: number) {
   const count=Math.max(1,Math.ceil(Math.max(Math.abs(dx),Math.abs(dy))/.10));
   const sx=dx/count,sy=dy/count;
   for(let i=0;i<count;i++){
-    if(!blocked(s.x+sx,s.y,getLevel(s.mission)))s.x+=sx;else s.bumps++;
-    if(!blocked(s.x,s.y+sy,getLevel(s.mission)))s.y+=sy;else s.bumps++;
+    if(!blockedBy(s.x+sx,s.y,s.blockers))s.x+=sx;else s.bumps++;
+    if(!blockedBy(s.x,s.y+sy,s.blockers))s.y+=sy;else s.bumps++;
   }
 }
 export function step(s: GameState,input: Input,dt=TUNING.step) {
   'worklet';
   if(s.status!=='playing')return;
-  s.px=s.x;s.py=s.y;s.elapsed+=dt;s.ticks++;
+  s.px=s.x;s.py=s.y;s.elapsed+=dt;s.ticks++;updateGates(s);
   s.cooldown=Math.max(0,s.cooldown-dt);
   const magnitude=Math.hypot(input.x,input.y),divisor=Math.max(1,magnitude);
   const ix=input.x/divisor,iy=input.y/divisor;
@@ -68,7 +76,7 @@ export function step(s: GameState,input: Input,dt=TUNING.step) {
     s.pickup+=dt;
     if(s.pickup+1e-8>=TUNING.pickupHold){s.carrying=true;s.battery=100;s.pickup=0;}
   }else s.pickup=0;
-  updateGuards(s.guards,s.x,s.y,dt,getLevel(s.mission));
+  updateGuards(s.guards,s.x,s.y,dt,{...getLevel(s.mission),blockers:s.blockers});
   s.alert=0;
   for(let i=0;i<s.guards.length;i++){
     s.alert=Math.max(s.alert,s.guards[i]!.exposure);if(s.guards[i]!.seesPlayer)s.spotted=true;

@@ -17,7 +17,7 @@ export default function GuardLayer({game,alpha,index}:Props){
   const x=g.px+(g.x-g.px)*alpha.value,y=g.py+(g.y-g.py)*alpha.value;p.moveTo(x,y);
   for(let i=0;i<=32;i++){
    const a=g.angle-g.halfAngle+2*g.halfAngle*i/32,dx=Math.cos(a),dy=Math.sin(a);
-   const d=sightDistance(x,y,dx,dy,g.range,getLevel(game.value.mission));p.lineTo(x+dx*d,y+dy*d);
+   const d=sightDistance(x,y,dx,dy,g.range,{...getLevel(game.value.mission),blockers:game.value.blockers});p.lineTo(x+dx*d,y+dy*d);
   }
   p.close();return p;
  });

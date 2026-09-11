@@ -42,9 +42,10 @@ function Courier({game,alpha,clock}:SceneProps){
   <group ref={carry} position={[.26,.51,.36]} rotation={[.3,0,-.2]} scale={.65}><Phone/></group>
  </group></group>;
 }
-function Robot({index,game,alpha,clock}:SceneProps & {index:number}){
+function Robot({index,game,alpha,clock,level}:SceneProps & {index:number}){
  const root=useRef<THREE.Group>(null),visor=useRef<THREE.MeshStandardMaterial>(null);
  useFrame(()=>{const g=game.value.guards[index];if(!root.current)return;root.current.visible=!!g;if(!g)return;const a=alpha.value;root.current.position.set(g.px+(g.x-g.px)*a,.02+Math.sin(clock.value*5+index)*.015,g.py+(g.y-g.py)*a);root.current.rotation.y=Math.PI/2-g.angle;if(visor.current)visor.current.color.set(g.exposure>0?'#ff7354':colors.mint);});
+ if(level.patrols[index]?.kind==='scanner')return <group ref={root}><Box position={[0,.2,0]} scale={[.9,.4,.9]} color={colors.dark}/><Box position={[0,1,0]} scale={[.17,1.7,.17]} color={colors.cream}/><Box position={[0,1.6,0]} scale={[.72,.4,.46]} color={colors.cream}/><Box position={[0,1.6,.26]} scale={[.57,.21,.08]} color={colors.amber} emissive/><Ball position={[0,1.96,0]} scale={[.09,.09,.09]} color={colors.amber}/></group>;
  return <group ref={root}>
   <Box position={[0,.48,0]} scale={[.74,.53,.66]} color={colors.cream}/>
   <Box position={[0,.48,.35]} scale={[.56,.24,.045]} color={colors.dark}/>
@@ -58,13 +59,18 @@ function Vision({index,game}:Pick<SceneProps,'game'> & {index:number}){
  const mesh=useRef<THREE.Mesh>(null);
  const geometry=useMemo(()=>{const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.BufferAttribute(new Float32Array(24*9),3));return g;},[]);
  useFrame(()=>{const guard=game.value.guards[index];if(!mesh.current)return;mesh.current.visible=!!guard;if(!guard)return;
-  const positions=geometry.attributes.position!;let k=0;
+  const positions=geometry.attributes.position!,level={...getLevel(game.value.mission),blockers:game.value.blockers};let k=0;
   for(let j=0;j<24;j++){
    positions.setXYZ(k++,guard.x,.025,guard.y);
-   for(let e=0;e<2;e++){const angle=guard.angle-guard.halfAngle+(j+e)/24*guard.halfAngle*2,dx=Math.cos(angle),dy=Math.sin(angle),dist=sightDistance(guard.x,guard.y,dx,dy,guard.range,getLevel(game.value.mission));positions.setXYZ(k++,guard.x+dx*dist,.025,guard.y+dy*dist);}
+   for(let e=0;e<2;e++){const angle=guard.angle-guard.halfAngle+(j+e)/24*guard.halfAngle*2,dx=Math.cos(angle),dy=Math.sin(angle),dist=sightDistance(guard.x,guard.y,dx,dy,guard.range,level);positions.setXYZ(k++,guard.x+dx*dist,.025,guard.y+dy*dist);}
   }positions.needsUpdate=true;
  });
  return <mesh ref={mesh} geometry={geometry} frustumCulled={false}><meshBasicMaterial color={colors.amber} transparent opacity={.19} depthWrite={false} side={THREE.DoubleSide}/></mesh>;
+}
+function Gate({index,game,level}:Pick<SceneProps,'game'|'level'>&{index:number}){
+ const gate=level.gates![index]!,b=gate.box,bar=useRef<THREE.Mesh>(null),material=useRef<THREE.MeshStandardMaterial>(null);
+ useFrame((_,dt)=>{const closed=game.value.closedGates[index];if(bar.current)bar.current.position.y=THREE.MathUtils.damp(bar.current.position.y,closed?.6:-.65,15,dt);if(material.current){material.current.color.set(closed?colors.amber:colors.mint);material.current.emissive.set(closed?colors.amber:colors.mint);}});
+ return <group><mesh ref={bar} position={[b.x+b.w/2,.6,b.y+b.h/2]}><boxGeometry args={[b.w,1.2,b.h*.3]}/><meshStandardMaterial color={colors.dark} roughness={.5}/></mesh><mesh position={[b.x+b.w/2,.025,b.y+b.h/2]}><boxGeometry args={[b.w,.035,b.h]}/><meshStandardMaterial ref={material} color={colors.amber} emissive={colors.amber} emissiveIntensity={.5}/></mesh>{[b.x-.08,b.x+b.w+.08].map(x=><Box key={x} position={[x,.5,b.y+b.h/2]} scale={[.12,1,.2]} color={colors.cream}/>)}</group>;
 }
 const Warehouse=memo(function Warehouse({level}:{level:LevelDefinition}){return <group>
  <Box position={[6,-.3,10]} scale={[12,.6,20]} color={colors.edge}/>
@@ -89,7 +95,7 @@ function FollowCamera({game}:Pick<SceneProps,'game'>){const {camera}=useThree();
 export default function HeistScene(props:SceneProps){return <>
  <color attach="background" args={['#101c20']}/><fog attach="fog" args={['#101c20',32,65]}/>
  <hemisphereLight args={['#d1eee0','#273639',2.2]}/><directionalLight position={[-4,15,4]} intensity={3} color="#fff1d8" castShadow shadow-mapSize-width={1024} shadow-mapSize-height={1024} shadow-camera-left={-16} shadow-camera-right={16} shadow-camera-top={16} shadow-camera-bottom={-16} shadow-camera-far={50} shadow-normalBias={.04}/>
- <Warehouse level={props.level}/><Objective {...props}/><Courier {...props}/>
+ <Warehouse level={props.level}/>{props.level.gates?.map((_,index)=><Gate key={index} level={props.level} game={props.game} index={index}/>)}<Objective {...props}/><Courier {...props}/>
  {props.level.patrols.map((_,index)=><React.Fragment key={index}><Robot {...props} index={index}/><Vision game={props.game} index={index}/></React.Fragment>)}
  <FollowCamera game={props.game}/>
  </>;}

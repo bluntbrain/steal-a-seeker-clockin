@@ -10,5 +10,5 @@ test('completion unlocks next mission; retries preserve independent personal bes
 test('mastery needs clean time; malformed and future saves do not silently reset',()=>{
  const s=initialState();Object.assign(s,{status:'won',battery:40,elapsed:60,spotted:true});assert.equal(starsFor(s),2);s.spotted=false;assert.equal(starsFor(s),3);s.battery=39;assert.equal(starsFor(s),2);
  assert.throws(()=>parseProgress('{'));assert.throws(()=>parseProgress('{"version":2,"missions":{}}'));
- assert.deepEqual(parseProgress('{"version":1,"missions":{"practice":{"stars":99}}}'),freshProgress());
+ assert.throws(()=>parseProgress('{"version":1,"missions":{"practice":{"stars":99}}}'));
 });

@@ -1,8 +1,9 @@
 export type Box = { x: number; y: number; w: number; h: number; kind: 'wall' | 'crate' | 'rack' };
-export type MissionId = 'practice' | 'cone-lesson' | 'battery-dash' | 'crossing-signals' | 'night-shift';
+export type MissionId = 'practice' | 'cone-lesson' | 'battery-dash' | 'crossing-signals' | 'sweep-window' | 'narrow-crossing' | 'night-shift';
 export type Point = {x:number;y:number};
-export type GuardSpec = {route:Point[];speed:number;range:number;halfAngle:number;spotSeconds:number;pauseSeconds:number};
-export type LevelDefinition = {id:string;mission:MissionId;title:string;number:number;briefing:string;width:number;height:number;spawn:Point;phone:Point;exit:Point & {w:number;h:number};targetSeconds:number;hardLimitSeconds:number;blockers:Box[];patrols:GuardSpec[];floorColor:string};
+export type GuardSpec = {route:Point[];speed:number;range:number;halfAngle:number;spotSeconds:number;pauseSeconds:number;kind?:'scanner';sweep?:{angle:number;amplitude:number;period:number}};
+export type GateSpec={box:Box;period:number;openSeconds:number;phase:number};
+export type LevelDefinition = {id:string;mission:MissionId;title:string;number:number;briefing:string;width:number;height:number;spawn:Point;phone:Point;exit:Point & {w:number;h:number};targetSeconds:number;hardLimitSeconds:number;blockers:Box[];patrols:GuardSpec[];floorColor:string;gates?:GateSpec[]};
 export const PATROLS = [
   [{x:3.7,y:10.5},{x:6.6,y:10.5},{x:6.6,y:7.6},{x:4.3,y:7.6},{x:4.3,y:10.5}],
   [{x:7.3,y:4.2},{x:10.5,y:4.2},{x:10.5,y:7.1},{x:7.3,y:7.1}],
@@ -61,9 +62,24 @@ export const LEVELS:Record<MissionId,LevelDefinition> = {
   blockers:[...boundary,crate(1.6,13.9,2.3,1.5),crate(8.1,14.1,2.3,1.4),rack(4.8,10.2,2.4,2.7),crate(4.8,6.4,2.4,1.8),rack(1.5,4.6,1.6,3.2),rack(8.7,5.5,1.6,2.4)],
   patrols:[patrol([{x:1.1,y:13.4},{x:10.9,y:13.4},{x:10.9,y:16.1},{x:1.1,y:16.1}],1.1,3.3),patrol([{x:3.8,y:4},{x:10.5,y:4},{x:10.5,y:2},{x:3.8,y:2}],1,3.3)]
  },
+ 'sweep-window':{
+  id:'sweep-window-v1',mission:'sweep-window',title:'Sweep Window',number:5,width:12,height:20,
+  spawn:{x:2,y:17.5},phone:{x:9.4,y:2.5},exit:{x:1.2,y:1.15,w:2.5,h:1.8},targetSeconds:150,hardLimitSeconds:300,
+  briefing:'The tower scanner sweeps across the roof. Wait behind a shelter, then move while its beam turns away. The beam cannot see through cover.',floorColor:'#26394b',
+  blockers:[...boundary,crate(1.5,13.4,2.1,1.5),crate(5.2,14.8,2.2,1.6),rack(4.6,9.1,1.5,2.5),crate(8.6,10.8,1.9,1.5),crate(7.8,5.9,2.6,1.5),rack(3.5,3.8,1.5,2.5)],
+  patrols:[{...patrol([{x:6.6,y:6.4},{x:6.6,y:6.4}],0,7.5),kind:'scanner',halfAngle:Math.PI/13,spotSeconds:1.1,sweep:{angle:Math.PI/2,amplitude:1.25,period:8}}]
+ },
+ 'narrow-crossing':{
+  id:'narrow-crossing-v1',mission:'narrow-crossing',title:'Narrow Crossing',number:6,width:12,height:20,
+  spawn:{x:2,y:17.5},phone:{x:9.4,y:2.5},exit:{x:8.2,y:16.8,w:2.5,h:1.8},targetSeconds:180,hardLimitSeconds:360,
+  briefing:'Two gates alternate across the middle of the roof. Mint means open; amber means wait. The gates wait for you to clear the doorway before closing.',floorColor:'#263b40',
+  blockers:[...boundary,rack(.7,9.4,1.1,1.2),rack(4,9.4,4,1.2),rack(10.2,9.4,1.1,1.2),crate(4.5,13.8,2.8,2),crate(4.4,5,2.4,2.3),crate(1.3,4.4,1.6,2.2)],
+  gates:[{box:{x:1.8,y:9.4,w:2.2,h:1.2,kind:'wall'},period:8,openSeconds:3.8,phase:0},{box:{x:8,y:9.4,w:2.2,h:1.2,kind:'wall'},period:8,openSeconds:3.8,phase:4}],
+  patrols:[patrol([{x:7.4,y:7.5},{x:10.6,y:7.5},{x:10.6,y:4},{x:7.4,y:4}],.85,3)]
+ },
  'night-shift':{...original,id:'legacy-night-shift-v1',mission:'night-shift',title:'Night Shift',number:0,briefing:'Original two-patrol test room. This is a separate practice room, outside campaign progression.',patrols:PATROLS.map(route=>patrol(route)),floorColor:'#263938'},
 };
-export const CAMPAIGN_IDS:MissionId[]=['practice','cone-lesson','battery-dash','crossing-signals'];
+export const CAMPAIGN_IDS:MissionId[]=['practice','cone-lesson','battery-dash','crossing-signals','sweep-window','narrow-crossing'];
 export const MISSIONS=CAMPAIGN_IDS.map(id=>({id,title:LEVELS[id].title,label:`${String(LEVELS[id].number).padStart(2,'0')} · ${LEVELS[id].title}`}));
 // Retained for original regression fixtures. Gameplay resolves its own mission.
 export const LEVEL=LEVELS.practice;
