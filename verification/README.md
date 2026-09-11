@@ -1,3 +1,5 @@
+Current build: [v0.2 Night Shift verification](night-shift.md). The notes below describe the earlier v0.1 movement prototype.
+
 # MVP verification · 11 September 2026
 
 The one-screen, one-level game is implemented and playable. This is a private movement prototype; real SKR purchases, backend validation, guards and the remaining campaign are not implemented in this slice.

@@ -1,4 +1,14 @@
 export type Box = { x: number; y: number; w: number; h: number; kind: 'wall' | 'crate' | 'rack' };
+export type MissionId = 'practice' | 'night-shift';
+export const MISSIONS = [
+  { id: 'practice' as const, title: 'QUIET PICKUP', label: '01 · Practice' },
+  { id: 'night-shift' as const, title: 'NIGHT SHIFT', label: '02 · Night shift' },
+];
+export const PATROLS = [
+  [{x:3.7,y:10.5},{x:6.6,y:10.5},{x:6.6,y:7.6},{x:4.3,y:7.6},{x:4.3,y:10.5}],
+  [{x:7.3,y:4.2},{x:10.5,y:4.2},{x:10.5,y:7.1},{x:7.3,y:7.1}],
+];
+export const GUARD_TUNING = { speed: 1.05, range: 3.7, halfAngle: Math.PI / 5, spotSeconds: .8, forgetSeconds: .55, pauseSeconds: .7 };
 // World units are tiles. Art, collision and test routes share this single definition.
 export const LEVEL = {
   id: 'quiet-pickup-v1', width: 12, height: 20,

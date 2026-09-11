@@ -1,0 +1,50 @@
+import { LEVEL, PATROLS, GUARD_TUNING, type MissionId } from './level';
+
+export type Guard = {x:number;y:number;px:number;py:number;angle:number;target:number;wait:number;exposure:number;seesPlayer:boolean};
+export function makeGuards(mission:MissionId):Guard[]{
+ 'worklet';
+ if(mission==='practice')return [];
+ return PATROLS.map(route=>({x:route[0]!.x,y:route[0]!.y,px:route[0]!.x,py:route[0]!.y,angle:Math.atan2(route[1]!.y-route[0]!.y,route[1]!.x-route[0]!.x),target:1,wait:0,exposure:0,seesPlayer:false}));
+}
+// Slab intersection returns the nearest wall/crate along a ray. Shared by detection
+// and cone rendering, so the highlighted floor agrees with what a guard can see.
+export function sightDistance(x:number,y:number,dx:number,dy:number,limit:number){
+ 'worklet';
+ let nearest=limit;
+ for(let i=0;i<LEVEL.blockers.length;i++){
+  const b=LEVEL.blockers[i]!;
+  let enter=0,leave=nearest;
+  if(Math.abs(dx)<1e-9){if(x<b.x||x>b.x+b.w)continue;}
+  else{const a=(b.x-x)/dx,c=(b.x+b.w-x)/dx;enter=Math.max(enter,Math.min(a,c));leave=Math.min(leave,Math.max(a,c));}
+  if(Math.abs(dy)<1e-9){if(y<b.y||y>b.y+b.h)continue;}
+  else{const a=(b.y-y)/dy,c=(b.y+b.h-y)/dy;enter=Math.max(enter,Math.min(a,c));leave=Math.min(leave,Math.max(a,c));}
+  if(enter<=leave&&leave>=0)nearest=Math.max(0,enter);
+ }
+ return nearest;
+}
+export function sees(guard:Guard,x:number,y:number){
+ 'worklet';
+ const dx=x-guard.x,dy=y-guard.y,d=Math.hypot(dx,dy);
+ if(d>GUARD_TUNING.range)return false;
+ if(d<1e-6)return true;
+ // Contact also detects the player behind a guard, but never through cover.
+ if(d>.5&&(dx*Math.cos(guard.angle)+dy*Math.sin(guard.angle))/d<Math.cos(GUARD_TUNING.halfAngle))return false;
+ return sightDistance(guard.x,guard.y,dx/d,dy/d,d)>=d-1e-7;
+}
+export function updateGuards(guards:Guard[],x:number,y:number,dt:number){
+ 'worklet';
+ for(let i=0;i<guards.length;i++){
+  const g=guards[i]!,route=PATROLS[i]!;g.px=g.x;g.py=g.y;
+  // Suspicion holds the patrol in place. Breaking sight lets it resume its route.
+  if(g.exposure===0){
+   if(g.wait>0)g.wait=Math.max(0,g.wait-dt);
+   else{
+    const p=route[g.target]!,dx=p.x-g.x,dy=p.y-g.y,d=Math.hypot(dx,dy),travel=GUARD_TUNING.speed*dt;
+    if(d<=travel){g.x=p.x;g.y=p.y;g.target=(g.target+1)%route.length;g.wait=GUARD_TUNING.pauseSeconds;}
+    else{g.angle=Math.atan2(dy,dx);g.x+=dx/d*travel;g.y+=dy/d*travel;}
+   }
+  }
+  g.seesPlayer=sees(g,x,y);
+  g.exposure=g.seesPlayer?Math.min(1,g.exposure+dt/GUARD_TUNING.spotSeconds):Math.max(0,g.exposure-dt/GUARD_TUNING.forgetSeconds);
+ }
+}

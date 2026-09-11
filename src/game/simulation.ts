@@ -1,18 +1,21 @@
-import { LEVEL, TUNING, type Box } from './level';
+import { LEVEL, TUNING, type Box, type MissionId } from './level';
+import { makeGuards, updateGuards, type Guard } from './guards';
 export type Input = { x: number; y: number; interact: boolean; dash: number };
 export type GameState = {
   x: number; y: number; px: number; py: number; vx: number; vy: number;
   facing: number; walked: number; carrying: boolean; battery: number;
   pickup: number; extraction: number; elapsed: number; ticks: number;
   dashLeft: number; cooldown: number; dashX: number; dashY: number; dashSeen: number;
-  status: 'playing' | 'won' | 'timeout'; dashes: number; score: number; bumps: number;
+  status: 'playing' | 'won' | 'timeout' | 'caught'; dashes: number; score: number; bumps: number;
+  mission: MissionId; guards: Guard[]; alert: number; caughtBy: number;
 };
-export function initialState(): GameState {
+export function initialState(mission:MissionId='practice'): GameState {
   'worklet';
   return { x: LEVEL.spawn.x, y: LEVEL.spawn.y, px: LEVEL.spawn.x, py: LEVEL.spawn.y,
     vx: 0, vy: 0, facing: 2, walked: 0, carrying: false, battery: 100,
     pickup: 0, extraction: 0, elapsed: 0, ticks: 0, dashLeft: 0, cooldown: 0,
-    dashX: 0, dashY: -1, dashSeen: 0, status: 'playing', dashes: 0, score: 0, bumps: 0 };
+    dashX: 0, dashY: -1, dashSeen: 0, status: 'playing', dashes: 0, score: 0, bumps: 0,
+    mission,guards:makeGuards(mission),alert:0,caughtBy:-1 };
 }
 export function idleInput(): Input { 'worklet'; return { x: 0, y: 0, interact: false, dash: 0 }; }
 export function clamp(n: number, lo: number, hi: number) { 'worklet'; return Math.max(lo, Math.min(hi, n)); }
@@ -64,6 +67,12 @@ export function step(s: GameState,input: Input,dt=TUNING.step) {
     s.pickup+=dt;
     if(s.pickup+1e-8>=TUNING.pickupHold){s.carrying=true;s.battery=100;s.pickup=0;}
   }else s.pickup=0;
+  updateGuards(s.guards,s.x,s.y,dt);
+  s.alert=0;
+  for(let i=0;i<s.guards.length;i++){
+    s.alert=Math.max(s.alert,s.guards[i]!.exposure);
+    if(s.guards[i]!.exposure>=1-1e-8){s.caughtBy=i;s.status='caught';s.vx=0;s.vy=0;s.px=s.x;s.py=s.y;s.extraction=0;return;}
+  }
   if(s.carrying && inExit(s) && s.dashLeft===0){
     s.extraction+=dt;
     if(s.extraction+1e-8>=TUNING.extractHold){s.status='won';s.vx=0;s.vy=0;s.px=s.x;s.py=s.y;s.score=10000+20*s.battery+5*Math.max(0,Math.floor(LEVEL.targetSeconds-s.elapsed));}

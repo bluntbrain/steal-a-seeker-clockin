@@ -5,6 +5,7 @@ import {makeWarehouse} from '../game/art';
 import {LEVEL,TUNING} from '../game/level';
 import type {GameState} from '../game/simulation';
 import frames from '../../assets/courier.frames.json';
+import GuardLayer from './GuardLayer';
 type Props={size:number;game:SharedValue<GameState>;alpha:SharedValue<number>;clock:SharedValue<number>};
 const cleanAlpha=[1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,1.5,-.5];
 export default memo(function GameCanvas({size,game,alpha,clock}:Props){
@@ -40,6 +41,8 @@ export default memo(function GameCanvas({size,game,alpha,clock}:Props){
     <Line p1={{x:LEVEL.phone.x-.09,y:LEVEL.phone.y-.82}} p2={{x:LEVEL.phone.x+.09,y:LEVEL.phone.y-.82}} color="#1f504b" strokeWidth={.04}/>
     <RoundedRect x={LEVEL.phone.x-.55} y={LEVEL.phone.y+.65} width={pickupWidth} height={.07} r={.025} color="#d9fff0"/>
    </Group>
+   <GuardLayer game={game} alpha={alpha} index={0}/>
+   <GuardLayer game={game} alpha={alpha} index={1}/>
    <Oval rect={trail} color="#adf1db" opacity={dash}/>
    <Oval rect={shadow} color="#070c0d" opacity={.7}/>
    {sprite && <Atlas image={sprite} sprites={sprites} transforms={transforms}><ColorMatrix matrix={cleanAlpha}/></Atlas>}

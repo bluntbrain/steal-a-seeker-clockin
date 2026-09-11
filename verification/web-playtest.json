@@ -2,10 +2,10 @@
   "status": "passed",
   "url": "http://127.0.0.1:8787",
   "sourceHashes": {
-    "src/GameScreen.tsx": "c5c121ad94aa3830a19c799ed51274ec27940167f6e7fda25a81aa7738617b58",
-    "src/game/simulation.ts": "338696bf107421328ba023998b9c49264215740d791617000850adc69b790450",
-    "src/game/level.ts": "ef6320c6ba90ca89f859e57aa771fe79b8a780fb02f48da39a64b7c35792d228",
-    "src/components/GameCanvas.tsx": "53349661b5ca9acb20cfbd68a0548c1468a495b4640fe994242b15e5a035882e",
+    "src/GameScreen.tsx": "19fb52bf2a8379515a71222aa0ecdb29bbcc7a9c610f17444fb2827202cc8d81",
+    "src/game/simulation.ts": "ba529eaf3ad41d2e2674dc81ad2cdbc1e2c35ccb336341a13017537c7d7d1dc9",
+    "src/game/level.ts": "7855a80e485af6bdbdeef70b46758a769abff97ac515787e39707430545e852f",
+    "src/components/GameCanvas.tsx": "07088e3d7a6855e663ad95bd4e3f54f6c051dd9ae85564f963da308468504dc9",
     "src/game/art.ts": "1cf970bf409c17a93a4adca949c181300a9ec4e773a1758c84d26c0593d2d7f3"
   },
   "environment": "Headless Chrome on local Mac, not a physical phone",
@@ -27,20 +27,20 @@
     "no uncaught browser errors"
   ],
   "result": {
-    "x": 9.352007212761844,
-    "y": 2.1645721545445196,
-    "px": 9.352007212761844,
-    "py": 2.1645721545445196,
+    "x": 9.480846558147219,
+    "y": 1.9605649361140405,
+    "px": 9.480846558147219,
+    "py": 1.9605649361140405,
     "vx": 0,
     "vy": 0,
     "facing": 2,
-    "walked": 39.323119434802926,
+    "walked": 25.184337419171246,
     "carrying": true,
     "battery": 80,
     "pickup": 0,
     "extraction": 0.9999999999999999,
-    "elapsed": 18.900000000000098,
-    "ticks": 567,
+    "elapsed": 10.699999999999973,
+    "ticks": 321,
     "dashLeft": 0,
     "cooldown": 0,
     "dashX": 0,
@@ -48,13 +48,17 @@
     "dashSeen": 1,
     "status": "won",
     "dashes": 1,
-    "score": 11805,
-    "bumps": 5
+    "score": 11845,
+    "bumps": 0,
+    "mission": "practice",
+    "guards": [],
+    "alert": 0,
+    "caughtBy": -1
   },
   "metrics": {
-    "fps": 60.012002400479695,
+    "fps": 59.99100134979739,
     "p95": 16.700000000000728,
-    "frames": 1092,
+    "frames": 604,
     "slow": 0
   }
 }

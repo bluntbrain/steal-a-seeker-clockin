@@ -1,0 +1,19 @@
+{
+  "version": "0.2.0",
+  "versionCode": 2,
+  "apk": "releases/steal-a-seeker-0.2.0-arm64.apk",
+  "bytes": 46858530,
+  "sha256": "1d3cb8447c8a580fbdcfe117289f4264d0f4161b54d1c6ceab2f49aa6218f8b7",
+  "sourceHashes": {
+    "src/GameScreen.tsx": "536cb0d2495c249ed142a4579ce07a68eabfcbe1fb77b87bb6e6b4183386bf98",
+    "src/game/art.ts": "1cf970bf409c17a93a4adca949c181300a9ec4e773a1758c84d26c0593d2d7f3",
+    "src/game/level.ts": "7855a80e485af6bdbdeef70b46758a769abff97ac515787e39707430545e852f",
+    "src/game/guards.ts": "bd34a6455d291edbc6ceef926953192c3865506f942bb88eef49a0ca77465cf3",
+    "src/game/simulation.ts": "ba529eaf3ad41d2e2674dc81ad2cdbc1e2c35ccb336341a13017537c7d7d1dc9",
+    "src/components/GuardLayer.tsx": "b472d688735869541ea5a9688a7f7289486191265dd965c64096262bd7bca9ab",
+    "src/components/GameCanvas.tsx": "07088e3d7a6855e663ad95bd4e3f54f6c051dd9ae85564f963da308468504dc9"
+  },
+  "signing": "Development test key, not production distribution signing",
+  "nativeTest": "Pixel 9 Pro Android 36 emulator",
+  "physicalSeekerTested": false
+}
