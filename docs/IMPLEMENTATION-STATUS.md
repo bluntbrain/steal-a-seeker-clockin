@@ -13,6 +13,7 @@ Updated 12 September 2026. Goal remains the full game described in COMPLETE-GAME
 | Purchase/backend | PostgreSQL API, signed wallet login, immutable orders, finalized-transfer verification, reference recovery and entitlement restore implemented; 18 server tests pass, including fixed payment lifetimes, callback recovery, ownership and progress. Native checkout is wired in source. Live mint/payment, physical Phantom, stable HTTPS deployment and operator refunds remain. See server/README.md. |
 | Progress/shop | Local campaign progress uses SQLite on Android and localStorage in the browser. Stars, personal bests and sequential unlocks implemented; browser reload restore passes. Wallet-scoped saves, best-preserving client sync, the native campaign gate and equipment delivery are now wired. Browser smoke and no-wallet Android paywall pass. Physical purchase/restore/sync and owned appearance rendering remain to be tested. |
 | Daily/ranking | Daily manifests, owner-bound tickets, quantized recording, durable worker verification, result recovery and one-best-per-wallet leaderboard are implemented. 14 Android simulation-parity cases pass. Browser and native-build evidence is tracked separately; physical ranked submission remains unverified. See RANKED-RUNS.md. |
+| Settings/help | Sound and volume, haptics, reduced decorative effects and controls help are implemented with device-local persistence. Browser restart and storage-failure/retry checks pass. Physical audio/haptic behavior remains unverified. |
 | Test entry/return | Not implemented. Reserve, settlement, recovery and receipt verification remain. |
 | Submission | Current APK is a development-signed test build. Release identity/signing, fresh-clone release evidence, final deck/demo and physical testing remain. |
 
@@ -69,3 +70,11 @@ Daily UI, published rules, ticket creation, recording, persisted pending results
 Hosting was rechecked: the Railway trial is still expired and no game project exists. The dedicated treasury still has zero devnet SOL; a fresh 0.1 SOL faucet request returned an internal error. The user has been asked to enable hosting and fund the test treasury while implementation continues.
 
 Latest ranked preview: `releases/steal-a-seeker-ranked-devnet-preview.apk`, with source hashes and checksum in `verification/ranked-build.json`. This is the native hard-paywall build; its API endpoint is not yet configured. It cannot complete a new purchase until hosting and devnet mint setup are finished. The prior free campaign preview remains available for gameplay testing.
+
+## Device preferences
+
+Sound enablement and volume now drive the audio players; vibration has an independent preference. Reduced effects suppresses the escape trail, body/robot bobbing, phone and pad spinning, and decoy ring expansion while preserving gameplay cues. Preferences are device-local rather than wallet-specific, survive account/game remounts, and serialize writes so older saves cannot overwrite newer changes. Errors retain the current values and offer an explicit save retry. Hideout and pause screens both expose controls/help and settings.
+
+`verification/settings-web-check.json` covers reload persistence, switches, volume, paused simulation, storage failure and recovery. An account/gameplay smoke and its pinned replay verification also pass after integration. Shared gameplay rules are unchanged from the twelve-route campaign and native simulation parity checkpoint. Physical output and owned-cosmetic reduced-effects behavior still need a phone test.
+
+Latest preferences build: `releases/steal-a-seeker-settings-devnet-preview.apk`; checksum and exact sources are recorded in `verification/settings-build.json`. It retains the native hard paywall and unconfigured API. `npm run build:apk` now forces JavaScript rebundling when build-time endpoint or diagnostic flags change.

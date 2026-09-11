@@ -1,0 +1,26 @@
+{
+  "status": "passed",
+  "checks": [
+    "preferences survive reload",
+    "sound and vibration toggles",
+    "volume selection",
+    "reduced effects selection",
+    "gameplay remains paused in settings",
+    "storage failure retains in-session value",
+    "explicit retry saves latest settings",
+    "pause screen settings access",
+    "no browser runtime errors"
+  ],
+  "notVerified": [
+    "physical volume output",
+    "physical haptics",
+    "physical reduced-effects rendering"
+  ],
+  "sourceHashes": {
+    "src/settings/SettingsProvider.tsx": "a122d8b520801396c076eae219b204fd585a6531135b27b6e6223f0f0fcc0a48",
+    "src/settings/SettingsPanel.tsx": "f22eb288ea8ee80994c73a2fcb56d847956bc4865ce527db83d940504ba3595a",
+    "src/GameScreen.tsx": "ab514f031a7fdd86d91eb496db54ee5d210cbb9e6b54041ebf49eb26c961366d",
+    "src/components/Hideout.tsx": "b920f15c43899f32f4fbc9cc0ac7873a418aee34e1e5a04bb3a6779a50953b02",
+    "src/three/HeistScene.tsx": "800355c6bd96413f7b9be7c02ab5e5ff1a2ce477608f01f469e48a7fbee3772c"
+  }
+}

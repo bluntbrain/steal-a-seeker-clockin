@@ -10,7 +10,7 @@
     "typecheck": "tsc --noEmit",
     "test": "tsx --test tests/*.test.ts",
     "export:web": "npm run rules:check && expo export --platform web",
-    "build:apk": "npm run rules:check && cd android && ./gradlew :app:assembleRelease --no-daemon",
+    "build:apk": "npm run rules:check && cd android && ./gradlew :app:cleanCreateBundleReleaseJsAndAssets :app:assembleRelease --no-daemon",
     "preview": "node scripts/preview.cjs",
     "server:dev": "tsx server/main.ts",
     "server:test": "tsx --test server/*.test.ts",
