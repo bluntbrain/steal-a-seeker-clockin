@@ -1,6 +1,6 @@
 # Devnet paid challenge implementation contract
 
-Planned, not implemented. This extends the complete-game plan; it does not enable mainnet money play. Daily leaderboards remain a separate, no-payout mode.
+Partially implemented: reservations, durable signed-return jobs and owner-only return status are now implemented and tested locally; see [return-worker evidence](RETURN-SETTLEMENT.md). Entry checkout, paid-run recovery and outcome authorization remain planned. This extends the complete-game plan; it does not enable mainnet money play. Daily leaderboards remain a separate, no-payout mode.
 
 ## Player contract
 

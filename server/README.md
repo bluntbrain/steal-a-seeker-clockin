@@ -64,3 +64,7 @@ Railway creation was rejected on 12 September because the account trial expired.
 ## Daily runs
 
 Migration 003 adds immutable UTC daily manifests and wallet-bound run tickets. `server/ranked-service.ts` persists submitted input replays before queueing verification. Worker leases and claim tokens support process-restart recovery. Each ticket selects a checksum-verified immutable bundle in `server/rule-bundles`; API startup checks the current rules manifest. Native recording and pending-result recovery are wired. Public daily routes are available through the local browser preview; native requests still need a configured HTTPS endpoint. See [daily-run details](../docs/RANKED-RUNS.md) for APIs, evidence and limitations. There is no payout in daily mode.
+
+## Return worker
+
+Migration 004 adds reserved return liabilities and durable signed payout attempts. Authenticated `GET /returns/:id` reads only the owner’s allocation/receipt. Processing is disabled unless `DEVNET_RETURNS_ENABLED=1` and a private `DEVNET_SIGNER_PATH` are configured. Reservations and allocations are internal methods with no public write endpoint; the paid-entry service must authorize them from verified payment/run outcomes before this becomes a playable feature. No live payout is proven. See [the return-worker contract and tests](../docs/RETURN-SETTLEMENT.md). There are now 32 passing server tests; chain responses remain synthetic.

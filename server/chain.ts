@@ -8,7 +8,8 @@ export type Verification={state:'verified';instructionIndex:number;slot:number}|
 export interface PaymentChain {verify(order:Order,signature:string):Promise<Verification>;find(reference:string,minContextSlot?:number):Promise<string[]>;ready():Promise<void>;lifetime():Promise<Omit<PaymentAuthorization,'id'>>;height(minContextSlot:number):Promise<number>}
 const tokenBalance=z.object({accountIndex:z.number().int(),mint:z.string(),owner:z.string().optional(),uiTokenAmount:z.object({amount:z.string().regex(/^\d+$/),decimals:z.number().int()})});
 const txSchema=z.object({slot:z.number().int().nonnegative(),blockTime:z.number().nullable(),meta:z.object({err:z.unknown().nullable(),preTokenBalances:z.array(tokenBalance),postTokenBalances:z.array(tokenBalance),loadedAddresses:z.object({writable:z.array(z.string()),readonly:z.array(z.string())}).optional()}),transaction:z.object({signatures:z.array(z.string()),message:z.object({header:z.object({numRequiredSignatures:z.number().int()}),accountKeys:z.array(z.string()),instructions:z.array(z.object({programIdIndex:z.number().int(),accounts:z.array(z.number().int()),data:z.string()}))})})});
-export function verifyPayment(order:Order,signature:string,value:unknown):Verification{
+export type TransferBinding=Pick<Order,'wallet'|'source'|'mint'|'destination'|'recipient'|'tokenProgram'|'decimals'|'amount'|'reference'|'memo'|'createdAt'|'expiresAt'>;
+export function verifyPayment(order:TransferBinding,signature:string,value:unknown,checkQuoteWindow=true):Verification{
  if(value===null)return {state:'pending',detail:'Waiting for a finalized transaction.'};
  const parsed=txSchema.safeParse(value);if(!parsed.success)return {state:'invalid',detail:'Unrecognized transaction response.'};
  const tx=parsed.data;if(tx.meta.err!==null)return {state:'invalid',detail:'Transaction failed on chain.'};
@@ -29,7 +30,7 @@ export function verifyPayment(order:Order,signature:string,value:unknown):Verifi
   const src=tx.meta.preTokenBalances.find(b=>keys[b.accountIndex]===source),dstBefore=tx.meta.preTokenBalances.find(b=>keys[b.accountIndex]===destination),dst=tx.meta.postTokenBalances.find(b=>keys[b.accountIndex]===destination);
   if(!src||src.owner!==order.wallet||src.mint!==order.mint||src.uiTokenAmount.decimals!==order.decimals||!dst||dst.owner!==order.recipient||dst.mint!==order.mint||dst.uiTokenAmount.decimals!==order.decimals)continue;
   if(BigInt(dst.uiTokenAmount.amount)-BigInt(dstBefore?.uiTokenAmount.amount||'0')<amount)continue;
-  if(tx.blockTime===null||tx.blockTime*1000<new Date(order.createdAt).getTime()-30000||tx.blockTime*1000>new Date(order.expiresAt).getTime())return {state:'needs_review',detail:'Payment found outside the quote window; review for fulfillment or refund.'};
+  if(checkQuoteWindow&&(tx.blockTime===null||tx.blockTime*1000<new Date(order.createdAt).getTime()-30000||tx.blockTime*1000>new Date(order.expiresAt).getTime()))return {state:'needs_review',detail:'Payment found outside the quote window; review for fulfillment or refund.'};
   return {state:'verified',instructionIndex:index,slot:tx.slot};
  }
  return {state:'invalid',detail:'No matching transfer with the quoted mint, amount, buyer, recipient and reference.'};

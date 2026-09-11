@@ -6,6 +6,7 @@ import {PRODUCTS,type ProductId} from '../shared/commerce';
 import {progressInput} from './progress';
 import {CommerceService,ServiceError} from './service';
 import {RankedService} from './ranked-service';
+import {returnStatus} from './returns';
 const wallet=z.string().refine(v=>{try{address(v);return true;}catch{return false;}}),uuid=z.string().uuid(),sku=z.enum(PRODUCTS.map(p=>p.id) as [ProductId,...ProductId[]]);
 const bytes=z.string().max(8192).regex(/^[A-Za-z0-9+/]*={0,2}$/);
 export async function createApp(service:CommerceService,ranked=new RankedService(service.pool)){
@@ -18,6 +19,7 @@ export async function createApp(service:CommerceService,ranked=new RankedService
  app.post('/auth/verify',async req=>service.signIn(z.object({id:uuid,wallet,signedMessage:bytes,signature:bytes}).strict().parse(req.body)));
  app.post('/auth/logout',async req=>{const a=await account(req.headers.authorization);await service.logout(a.token);return {ok:true};});
  app.get('/me',async req=>service.me((await account(req.headers.authorization)).wallet));
+ app.get('/returns/:id',async req=>returnStatus(service.pool,(await account(req.headers.authorization)).wallet,z.object({id:uuid}).parse(req.params).id));
  app.get('/orders',async req=>service.orders((await account(req.headers.authorization)).wallet));
  app.post('/orders',async req=>{const a=await account(req.headers.authorization),b=z.object({sku,idempotencyKey:uuid}).strict().parse(req.body);return service.createOrder(a.wallet,b.sku,b.idempotencyKey);});
  app.get('/orders/:id',async req=>{const a=await account(req.headers.authorization),{id}=z.object({id:uuid}).parse(req.params);return service.getOrder(a.wallet,id);});

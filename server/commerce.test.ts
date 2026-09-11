@@ -11,6 +11,7 @@ import {verifyPayment,TOKEN_PROGRAM,MEMO_PROGRAM,type PaymentChain} from './chai
 import type {Order,SignInChallenge} from '../shared/commerce';
 import {RankedService,dailyMission} from './ranked-service';
 import {fixtureReplay} from '../tests/fixtures/replay';
+import {ReturnService, RETURN_FEE_RESERVE, type ReturnChain, type ReturnInspection, type SignedReturn} from './returns';
 import type {DailyManifest,RunTicket} from '../shared/ranked';
 const b58=(b:Uint8Array)=>getBase58Decoder().decode(b),pub=()=>b58(randomBytes(32));
 const pool=database('postgresql://localhost/seeker_clockin_test');
@@ -137,4 +138,72 @@ test('leaderboard keeps top fifty rows and the signed-in player even when sixty 
  const wallets=Array.from({length:60},()=>pub()).sort();
  for(const wallet of wallets){await pool.query('INSERT INTO wallets(address) VALUES($1)',[wallet]);await pool.query("INSERT INTO ranked_runs(id,wallet,day,request_key,manifest,status,issued_at,expires_at,result) VALUES($1,$2,$3,$4,$5,'verified',now(),now(),$6)",[randomUUID(),wallet,day,randomUUID(),{...manifest,day},{status:'won',score:12000,ticks:400,seconds:400/30,battery:100,delivered:1,spotted:false}]);}
  const board=await ranked.leaderboard(day,wallets[59]);assert.equal(board.entries.length,50);assert.deepEqual(board.entries.map(e=>e.wallet),wallets.slice(0,50));assert.equal(board.personal?.wallet,wallets[59]);assert.equal(board.personal?.rank,1);assert(board.entries.every(e=>e.rank===1));
+});
+
+async function returnHarness(tokens=100_000_000n,lamports=100_000_000n){
+ await pool.query('TRUNCATE return_allocations,return_attempts,return_reservations CASCADE');
+ const user=await login(),other=await login(),config={mint:pub(),treasury:pub(),source:pub(),decimals:6};
+ const sent:SignedReturn[]=[],prepared:SignedReturn[]=[],minimumSlots:number[]=[];
+ let inspection:ReturnInspection={state:'pending',detail:'Waiting.'},sendError=false,prepareError=false,beforeBroadcastError=false,onBalanceRead:(()=>Promise<void>)|undefined,beforeSave:(()=>Promise<void>)|undefined;
+ const chain:ReturnChain={available:async min=>{minimumSlots.push(min??0);if(onBalanceRead)await onBalanceRead();return {tokens,lamports};},prepare:async()=>{const signed={signature:b58(randomBytes(64)),wire:randomBytes(80).toString('base64'),blockhash:pub(),lastValidHeight:'500',contextSlot:'200'};prepared.push(signed);if(beforeSave)await beforeSave();if(prepareError)throw new Error('Crash before persistence');return signed;},inspect:async()=>inspection,broadcast:async attempt=>{assert.equal((await pool.query('SELECT wire FROM return_attempts WHERE signature=$1',[attempt.signature])).rows[0]?.wire,attempt.wire,'bytes must exist durably before broadcast');if(beforeBroadcastError)throw new Error('Crash before broadcast');sent.push(attempt);if(sendError)throw new Error('RPC response lost after broadcast');}};
+ const service=new ReturnService(pool,chain,config);
+ const retry=async()=>{await pool.query("UPDATE return_allocations SET process_after=now()-interval '1 second',lease_until=NULL");};
+ return {user,other,config,chain,service,sent,prepared,minimumSlots,retry,setInspection:(i:ReturnInspection)=>{inspection=i;},setSendError:(v:boolean)=>{sendError=v;},setPrepareError:(v:boolean)=>{prepareError=v;},setBeforeBroadcastError:(v:boolean)=>{beforeBroadcastError=v;},onBalanceRead:(fn:()=>Promise<void>)=>{onBalanceRead=fn;},beforeSave:(fn:()=>Promise<void>)=>{beforeSave=fn;}};
+}
+test('return reservations serialize capacity, preserve idempotency and cover token plus SOL liabilities',async()=>{
+ const h=await returnHarness(10_000_000n,RETURN_FEE_RESERVE),key=randomUUID();
+ const results=await Promise.allSettled([h.service.reserve(h.user.wallet,key,10_000_000n),h.service.reserve(h.other.wallet,randomUUID(),10_000_000n)]);
+ assert.equal(results.filter(r=>r.status==='fulfilled').length,1);assert.equal(results.filter(r=>r.status==='rejected').length,1);
+ const row=(await pool.query('SELECT * FROM return_reservations')).rows[0];assert.equal((await h.service.reserve(row.wallet,row.external_key,10_000_000n)).id,row.id);
+ await assert.rejects(h.service.reserve(row.wallet,row.external_key,1n),/different return/);
+ await h.service.release(row.id,'unpaid-finalized-expiry');await h.service.reserve(h.user.wallet,randomUUID(),10_000_000n);
+ const insufficientFee=await returnHarness(100_000_000n,RETURN_FEE_RESERVE-1n);await assert.rejects(insufficientFee.service.reserve(insufficientFee.user.wallet,randomUUID(),1n),/network costs/);
+});
+test('one return allocation per entry, owner-only status, and allocated liability cannot be released',async()=>{
+ const h=await returnHarness(),r=await h.service.reserve(h.user.wallet,randomUUID(),10_000_000n);
+ const [a,b]=await Promise.all([h.service.allocate(r.id,'success'),h.service.allocate(r.id,'success')]);assert.equal(a.id,b.id);
+ await assert.rejects(h.service.allocate(r.id,'refund'),/different allocated outcome/);await assert.rejects(h.service.release(r.id,'verified-loss'),/cannot be released/);
+ await assert.rejects(h.service.status(h.other.wallet,a.id),/not found/);const status=await h.service.status(h.user.wallet,a.id);assert.equal(status.state,'queued');assert(!('wire' in status));
+ const mine=await app.inject({method:'GET',url:`/returns/${a.id}`,headers:h.user.headers});assert.equal(mine.statusCode,200);assert.equal(mine.json().wallet,h.user.wallet);assert(!('wire' in mine.json()));assert.equal((await app.inject({method:'GET',url:`/returns/${a.id}`,headers:h.other.headers})).statusCode,404);assert.equal((await app.inject({method:'GET',url:`/returns/${a.id}`})).statusCode,401);assert.equal((await app.inject({method:'POST',url:`/returns/${a.id}`,headers:h.user.headers,payload:{outcome:'success'}})).statusCode,404);
+});
+test('lost return callback and process restart reuse the exact persisted signature and settle once',async()=>{
+ const h=await returnHarness(),r=await h.service.reserve(h.user.wallet,randomUUID(),10_000_000n),a=await h.service.allocate(r.id,'success');
+ h.setSendError(true);await h.service.process();assert.equal(h.sent.length,1);assert.equal(h.prepared.length,1);
+ await h.retry();h.setSendError(false);const restarted=new ReturnService(pool,h.chain,h.config);await restarted.process();assert.equal(h.sent.length,2);assert.equal(h.sent[0]!.signature,h.sent[1]!.signature);assert.equal(h.sent[0]!.wire,h.sent[1]!.wire);assert.equal(h.prepared.length,1);
+ await h.retry();h.setInspection({state:'settled',slot:999});await restarted.process();assert.equal((await h.service.status(h.user.wallet,a.id)).state,'settled');assert.equal((await pool.query('SELECT state FROM return_reservations WHERE id=$1',[r.id])).rows[0].state,'settled');
+ await h.retry();assert.equal(await restarted.process(),false);assert.equal(h.sent.length,2);
+ await h.service.reserve(h.user.wallet,randomUUID(),1n);assert.equal(h.minimumSlots.at(-1),999,'new capacity reads cannot precede the settled payout');
+});
+test('return worker crash before persistence never broadcasts the discarded transaction',async()=>{
+ const h=await returnHarness(),r=await h.service.reserve(h.user.wallet,randomUUID(),10_000_000n);await h.service.allocate(r.id,'refund');h.setPrepareError(true);
+ await h.service.process();assert.equal(h.sent.length,0);assert.equal((await pool.query('SELECT count(*) FROM return_attempts')).rows[0].count,'0');
+ h.setPrepareError(false);await h.retry();await h.service.process();assert.equal(h.prepared.length,2);assert.equal(h.sent.length,1);assert.equal(h.sent[0]!.signature,h.prepared[1]!.signature);
+});
+test('stale return worker cannot persist or broadcast after its lease is replaced',async()=>{
+ const h=await returnHarness(),r=await h.service.reserve(h.user.wallet,randomUUID(),10_000_000n),a=await h.service.allocate(r.id,'success');
+ h.beforeSave(async()=>{await pool.query("UPDATE return_allocations SET lease_token=$2,lease_until=now()+interval '10 minutes' WHERE id=$1",[a.id,randomUUID()]);});
+ await h.service.process();assert.equal(h.sent.length,0);assert.equal((await pool.query('SELECT count(*) FROM return_attempts')).rows[0].count,'0');
+ assert.equal(await h.service.process(),false);
+});
+test('expired return lifetime replaces only after definitive inspection; unexpected finalized transfer keeps reserve',async()=>{
+ const h=await returnHarness(),r=await h.service.reserve(h.user.wallet,randomUUID(),10_000_000n),a=await h.service.allocate(r.id,'success');
+ await h.service.process();h.setInspection({state:'expired',detail:'Finalized non-execution.'});await h.retry();await h.service.process();assert.equal(h.prepared.length,2);assert.notEqual(h.sent[0]!.signature,h.sent[1]!.signature);
+ assert.equal((await pool.query('SELECT state FROM return_attempts ORDER BY sequence')).rows[0].state,'expired');
+ h.setInspection({state:'review',detail:'Wrong transfer.'});await h.retry();await h.service.process();assert.equal((await h.service.status(h.user.wallet,a.id)).state,'review');assert.equal((await pool.query('SELECT state FROM return_reservations WHERE id=$1',[r.id])).rows[0].state,'held');
+});
+test('two settlement workers claim one job and a replacement recovers a persisted unbroadcast attempt',async()=>{
+ const h=await returnHarness(),r=await h.service.reserve(h.user.wallet,randomUUID(),10_000_000n),a=await h.service.allocate(r.id,'success');
+ h.setBeforeBroadcastError(true);const outcomes=await Promise.all([h.service.process(),new ReturnService(pool,h.chain,h.config).process()]);assert.equal(outcomes.filter(Boolean).length,1);assert.equal(h.prepared.length,1);assert.equal(h.sent.length,0);assert.equal((await pool.query('SELECT count(*) FROM return_attempts WHERE allocation_id=$1',[a.id])).rows[0].count,'1');
+ h.setBeforeBroadcastError(false);await h.retry();await new ReturnService(pool,h.chain,h.config).process();assert.equal(h.sent.length,1);assert.equal(h.prepared.length,1);
+});
+
+test('settlement cannot release a liability while a reservation holds a pre-transfer balance snapshot',async()=>{
+ const h=await returnHarness(20_000_000n),r=await h.service.reserve(h.user.wallet,randomUUID(),10_000_000n),a=await h.service.allocate(r.id,'success');await h.service.process();await h.retry();h.setInspection({state:'settled',slot:999});
+ let releaseBalance!:()=>void,observed!:()=>void;
+ const balanceCaptured=new Promise<void>(resolve=>{observed=resolve;}),continueBalance=new Promise<void>(resolve=>{releaseBalance=resolve;});
+ h.onBalanceRead(async()=>{observed();await continueBalance;});
+ const reserved=h.service.reserve(h.other.wallet,randomUUID(),20_000_000n).then(value=>({ok:true,value}),error=>({ok:false,error}));
+ await balanceCaptured;const settled=h.service.process();
+ let waiting=false;try{const deadline=Date.now()+2000;while(Date.now()<deadline){const rows=await pool.query("SELECT 1 FROM pg_locks WHERE locktype='advisory' AND objid=1936024940 AND NOT granted AND database=(SELECT oid FROM pg_database WHERE datname=current_database())");if(rows.rowCount){waiting=true;break;}await new Promise(resolve=>setTimeout(resolve,10));}}finally{releaseBalance();}
+ const result=await reserved;await settled;assert(waiting,'settlement must wait on the capacity lock');assert.equal(result.ok,false,'the in-flight liability still consumes the stale balance');assert.equal((await h.service.status(h.user.wallet,a.id)).state,'settled');
 });

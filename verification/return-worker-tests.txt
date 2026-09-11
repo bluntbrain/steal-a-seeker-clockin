@@ -1,0 +1,44 @@
+
+> steal-a-seeker-mvp@0.2.0 server:test
+> tsx --test server/*.test.ts
+
+✔ signed authentication consumes one nonce, enforces account isolation and supports revocation (181.285708ms)
+✔ orders bind prices, isolate wallets, reject forged transfers and fulfill duplicate callbacks only once (40.373875ms)
+✔ lost callback is recovered by reference and restored from a new service instance; equipment requires ownership (19.172958ms)
+✔ payment verifier rejects wrong buyer, token, amount, destination, reference, failed execution and absent finality (11.41825ms)
+✔ campaign progress sync requires access, preserves best records and isolates wallets (34.3225ms)
+✔ payment preparation is wallet-bound and concurrent retries reuse the same transaction lifetime (18.966833ms)
+✔ expired approval rotates only after finalized reference scan; missing callback restores the purchase (18.533667ms)
+✔ incomplete finalized RPC history blocks reapproval; an expired unpaid quote can be replaced (18.1105ms)
+✔ daily tickets bind rules, require campaign ownership and reject another wallet, stale clients and instant runs (41.282167ms)
+✔ ranked input replay survives worker restart, rejects changed reuse and publishes only a computed best (235.446791ms)
+✔ expired tickets, unfinished runs and invalid action replays never enter the leaderboard (193.087959ms)
+✔ leaderboard keeps top fifty rows and the signed-in player even when sixty players tie (34.7125ms)
+✔ return reservations serialize capacity, preserve idempotency and cover token plus SOL liabilities (37.039584ms)
+✔ one return allocation per entry, owner-only status, and allocated liability cannot be released (17.868709ms)
+✔ lost return callback and process restart reuse the exact persisted signature and settle once (20.026167ms)
+✔ return worker crash before persistence never broadcasts the discarded transaction (21.235459ms)
+✔ stale return worker cannot persist or broadcast after its lease is replaced (17.817125ms)
+✔ expired return lifetime replaces only after definitive inspection; unexpected finalized transfer keeps reserve (20.834291ms)
+✔ two settlement workers claim one job and a replacement recovers a persisted unbroadcast attempt (17.617959ms)
+✔ settlement cannot release a liability while a reservation holds a pre-transfer balance snapshot (31.501ms)
+✔ campaign sync merges best records independently and is idempotent (4.9205ms)
+✔ sync rejects malformed stars, negative times and unknown missions (0.82225ms)
+✔ isolated replay returns computed state and enforces worker capacity (177.618292ms)
+✔ a timed-out worker releases capacity for the next replay (130.095ms)
+✔ quantized input replay reproduces completion and computed score without a client score field (15.343625ms)
+✔ verifier rejects impossible inputs, oversized runs, repeated edges and post-completion ticks (2.4205ms)
+✔ return preparation creates a genuinely signed ATA/TransferChecked/memo transaction without sending it (23.011708ms)
+✔ return signer refuses other networks, mismatched destination and excessive or failed preflight costs (12.874167ms)
+✔ return verification matches finalized transfer including a newly created recipient token account (4.442917ms)
+✔ return expiry requires elapsed lifetime, covered RPC history and a second status check (2.9115ms)
+✔ non-finalized or malformed status cannot authorize a replacement return (2.039458ms)
+✔ stale balance and status changing during the expiry scan leave settlement unresolved (2.462125ms)
+ℹ tests 32
+ℹ suites 0
+ℹ pass 32
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1514.2755

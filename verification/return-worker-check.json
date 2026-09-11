@@ -1,0 +1,37 @@
+{
+  "status": "backend foundation verified locally; paid entry flow incomplete",
+  "createdAt": "2026-09-11T23:44:45.901771+00:00",
+  "serverTests": 32,
+  "typecheck": "passed",
+  "sharedGameRules": "unchanged; rules:check passed",
+  "database": "dedicated local PostgreSQL test database; synthetic chain responses",
+  "signedWire": "actual Ed25519 signature, ATA creation, TransferChecked, memo and reference checked",
+  "migration004AppliedToLocalApi": true,
+  "localReturnStatusWithoutAuthentication": 401,
+  "dedicatedSignerIdentityCheck": "passed; offline only",
+  "liveReturnAllocations": 0,
+  "returnWorkerEnabledLocally": false,
+  "liveReturnSent": false,
+  "notVerified": [
+    "live devnet return",
+    "physical Phantom",
+    "paid entry checkout",
+    "paid run restart recovery",
+    "verified entry/outcome authorization wiring",
+    "native settlement screen",
+    "mainnet or economic release readiness"
+  ],
+  "sourceHashes": {
+    "server/004-returns.sql": "12e16a9d4dfa22fea4b40ec6ac39adc98786d824bd7ef368a727f14d5aabce4e",
+    "server/returns.ts": "1a876b2b20010ee327998efebf2ad0d26c863db6bbbd189cc07c9e1651f49a89",
+    "server/return-chain.ts": "84a7922dc0db27f7b34b60360d1dda178c29bf1457afb848519805933910172a",
+    "server/check-return-signer.ts": "f9fbf8f57ce390dbaabbdeb46e8b1fff19b73ab4198a8736a150660445f94ad7",
+    "server/chain.ts": "e7c18cea9ed5fc03162ce22a07ce2c99abf3cf5ad5c4bcfd6c2176145eb29212",
+    "server/app.ts": "2e3b730d368a3df1d11c3e4000d2f71a38ce1948379b672a41f65d219eae328d",
+    "server/main.ts": "916ca6ee8043362f229c615d3f92b432df9a8701294b35b6ee2a4353493590d1",
+    "server/db.ts": "17bd9a2decd15e10110b8b1003e4647ebb1cc782af7ba976c129477264741dd2",
+    "server/commerce.test.ts": "2e297762cd891ea2ff198577d803c67f67a4864446ef1dc4b1dcb015beeb9f7d",
+    "server/return-chain.test.ts": "06eee54888dc58d1af322cfbf348aaa0640dd14944f2a5f5af4b1ad136f64722",
+    "shared/returns.ts": "bf2db8ccafa7ba3da800baf22780b3f8001d238492032a116c38e5c11044047a"
+  }
+}

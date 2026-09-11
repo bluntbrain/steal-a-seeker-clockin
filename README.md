@@ -12,7 +12,7 @@ Status: 12 September 2026. The complete goal remains in [the game plan](docs/COM
 - Native campaign paywall and secure cache of verified ownership for offline use. Catalog equipment drives 3D courier materials, an escape trail, a profile frame and a collection-rack finish.
 - Native devnet wallet connection, signed login, checkout/restore, finalized-transfer verification and durable payment lifetimes. Resumed approvals reuse identical transaction bytes.
 - Persistent sound, volume, vibration and reduced-effects preferences; controls help is available from the hideout and pause screen.
-- Daily challenges with wallet-bound tickets, quantized input recording, a durable verification queue, immutable rule bundles and one best verified score per wallet. The separate paid-entry/success-return mode remains outstanding.
+- Daily challenges with wallet-bound tickets, quantized input recording, a durable verification queue, immutable rule bundles and one best verified score per wallet. The separate paid-entry/success-return mode is still incomplete; its reserve and signed-return worker now have local recovery tests.
 
 **Live purchases are not ready:** the current APK has no configured HTTPS API, the devnet test mint awaits funding, and physical Phantom sign-in/payment/restore remain unverified. TEST SKR has no monetary value. Mainnet SKR payments are not enabled.
 
@@ -43,7 +43,7 @@ Metro uses 8082; the static gameplay preview uses 8787. Set `EXPO_PUBLIC_API_URL
 
 ## Verification
 
-`npm run typecheck`, `npm test` and `npm run server:test` currently pass: 58 game/client tests and 18 server tests. Server tests require the dedicated local `seeker_clockin_test` database; they use synthetic chain responses and never establish a live token payment.
+`npm run typecheck`, `npm test` and `npm run server:test` currently pass: 58 game/client tests and 32 server tests. Server tests require the dedicated local `seeker_clockin_test` database; they use synthetic chain responses and never establish a live token payment.
 
 `scripts/playtest-campaign.cjs` exercised all twelve rooms through pointer joystick input, with no teleport or forced-win hooks. Results and source hashes are in [the campaign report](verification/campaign-web-playtest.json). After account/ranking integration, `scripts/playtest-account.cjs` verifies extraction, collection, public daily reads, native wallet guidance and reload restoration. `npx tsx scripts/verify-browser-replay.ts` checks its actual input recording against the pinned server verifier. Both require Playwright and Chrome. `scripts/playtest-settings.cjs` checks restart persistence, storage-error recovery and pause-screen access. Earlier v0.2 patrol scripts/reports are historical evidence and predate current navigation.
 
@@ -54,3 +54,5 @@ Android builds/install and native GL startup pass on the emulator. The paywall a
 `src/game` contains shared maps, deterministic rules, navigation and scoring. `src/three` renders the native/browser 3D scene; `src/components/GameCanvas.tsx` preserves the 2D diagnostic renderer. `src/commerce` handles wallet account state, checkout, access and equipment. `src/progress` stores campaign bests; `src/settings` stores device preferences. `server` owns authenticated records, payment verification, migrations and replay workers. Client-reported campaign saves never authorize ranks or payouts.
 
 Private deployment, refunds/support, paid-entry settlement, final art polish, physical validation and submission packaging remain required before calling the game complete.
+
+[Devnet return-worker implementation and remaining entry-flow work](docs/RETURN-SETTLEMENT.md).
