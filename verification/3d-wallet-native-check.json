@@ -1,0 +1,13 @@
+{
+  "status": "passed",
+  "environment": "Android 36 emulator",
+  "checks": [
+    "native wallet panel opens",
+    "devnet label",
+    "no wallet connected state",
+    "missing wallet error displayed",
+    "back returns to paused game"
+  ],
+  "phantomInstalled": false,
+  "phantomApprovalVerified": false
+}

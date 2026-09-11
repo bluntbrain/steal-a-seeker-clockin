@@ -4,6 +4,7 @@ const fs=require('fs'),assert=require('assert');
  const b=await chromium.launch({headless:true,executablePath:process.env.CHROME_PATH||'/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'});
  const p=await b.newPage({viewport:{width:430,height:932}});let errors=[];p.on('pageerror',e=>errors.push(e.message));
  await p.goto(process.env.MVP_URL||'http://127.0.0.1:8787');await p.waitForFunction(()=>window.__SEEKER_MVP__?.snapshot().ticks>3);
+ await p.getByRole('button',{name:'Switch to 2D view',exact:true}).click();
  const snap=()=>p.evaluate(()=>window.__SEEKER_MVP__.snapshot());
  await p.getByRole('button',{name:'Play night shift mission',exact:true}).click();await p.waitForTimeout(300);
  assert.equal((await snap()).guards.length,2);await p.screenshot({path:'verification/night-shift-start.png'});

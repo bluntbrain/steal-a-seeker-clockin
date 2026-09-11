@@ -2,7 +2,7 @@
   "status": "passed",
   "url": "http://127.0.0.1:8787",
   "sourceHashes": {
-    "src/GameScreen.tsx": "19fb52bf2a8379515a71222aa0ecdb29bbcc7a9c610f17444fb2827202cc8d81",
+    "src/GameScreen.tsx": "83e328b1a615dda66b7caef27d390272d777ddcf31c641a6f59616660072800e",
     "src/game/simulation.ts": "ba529eaf3ad41d2e2674dc81ad2cdbc1e2c35ccb336341a13017537c7d7d1dc9",
     "src/game/level.ts": "7855a80e485af6bdbdeef70b46758a769abff97ac515787e39707430545e852f",
     "src/components/GameCanvas.tsx": "07088e3d7a6855e663ad95bd4e3f54f6c051dd9ae85564f963da308468504dc9",
@@ -27,20 +27,20 @@
     "no uncaught browser errors"
   ],
   "result": {
-    "x": 9.480846558147219,
-    "y": 1.9605649361140405,
-    "px": 9.480846558147219,
-    "py": 1.9605649361140405,
+    "x": 9.416927368289352,
+    "y": 2.1421329971913106,
+    "px": 9.416927368289352,
+    "py": 2.1421329971913106,
     "vx": 0,
     "vy": 0,
     "facing": 2,
-    "walked": 25.184337419171246,
+    "walked": 22.380424586926278,
     "carrying": true,
     "battery": 80,
     "pickup": 0,
     "extraction": 0.9999999999999999,
-    "elapsed": 10.699999999999973,
-    "ticks": 321,
+    "elapsed": 9.63333333333331,
+    "ticks": 289,
     "dashLeft": 0,
     "cooldown": 0,
     "dashX": 0,
@@ -48,7 +48,7 @@
     "dashSeen": 1,
     "status": "won",
     "dashes": 1,
-    "score": 11845,
+    "score": 11850,
     "bumps": 0,
     "mission": "practice",
     "guards": [],
@@ -56,9 +56,9 @@
     "caughtBy": -1
   },
   "metrics": {
-    "fps": 59.99100134979739,
+    "fps": 60.00600060005992,
     "p95": 16.700000000000728,
-    "frames": 604,
+    "frames": 545,
     "slow": 0
   }
 }

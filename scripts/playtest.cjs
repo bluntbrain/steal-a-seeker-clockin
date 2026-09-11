@@ -6,6 +6,7 @@ const fs=require('fs'),assert=require('assert');
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
  await page.goto(process.env.MVP_URL||'http://localhost:8082');
  await page.waitForFunction(()=>window.__SEEKER_MVP__?.snapshot().ticks>5);
+ await page.getByRole('button',{name:'Switch to 2D view',exact:true}).click();
  const snapshot=()=>page.evaluate(()=>window.__SEEKER_MVP__.snapshot());
  await page.screenshot({path:'verification/web-level-01.png'});
  assert(await page.getByText('STEAL A SEEKER',{exact:true}).isVisible());

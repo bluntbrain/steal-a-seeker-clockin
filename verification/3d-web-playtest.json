@@ -1,0 +1,51 @@
+{
+  "status": "passed",
+  "sourceHashes": {
+    "src/GameScreen.tsx": "83e328b1a615dda66b7caef27d390272d777ddcf31c641a6f59616660072800e",
+    "src/three/HeistScene.tsx": "b2e210fe79a94bc9b111046206304edf4c5ea57fdd205067bf6df86e574254c7",
+    "src/three/camera.ts": "465d8d2958082140fab81f8ab793654642e3901f0e61f9c4194e75a21806c989",
+    "src/components/GameCanvas3D.tsx": "c2f64ef599a1a053eae95a36fe7eec9c11c0a149c301a78a7617a2c2ab0be692"
+  },
+  "environment": "Headless Chrome, not a physical Android performance test",
+  "checks": [
+    "3D scene selected",
+    "pause freezes ticks",
+    "pointer joystick screen-relative",
+    "actual-input route",
+    "pointer pickup",
+    "extraction",
+    "retry",
+    "patrol scene",
+    "small/desktop fit",
+    "no page errors"
+  ],
+  "result": {
+    "x": 9.397637506213306,
+    "y": 2.246550060011981,
+    "px": 9.397637506213306,
+    "py": 2.246550060011981,
+    "vx": 0,
+    "vy": 0,
+    "facing": 2,
+    "walked": 21.442134662640335,
+    "carrying": true,
+    "battery": 100,
+    "pickup": 0,
+    "extraction": 0.9999999999999999,
+    "elapsed": 12.566666666666633,
+    "ticks": 377,
+    "dashLeft": 0,
+    "cooldown": 0,
+    "dashX": 0,
+    "dashY": -1,
+    "dashSeen": 0,
+    "status": "won",
+    "dashes": 0,
+    "score": 12235,
+    "bumps": 4,
+    "mission": "practice",
+    "guards": [],
+    "alert": 0,
+    "caughtBy": -1
+  }
+}

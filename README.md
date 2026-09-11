@@ -1,3 +1,5 @@
+> Development update, 12 September: angled native 3D and the first devnet wallet screen are under implementation. See [current evidence and remaining work](docs/IMPLEMENTATION-STATUS.md). The v0.2 information below describes the preceding baseline.
+
 # Steal a Seeker · Night Shift prototype
 
 A native React Native / Skia Android game with two selectable modes on the same warehouse layout. **Quiet Pickup** is the unguarded practice room. **Night Shift** adds two patrol bots, cover-aware sight cones, an alert meter, and a caught/retry loop. These are two mission rulesets, not two distinct room layouts.
