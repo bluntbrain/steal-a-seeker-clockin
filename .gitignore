@@ -1,0 +1,10 @@
+node_modules/
+.expo/
+dist/
+android/.gradle/
+android/app/build/
+android/build/
+android/local.properties
+*.log
+releases/*.apk
+__pycache__/

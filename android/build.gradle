@@ -1,0 +1,46 @@
+// Top-level build file where you can add configuration options common to all sub-projects/modules.
+
+buildscript {
+  repositories {
+    google()
+    mavenCentral()
+  }
+  dependencies {
+    classpath('com.android.tools.build:gradle')
+    classpath('com.facebook.react:react-native-gradle-plugin')
+    classpath('org.jetbrains.kotlin:kotlin-gradle-plugin')
+  }
+}
+
+allprojects {
+  repositories {
+    google()
+    mavenCentral()
+    maven { url 'https://www.jitpack.io' }
+  }
+}
+
+// Keep ARM64 native intermediates compact for the movement prototype.
+subprojects { p ->
+    ['com.android.library', 'com.android.application'].each { pluginId ->
+        p.plugins.withId(pluginId) {
+            p.android.defaultConfig.externalNativeBuild.cmake.arguments += [
+                '-DCMAKE_CXX_FLAGS_RELWITHDEBINFO=-O2 -g0 -DNDEBUG',
+                '-DCMAKE_C_FLAGS_RELWITHDEBINFO=-O2 -g0 -DNDEBUG'
+            ]
+        }
+    }
+}
+
+apply plugin: "expo-root-project"
+apply plugin: "com.facebook.react.rootproject"
+
+// Skia 2.4 ships static linker archives in libs/android. CMake consumes those
+// directly; only its generated .so belongs in the APK. Avoid redundant archive copies.
+def skiaProject = project(':shopify_react-native-skia')
+def omitStaticArchives = { skiaProject.android.sourceSets.main.jniLibs.srcDirs = [] }
+if (skiaProject.state.executed) {
+    omitStaticArchives()
+} else {
+    skiaProject.afterEvaluate { omitStaticArchives() }
+}

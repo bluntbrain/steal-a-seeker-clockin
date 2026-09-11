@@ -1,0 +1,31 @@
+{
+  "created_at": "2026-09-10T21:11:30.292306Z",
+  "display_name": "GPT Image 2.5",
+  "id": "75053ffc-d1e6-4674-846d-a51db4a9a802",
+  "job_type": "gpt_image_2_5",
+  "min_result_url": "https://d8j0ntlcm91z4.cloudfront.net/user_3DRg6egbSFDkhRzZKHaRDS2NY8F/hf_20260910_211130_75053ffc-d1e6-4674-846d-a51db4a9a802_min.webp",
+  "params": {
+    "aspect_ratio": "16:9",
+    "background": "transparent",
+    "height": 1520,
+    "medias": [
+      {
+        "data": {
+          "id": "1f5c8ed5-2322-4aaa-b2c0-0ad3dbc86b9f",
+          "type": "media_input",
+          "url": "https://d2ol7oe51mr4n9.cloudfront.net/user_3DRg6egbSFDkhRzZKHaRDS2NY8F/1f5c8ed5-2322-4aaa-b2c0-0ad3dbc86b9f_resize.jpg"
+        },
+        "role": "image"
+      }
+    ],
+    "model": "flare",
+    "prompt": "Create a production sprite sheet for the original Steal a Seeker mobile game, using the attached character sheet only for character identity, colors and material styling. OUTPUT ACTUAL TRANSPARENT BACKGROUND PNG with alpha, no backdrop, no floor, no labels, no borders, no guide lines, no shadows outside each character, no checkerboard painted into the image. Exactly FOUR columns and TWO rows, eight evenly spaced character sprites. Each cell has exactly the same dimensions. Top row is a relaxed standing pose. Bottom row is the same direction with one foot stepped forward and arms slightly swinging for a walk animation. Columns left to right: facing DOWN toward viewer, facing LEFT, facing UP away from viewer with backpack visible, facing RIGHT. Use a fixed elevated orthographic camera, around 35 degrees looking down, suitable for a top-down action game. Entire body visible, compact chibi courier: large warm offwhite hood, charcoal face cavity, pale mint rectangular visor with two small dark eyes, charcoal tunic and shorts, tiny cream gloves, offwhite shoes, square pale mint backpack. Match attached reference. Same silhouette, scale, camera and lighting in every cell. Each character uses only the middle 55% of its cell width and 72% of cell height, with generous transparent margins. Foot baseline at 86% height in each cell. Clean crisp soft shaded 2.5D render, strong silhouette readable at 56 pixels tall. No text, no phone, no additional props. This must be a usable transparent eight-frame sprite sheet, not a character presentation board.\n",
+    "quality": "xhigh",
+    "reference_elements": [],
+    "remove_bg": false,
+    "resolution": "2k",
+    "width": 2688
+  },
+  "result_url": "https://d8j0ntlcm91z4.cloudfront.net/user_3DRg6egbSFDkhRzZKHaRDS2NY8F/hf_20260910_211130_75053ffc-d1e6-4674-846d-a51db4a9a802.png",
+  "status": "completed"
+}

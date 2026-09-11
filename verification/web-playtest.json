@@ -1,0 +1,60 @@
+{
+  "status": "passed",
+  "url": "http://127.0.0.1:8787",
+  "sourceHashes": {
+    "src/GameScreen.tsx": "c5c121ad94aa3830a19c799ed51274ec27940167f6e7fda25a81aa7738617b58",
+    "src/game/simulation.ts": "338696bf107421328ba023998b9c49264215740d791617000850adc69b790450",
+    "src/game/level.ts": "ef6320c6ba90ca89f859e57aa771fe79b8a780fb02f48da39a64b7c35792d228",
+    "src/components/GameCanvas.tsx": "6bc68dfb8f3dc84a4368e20040e51f9b22bae0126c8bbb009b9d41c386a5a57e",
+    "src/game/art.ts": "bc054849d1ac925f032de2f0af04bd6d307015765e704b058c679ec47dc1a525"
+  },
+  "environment": "Headless Chrome on local Mac, not a physical phone",
+  "viewport": {
+    "width": 430,
+    "height": 932
+  },
+  "checks": [
+    "header and controls fit",
+    "pointer joystick",
+    "wall collision",
+    "pause freezes run",
+    "pickup via pointer hold",
+    "keyboard movement",
+    "dash costs once",
+    "complete extraction",
+    "retry clears state",
+    "desktop and small-phone layout",
+    "no uncaught browser errors"
+  ],
+  "result": {
+    "x": 9.283853773743369,
+    "y": 2.0446178467068266,
+    "px": 9.283853773743369,
+    "py": 2.0446178467068266,
+    "vx": 0,
+    "vy": 0,
+    "facing": 2,
+    "walked": 24.03242322824404,
+    "carrying": true,
+    "battery": 80,
+    "pickup": 0,
+    "extraction": 0.9999999999999999,
+    "elapsed": 10.066666666666642,
+    "ticks": 302,
+    "dashLeft": 0,
+    "cooldown": 0,
+    "dashX": 0,
+    "dashY": -1,
+    "dashSeen": 1,
+    "status": "won",
+    "dashes": 1,
+    "score": 11845,
+    "bumps": 3
+  },
+  "metrics": {
+    "fps": 60.00300015000757,
+    "p95": 16.799999999999272,
+    "frames": 608,
+    "slow": 0
+  }
+}

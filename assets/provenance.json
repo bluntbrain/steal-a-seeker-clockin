@@ -1,0 +1,10 @@
+{
+  "model": "gpt_image_2_5",
+  "source_url": "https://d8j0ntlcm91z4.cloudfront.net/user_3DRg6egbSFDkhRzZKHaRDS2NY8F/hf_20260910_211130_75053ffc-d1e6-4674-846d-a51db4a9a802.png",
+  "job_id": "75053ffc-d1e6-4674-846d-a51db4a9a802",
+  "file": "courier.png",
+  "sha256": "2a43ff3382d8b0206f3102b5118bab15e66e04a8922e25e28919a46685640a0c",
+  "prompt": "courier.prompt.txt",
+  "purpose": "Eight directional poses for the one-level MVP",
+  "recovery": "CLI observation returned HTTP 503; recovered the same completed job, no duplicate generation."
+}

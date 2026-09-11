@@ -1,0 +1,26 @@
+{
+  "expo": {
+    "name": "Steal a Seeker · MVP",
+    "slug": "steal-a-seeker-mvp",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "dark",
+    "newArchEnabled": true,
+    "android": {
+      "package": "com.krane.stealaseeker.mvp"
+    },
+    "web": {
+      "bundler": "metro",
+      "name": "Steal a Seeker · Level 01"
+    },
+    "assetBundlePatterns": [
+      "assets/**/*"
+    ],
+    "experiments": {
+      "baseUrl": ""
+    },
+    "plugins": [
+      "expo-audio"
+    ]
+  }
+}
