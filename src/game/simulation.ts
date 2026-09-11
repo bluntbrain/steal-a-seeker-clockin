@@ -1,14 +1,14 @@
 import { LEVEL, getLevel, TUNING, type Box, type MissionId, type LevelDefinition } from './level';
 import {intersectsBox,blockedBy} from './geometry';
 import { makeGuards, updateGuards, type Guard } from './guards';
-export type Input = { x: number; y: number; interact: boolean; dash: number };
+export type Input = { x: number; y: number; interact: boolean; dash: number;tool?:number };
 export type GameState = {
   x: number; y: number; px: number; py: number; vx: number; vy: number;
   facing: number; walked: number; carrying: boolean; battery: number;
   pickup: number; extraction: number; elapsed: number; ticks: number;
   dashLeft: number; cooldown: number; dashX: number; dashY: number; dashSeen: number;
   status: 'playing' | 'won' | 'timeout' | 'caught'; dashes: number; score: number; bumps: number;
-  mission: MissionId; guards: Guard[]; alert: number; caughtBy: number; spotted:boolean;closedGates:boolean[];blockers:Box[];
+  mission: MissionId; guards: Guard[]; alert: number; caughtBy: number; spotted:boolean;closedGates:boolean[];blockers:Box[];decoysLeft:number;toolSeen:number;decoy:{x:number;y:number;ttl:number};
 };
 export function initialState(mission:MissionId='practice'): GameState {
   'worklet';
@@ -17,7 +17,7 @@ export function initialState(mission:MissionId='practice'): GameState {
     vx: 0, vy: 0, facing: 2, walked: 0, carrying: false, battery: 100,
     pickup: 0, extraction: 0, elapsed: 0, ticks: 0, dashLeft: 0, cooldown: 0,
     dashX: 0, dashY: -1, dashSeen: 0, status: 'playing', dashes: 0, score: 0, bumps: 0,
-    mission,guards:makeGuards(mission),alert:0,caughtBy:-1,spotted:false,closedGates:(level.gates??[]).map(g=>g.phase%g.period>=g.openSeconds),blockers:[...level.blockers,...(level.gates??[]).filter(g=>g.phase%g.period>=g.openSeconds).map(g=>g.box)] };
+    decoysLeft:level.decoys??0,toolSeen:0,decoy:{x:0,y:0,ttl:0},mission,guards:makeGuards(mission),alert:0,caughtBy:-1,spotted:false,closedGates:(level.gates??[]).map(g=>g.phase%g.period>=g.openSeconds),blockers:[...level.blockers,...(level.gates??[]).filter(g=>g.phase%g.period>=g.openSeconds).map(g=>g.box)] };
 }
 export function idleInput(): Input { 'worklet'; return { x: 0, y: 0, interact: false, dash: 0 }; }
 export function clamp(n: number, lo: number, hi: number) { 'worklet'; return Math.max(lo, Math.min(hi, n)); }
@@ -51,7 +51,7 @@ export function step(s: GameState,input: Input,dt=TUNING.step) {
   'worklet';
   if(s.status!=='playing')return;
   s.px=s.x;s.py=s.y;s.elapsed+=dt;s.ticks++;updateGates(s);
-  s.cooldown=Math.max(0,s.cooldown-dt);
+  s.cooldown=Math.max(0,s.cooldown-dt);s.decoy.ttl=Math.max(0,s.decoy.ttl-dt);let noise:{x:number;y:number}|undefined;
   const magnitude=Math.hypot(input.x,input.y),divisor=Math.max(1,magnitude);
   const ix=input.x/divisor,iy=input.y/divisor;
   if(magnitude>.05){
@@ -63,8 +63,15 @@ export function step(s: GameState,input: Input,dt=TUNING.step) {
       const dirs=[[0,1],[-1,0],[0,-1],[1,0]];
       s.dashX=magnitude>.05?ix/Math.hypot(ix,iy):dirs[s.facing]![0]!;
       s.dashY=magnitude>.05?iy/Math.hypot(ix,iy):dirs[s.facing]![1]!;
-      s.battery-=TUNING.dashCost;s.dashes++;s.dashLeft=TUNING.dashDuration;s.cooldown=TUNING.dashCooldown;
+      s.battery-=TUNING.dashCost;s.dashes++;noise={x:s.x,y:s.y};s.dashLeft=TUNING.dashDuration;s.cooldown=TUNING.dashCooldown;
     }
+  }
+  if((input.tool??0)!==s.toolSeen){
+   s.toolSeen=input.tool??0;
+   if(s.decoysLeft>0){const dirs=[[0,1],[-1,0],[0,-1],[1,0]],dx=magnitude>.05?ix/Math.hypot(ix,iy):dirs[s.facing]![0]!,dy=magnitude>.05?iy/Math.hypot(ix,iy):dirs[s.facing]![1]!;let distance=0;
+    for(let d=.2;d<=3.21;d+=.2){if(blockedBy(s.x+dx*d,s.y+dy*d,s.blockers))break;distance=d;}
+    if(distance>=.6){noise={x:s.x+dx*distance,y:s.y+dy*distance};s.decoy={...noise,ttl:2.5};s.decoysLeft--;}
+   }
   }
   const speed=s.carrying?TUNING.carrySpeed:TUNING.walkSpeed;
   const accel=magnitude>.05?TUNING.acceleration:TUNING.friction;
@@ -76,7 +83,7 @@ export function step(s: GameState,input: Input,dt=TUNING.step) {
     s.pickup+=dt;
     if(s.pickup+1e-8>=TUNING.pickupHold){s.carrying=true;s.battery=100;s.pickup=0;}
   }else s.pickup=0;
-  updateGuards(s.guards,s.x,s.y,dt,{...getLevel(s.mission),blockers:s.blockers});
+  updateGuards(s.guards,s.x,s.y,dt,{...getLevel(s.mission),blockers:s.blockers},noise);
   s.alert=0;
   for(let i=0;i<s.guards.length;i++){
     s.alert=Math.max(s.alert,s.guards[i]!.exposure);if(s.guards[i]!.seesPlayer)s.spotted=true;

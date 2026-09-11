@@ -1,7 +1,7 @@
 [build]
 builder = "DOCKERFILE"
 dockerfilePath = "Dockerfile.api"
-watchPatterns = ["server/**", "shared/**", "Dockerfile.api", "railway.toml"]
+watchPatterns = ["server/**", "shared/**", "src/game/**", "Dockerfile.api", "railway.toml"]
 [deploy]
 healthcheckPath = "/health"
 healthcheckTimeout = 60

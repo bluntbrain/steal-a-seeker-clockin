@@ -47,7 +47,7 @@ function Robot({index,game,alpha,clock,level}:SceneProps & {index:number}){
  useFrame(()=>{const g=game.value.guards[index];if(!root.current)return;root.current.visible=!!g;if(!g)return;const a=alpha.value;root.current.position.set(g.px+(g.x-g.px)*a,.02+Math.sin(clock.value*5+index)*.015,g.py+(g.y-g.py)*a);root.current.rotation.y=Math.PI/2-g.angle;if(visor.current)visor.current.color.set(g.exposure>0?'#ff7354':colors.mint);});
  if(level.patrols[index]?.kind==='scanner')return <group ref={root}><Box position={[0,.2,0]} scale={[.9,.4,.9]} color={colors.dark}/><Box position={[0,1,0]} scale={[.17,1.7,.17]} color={colors.cream}/><Box position={[0,1.6,0]} scale={[.72,.4,.46]} color={colors.cream}/><Box position={[0,1.6,.26]} scale={[.57,.21,.08]} color={colors.amber} emissive/><Ball position={[0,1.96,0]} scale={[.09,.09,.09]} color={colors.amber}/></group>;
  return <group ref={root}>
-  <Box position={[0,.48,0]} scale={[.74,.53,.66]} color={colors.cream}/>
+  <Box position={[0,.48,0]} scale={[.74,.53,.66]} color={level.patrols[index]?.kind==='warden'?'#72877c':colors.cream}/>{level.patrols[index]?.kind==='warden'&&<><Box position={[0,.78,0]} scale={[.78,.1,.7]} color={colors.amber}/><Box position={[0,.48,-.37]} scale={[.68,.42,.1]} color={colors.dark}/></>}
   <Box position={[0,.48,.35]} scale={[.56,.24,.045]} color={colors.dark}/>
   <mesh position={[0,.49,.38]}><boxGeometry args={[.36,.075,.02]}/><meshStandardMaterial ref={visor} color={colors.mint} emissive={colors.mint} emissiveIntensity={.5}/></mesh>
   <Box position={[0,.8,0]} scale={[.13,.16,.13]} color={colors.dark}/>
@@ -67,6 +67,7 @@ function Vision({index,game}:Pick<SceneProps,'game'> & {index:number}){
  });
  return <mesh ref={mesh} geometry={geometry} frustumCulled={false}><meshBasicMaterial color={colors.amber} transparent opacity={.19} depthWrite={false} side={THREE.DoubleSide}/></mesh>;
 }
+function Decoy({game}:Pick<SceneProps,'game'>){const ref=useRef<THREE.Group>(null),ring=useRef<THREE.Mesh>(null),mat=useRef<THREE.MeshBasicMaterial>(null);useFrame(()=>{const d=game.value.decoy;if(ref.current){ref.current.visible=d.ttl>0;ref.current.position.set(d.x,.05,d.y);}if(ring.current)ring.current.scale.setScalar(1+(2.5-d.ttl)*.9);if(mat.current)mat.current.opacity=d.ttl/2.5*.55;});return <group ref={ref}><Ball position={[0,.15,0]} scale={[.12,.15,.12]} color={colors.amber}/><mesh ref={ring} rotation={[-Math.PI/2,0,0]}><ringGeometry args={[.42,.47,24]}/><meshBasicMaterial ref={mat} color={colors.amber} transparent opacity={.5} depthWrite={false} side={THREE.DoubleSide}/></mesh></group>;}
 function Gate({index,game,level}:Pick<SceneProps,'game'|'level'>&{index:number}){
  const gate=level.gates![index]!,b=gate.box,bar=useRef<THREE.Mesh>(null),material=useRef<THREE.MeshStandardMaterial>(null);
  useFrame((_,dt)=>{const closed=game.value.closedGates[index];if(bar.current)bar.current.position.y=THREE.MathUtils.damp(bar.current.position.y,closed?.6:-.65,15,dt);if(material.current){material.current.color.set(closed?colors.amber:colors.mint);material.current.emissive.set(closed?colors.amber:colors.mint);}});
@@ -95,7 +96,7 @@ function FollowCamera({game}:Pick<SceneProps,'game'>){const {camera}=useThree();
 export default function HeistScene(props:SceneProps){return <>
  <color attach="background" args={['#101c20']}/><fog attach="fog" args={['#101c20',32,65]}/>
  <hemisphereLight args={['#d1eee0','#273639',2.2]}/><directionalLight position={[-4,15,4]} intensity={3} color="#fff1d8" castShadow shadow-mapSize-width={1024} shadow-mapSize-height={1024} shadow-camera-left={-16} shadow-camera-right={16} shadow-camera-top={16} shadow-camera-bottom={-16} shadow-camera-far={50} shadow-normalBias={.04}/>
- <Warehouse level={props.level}/>{props.level.gates?.map((_,index)=><Gate key={index} level={props.level} game={props.game} index={index}/>)}<Objective {...props}/><Courier {...props}/>
+ <Warehouse level={props.level}/>{props.level.gates?.map((_,index)=><Gate key={index} level={props.level} game={props.game} index={index}/>)}<Objective {...props}/><Courier {...props}/><Decoy game={props.game}/>
  {props.level.patrols.map((_,index)=><React.Fragment key={index}><Robot {...props} index={index}/><Vision game={props.game} index={index}/></React.Fragment>)}
  <FollowCamera game={props.game}/>
  </>;}

@@ -52,3 +52,7 @@ Remaining: live test mint/payment, physical Phantom round trip, stable HTTPS dep
 ## Hosting status
 
 Railway creation was rejected on 12 September because the account trial expired. Enable hosting before deployment. The Docker service uses private database networking; no signing key is needed for purchase verification. `Dockerfile.api`, the service-only lockfile and `railway.toml` are prepared but have not been remotely built or deployed.
+
+## Campaign progress endpoint
+
+`PUT /me/progress` requires signed authentication and a campaign entitlement. It validates a versioned payload and merges stars, best time, score, battery and completion count without regressing either device's best values. Repeated sync is idempotent. The native client is not wired to this endpoint yet. These client-reported saves are not trusted for daily ranks or returns. Docker packaging includes the shared game definitions so the API uses the same mission IDs.

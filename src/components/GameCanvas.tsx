@@ -9,6 +9,7 @@ import GuardLayer from './GuardLayer';
 type Props={size:number;game:SharedValue<GameState>;alpha:SharedValue<number>;clock:SharedValue<number>;level:LevelDefinition};
 const cleanAlpha=[1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,1.5,-.5];
 function GateLayer({game,level,index}:Pick<Props,'game'|'level'>&{index:number}){const b=level.gates![index]!.box,color=useDerivedValue(()=>game.value.closedGates[index]?'#edb768':'#99dfc4'),opacity=useDerivedValue(()=>game.value.closedGates[index]?.85:.2);return <RoundedRect x={b.x} y={b.y} width={b.w} height={b.h} r={.04} color={color} opacity={opacity}/>;}
+function DecoyLayer({game}:Pick<Props,'game'>){const x=useDerivedValue(()=>game.value.decoy.x),y=useDerivedValue(()=>game.value.decoy.y),radius=useDerivedValue(()=>.45+(2.5-game.value.decoy.ttl)*.4),opacity=useDerivedValue(()=>game.value.decoy.ttl/2.5*.5);return <Circle cx={x} cy={y} r={radius} color="#ffc778" opacity={opacity}/>;}
 export default memo(function GameCanvas({size,game,alpha,clock,level}:Props){
  const world=useMemo(()=>makeWarehouse(level.mission!=='practice'&&level.mission!=='night-shift',level),[level]),fallbackWorld=useMemo(()=>makeWarehouse(true,level),[level]);
  const floor=useImage(require('../../assets/warehouse-floor-v1.png'));
@@ -43,6 +44,7 @@ export default memo(function GameCanvas({size,game,alpha,clock,level}:Props){
     <RoundedRect x={level.phone.x-.55} y={level.phone.y+.65} width={pickupWidth} height={.07} r={.025} color="#d9fff0"/>
    </Group>
    {level.patrols.map((_,index)=><GuardLayer key={index} game={game} alpha={alpha} index={index}/>)}
+   <DecoyLayer game={game}/>
    <Oval rect={trail} color="#adf1db" opacity={dash}/>
    <Oval rect={shadow} color="#070c0d" opacity={.7}/>
    {sprite && <Atlas image={sprite} sprites={sprites} transforms={transforms}><ColorMatrix matrix={cleanAlpha}/></Atlas>}

@@ -5,6 +5,7 @@ import {findAssociatedTokenPda} from '@solana-program/token';
 import {verifySignIn} from '@solana/wallet-standard-util';
 import {PRODUCTS,type ProductId,type Order,type AccountState,type SignInChallenge} from '../shared/commerce';
 import {transaction} from './db';
+import {mergeProgress,type SyncedProgress} from './progress';
 import {TOKEN_PROGRAM,type PaymentChain} from './chain';
 export class ServiceError extends Error{constructor(public status:number,message:string){super(message);}}
 export type CommerceConfig={identityUri:string;mint:string;recipient:string;decimals:number;destination:string};
@@ -68,6 +69,9 @@ export class CommerceService {
  async reconcile(id:string){const r=await this.pool.query('SELECT * FROM orders WHERE id=$1',[id]);if(!r.rowCount)return;const order=orderFromRow(r.rows[0]);if(order.status==='fulfilled')return;
   const attempts=await this.pool.query("SELECT signature FROM order_attempts WHERE order_id=$1 AND state='pending'",[id]);const signatures=new Set<string>(attempts.rows.map(r=>r.signature));if(order.signature)signatures.add(order.signature);for(const sig of await this.chain.find(order.reference))signatures.add(sig);
   for(const sig of signatures)await this.check(order,sig);await this.pool.query('UPDATE orders SET checked_at=now() WHERE id=$1',[id]);
+ }
+ async syncProgress(wallet:string,incoming:SyncedProgress){
+  await transaction(this.pool,async db=>{const row=await db.query('SELECT progress FROM wallets WHERE address=$1 FOR UPDATE',[wallet]);if(!row.rowCount)throw new ServiceError(404,'Account not found.');const owned=await db.query("SELECT 1 FROM entitlements WHERE wallet=$1 AND sku='campaign'",[wallet]);if(!owned.rowCount)throw new ServiceError(403,'Campaign access is required to sync campaign progress.');const next=mergeProgress(row.rows[0].progress,incoming);await db.query('UPDATE wallets SET progress=$2 WHERE address=$1',[wallet,next]);});return this.me(wallet);
  }
  async equip(wallet:string,sku:ProductId){const product=PRODUCTS.find(p=>p.id===sku);if(!product||product.kind==='access')throw new ServiceError(400,'This item cannot be equipped.');const owned=await this.pool.query('SELECT 1 FROM entitlements WHERE wallet=$1 AND sku=$2',[wallet,sku]);if(!owned.rowCount)throw new ServiceError(403,'You do not own this item.');await this.pool.query('UPDATE wallets SET equipment=equipment || $2::jsonb WHERE address=$1',[wallet,JSON.stringify({[product.kind]:sku})]);return this.me(wallet);}
 }

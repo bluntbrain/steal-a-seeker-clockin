@@ -55,3 +55,15 @@ test('payment verifier rejects wrong buyer, token, amount, destination, referenc
  assert.equal(verifyPayment(order,sig,{...good,meta:{...good.meta,err:{InstructionError:[0,'Custom']}}}).state,'invalid');
  assert.equal(verifyPayment(order,sig,{...good,blockTime:Math.floor(new Date(order.expiresAt).getTime()/1000)+60}).state,'needs_review');
 });
+
+test('campaign progress sync requires access, preserves best records and isolates wallets',async()=>{
+ const user=await login(),other=await login(),payload={version:1,missions:{practice:{stars:2,seconds:25,score:11500,battery:60,completions:2}}};
+ assert.equal((await app.inject({method:'PUT',url:'/me/progress',headers:user.headers,payload})).statusCode,403);
+ const order=await quote(user),sig=b58(randomBytes(64));transactions.set(sig,paidTx(order,sig));await service.attach(user.wallet,order.id,sig);
+ const result=await app.inject({method:'PUT',url:'/me/progress',headers:user.headers,payload});assert.equal(result.statusCode,200,result.body);assert.deepEqual(result.json().progress,payload);
+ const better={version:1,missions:{practice:{stars:3,seconds:20,score:12000,battery:80,completions:3}}};
+ await Promise.all([app.inject({method:'PUT',url:'/me/progress',headers:user.headers,payload:better}),app.inject({method:'PUT',url:'/me/progress',headers:user.headers,payload})]);
+ assert.deepEqual((await service.me(user.wallet)).progress,better);assert.deepEqual((await service.me(other.wallet)).progress,{});
+ assert.equal((await app.inject({method:'PUT',url:'/me/progress',headers:user.headers,payload:{...payload,wallet:other.wallet}})).statusCode,400);
+ assert.equal((await app.inject({method:'PUT',url:'/me/progress',headers:user.headers,payload:{version:1,missions:{practice:{...payload.missions.practice,stars:8}}}})).statusCode,400);
+});

@@ -1,4 +1,4 @@
-> Development update, 12 September: angled native 3D and the first devnet wallet screen are under implementation. See [current evidence and remaining work](docs/IMPLEMENTATION-STATUS.md). The v0.2 information below describes the preceding baseline.
+> Development update, 12 September: eight authored 3D missions, local saves, native devnet MWA and a tested local commerce API are implemented. [Current evidence and remaining work](docs/IMPLEMENTATION-STATUS.md) · [Eight-mission development APK](releases/steal-a-seeker-eight-missions-devnet-preview.apk). Four missions, paywall/shop delivery, rankings, settlement and physical Phantom testing remain. The v0.2 information below describes the earlier baseline.
 
 # Steal a Seeker · Night Shift prototype
 

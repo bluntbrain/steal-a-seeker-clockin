@@ -1,9 +1,9 @@
 export type Box = { x: number; y: number; w: number; h: number; kind: 'wall' | 'crate' | 'rack' };
-export type MissionId = 'practice' | 'cone-lesson' | 'battery-dash' | 'crossing-signals' | 'sweep-window' | 'narrow-crossing' | 'night-shift';
+export type MissionId = 'practice' | 'cone-lesson' | 'battery-dash' | 'crossing-signals' | 'sweep-window' | 'narrow-crossing' | 'false-footsteps' | 'warden-gate' | 'night-shift';
 export type Point = {x:number;y:number};
-export type GuardSpec = {route:Point[];speed:number;range:number;halfAngle:number;spotSeconds:number;pauseSeconds:number;kind?:'scanner';sweep?:{angle:number;amplitude:number;period:number}};
+export type GuardSpec = {route:Point[];speed:number;range:number;halfAngle:number;spotSeconds:number;pauseSeconds:number;kind?:'scanner'|'warden';investigates?:boolean;hearing?:number;sweep?:{angle:number;amplitude:number;period:number}};
 export type GateSpec={box:Box;period:number;openSeconds:number;phase:number};
-export type LevelDefinition = {id:string;mission:MissionId;title:string;number:number;briefing:string;width:number;height:number;spawn:Point;phone:Point;exit:Point & {w:number;h:number};targetSeconds:number;hardLimitSeconds:number;blockers:Box[];patrols:GuardSpec[];floorColor:string;gates?:GateSpec[]};
+export type LevelDefinition = {id:string;mission:MissionId;title:string;number:number;briefing:string;width:number;height:number;spawn:Point;phone:Point;exit:Point & {w:number;h:number};targetSeconds:number;hardLimitSeconds:number;blockers:Box[];patrols:GuardSpec[];floorColor:string;gates?:GateSpec[];decoys?:number};
 export const PATROLS = [
   [{x:3.7,y:10.5},{x:6.6,y:10.5},{x:6.6,y:7.6},{x:4.3,y:7.6},{x:4.3,y:10.5}],
   [{x:7.3,y:4.2},{x:10.5,y:4.2},{x:10.5,y:7.1},{x:7.3,y:7.1}],
@@ -77,9 +77,23 @@ export const LEVELS:Record<MissionId,LevelDefinition> = {
   gates:[{box:{x:1.8,y:9.4,w:2.2,h:1.2,kind:'wall'},period:8,openSeconds:3.8,phase:0},{box:{x:8,y:9.4,w:2.2,h:1.2,kind:'wall'},period:8,openSeconds:3.8,phase:4}],
   patrols:[patrol([{x:7.4,y:7.5},{x:10.6,y:7.5},{x:10.6,y:4},{x:7.4,y:4}],.85,3)]
  },
+ 'false-footsteps':{
+  id:'false-footsteps-v1',mission:'false-footsteps',title:'False Footsteps',number:7,width:12,height:20,
+  spawn:{x:2,y:17.5},phone:{x:9.5,y:3},exit:{x:1.2,y:1.1,w:2.5,h:1.8},targetSeconds:180,hardLimitSeconds:360,decoys:2,
+  briefing:'Throw a decoy in the direction you face. Nearby robots investigate the sound, search there, then return. Use the opening or take the long route behind cover.',floorColor:'#283c48',
+  blockers:[...boundary,rack(4.3,12.8,2,3.7),crate(7.8,13.4,2.5,1.6),rack(4.3,7.2,2,3.4),crate(8.1,6.1,2.2,1.7),crate(1.4,5.4,2,2.3),rack(4.3,2.8,1.7,2.5)],
+  patrols:[{...patrol([{x:7.2,y:12},{x:10.6,y:12},{x:10.6,y:9},{x:7.2,y:9}],1.1,4),investigates:true,hearing:6.5}]
+ },
+ 'warden-gate':{
+  id:'warden-gate-v1',mission:'warden-gate',title:'Warden Gate',number:8,width:12,height:20,
+  spawn:{x:2,y:17.5},phone:{x:9.3,y:4.4},exit:{x:1.2,y:1.1,w:2.5,h:1.8},targetSeconds:210,hardLimitSeconds:420,decoys:2,
+  briefing:'The Warden is slow, with a longer view. Lure it away from the exit. A dash also makes noise, so save it for the escape.',floorColor:'#343944',
+  blockers:[...boundary,crate(1.4,12.9,2.2,2),rack(5.1,12.6,1.7,3.5),crate(8.3,10.1,2.1,2),rack(4.7,6.2,1.8,3),crate(7.7,6.2,2.7,1.5),rack(4.8,2,1.4,1.9)],
+  patrols:[{...patrol([{x:3.8,y:4.5},{x:7,y:4.5},{x:7,y:1.2},{x:3.8,y:1.2}],.65,4.7),kind:'warden',spotSeconds:1.1,investigates:true,hearing:8}]
+ },
  'night-shift':{...original,id:'legacy-night-shift-v1',mission:'night-shift',title:'Night Shift',number:0,briefing:'Original two-patrol test room. This is a separate practice room, outside campaign progression.',patrols:PATROLS.map(route=>patrol(route)),floorColor:'#263938'},
 };
-export const CAMPAIGN_IDS:MissionId[]=['practice','cone-lesson','battery-dash','crossing-signals','sweep-window','narrow-crossing'];
+export const CAMPAIGN_IDS:MissionId[]=['practice','cone-lesson','battery-dash','crossing-signals','sweep-window','narrow-crossing','false-footsteps','warden-gate'];
 export const MISSIONS=CAMPAIGN_IDS.map(id=>({id,title:LEVELS[id].title,label:`${String(LEVELS[id].number).padStart(2,'0')} · ${LEVELS[id].title}`}));
 // Retained for original regression fixtures. Gameplay resolves its own mission.
 export const LEVEL=LEVELS.practice;

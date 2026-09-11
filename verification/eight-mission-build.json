@@ -1,0 +1,51 @@
+{
+  "build": "development-signed Android ARM64 release-mode preview",
+  "apk": "releases/steal-a-seeker-eight-missions-devnet-preview.apk",
+  "bytes": 63666507,
+  "sha256": "fa4aa209d5120a2e22a742cda5cd99010834c5b5f794faa55897362cc7411ef3",
+  "sourceHashes": {
+    "src/GameScreen.tsx": "c78d327aee87042ca06dafb8bdc94ce8deb1064b11f4b3e2d117f8931ba7aa77",
+    "src/commerce/CommerceSection.tsx": "a37a3961d546dcbe70c3f846b09f25daa2797eb3689817f84b2fc0f44439adf0",
+    "src/commerce/client.ts": "138eb5fd14725daa757d340ea592a67035ec32a40edc1fb96662e9fa5e94a482",
+    "src/progress/storage.web.ts": "61e596f5f03f0e09aa15ba98fdf3434fece80bc2f912625ed7e50f68ed96ef87",
+    "src/progress/storage.ts": "91deb261302f6eb94610eebc0976a4353dcef8d0081cfba97be958575c8c4e34",
+    "src/progress/model.ts": "5236fa757566b305756a1996bd9e01a6c6c80244a05a1f3eaf443b649d061bb2",
+    "src/progress/useProgress.ts": "78526248d294a21d7623f93c838490361ba83f2739f16f2ccabf9cb84aad6837",
+    "src/game/navigation.ts": "07e680441f8478b077f965e4e3081aa1218d7648bf4797537f54b01597137d1e",
+    "src/game/art.ts": "50c9d2828e6df5ad7352d76921d6c9a883c3cbeefea4728dc4165dc3c8e0c6fb",
+    "src/game/geometry.ts": "85d58e09b875ac40e32e8ac9570ef792cd597175bd86df8d63ab6b8a8ff7df25",
+    "src/game/level.ts": "9dd1d7b2a8fe3a7c6632e6b39aee3d0b8cf09a93ca7fc1b5fcdc522d07a1ec3e",
+    "src/game/guards.ts": "cb583be76f9c88247e5f85c5fb6fb247578692d58bbbea7af5a66774a06d2643",
+    "src/game/simulation.ts": "52bf9036b39773c00599bb2d67287e4a7e829da3732f5b6364a38e33883e8022",
+    "src/three/HeistScene.tsx": "7bdbdb6106c7da6ced873cabebf72ccb7dec26709d8e25e86710236f12af79c2",
+    "src/three/Canvas.web.tsx": "75a19313015998b24cc706d8431bda79c54c011047c2dce0b4473c09fc564b44",
+    "src/three/camera.ts": "465d8d2958082140fab81f8ab793654642e3901f0e61f9c4194e75a21806c989",
+    "src/three/Canvas.tsx": "71bc424604db37fc4acfc54340609923a101db6d353ff8ef5b51fdea84b21855",
+    "src/components/GuardLayer.tsx": "1b02473d4f7021c5d49571f3e17664b780853783c761c1e54b5228925e193400",
+    "src/components/GameCanvas3D.tsx": "c2f64ef599a1a053eae95a36fe7eec9c11c0a149c301a78a7617a2c2ab0be692",
+    "src/components/MissionMap.tsx": "3556763d37fe565e32e192c447fb3129a9fab33995cb69ccca1979d6447179a5",
+    "src/components/GameCanvas.tsx": "78ec7a7f71cf4e57c1ab46d8b2673845d91220eeec9f28646adb2c14ded1271b",
+    "src/wallet/polyfill.ts": "35466a490e093275a91dca52a50fece1c72587d49b12c5d95509081ca63becca",
+    "src/wallet/polyfill.web.ts": "cecf35f8e0b9c3918b711897abe02b25a4c0895995a8e5f3eadba617df5b157f",
+    "src/wallet/WalletPanel.tsx": "dce8b69294c83ecfc2d10e2fecc9c4114e6c8acdf248a4888a991040ebdcdda8",
+    "src/wallet/WalletProvider.web.tsx": "a21e00479a01d320a544217a6cd7ba6ed81b6da08e6e2f6a1a3868d5d4591a21",
+    "src/wallet/WalletPanel.web.tsx": "13fc85abee170a16d7b6c40eedec2759d1b92fe124c1496cfbae58067b5e10c9",
+    "src/wallet/config.ts": "60ad40c38086ef01f4072dd4676f67d55cbcd4613e1bdda9788967f268976a3b",
+    "src/wallet/WalletProvider.tsx": "8a8cd688e078aedac85d47c80dda8d8f10078b3500c4ddd73e2d8b703e6a55da",
+    "package-lock.json": "941bfd407c5e1848e36a018748f179e8ad9919a4f73af69a82df08710c22feaf"
+  },
+  "verified": [
+    "Android build",
+    "emulator install",
+    "eight browser joystick extractions",
+    "browser decoy response",
+    "browser save restore"
+  ],
+  "notVerified": [
+    "physical Phantom",
+    "live token payment",
+    "native eight-mission completion",
+    "physical performance"
+  ],
+  "commerceApiConfigured": false
+}

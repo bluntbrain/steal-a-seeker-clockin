@@ -2,18 +2,23 @@
   "status": "passed",
   "environment": "Headless Chrome with pointer joystick, not physical phone",
   "checks": [
-    "6 actual-input extractions",
+    "8 actual-input extractions",
     "unlocks in order",
     "mission-specific render",
     "progress restored after reload",
     "no page errors"
   ],
   "sourceHashes": {
-    "src/GameScreen.tsx": "fb80766abc3844e0d72fd36ef5c474a259b73716c2abdb02e5eafc17a1605177",
-    "src/game/level.ts": "387f0b592d5197d0bd573fee228fbdd1f2f73eab1e4609b0e55f7bcb4eb9ae52",
-    "src/game/simulation.ts": "0b019960652f704452393a29aa4f84da09b896d1fb7a9910132f7adef9f6bbdf",
-    "src/game/guards.ts": "4d76645f435975efdb5ec19df5f687b099304deaf3a278b936ca8878980a3e34",
-    "src/three/HeistScene.tsx": "a05af4896123d23ebbe231da8651ea4e756a41900edc88b79aed36ad64ebe174"
+    "src/GameScreen.tsx": "c78d327aee87042ca06dafb8bdc94ce8deb1064b11f4b3e2d117f8931ba7aa77",
+    "src/game/level.ts": "9dd1d7b2a8fe3a7c6632e6b39aee3d0b8cf09a93ca7fc1b5fcdc522d07a1ec3e",
+    "src/game/simulation.ts": "52bf9036b39773c00599bb2d67287e4a7e829da3732f5b6364a38e33883e8022",
+    "src/game/guards.ts": "cb583be76f9c88247e5f85c5fb6fb247578692d58bbbea7af5a66774a06d2643",
+    "src/game/geometry.ts": "85d58e09b875ac40e32e8ac9570ef792cd597175bd86df8d63ab6b8a8ff7df25",
+    "src/game/navigation.ts": "07e680441f8478b077f965e4e3081aa1218d7648bf4797537f54b01597137d1e",
+    "src/three/HeistScene.tsx": "7bdbdb6106c7da6ced873cabebf72ccb7dec26709d8e25e86710236f12af79c2",
+    "src/components/MissionMap.tsx": "3556763d37fe565e32e192c447fb3129a9fab33995cb69ccca1979d6447179a5",
+    "src/progress/model.ts": "5236fa757566b305756a1996bd9e01a6c6c80244a05a1f3eaf443b649d061bb2",
+    "src/progress/useProgress.ts": "78526248d294a21d7623f93c838490361ba83f2739f16f2ccabf9cb84aad6837"
   },
   "results": [
     {
@@ -22,24 +27,24 @@
         {
           "wait": 0,
           "status": "won",
-          "seconds": 10.966666666666638
+          "seconds": 10.899999999999972
         }
       ],
       "result": {
-        "x": 9.431486227197407,
-        "y": 2.0098809881900497,
-        "px": 9.431486227197407,
-        "py": 2.0098809881900497,
+        "x": 9.405790902897541,
+        "y": 2.011609023745918,
+        "px": 9.405790902897541,
+        "py": 2.011609023745918,
         "vx": 0,
         "vy": 0,
         "facing": 3,
-        "walked": 22.76865144147247,
+        "walked": 22.53869807932522,
         "carrying": true,
         "battery": 100,
         "pickup": 0,
         "extraction": 0.9999999999999999,
-        "elapsed": 10.966666666666638,
-        "ticks": 329,
+        "elapsed": 10.899999999999972,
+        "ticks": 327,
         "dashLeft": 0,
         "cooldown": 0,
         "dashX": 0,
@@ -49,6 +54,13 @@
         "dashes": 0,
         "score": 12245,
         "bumps": 0,
+        "decoysLeft": 0,
+        "toolSeen": 0,
+        "decoy": {
+          "x": 0,
+          "y": 0,
+          "ttl": 0
+        },
         "mission": "practice",
         "guards": [],
         "alert": 0,
@@ -149,24 +161,24 @@
         {
           "wait": 0,
           "status": "won",
-          "seconds": 13.133333333333297
+          "seconds": 13.066666666666631
         }
       ],
       "result": {
-        "x": 2.5206201767992935,
-        "y": 2.0611214696399567,
-        "px": 2.5206201767992935,
-        "py": 2.0611214696399567,
+        "x": 2.520399744411078,
+        "y": 2.061319499221721,
+        "px": 2.520399744411078,
+        "py": 2.061319499221721,
         "vx": 0,
         "vy": 0,
         "facing": 1,
-        "walked": 29.66265253032783,
+        "walked": 29.646184374673695,
         "carrying": true,
         "battery": 100,
         "pickup": 0,
         "extraction": 0.9999999999999999,
-        "elapsed": 13.133333333333297,
-        "ticks": 394,
+        "elapsed": 13.066666666666631,
+        "ticks": 392,
         "dashLeft": 0,
         "cooldown": 0,
         "dashX": 0,
@@ -176,13 +188,20 @@
         "dashes": 0,
         "score": 12380,
         "bumps": 0,
+        "decoysLeft": 0,
+        "toolSeen": 0,
+        "decoy": {
+          "x": 0,
+          "y": 0,
+          "ttl": 0
+        },
         "mission": "cone-lesson",
         "guards": [
           {
             "x": 7.9,
-            "y": 6.03000000000003,
+            "y": 6.093333333333362,
             "px": 7.9,
-            "py": 6.061666666666696,
+            "py": 6.125000000000028,
             "angle": -1.5707963267948966,
             "target": 3,
             "wait": 0,
@@ -191,8 +210,17 @@
             "range": 3.4,
             "halfAngle": 0.6283185307179586,
             "spotSeconds": 0.8,
-            "clock": 13.133333333333297,
-            "kind": "patrol"
+            "clock": 13.066666666666631,
+            "kind": "patrol",
+            "mode": "patrol",
+            "path": [],
+            "pathIndex": 0,
+            "searchLeft": 0,
+            "searchAngle": 0,
+            "lastSeen": {
+              "x": 3.7,
+              "y": 12.9
+            }
           }
         ],
         "alert": 0,
@@ -272,24 +300,24 @@
         {
           "wait": 3.5,
           "status": "won",
-          "seconds": 20.633333333333518
+          "seconds": 20.600000000000183
         }
       ],
       "result": {
-        "x": 9.383989690867953,
-        "y": 17.614764695980174,
-        "px": 9.383989690867953,
-        "py": 17.614764695980174,
+        "x": 9.373324483934814,
+        "y": 17.636386802071513,
+        "px": 9.373324483934814,
+        "py": 17.636386802071513,
         "vx": 0,
         "vy": 0,
         "facing": 0,
-        "walked": 39.04402006837404,
+        "walked": 38.97398085402486,
         "carrying": true,
         "battery": 100,
         "pickup": 0,
         "extraction": 0.9999999999999999,
-        "elapsed": 20.633333333333518,
-        "ticks": 619,
+        "elapsed": 20.600000000000183,
+        "ticks": 618,
         "dashLeft": 0,
         "cooldown": 0,
         "dashX": 0,
@@ -299,6 +327,13 @@
         "dashes": 0,
         "score": 12495,
         "bumps": 0,
+        "decoysLeft": 0,
+        "toolSeen": 0,
+        "decoy": {
+          "x": 0,
+          "y": 0,
+          "ttl": 0
+        },
         "mission": "battery-dash",
         "guards": [
           {
@@ -308,14 +343,23 @@
             "py": 11.4,
             "angle": 1.5707963267948966,
             "target": 3,
-            "wait": 0.33333333333333337,
+            "wait": 0.3666666666666667,
             "exposure": 0,
             "seesPlayer": false,
             "range": 3.8,
             "halfAngle": 0.6283185307179586,
             "spotSeconds": 0.8,
-            "clock": 20.633333333333518,
-            "kind": "patrol"
+            "clock": 20.600000000000183,
+            "kind": "patrol",
+            "mode": "patrol",
+            "path": [],
+            "pathIndex": 0,
+            "searchLeft": 0,
+            "searchAngle": 0,
+            "lastSeen": {
+              "x": 7.3,
+              "y": 8.4
+            }
           }
         ],
         "alert": 0,
@@ -409,24 +453,24 @@
         {
           "wait": 0,
           "status": "won",
-          "seconds": 12.799999999999965
+          "seconds": 12.599999999999966
         }
       ],
       "result": {
-        "x": 2.5523215663135934,
-        "y": 2.001065001977518,
-        "px": 2.5523215663135934,
-        "py": 2.001065001977518,
+        "x": 2.5667730422828012,
+        "y": 2.00108746378842,
+        "px": 2.5667730422828012,
+        "py": 2.00108746378842,
         "vx": 0,
         "vy": 0,
         "facing": 1,
-        "walked": 29.7241898324402,
+        "walked": 29.800413222099824,
         "carrying": true,
         "battery": 100,
         "pickup": 0,
         "extraction": 0.9999999999999999,
-        "elapsed": 12.799999999999965,
-        "ticks": 384,
+        "elapsed": 12.599999999999966,
+        "ticks": 378,
         "dashLeft": 0,
         "cooldown": 0,
         "dashX": 0,
@@ -436,6 +480,13 @@
         "dashes": 0,
         "score": 12685,
         "bumps": 0,
+        "decoysLeft": 0,
+        "toolSeen": 0,
+        "decoy": {
+          "x": 0,
+          "y": 0,
+          "ttl": 0
+        },
         "mission": "crossing-signals",
         "guards": [
           {
@@ -445,19 +496,28 @@
             "py": 16.1,
             "angle": 1.5707963267948966,
             "target": 3,
-            "wait": 0.3666666666666667,
+            "wait": 0.5666666666666667,
             "exposure": 0,
             "seesPlayer": false,
             "range": 3.3,
             "halfAngle": 0.6283185307179586,
             "spotSeconds": 0.8,
-            "clock": 12.799999999999965,
-            "kind": "patrol"
+            "clock": 12.599999999999966,
+            "kind": "patrol",
+            "mode": "patrol",
+            "path": [],
+            "pathIndex": 0,
+            "searchLeft": 0,
+            "searchAngle": 0,
+            "lastSeen": {
+              "x": 1.1,
+              "y": 13.4
+            }
           },
           {
-            "x": 8.266666666666675,
+            "x": 8.133333333333342,
             "y": 2,
-            "px": 8.300000000000008,
+            "px": 8.166666666666675,
             "py": 2,
             "angle": 3.141592653589793,
             "target": 3,
@@ -467,8 +527,17 @@
             "range": 3.3,
             "halfAngle": 0.6283185307179586,
             "spotSeconds": 0.8,
-            "clock": 12.799999999999965,
-            "kind": "patrol"
+            "clock": 12.599999999999966,
+            "kind": "patrol",
+            "mode": "patrol",
+            "path": [],
+            "pathIndex": 0,
+            "searchLeft": 0,
+            "searchAngle": 0,
+            "lastSeen": {
+              "x": 3.8,
+              "y": 4
+            }
           }
         ],
         "alert": 0,
@@ -555,24 +624,24 @@
         {
           "wait": 0,
           "status": "won",
-          "seconds": 12.899999999999965
+          "seconds": 12.933333333333298
         }
       ],
       "result": {
-        "x": 2.5364935900723258,
-        "y": 2.0126803592056737,
-        "px": 2.5364935900723258,
-        "py": 2.0126803592056737,
+        "x": 2.5369468169252034,
+        "y": 2.0126833946216043,
+        "px": 2.5369468169252034,
+        "py": 2.0126833946216043,
         "vx": 0,
         "vy": 0,
         "facing": 1,
-        "walked": 29.467993616957482,
+        "walked": 29.535928005363008,
         "carrying": true,
         "battery": 100,
         "pickup": 0,
         "extraction": 0.9999999999999999,
-        "elapsed": 12.899999999999965,
-        "ticks": 387,
+        "elapsed": 12.933333333333298,
+        "ticks": 388,
         "dashLeft": 0,
         "cooldown": 0,
         "dashX": 0,
@@ -582,6 +651,13 @@
         "dashes": 0,
         "score": 12685,
         "bumps": 0,
+        "decoysLeft": 0,
+        "toolSeen": 0,
+        "decoy": {
+          "x": 0,
+          "y": 0,
+          "ttl": 0
+        },
         "mission": "sweep-window",
         "guards": [
           {
@@ -589,7 +665,7 @@
             "y": 6.4,
             "px": 6.6,
             "py": 6.4,
-            "angle": 0.7589862663821939,
+            "angle": 0.73438306884635,
             "target": 1,
             "wait": 0,
             "exposure": 0,
@@ -597,8 +673,17 @@
             "range": 7.5,
             "halfAngle": 0.241660973353061,
             "spotSeconds": 1.1,
-            "clock": 12.899999999999965,
-            "kind": "scanner"
+            "clock": 12.933333333333298,
+            "kind": "scanner",
+            "mode": "patrol",
+            "path": [],
+            "pathIndex": 0,
+            "searchLeft": 0,
+            "searchAngle": 0,
+            "lastSeen": {
+              "x": 6.6,
+              "y": 6.4
+            }
           }
         ],
         "alert": 0,
@@ -689,14 +774,14 @@
         }
       ],
       "result": {
-        "x": 9.46482052258367,
-        "y": 17.594457374701097,
-        "px": 9.46482052258367,
-        "py": 17.594457374701097,
+        "x": 9.464820547559697,
+        "y": 17.594400239515856,
+        "px": 9.464820547559697,
+        "py": 17.594400239515856,
         "vx": 0,
         "vy": 0,
         "facing": 0,
-        "walked": 37.202658326228374,
+        "walked": 37.27572417130309,
         "carrying": true,
         "battery": 100,
         "pickup": 0,
@@ -712,6 +797,13 @@
         "dashes": 0,
         "score": 12815,
         "bumps": 0,
+        "decoysLeft": 0,
+        "toolSeen": 0,
+        "decoy": {
+          "x": 0,
+          "y": 0,
+          "ttl": 0
+        },
         "mission": "narrow-crossing",
         "guards": [
           {
@@ -728,7 +820,16 @@
             "halfAngle": 0.6283185307179586,
             "spotSeconds": 0.8,
             "clock": 16.199999999999964,
-            "kind": "patrol"
+            "kind": "patrol",
+            "mode": "patrol",
+            "path": [],
+            "pathIndex": 0,
+            "searchLeft": 0,
+            "searchAngle": 0,
+            "lastSeen": {
+              "x": 7.4,
+              "y": 7.5
+            }
           }
         ],
         "alert": 0,
@@ -815,6 +916,311 @@
             "w": 2.2,
             "h": 1.2,
             "kind": "wall"
+          }
+        ]
+      }
+    },
+    {
+      "mission": "false-footsteps",
+      "attempts": [
+        {
+          "wait": 0,
+          "status": "won",
+          "seconds": 13.56666666666663
+        }
+      ],
+      "result": {
+        "x": 2.5641927384326415,
+        "y": 2.0012079908912614,
+        "px": 2.5641927384326415,
+        "py": 2.0012079908912614,
+        "vx": 0,
+        "vy": 0,
+        "facing": 1,
+        "walked": 29.894371033675988,
+        "carrying": true,
+        "battery": 100,
+        "pickup": 0,
+        "extraction": 0.9999999999999999,
+        "elapsed": 13.56666666666663,
+        "ticks": 407,
+        "dashLeft": 0,
+        "cooldown": 0,
+        "dashX": 0,
+        "dashY": -1,
+        "dashSeen": 0,
+        "status": "won",
+        "dashes": 0,
+        "score": 12830,
+        "bumps": 0,
+        "decoysLeft": 1,
+        "toolSeen": 1,
+        "decoy": {
+          "x": 5.4733333333333345,
+          "y": 17.499999772680333,
+          "ttl": 0
+        },
+        "mission": "false-footsteps",
+        "guards": [
+          {
+            "x": 7.3684731920030595,
+            "y": 13.183741271972384,
+            "px": 7.364424036046982,
+            "py": 13.220183675577083,
+            "angle": -1.4601391056209938,
+            "target": 1,
+            "wait": 0,
+            "exposure": 0,
+            "seesPlayer": false,
+            "range": 4,
+            "halfAngle": 0.6283185307179586,
+            "spotSeconds": 0.8,
+            "clock": 13.56666666666663,
+            "kind": "patrol",
+            "mode": "return",
+            "path": [
+              {
+                "x": 7,
+                "y": 16.5
+              },
+              {
+                "x": 7.5,
+                "y": 12
+              },
+              {
+                "x": 10.6,
+                "y": 12
+              }
+            ],
+            "pathIndex": 1,
+            "searchLeft": -1.0130785099704553e-15,
+            "searchAngle": -3.1415924321744706,
+            "lastSeen": {
+              "x": 7.2,
+              "y": 12
+            }
+          }
+        ],
+        "alert": 0,
+        "caughtBy": -1,
+        "spotted": false,
+        "closedGates": [],
+        "blockers": [
+          {
+            "x": 0,
+            "y": 0,
+            "w": 12,
+            "h": 0.7,
+            "kind": "wall"
+          },
+          {
+            "x": 0,
+            "y": 19.3,
+            "w": 12,
+            "h": 0.7,
+            "kind": "wall"
+          },
+          {
+            "x": 0,
+            "y": 0,
+            "w": 0.7,
+            "h": 20,
+            "kind": "wall"
+          },
+          {
+            "x": 11.3,
+            "y": 0,
+            "w": 0.7,
+            "h": 20,
+            "kind": "wall"
+          },
+          {
+            "x": 4.3,
+            "y": 12.8,
+            "w": 2,
+            "h": 3.7,
+            "kind": "rack"
+          },
+          {
+            "x": 7.8,
+            "y": 13.4,
+            "w": 2.5,
+            "h": 1.6,
+            "kind": "crate"
+          },
+          {
+            "x": 4.3,
+            "y": 7.2,
+            "w": 2,
+            "h": 3.4,
+            "kind": "rack"
+          },
+          {
+            "x": 8.1,
+            "y": 6.1,
+            "w": 2.2,
+            "h": 1.7,
+            "kind": "crate"
+          },
+          {
+            "x": 1.4,
+            "y": 5.4,
+            "w": 2,
+            "h": 2.3,
+            "kind": "crate"
+          },
+          {
+            "x": 4.3,
+            "y": 2.8,
+            "w": 1.7,
+            "h": 2.5,
+            "kind": "rack"
+          }
+        ]
+      }
+    },
+    {
+      "mission": "warden-gate",
+      "attempts": [
+        {
+          "wait": 3,
+          "status": "won",
+          "seconds": 16.09999999999996
+        }
+      ],
+      "result": {
+        "x": 2.5288544481917308,
+        "y": 2.0023940204343607,
+        "px": 2.5288544481917308,
+        "py": 2.0023940204343607,
+        "vx": 0,
+        "vy": 0,
+        "facing": 1,
+        "walked": 29.45569471737865,
+        "carrying": true,
+        "battery": 100,
+        "pickup": 0,
+        "extraction": 0.9999999999999999,
+        "elapsed": 16.09999999999996,
+        "ticks": 483,
+        "dashLeft": 0,
+        "cooldown": 0,
+        "dashX": 0,
+        "dashY": -1,
+        "dashSeen": 0,
+        "status": "won",
+        "dashes": 0,
+        "score": 12965,
+        "bumps": 16,
+        "decoysLeft": 2,
+        "toolSeen": 0,
+        "decoy": {
+          "x": 0,
+          "y": 0,
+          "ttl": 0
+        },
+        "mission": "warden-gate",
+        "guards": [
+          {
+            "x": 4.573333333333352,
+            "y": 1.2,
+            "px": 4.573333333333352,
+            "py": 1.2,
+            "angle": 3.141592653589793,
+            "target": 3,
+            "wait": 0,
+            "exposure": 0.8181818181818177,
+            "seesPlayer": true,
+            "range": 4.7,
+            "halfAngle": 0.6283185307179586,
+            "spotSeconds": 1.1,
+            "clock": 16.09999999999996,
+            "kind": "warden",
+            "mode": "patrol",
+            "path": [],
+            "pathIndex": 0,
+            "searchLeft": 0,
+            "searchAngle": 0,
+            "lastSeen": {
+              "x": 2.5288544481917308,
+              "y": 2.0023940204343607
+            }
+          }
+        ],
+        "alert": 0.8181818181818177,
+        "caughtBy": -1,
+        "spotted": true,
+        "closedGates": [],
+        "blockers": [
+          {
+            "x": 0,
+            "y": 0,
+            "w": 12,
+            "h": 0.7,
+            "kind": "wall"
+          },
+          {
+            "x": 0,
+            "y": 19.3,
+            "w": 12,
+            "h": 0.7,
+            "kind": "wall"
+          },
+          {
+            "x": 0,
+            "y": 0,
+            "w": 0.7,
+            "h": 20,
+            "kind": "wall"
+          },
+          {
+            "x": 11.3,
+            "y": 0,
+            "w": 0.7,
+            "h": 20,
+            "kind": "wall"
+          },
+          {
+            "x": 1.4,
+            "y": 12.9,
+            "w": 2.2,
+            "h": 2,
+            "kind": "crate"
+          },
+          {
+            "x": 5.1,
+            "y": 12.6,
+            "w": 1.7,
+            "h": 3.5,
+            "kind": "rack"
+          },
+          {
+            "x": 8.3,
+            "y": 10.1,
+            "w": 2.1,
+            "h": 2,
+            "kind": "crate"
+          },
+          {
+            "x": 4.7,
+            "y": 6.2,
+            "w": 1.8,
+            "h": 3,
+            "kind": "rack"
+          },
+          {
+            "x": 7.7,
+            "y": 6.2,
+            "w": 2.7,
+            "h": 1.5,
+            "kind": "crate"
+          },
+          {
+            "x": 4.8,
+            "y": 2,
+            "w": 1.4,
+            "h": 1.9,
+            "kind": "rack"
           }
         ]
       }

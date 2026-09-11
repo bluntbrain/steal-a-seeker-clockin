@@ -3,6 +3,7 @@ import rateLimit from '@fastify/rate-limit';
 import {z,ZodError} from 'zod';
 import {address,signature as validateSignature} from '@solana/kit';
 import {PRODUCTS,type ProductId} from '../shared/commerce';
+import {progressInput} from './progress';
 import {CommerceService,ServiceError} from './service';
 const wallet=z.string().refine(v=>{try{address(v);return true;}catch{return false;}}),uuid=z.string().uuid(),sku=z.enum(PRODUCTS.map(p=>p.id) as [ProductId,...ProductId[]]);
 const bytes=z.string().max(8192).regex(/^[A-Za-z0-9+/]*={0,2}$/);
@@ -21,6 +22,7 @@ export async function createApp(service:CommerceService){
  app.get('/orders/:id',async req=>{const a=await account(req.headers.authorization),{id}=z.object({id:uuid}).parse(req.params);return service.getOrder(a.wallet,id);});
  app.post('/orders/:id/transaction',async req=>{const a=await account(req.headers.authorization),{id}=z.object({id:uuid}).parse(req.params),body=z.object({signature:z.string().refine(v=>{try{validateSignature(v);return true;}catch{return false;}})}).strict().parse(req.body);return service.attach(a.wallet,id,body.signature);});
  app.post('/orders/:id/reconcile',async req=>{const a=await account(req.headers.authorization),{id}=z.object({id:uuid}).parse(req.params);await service.getOrder(a.wallet,id);await service.reconcile(id);return service.getOrder(a.wallet,id);});
+ app.put('/me/progress',async req=>service.syncProgress((await account(req.headers.authorization)).wallet,progressInput.parse(req.body)));
  app.put('/me/equipment',async req=>service.equip((await account(req.headers.authorization)).wallet,z.object({sku}).strict().parse(req.body).sku));
  return app;
 }
