@@ -7,12 +7,12 @@ Updated 12 September 2026. Goal remains the full game described in COMPLETE-GAME
 | Angled real 3D | First room renders through Three.js / React Three Fiber and native Expo GL; browser and Android emulator screenshots in verification. Original 2D view remains selectable for regression comparison. |
 | Camera and touch | Screen-relative joystick math test and input-driven browser playthrough pass. Physical-device feel, wall fading and final framing still need testing. |
 | 3D assets | Procedural courier/robot proxy models with articulated walking; final art, animation and outfits remain. |
-| Dynamic guards | Patrols, scanner sweeps, noise/last-seen investigation, bounded search and return-to-route are implemented. Browser decoy interaction and extraction pass. Pickup-triggered security changes remain. |
-| Twelve levels | Eight authored maps with distinct geometry, configurable patrols, a scanner, alternating gates, decoys and a slow Warden. All eight pass simulation and browser joystick extraction tests. Four advanced maps remain. |
+| Dynamic guards | Patrols, scanner sweeps, noise/last-seen investigation, bounded search and return-to-route are implemented. Browser decoy interaction and extraction pass. Marked patrols accelerate after the first delivery in multi-target missions. |
+| Twelve levels | All twelve authored maps pass simulation and browser joystick extraction tests. Advanced maps include power/scanner switching, two deliveries, timed relay doors and the final vault. |
 | Native wallet | MWA Kit provider, secure native authorization cache, devnet wallet panel and memo transaction diagnostic implemented. Android build, wallet panel and missing-wallet handling pass on the emulator. Physical Phantom approval and successful devnet transaction remain unverified. |
 | Purchase/backend | PostgreSQL API, signed wallet login, immutable orders, finalized-transfer verification, reference recovery and entitlement restore implemented; 4 integration scenarios pass. Native test shop is wired in source. Live mint/payment, physical Phantom, stable HTTPS deployment and full recovery remain. See server/README.md. |
 | Progress/shop | Local campaign progress uses SQLite on Android and localStorage in the browser. Stars, personal bests and sequential unlocks implemented; browser reload restore passes. Authenticated best-preserving sync endpoint implemented and tested, but client sync is not wired yet. Wallet-scoped saves, paywall and usable catalog delivery remain. |
-| Daily/ranking | Not implemented. Shared deterministic run validation remains. |
+| Daily/ranking | Shared quantized-input replay computes results; isolated workers enforce capacity and a deadline. Tests pass. Tickets, recording, API and leaderboard are not yet implemented. |
 | Test entry/return | Not implemented. Reserve, settlement, recovery and receipt verification remain. |
 | Submission | Current APK is a development-signed test build. Release identity/signing, fresh-clone release evidence, final deck/demo and physical testing remain. |
 
@@ -49,3 +49,9 @@ Six missions now pass complete browser joystick routes, sequential unlocks and p
 36 game tests pass. Seven server tests pass, including access-gated progress sync, concurrent best-preserving merge and wallet isolation. Progress sync records are explicitly client-reported campaign saves, never verified scores or payout evidence. Android eight-mission build/install pass; actual native eight-level playthrough and physical Phantom remain unverified. The local API is running on 8790. Railway still requires hosting to be enabled, and a second devnet faucet request failed.
 
 Latest development APK: `releases/steal-a-seeker-eight-missions-devnet-preview.apk`, checksum/source manifest `verification/eight-mission-build.json`. The preview still exposes free development playtest rooms; the requested release paywall is outstanding. Next four levels require power switching, sequential phone deliveries, relay doors and the final vault.
+
+## Twelve-mission checkpoint
+
+All twelve maps passed actual pointer-joystick routes in the browser, including two-phone extraction, power switching and relay doors. Some routes required several start phases; this is input-driven play, not forced completion. 43 game tests and 11 server tests pass. `verification/campaign-web-playtest.json` contains the results and matching source hashes. The fixed native bundle installed and opened on the emulator (`verification/twelve-missions-native.png`).
+
+`releases/steal-a-seeker-twelve-missions-devnet-preview.apk` preserves the freely accessible development playtest before the native paywall is connected. Its checksum/source manifest is `verification/twelve-mission-build.json`. This is not proof of physical Phantom payments or full native campaign completion. Replay verification currently has no public route; ranked tickets, recording and settlement remain.

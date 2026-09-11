@@ -1,4 +1,4 @@
-import { LEVEL, getLevel, TUNING, type Box, type MissionId, type LevelDefinition } from './level';
+import { LEVEL, getLevel, TUNING, type Box, type MissionId, type LevelDefinition, type GateSpec } from './level';
 import {intersectsBox,blockedBy} from './geometry';
 import { makeGuards, updateGuards, type Guard } from './guards';
 export type Input = { x: number; y: number; interact: boolean; dash: number;tool?:number };
@@ -8,8 +8,9 @@ export type GameState = {
   pickup: number; extraction: number; elapsed: number; ticks: number;
   dashLeft: number; cooldown: number; dashX: number; dashY: number; dashSeen: number;
   status: 'playing' | 'won' | 'timeout' | 'caught'; dashes: number; score: number; bumps: number;
-  mission: MissionId; guards: Guard[]; alert: number; caughtBy: number; spotted:boolean;closedGates:boolean[];blockers:Box[];decoysLeft:number;toolSeen:number;decoy:{x:number;y:number;ttl:number};
+  mission: MissionId; guards: Guard[]; alert: number; caughtBy: number; spotted:boolean;closedGates:boolean[];blockers:Box[];decoysLeft:number;toolSeen:number;decoy:{x:number;y:number;ttl:number};power:0|1;relayTimers:number[];interactSeen:boolean;activations:number;delivered:number;deliveryBatteries:number[];
 };
+export function gateWantsClosed(g:GateSpec,elapsed:number,power:number,timers:number[]){'worklet';return g.mode==='power'?g.power!==power:g.mode==='relay'?(timers[g.relay??0]??0)<=0:(elapsed+g.phase)%g.period>=g.openSeconds;}
 export function initialState(mission:MissionId='practice'): GameState {
   'worklet';
   const level=getLevel(mission);
@@ -17,11 +18,14 @@ export function initialState(mission:MissionId='practice'): GameState {
     vx: 0, vy: 0, facing: 2, walked: 0, carrying: false, battery: 100,
     pickup: 0, extraction: 0, elapsed: 0, ticks: 0, dashLeft: 0, cooldown: 0,
     dashX: 0, dashY: -1, dashSeen: 0, status: 'playing', dashes: 0, score: 0, bumps: 0,
-    decoysLeft:level.decoys??0,toolSeen:0,decoy:{x:0,y:0,ttl:0},mission,guards:makeGuards(mission),alert:0,caughtBy:-1,spotted:false,closedGates:(level.gates??[]).map(g=>g.phase%g.period>=g.openSeconds),blockers:[...level.blockers,...(level.gates??[]).filter(g=>g.phase%g.period>=g.openSeconds).map(g=>g.box)] };
+    power:0,relayTimers:[0,0],interactSeen:false,activations:0,delivered:0,deliveryBatteries:[],decoysLeft:level.decoys??0,toolSeen:0,decoy:{x:0,y:0,ttl:0},mission,guards:makeGuards(mission),alert:0,caughtBy:-1,spotted:false,closedGates:(level.gates??[]).map(g=>gateWantsClosed(g,0,0,[0,0])),blockers:[...level.blockers,...(level.gates??[]).filter(g=>gateWantsClosed(g,0,0,[0,0])).map(g=>g.box)] };
 }
 export function idleInput(): Input { 'worklet'; return { x: 0, y: 0, interact: false, dash: 0 }; }
 export function clamp(n: number, lo: number, hi: number) { 'worklet'; return Math.max(lo, Math.min(hi, n)); }
-export function nearPhone(s: GameState) { 'worklet'; return !s.carrying && Math.hypot(s.x - getLevel(s.mission).phone.x, s.y - getLevel(s.mission).phone.y) <= TUNING.pickupRadius; }
+export function targetPhone(s:GameState){'worklet';const level=getLevel(s.mission);return level.targets?.[Math.min(s.delivered,level.targets.length-1)]??level.phone;}
+export function targetCount(s:GameState){'worklet';return getLevel(s.mission).targets?.length??1;}
+export function nearPhone(s:GameState){'worklet';const phone=targetPhone(s);return s.status==='playing'&&!s.carrying&&Math.hypot(s.x-phone.x,s.y-phone.y)<=TUNING.pickupRadius;}
+export function nearSwitch(s:GameState){'worklet';const switches=getLevel(s.mission).switches??[];for(let i=0;i<switches.length;i++)if(Math.hypot(s.x-switches[i]!.x,s.y-switches[i]!.y)<.95)return i;return -1;}
 export function inExit(s: GameState) { 'worklet'; const e=getLevel(s.mission).exit; return s.x >= e.x && s.x <= e.x+e.w && s.y >= e.y && s.y <= e.y+e.h; }
 export const intersects=intersectsBox;
 export function blocked(x:number,y:number,level:LevelDefinition=LEVEL){'worklet';return blockedBy(x,y,level.blockers);}
@@ -29,7 +33,7 @@ function updateGates(s:GameState){
  'worklet';const level=getLevel(s.mission),gates=level.gates;if(!gates)return;
  let changed=false;
  for(let i=0;i<gates.length;i++){
-  const gate=gates[i]!,wantsClosed=(s.elapsed+gate.phase)%gate.period>=gate.openSeconds;
+  const gate=gates[i]!,wantsClosed=gateWantsClosed(gate,s.elapsed,s.power,s.relayTimers);
   // Never materialize a gate on a body; it closes after the doorway clears.
   const occupied=intersectsBox(s.x,s.y,gate.box,.4)||s.guards.some(g=>intersectsBox(g.x,g.y,gate.box,.45));
   const closed=wantsClosed&&(s.closedGates[i]||!occupied);if(closed!==s.closedGates[i]){s.closedGates[i]=closed;changed=true;}
@@ -50,7 +54,7 @@ function move(s: GameState,dx: number,dy: number) {
 export function step(s: GameState,input: Input,dt=TUNING.step) {
   'worklet';
   if(s.status!=='playing')return;
-  s.px=s.x;s.py=s.y;s.elapsed+=dt;s.ticks++;updateGates(s);
+  s.px=s.x;s.py=s.y;s.elapsed+=dt;s.ticks++;s.relayTimers=s.relayTimers.map(t=>Math.max(0,t-dt));updateGates(s);if(!input.interact)s.interactSeen=false;
   s.cooldown=Math.max(0,s.cooldown-dt);s.decoy.ttl=Math.max(0,s.decoy.ttl-dt);let noise:{x:number;y:number}|undefined;
   const magnitude=Math.hypot(input.x,input.y),divisor=Math.max(1,magnitude);
   const ix=input.x/divisor,iy=input.y/divisor;
@@ -79,11 +83,13 @@ export function step(s: GameState,input: Input,dt=TUNING.step) {
   if(s.dashLeft>0){const duration=Math.min(dt,s.dashLeft);move(s,s.dashX*TUNING.dashSpeed*duration,s.dashY*TUNING.dashSpeed*duration);s.dashLeft=Math.max(0,s.dashLeft-dt);}
   else move(s,s.vx*dt,s.vy*dt);
   s.walked+=Math.hypot(s.x-s.px,s.y-s.py);
-  if(input.interact && nearPhone(s) && Math.hypot(s.vx,s.vy)<.2){
+  const switchIndex=nearSwitch(s);
+  if(input.interact&&!s.interactSeen&&switchIndex>=0&&Math.hypot(s.vx,s.vy)<.2){const pad=getLevel(s.mission).switches![switchIndex]!;if(pad.kind==='power')s.power=s.power===0?1:0;else s.relayTimers[pad.channel??0]=pad.duration??9;s.interactSeen=true;s.activations++;updateGates(s);}
+  if(input.interact && switchIndex<0 && nearPhone(s) && Math.hypot(s.vx,s.vy)<.2){
     s.pickup+=dt;
-    if(s.pickup+1e-8>=TUNING.pickupHold){s.carrying=true;s.battery=100;s.pickup=0;}
+    if(s.pickup+1e-8>=TUNING.pickupHold){s.carrying=true;s.battery=100;s.pickup=0;s.cooldown=0;}
   }else s.pickup=0;
-  updateGuards(s.guards,s.x,s.y,dt,{...getLevel(s.mission),blockers:s.blockers},noise);
+  updateGuards(s.guards,s.x,s.y,dt,{...getLevel(s.mission),blockers:s.blockers},noise,{power:s.power,delivered:s.delivered});
   s.alert=0;
   for(let i=0;i<s.guards.length;i++){
     s.alert=Math.max(s.alert,s.guards[i]!.exposure);if(s.guards[i]!.seesPlayer)s.spotted=true;
@@ -91,7 +97,7 @@ export function step(s: GameState,input: Input,dt=TUNING.step) {
   }
   if(s.carrying && inExit(s) && s.dashLeft===0){
     s.extraction+=dt;
-    if(s.extraction+1e-8>=TUNING.extractHold){s.status='won';s.vx=0;s.vy=0;s.px=s.x;s.py=s.y;s.score=10000+20*s.battery+5*Math.max(0,Math.floor(getLevel(s.mission).targetSeconds-s.elapsed));}
+    if(s.extraction+1e-8>=TUNING.extractHold){s.deliveryBatteries.push(s.battery);s.delivered++;s.vx=0;s.vy=0;s.px=s.x;s.py=s.y;s.extraction=0;if(s.delivered>=targetCount(s)){s.status='won';s.score=10000+2000*(targetCount(s)-1)+20*s.battery+5*Math.max(0,Math.floor(getLevel(s.mission).targetSeconds-s.elapsed));}else{s.carrying=false;}}
   }else s.extraction=0;
   if(s.status==='playing' && s.elapsed+1e-8>=getLevel(s.mission).hardLimitSeconds){s.status='timeout';s.vx=0;s.vy=0;s.px=s.x;s.py=s.y;}
 }

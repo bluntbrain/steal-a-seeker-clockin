@@ -2,7 +2,7 @@ import React, {memo, useMemo, useRef} from 'react';
 import {useFrame, useThree} from '@react-three/fiber';
 import * as THREE from 'three';
 import type {SharedValue} from 'react-native-reanimated';
-import type {GameState} from '../game/simulation';
+import {targetPhone,type GameState} from '../game/simulation';
 import {getLevel, type LevelDefinition} from '../game/level';
 import {sightDistance} from '../game/guards';
 
@@ -58,7 +58,7 @@ function Robot({index,game,alpha,clock,level}:SceneProps & {index:number}){
 function Vision({index,game}:Pick<SceneProps,'game'> & {index:number}){
  const mesh=useRef<THREE.Mesh>(null);
  const geometry=useMemo(()=>{const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.BufferAttribute(new Float32Array(24*9),3));return g;},[]);
- useFrame(()=>{const guard=game.value.guards[index];if(!mesh.current)return;mesh.current.visible=!!guard;if(!guard)return;
+ useFrame(()=>{const guard=game.value.guards[index];if(!mesh.current)return;mesh.current.visible=!!guard&&guard.active;if(!guard||!guard.active)return;
   const positions=geometry.attributes.position!,level={...getLevel(game.value.mission),blockers:game.value.blockers};let k=0;
   for(let j=0;j<24;j++){
    positions.setXYZ(k++,guard.x,.025,guard.y);
@@ -68,6 +68,11 @@ function Vision({index,game}:Pick<SceneProps,'game'> & {index:number}){
  return <mesh ref={mesh} geometry={geometry} frustumCulled={false}><meshBasicMaterial color={colors.amber} transparent opacity={.19} depthWrite={false} side={THREE.DoubleSide}/></mesh>;
 }
 function Decoy({game}:Pick<SceneProps,'game'>){const ref=useRef<THREE.Group>(null),ring=useRef<THREE.Mesh>(null),mat=useRef<THREE.MeshBasicMaterial>(null);useFrame(()=>{const d=game.value.decoy;if(ref.current){ref.current.visible=d.ttl>0;ref.current.position.set(d.x,.05,d.y);}if(ring.current)ring.current.scale.setScalar(1+(2.5-d.ttl)*.9);if(mat.current)mat.current.opacity=d.ttl/2.5*.55;});return <group ref={ref}><Ball position={[0,.15,0]} scale={[.12,.15,.12]} color={colors.amber}/><mesh ref={ring} rotation={[-Math.PI/2,0,0]}><ringGeometry args={[.42,.47,24]}/><meshBasicMaterial ref={mat} color={colors.amber} transparent opacity={.5} depthWrite={false} side={THREE.DoubleSide}/></mesh></group>;}
+function SwitchPad({index,game,level}:Pick<SceneProps,'game'|'level'>&{index:number}){
+ const p=level.switches![index]!,mat=useRef<THREE.MeshStandardMaterial>(null),ring=useRef<THREE.Mesh>(null);
+ useFrame(()=>{const state=game.value,on=p.kind==='power'?state.power===1:(state.relayTimers[p.channel??0]??0)>0;if(mat.current){mat.current.color.set(on?colors.mint:colors.amber);mat.current.emissive.set(on?colors.mint:colors.amber);}if(ring.current)ring.current.rotation.z=state.elapsed*.3;});
+ return <group position={[p.x,.035,p.y]}><Box position={[0,0,0]} scale={[.76,.07,.76]} color={colors.dark}/><mesh><boxGeometry args={[.52,.09,.52]}/><meshStandardMaterial ref={mat} color={colors.amber} emissive={colors.amber} emissiveIntensity={.5}/></mesh><mesh ref={ring} rotation={[-Math.PI/2,0,0]}><ringGeometry args={[.64,.68,4]}/><meshBasicMaterial color={colors.mint} side={THREE.DoubleSide}/></mesh></group>;
+}
 function Gate({index,game,level}:Pick<SceneProps,'game'|'level'>&{index:number}){
  const gate=level.gates![index]!,b=gate.box,bar=useRef<THREE.Mesh>(null),material=useRef<THREE.MeshStandardMaterial>(null);
  useFrame((_,dt)=>{const closed=game.value.closedGates[index];if(bar.current)bar.current.position.y=THREE.MathUtils.damp(bar.current.position.y,closed?.6:-.65,15,dt);if(material.current){material.current.color.set(closed?colors.amber:colors.mint);material.current.emissive.set(closed?colors.amber:colors.mint);}});
@@ -88,15 +93,14 @@ const Warehouse=memo(function Warehouse({level}:{level:LevelDefinition}){return 
  <Box position={[level.exit.x+level.exit.w/2,.02,level.exit.y+level.exit.h/2]} scale={[level.exit.w,.025,level.exit.h]} color="#87cdb6" emissive/>
  <Box position={[level.exit.x+level.exit.w/2,1.45,level.exit.y]} scale={[level.exit.w+.25,.2,.22]} color={colors.mint} emissive/>
  {[level.exit.x-.1,level.exit.x+level.exit.w+.1].map(x=><Box key={x} position={[x,.75,level.exit.y]} scale={[.15,1.5,.18]} color={colors.cream}/>)}
- <Box position={[level.phone.x,.17,level.phone.y]} scale={[.8,.34,.8]} color={colors.dark}/>
- <Box position={[level.phone.x,.35,level.phone.y]} scale={[.85,.035,.85]} color={colors.mint} emissive/>
+ {(level.targets??[level.phone]).map((p,i)=><Box key={i} position={[p.x,.17,p.y]} scale={[.8,.34,.8]} color={colors.dark}/>)}
  </group>;});
-function Objective({game,clock,level}:Pick<SceneProps,'game'|'clock'|'level'>){const ref=useRef<THREE.Group>(null);useFrame(()=>{if(ref.current){ref.current.visible=!game.value.carrying;ref.current.position.y=.55+Math.sin(clock.value*2)*.06;ref.current.rotation.y=clock.value*.5;}});return <group ref={ref} position={[level.phone.x,.6,level.phone.y]}><Phone/></group>;}
+function Objective({game,clock,level}:Pick<SceneProps,'game'|'clock'|'level'>){const ref=useRef<THREE.Group>(null);useFrame(()=>{if(ref.current){const state=game.value,phone=targetPhone(state);ref.current.visible=!state.carrying&&state.status!=='won';ref.current.position.set(phone.x,.55+Math.sin(clock.value*2)*.06,phone.y);ref.current.rotation.y=clock.value*.5;}});return <group ref={ref} position={[level.phone.x,.6,level.phone.y]}><Phone/></group>;}
 function FollowCamera({game}:Pick<SceneProps,'game'>){const {camera}=useThree();const target=useRef(new THREE.Vector3(6,0,13));useFrame((_,dt)=>{const s=game.value;const t=target.current;t.x=THREE.MathUtils.damp(t.x,THREE.MathUtils.clamp(s.x,4,8),3,dt);t.z=THREE.MathUtils.damp(t.z,THREE.MathUtils.clamp(s.y,5,15),3,dt);camera.position.set(t.x+6,18,t.z+11);camera.lookAt(t.x,0,t.z);});return null;}
 export default function HeistScene(props:SceneProps){return <>
  <color attach="background" args={['#101c20']}/><fog attach="fog" args={['#101c20',32,65]}/>
  <hemisphereLight args={['#d1eee0','#273639',2.2]}/><directionalLight position={[-4,15,4]} intensity={3} color="#fff1d8" castShadow shadow-mapSize-width={1024} shadow-mapSize-height={1024} shadow-camera-left={-16} shadow-camera-right={16} shadow-camera-top={16} shadow-camera-bottom={-16} shadow-camera-far={50} shadow-normalBias={.04}/>
- <Warehouse level={props.level}/>{props.level.gates?.map((_,index)=><Gate key={index} level={props.level} game={props.game} index={index}/>)}<Objective {...props}/><Courier {...props}/><Decoy game={props.game}/>
+ <Warehouse level={props.level}/>{props.level.gates?.map((_,index)=><Gate key={index} level={props.level} game={props.game} index={index}/>)}{props.level.switches?.map((_,index)=><SwitchPad key={index} level={props.level} game={props.game} index={index}/>)}<Objective {...props}/><Courier {...props}/><Decoy game={props.game}/>
  {props.level.patrols.map((_,index)=><React.Fragment key={index}><Robot {...props} index={index}/><Vision game={props.game} index={index}/></React.Fragment>)}
  <FollowCamera game={props.game}/>
  </>;}
