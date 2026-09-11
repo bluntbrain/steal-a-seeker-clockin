@@ -2,12 +2,13 @@ import { createPicture, Skia, type SkCanvas } from '@shopify/react-native-skia';
 import { LEVEL } from './level';
 const palette={ floor:'#20292c', line:'#293337', mint:'#cfe6e4', edge:'#465054' };
 // Code-native environment art is recorded once, not recreated on each animation frame.
-export function makeWarehouse(){
+export function makeWarehouse(drawFloor=true){
   return createPicture((c:SkCanvas)=>{
     const p=Skia.Paint();p.setAntiAlias(true);
     const rect=(x:number,y:number,w:number,h:number,color:string)=>{p.setColor(Skia.Color(color));c.drawRect(Skia.XYWHRect(x,y,w,h),p);};
     const round=(x:number,y:number,w:number,h:number,r:number,color:string)=>{p.setColor(Skia.Color(color));c.drawRRect(Skia.RRectXY(Skia.XYWHRect(x,y,w,h),r,r),p);};
     const line=(x:number,y:number,x2:number,y2:number,color:string,width=.025)=>{p.setColor(Skia.Color(color));p.setStrokeWidth(width);c.drawLine(x,y,x2,y2,p);};
+    if(drawFloor){
     rect(0,0,12,20,'#131b1e');
     for(let y=0;y<20;y++)for(let x=0;x<12;x++){
       rect(x+.025,y+.025,.95,.95,(x*3+y*7)%6===0?'#263033':palette.floor);
@@ -16,6 +17,7 @@ export function makeWarehouse(){
     }
     // Painted loading lanes; a path indication, not an automatic solution line.
     for(let y=4;y<18;y+=1.2){rect(3.95,y,.035,.45,'#52635f');rect(10.7,y,.035,.45,'#3d4f4d');}
+    }
     for(const b of LEVEL.blockers){
       if(b.kind==='wall'){
         rect(b.x,b.y+.16,b.w,b.h,'#080d10');rect(b.x,b.y,b.w,b.h,'#333f43');

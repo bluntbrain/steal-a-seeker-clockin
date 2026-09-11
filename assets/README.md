@@ -7,3 +7,5 @@
 - public/canvaskit.wasm and its adjacent license: web runtime from the locked dependency. Android uses native Skia.
 
 The source PNG is preserved. Frame rectangles normalize the generated grid's spacing; a paint-time alpha filter suppresses faint halos. A full rig and more stride frames remain future art work. The game makes no runtime request to a font, image or audio service.
+
+- warehouse-floor-v1.png: built-in image generation, opaque portrait floor with metal plates, wear, flush grates and mint reflected light. Loaded once and drawn below geometry-aligned obstacles; original procedural floor is the loading fallback. Exact prompt and provenance are adjacent.

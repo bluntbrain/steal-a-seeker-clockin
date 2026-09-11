@@ -34,6 +34,6 @@ Verification evidence lives in verification/. Chrome/emulator measurements do no
 
 `src/game/level.ts` is the map/tuning source. `simulation.ts` implements a fixed 30 Hz worklet-compatible simulation, normalized input, acceleration, wall sliding, collision substeps, pickup, battery/dash, extraction and score. Android runs it on Reanimated's UI runtime; Skia interpolates positions at display cadence. React updates the HUD rather than moving the sprite each frame.
 
-`art.ts` records reusable environment shapes once. `GameCanvas.tsx` draws the atlas and effects. `GameScreen.tsx` handles controls, audio, pause/retry and statistics. All runtime assets are local. The broader research remains in ../seeker-plan/.
+`assets/warehouse-floor-v1.png` provides the textured warehouse floor. `art.ts` records reusable obstacle/environment shapes once above it. `GameCanvas.tsx` draws the atlas and effects. `GameScreen.tsx` handles controls, audio, pause/retry and statistics. All runtime assets are local. The broader research remains in ../seeker-plan/.
 
 The FPS display measures UI frame-callback cadence over the latest 120 frames, not GPU presentation. Native build flags omit C++ debug symbols to keep ARM64 intermediates compact. The renderer and gameplay remain intact.

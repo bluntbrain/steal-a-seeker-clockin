@@ -1,5 +1,5 @@
 import React,{memo,useMemo} from 'react';
-import {Canvas,Group,Picture,Atlas,Circle,RoundedRect,Oval,Line,ColorMatrix,useImage,useRSXformBuffer} from '@shopify/react-native-skia';
+import {Canvas,Group,Picture,Image,Atlas,Circle,RoundedRect,Oval,Line,ColorMatrix,useImage,useRSXformBuffer} from '@shopify/react-native-skia';
 import {useDerivedValue,type SharedValue} from 'react-native-reanimated';
 import {makeWarehouse} from '../game/art';
 import {LEVEL,TUNING} from '../game/level';
@@ -8,7 +8,9 @@ import frames from '../../assets/courier.frames.json';
 type Props={size:number;game:SharedValue<GameState>;alpha:SharedValue<number>;clock:SharedValue<number>};
 const cleanAlpha=[1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,1.5,-.5];
 export default memo(function GameCanvas({size,game,alpha,clock}:Props){
- const world=useMemo(makeWarehouse,[]);const sprite=useImage(require('../../assets/courier.png'));
+ const world=useMemo(()=>makeWarehouse(false),[]),fallbackWorld=useMemo(()=>makeWarehouse(),[]);
+ const floor=useImage(require('../../assets/warehouse-floor-v1.png'));
+ const sprite=useImage(require('../../assets/courier.png'));
  const x=useDerivedValue(()=>game.value.px+(game.value.x-game.value.px)*alpha.value);
  const y=useDerivedValue(()=>game.value.py+(game.value.y-game.value.py)*alpha.value);
  const frame=useDerivedValue(()=>{const s=game.value;return s.facing+(Math.hypot(s.vx,s.vy)>.1 && Math.floor(s.walked*3.5)%2===1?4:0);});
@@ -27,7 +29,8 @@ export default memo(function GameCanvas({size,game,alpha,clock}:Props){
  const pickupWidth=useDerivedValue(()=>game.value.pickup/TUNING.pickupHold*1.1);
  return <Canvas style={{width:size,height:size*20/12}} accessible={false}>
   <Group transform={[{scale:size/12}]}>
-   <Picture picture={world}/>
+   <Image image={floor} x={0} y={0} width={12} height={20} fit="fill"/>
+   <Picture picture={floor?world:fallbackWorld}/>
    <RoundedRect x={LEVEL.exit.x} y={LEVEL.exit.y} width={LEVEL.exit.w} height={LEVEL.exit.h} r={.1} color="#b9e6d6" opacity={glow}/>
    <RoundedRect x={LEVEL.exit.x} y={LEVEL.exit.y+LEVEL.exit.h-.10} width={extract} height={.08} r={.02} color="#e3fff5"/>
    <Group opacity={target}>

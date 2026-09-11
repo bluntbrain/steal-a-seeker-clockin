@@ -5,8 +5,8 @@
     "src/GameScreen.tsx": "c5c121ad94aa3830a19c799ed51274ec27940167f6e7fda25a81aa7738617b58",
     "src/game/simulation.ts": "338696bf107421328ba023998b9c49264215740d791617000850adc69b790450",
     "src/game/level.ts": "ef6320c6ba90ca89f859e57aa771fe79b8a780fb02f48da39a64b7c35792d228",
-    "src/components/GameCanvas.tsx": "6bc68dfb8f3dc84a4368e20040e51f9b22bae0126c8bbb009b9d41c386a5a57e",
-    "src/game/art.ts": "bc054849d1ac925f032de2f0af04bd6d307015765e704b058c679ec47dc1a525"
+    "src/components/GameCanvas.tsx": "53349661b5ca9acb20cfbd68a0548c1468a495b4640fe994242b15e5a035882e",
+    "src/game/art.ts": "1cf970bf409c17a93a4adca949c181300a9ec4e773a1758c84d26c0593d2d7f3"
   },
   "environment": "Headless Chrome on local Mac, not a physical phone",
   "viewport": {
@@ -27,20 +27,20 @@
     "no uncaught browser errors"
   ],
   "result": {
-    "x": 9.283853773743369,
-    "y": 2.0446178467068266,
-    "px": 9.283853773743369,
-    "py": 2.0446178467068266,
+    "x": 9.352007212761844,
+    "y": 2.1645721545445196,
+    "px": 9.352007212761844,
+    "py": 2.1645721545445196,
     "vx": 0,
     "vy": 0,
     "facing": 2,
-    "walked": 24.03242322824404,
+    "walked": 39.323119434802926,
     "carrying": true,
     "battery": 80,
     "pickup": 0,
     "extraction": 0.9999999999999999,
-    "elapsed": 10.066666666666642,
-    "ticks": 302,
+    "elapsed": 18.900000000000098,
+    "ticks": 567,
     "dashLeft": 0,
     "cooldown": 0,
     "dashX": 0,
@@ -48,13 +48,13 @@
     "dashSeen": 1,
     "status": "won",
     "dashes": 1,
-    "score": 11845,
-    "bumps": 3
+    "score": 11805,
+    "bumps": 5
   },
   "metrics": {
-    "fps": 60.00300015000757,
-    "p95": 16.799999999999272,
-    "frames": 608,
+    "fps": 60.012002400479695,
+    "p95": 16.700000000000728,
+    "frames": 1092,
     "slow": 0
   }
 }

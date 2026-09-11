@@ -14,7 +14,7 @@ The one-screen, one-level game is implemented and playable. This is a private mo
 
 ## Smoothness: what was actually measured
 
-The browser run reported about **60 FPS**, p95 **16.8 ms**, zero callback intervals above 25 ms in 608 observed frames. This is headless Chrome on this Mac, not a phone.
+The browser run reported about **60 FPS**, p95 **16.7 ms**, zero callback intervals above 25 ms in 1,092 observed frames. This is headless Chrome on this Mac, not a phone.
 
 The Android emulator's `dumpsys gfxinfo` recorded **2,393 frames, 260 janky frames (10.87%), p95 28 ms** during touch testing, screenshots and accessibility dumps. The on-screen callback counter varied with emulator scheduling/refresh rate. These are different measurements; a high callback FPS does not erase rendered-frame jank. The emulator is useful for functional testing, not proof of Seeker smoothness. No physical Android phone or Seeker was tested. Audio files loaded without runtime errors; subjective speaker/haptic quality remains a physical-device check.
 
@@ -32,3 +32,7 @@ The native project is retained with ARM64-only configuration and compact C++ bui
 - [Reanimated frame callback](https://docs.swmansion.com/react-native-reanimated/docs/advanced/useFrameCallback/)
 
 `release-manifest.json` identifies the APK and source files used for this handoff. Build logs remain local in this directory. This is not a complete hackathon submission and does not yet integrate Mobile Wallet Adapter.
+
+## Textured floor update
+
+Added `warehouse-floor-v1.png` using built-in image generation and drew it below the existing collision-aligned obstacles. Inspected the generated artwork and in-game browser view. Types, all eight simulation tests, the actual-input browser replay and Android release build passed again. Native gameplay statistics above are retained from the preceding mechanics run; the art update received a separate Android visual smoke check. No change to movement, collision, levels or economy.

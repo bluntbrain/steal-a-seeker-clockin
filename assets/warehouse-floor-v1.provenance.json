@@ -1,0 +1,9 @@
+{
+  "file": "warehouse-floor-v1.png",
+  "method": "built-in image_gen",
+  "date": "2026-09-11",
+  "sha256": "d76c45301494a845b0dc529e6ef146df955220b66e1dda3531ff19174efe4c08",
+  "bytes": 2515870,
+  "prompt": "warehouse-floor-v1.prompt.txt",
+  "role": "Flat walkable floor below code-drawn collision obstacles; no gameplay geometry baked into the image"
+}

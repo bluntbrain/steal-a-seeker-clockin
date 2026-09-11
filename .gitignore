@@ -8,3 +8,13 @@ android/local.properties
 *.log
 releases/*.apk
 __pycache__/
+
+# Local credentials and distribution signing material
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.jks
+*.keystore
+!android/app/debug.keystore

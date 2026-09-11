@@ -1,15 +1,15 @@
 {
   "date": "2026-09-11",
   "apk": "releases/steal-a-seeker-0.1.0-arm64.apk",
-  "bytes": 44355186,
-  "sha256": "8a80726c8fd32a5734ada81fdd5aae2c748cd47a94a450276a1809d6990d84f4",
+  "bytes": 46844426,
+  "sha256": "d21665b62649bba8fe0ee600e085d0ffbebf94a6dccaa8ad7e5211cefa9b523c",
   "architecture": "arm64-v8a",
   "signing": "development key, APK signature v2 verified",
   "sourceHashes": {
     "package-lock.json": "e740453cad70e3edf50fa042815ce7e06e04ad5b62c9eb4270aada7c711e8493",
     "src/GameScreen.tsx": "c5c121ad94aa3830a19c799ed51274ec27940167f6e7fda25a81aa7738617b58",
-    "src/components/GameCanvas.tsx": "6bc68dfb8f3dc84a4368e20040e51f9b22bae0126c8bbb009b9d41c386a5a57e",
-    "src/game/art.ts": "bc054849d1ac925f032de2f0af04bd6d307015765e704b058c679ec47dc1a525",
+    "src/components/GameCanvas.tsx": "53349661b5ca9acb20cfbd68a0548c1468a495b4640fe994242b15e5a035882e",
+    "src/game/art.ts": "1cf970bf409c17a93a4adca949c181300a9ec4e773a1758c84d26c0593d2d7f3",
     "src/game/level.ts": "ef6320c6ba90ca89f859e57aa771fe79b8a780fb02f48da39a64b7c35792d228",
     "src/game/simulation.ts": "338696bf107421328ba023998b9c49264215740d791617000850adc69b790450"
   },
@@ -30,5 +30,7 @@
     "dash",
     "extraction"
   ],
-  "physicalDeviceTested": false
+  "physicalDeviceTested": false,
+  "revisionNote": "Textured floor update; native gameplay result retained from preceding mechanics verification; web replay retested with new art.",
+  "backgroundAssetSha256": "d76c45301494a845b0dc529e6ef146df955220b66e1dda3531ff19174efe4c08"
 }
