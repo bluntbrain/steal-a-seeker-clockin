@@ -1,0 +1,49 @@
+import {z} from 'zod';
+import {getBase58Encoder} from '@solana/kit';
+import type {Order} from '../shared/commerce';
+export const TOKEN_PROGRAM='TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA';
+export const MEMO_PROGRAM='MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr';
+export const DEVNET_GENESIS='EtWTRABZaYq6iMfeYKouRu166VU2xqa1wcaWoxPkrZBG';
+export type Verification={state:'verified';instructionIndex:number;slot:number}|{state:'pending'|'invalid'|'needs_review';detail:string};
+export interface PaymentChain {verify(order:Order,signature:string):Promise<Verification>;find(reference:string):Promise<string[]>;ready():Promise<void>}
+const tokenBalance=z.object({accountIndex:z.number().int(),mint:z.string(),owner:z.string().optional(),uiTokenAmount:z.object({amount:z.string().regex(/^\d+$/),decimals:z.number().int()})});
+const txSchema=z.object({slot:z.number().int().nonnegative(),blockTime:z.number().nullable(),meta:z.object({err:z.unknown().nullable(),preTokenBalances:z.array(tokenBalance),postTokenBalances:z.array(tokenBalance),loadedAddresses:z.object({writable:z.array(z.string()),readonly:z.array(z.string())}).optional()}),transaction:z.object({signatures:z.array(z.string()),message:z.object({header:z.object({numRequiredSignatures:z.number().int()}),accountKeys:z.array(z.string()),instructions:z.array(z.object({programIdIndex:z.number().int(),accounts:z.array(z.number().int()),data:z.string()}))})})});
+export function verifyPayment(order:Order,signature:string,value:unknown):Verification{
+ if(value===null)return {state:'pending',detail:'Waiting for a finalized transaction.'};
+ const parsed=txSchema.safeParse(value);if(!parsed.success)return {state:'invalid',detail:'Unrecognized transaction response.'};
+ const tx=parsed.data;if(tx.meta.err!==null)return {state:'invalid',detail:'Transaction failed on chain.'};
+ if(tx.transaction.signatures[0]!==signature)return {state:'invalid',detail:'Transaction signature mismatch.'};
+ const message=tx.transaction.message,keys=[...message.accountKeys,...(tx.meta.loadedAddresses?.writable||[]),...(tx.meta.loadedAddresses?.readonly||[])];
+ const walletIndex=message.accountKeys.indexOf(order.wallet);
+ if(walletIndex<0||walletIndex>=message.header.numRequiredSignatures)return {state:'invalid',detail:'The buyer did not sign this transaction.'};
+ const hasMemo=message.instructions.some(i=>{try{return keys[i.programIdIndex]===MEMO_PROGRAM&&Buffer.from(getBase58Encoder().encode(i.data)).toString('utf8')===order.memo;}catch{return false;}});
+ if(!hasMemo)return {state:'invalid',detail:'Order memo is missing.'};
+ for(let index=0;index<message.instructions.length;index++){
+  const i=message.instructions[index]!;if(keys[i.programIdIndex]!==order.tokenProgram)continue;
+  let data:Uint8Array;try{data=new Uint8Array(getBase58Encoder().encode(i.data));}catch{continue;}
+  if(data.length!==10||data[0]!==12)continue;
+  const amount=new DataView(data.buffer,data.byteOffset,data.byteLength).getBigUint64(1,true);
+  const [source,mint,destination,authority]=i.accounts.map(a=>keys[a]);
+  if(source!==order.source||mint!==order.mint||destination!==order.destination||authority!==order.wallet||amount!==BigInt(order.amount)||data[9]!==order.decimals)continue;
+  if(!i.accounts.slice(4).some(a=>keys[a]===order.reference))continue;
+  const src=tx.meta.preTokenBalances.find(b=>keys[b.accountIndex]===source),dstBefore=tx.meta.preTokenBalances.find(b=>keys[b.accountIndex]===destination),dst=tx.meta.postTokenBalances.find(b=>keys[b.accountIndex]===destination);
+  if(!src||src.owner!==order.wallet||src.mint!==order.mint||src.uiTokenAmount.decimals!==order.decimals||!dst||dst.owner!==order.recipient||dst.mint!==order.mint||dst.uiTokenAmount.decimals!==order.decimals)continue;
+  if(BigInt(dst.uiTokenAmount.amount)-BigInt(dstBefore?.uiTokenAmount.amount||'0')<amount)continue;
+  if(tx.blockTime===null||tx.blockTime*1000<new Date(order.createdAt).getTime()-30000||tx.blockTime*1000>new Date(order.expiresAt).getTime())return {state:'needs_review',detail:'Payment found outside the quote window; review for fulfillment or refund.'};
+  return {state:'verified',instructionIndex:index,slot:tx.slot};
+ }
+ return {state:'invalid',detail:'No matching transfer with the quoted mint, amount, buyer, recipient and reference.'};
+}
+export async function rpc<T>(url:string,method:string,params:unknown[]=[]):Promise<T>{const response=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({jsonrpc:'2.0',id:1,method,params}),signal:AbortSignal.timeout(12000)});if(!response.ok)throw new Error(`RPC unavailable (${response.status})`);const body=await response.json() as {error?:{message:string};result:T};if(body.error)throw new Error('RPC request could not be completed.');return body.result;}
+export class DevnetChain implements PaymentChain{
+ constructor(private config:{rpcUrl:string;mint:string;recipient:string;decimals:number;destination:string}){}
+ async ready(){
+  if(await rpc<string>(this.config.rpcUrl,'getGenesisHash')!==DEVNET_GENESIS)throw new Error('Payment service requires Solana devnet.');
+  const result=await rpc<{value:{owner:string;data:{parsed:{type:string;info:{decimals:number}}}}|null}>(this.config.rpcUrl,'getAccountInfo',[this.config.mint,{encoding:'jsonParsed',commitment:'finalized'}]);
+  if(!result.value||result.value.owner!==TOKEN_PROGRAM||result.value.data.parsed.type!=='mint'||result.value.data.parsed.info.decimals!==this.config.decimals)throw new Error('The configured devnet mint is not ready.');
+  const account=await rpc<{value:{owner:string;data:{parsed:{info:{owner:string;mint:string;state:string}}}}|null}>(this.config.rpcUrl,'getAccountInfo',[this.config.destination,{encoding:'jsonParsed',commitment:'finalized'}]);
+  if(!account.value||account.value.owner!==TOKEN_PROGRAM||account.value.data.parsed.info.owner!==this.config.recipient||account.value.data.parsed.info.mint!==this.config.mint||account.value.data.parsed.info.state!=='initialized')throw new Error('The treasury token account is not ready.');
+ }
+ async verify(order:Order,signature:string){return verifyPayment(order,signature,await rpc(this.config.rpcUrl,'getTransaction',[signature,{encoding:'json',commitment:'finalized',maxSupportedTransactionVersion:0}]));}
+ async find(reference:string){return (await rpc<{signature:string;err:unknown}[]>(this.config.rpcUrl,'getSignaturesForAddress',[reference,{limit:20,commitment:'finalized'}])).filter(s=>!s.err).map(s=>s.signature);}
+}

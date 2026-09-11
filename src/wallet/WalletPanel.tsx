@@ -4,9 +4,10 @@ import {useMobileWallet} from '@wallet-ui/react-native-kit';
 import {signature as parseSignature} from '@solana/kit';
 import {getAddMemoInstruction} from '@solana-program/memo';
 import {transactionLink} from './config';
+import CommerceSection from '../commerce/CommerceSection';
 export default function WalletPanel({visible,onClose}:{visible:boolean;onClose:()=>void}){
  const wallet=useMobileWallet();const [busy,setBusy]=useState(false),[message,setMessage]=useState(''),[balance,setBalance]=useState<string>(),[receipt,setReceipt]=useState<string>();const mounted=useRef(true),accountRef=useRef(wallet.account?.address);accountRef.current=wallet.account?.address;
- useEffect(()=>()=>{mounted.current=false;},[]);
+ useEffect(()=>{mounted.current=true;return()=>{mounted.current=false;};},[]);
  useEffect(()=>{setBalance(undefined);setReceipt(undefined);setMessage('');let cancelled=false;const address=wallet.account?.address;if(address&&visible)wallet.client.rpc.getBalance(address).send().then(r=>{if(!cancelled)setBalance((Number(r.value)/1e9).toFixed(5));}).catch(()=>{if(!cancelled)setMessage('Could not read devnet balance. Check your connection.');});return()=>{cancelled=true;};},[wallet.account?.address,visible]);
  async function act(action:()=>Promise<void>){if(busy)return;setBusy(true);setMessage('');try{await action();}catch(e){if(mounted.current)setMessage(e instanceof Error?e.message:'The wallet request did not finish. You can try again.');}finally{if(mounted.current)setBusy(false);}}
  async function sendTest(){
@@ -34,6 +35,7 @@ export default function WalletPanel({visible,onClose}:{visible:boolean;onClose:(
   </>}
   {!!message&&<Text accessibilityLiveRegion="polite" style={styles.body}>{message}</Text>}
   {!!receipt&&<Pressable accessibilityRole="link" onPress={()=>Linking.openURL(transactionLink(receipt))}><Text style={styles.link}>View devnet transaction ↗</Text></Pressable>}
+  {wallet.account&&<CommerceSection/>}
   <Pressable accessibilityRole="button" onPress={onClose} style={styles.close}><Text style={styles.link}>Back to game</Text></Pressable>
  </ScrollView></View></Modal>;
 }

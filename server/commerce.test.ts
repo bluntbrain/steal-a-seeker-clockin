@@ -1,0 +1,57 @@
+import test,{before,after} from 'node:test';
+import assert from 'node:assert/strict';
+import {randomBytes,randomUUID,generateKeyPairSync,sign} from 'node:crypto';
+import {getBase58Decoder,address} from '@solana/kit';
+import {findAssociatedTokenPda} from '@solana-program/token';
+import {createSignInMessage} from '@solana/wallet-standard-util';
+import {database,migrate} from './db';
+import {CommerceService} from './service';
+import {createApp} from './app';
+import {verifyPayment,TOKEN_PROGRAM,MEMO_PROGRAM,type PaymentChain} from './chain';
+import type {Order,SignInChallenge} from '../shared/commerce';
+const b58=(b:Uint8Array)=>getBase58Decoder().decode(b),pub=()=>b58(randomBytes(32));
+const pool=database('postgresql://localhost/seeker_clockin_test');
+const transactions=new Map<string,unknown>(),references=new Map<string,string[]>();
+const chain:PaymentChain={ready:async()=>{},verify:async(o,s)=>verifyPayment(o,s,transactions.get(s)??null),find:async r=>references.get(r)||[]};
+let service:CommerceService,app:Awaited<ReturnType<typeof createApp>>;
+before(async()=>{assert.equal((await pool.query('SELECT current_database() AS name')).rows[0].name,'seeker_clockin_test');await migrate(pool);await pool.query('TRUNCATE wallets,auth_challenges,sessions,orders,order_attempts,payment_receipts,entitlements CASCADE');const mint=pub(),recipient=pub();const [destination]=await findAssociatedTokenPda({owner:address(recipient),mint:address(mint),tokenProgram:address(TOKEN_PROGRAM)});service=new CommerceService(pool,chain,{mint,recipient,destination,decimals:6,identityUri:'https://github.com/bluntbrain'});app=await createApp(service);});
+after(async()=>{await app.close();await pool.end();});
+async function login(){const keys=generateKeyPairSync('ed25519'),wallet=b58(keys.publicKey.export({type:'spki',format:'der'}).subarray(-32));const response=await app.inject({method:'POST',url:'/auth/challenge',payload:{wallet}});assert.equal(response.statusCode,200);const c=response.json<SignInChallenge>(),message=createSignInMessage(c.payload),signature=sign(null,message,keys.privateKey);const payload={id:c.id,wallet,signedMessage:Buffer.from(message).toString('base64'),signature:signature.toString('base64')};const auth=await app.inject({method:'POST',url:'/auth/verify',payload});assert.equal(auth.statusCode,200,auth.body);return {keys,wallet,token:auth.json().token,headers:{authorization:`Bearer ${auth.json().token}`},payload};}
+function paidTx(o:Order,sig:string){const keys=[o.wallet,o.source,o.mint,o.destination,o.reference,TOKEN_PROGRAM,MEMO_PROGRAM];const data=Buffer.alloc(10);data[0]=12;data.writeBigUInt64LE(BigInt(o.amount),1);data[9]=o.decimals;const balance=(accountIndex:number,owner:string,amount:string)=>({accountIndex,owner,mint:o.mint,uiTokenAmount:{amount,decimals:o.decimals}});return {slot:42,blockTime:Math.floor(Date.now()/1000),transaction:{signatures:[sig],message:{header:{numRequiredSignatures:1},accountKeys:keys,instructions:[{programIdIndex:5,accounts:[1,2,3,0,4],data:b58(data)},{programIdIndex:6,accounts:[],data:b58(Buffer.from(o.memo))}]}},meta:{err:null,preTokenBalances:[balance(1,o.wallet,o.amount),balance(3,o.recipient,'0')],postTokenBalances:[balance(1,o.wallet,'0'),balance(3,o.recipient,o.amount)]}};}
+async function quote(user:Awaited<ReturnType<typeof login>>,sku='campaign',idempotencyKey=randomUUID()){const r=await app.inject({method:'POST',url:'/orders',headers:user.headers,payload:{sku,idempotencyKey}});assert.equal(r.statusCode,200,r.body);return r.json<Order>();}
+test('signed authentication consumes one nonce, enforces account isolation and supports revocation',async()=>{
+ assert.equal((await app.inject({method:'GET',url:'/me'})).statusCode,401);
+ const user=await login();assert.equal((await app.inject({method:'POST',url:'/auth/verify',payload:user.payload})).statusCode,401);
+ const c=(await app.inject({method:'POST',url:'/auth/challenge',payload:{wallet:user.wallet}})).json<SignInChallenge>();assert.equal((await app.inject({method:'POST',url:'/auth/verify',payload:{...user.payload,id:c.id}})).statusCode,401,'Old signed message cannot satisfy a new nonce');
+ const expired=await login();await pool.query("UPDATE sessions SET expires_at=now()-interval '1 second' WHERE wallet=$1",[expired.wallet]);assert.equal((await app.inject({method:'GET',url:'/me',headers:expired.headers})).statusCode,401);
+ const expiryChallenge=await service.challenge(expired.wallet);const expiryMessage=createSignInMessage(expiryChallenge.payload);await pool.query("UPDATE auth_challenges SET expires_at=now()-interval '1 second' WHERE id=$1",[expiryChallenge.id]);assert.equal((await app.inject({method:'POST',url:'/auth/verify',payload:{id:expiryChallenge.id,wallet:expired.wallet,signedMessage:Buffer.from(expiryMessage).toString('base64'),signature:sign(null,expiryMessage,expired.keys.privateKey).toString('base64')}})).statusCode,401);
+ assert.equal((await app.inject({method:'GET',url:'/me',headers:user.headers})).json().wallet,user.wallet);
+ await app.inject({method:'POST',url:'/auth/logout',headers:user.headers});assert.equal((await app.inject({method:'GET',url:'/me',headers:user.headers})).statusCode,401);
+});
+test('orders bind prices, isolate wallets, reject forged transfers and fulfill duplicate callbacks only once',async()=>{
+ const user=await login(),other=await login(),key=randomUUID(),order=await quote(user,'campaign',key);assert.equal(order.amount,'50000000');assert.equal((await quote(user,'campaign',key)).id,order.id);
+ assert.equal((await app.inject({method:'POST',url:'/orders',headers:user.headers,payload:{sku:'night-courier',idempotencyKey:key}})).statusCode,409);
+ assert.equal((await app.inject({method:'GET',url:`/orders/${order.id}`,headers:other.headers})).statusCode,404);
+ assert.equal((await app.inject({method:'POST',url:'/orders',headers:user.headers,payload:{sku:'campaign',idempotencyKey:randomUUID(),amount:'1'}})).statusCode,400);
+ const forged=b58(randomBytes(64)),bad=paidTx(order,forged);bad.transaction.message.accountKeys[2]=pub();transactions.set(forged,bad);
+ await app.inject({method:'POST',url:`/orders/${order.id}/transaction`,headers:user.headers,payload:{signature:forged}});assert.deepEqual((await service.me(user.wallet)).entitlements,[]);
+ const sig=b58(randomBytes(64));transactions.set(sig,paidTx(order,sig));const send=()=>app.inject({method:'POST',url:`/orders/${order.id}/transaction`,headers:user.headers,payload:{signature:sig}});
+ const results=await Promise.all([send(),send()]);for(const r of results){assert.equal(r.statusCode,200,r.body);assert.equal(r.json().status,'fulfilled');}
+ assert.deepEqual((await service.me(user.wallet)).entitlements,['campaign']);assert.equal(Number((await pool.query('SELECT count(*) FROM payment_receipts WHERE order_id=$1',[order.id])).rows[0].count),1);
+ assert.equal((await app.inject({method:'POST',url:'/orders',headers:user.headers,payload:{sku:'campaign',idempotencyKey:randomUUID()}})).statusCode,409);
+ assert.deepEqual((await service.me(other.wallet)).entitlements,[]);
+});
+test('lost callback is recovered by reference and restored from a new service instance; equipment requires ownership',async()=>{
+ const user=await login(),o=await quote(user,'night-courier'),sig=b58(randomBytes(64));transactions.set(sig,paidTx(o,sig));references.set(o.reference,[sig]);
+ assert.equal((await app.inject({method:'PUT',url:'/me/equipment',headers:user.headers,payload:{sku:'night-courier'}})).statusCode,403);
+ const recovered=await app.inject({method:'POST',url:`/orders/${o.id}/reconcile`,headers:user.headers});assert.equal(recovered.statusCode,200,recovered.body);assert.equal(recovered.json().status,'fulfilled');
+ const restarted=new CommerceService(pool,chain,service.config);assert.deepEqual((await restarted.me(user.wallet)).entitlements,['night-courier']);
+ const equipped=await app.inject({method:'PUT',url:'/me/equipment',headers:user.headers,payload:{sku:'night-courier'}});assert.equal(equipped.json().equipment.outfit,'night-courier');
+});
+test('payment verifier rejects wrong buyer, token, amount, destination, reference, failed execution and absent finality',async()=>{
+ const user=await login(),order=await quote(user),sig=b58(randomBytes(64)),good=paidTx(order,sig);assert.equal(verifyPayment(order,sig,good).state,'verified');assert.equal(verifyPayment(order,sig,null).state,'pending');
+ const mutations:((v:ReturnType<typeof paidTx>)=>void)[]=[v=>{v.transaction.message.header.numRequiredSignatures=0;},v=>{v.transaction.message.accountKeys[2]=pub();},v=>{v.transaction.message.accountKeys[3]=pub();},v=>{v.transaction.message.accountKeys[4]=pub();},v=>{v.transaction.message.accountKeys[5]=pub();},v=>{v.transaction.message.instructions[0]!.data=b58(Buffer.alloc(10));},v=>{v.transaction.message.instructions.pop();},v=>{v.meta.postTokenBalances[1]!.uiTokenAmount.amount='0';},v=>{v.meta.preTokenBalances[0]!.owner=pub();}];
+ for(const mutate of mutations){const bad=structuredClone(good);mutate(bad);assert.equal(verifyPayment(order,sig,bad).state,'invalid');}
+ assert.equal(verifyPayment(order,sig,{...good,meta:{...good.meta,err:{InstructionError:[0,'Custom']}}}).state,'invalid');
+ assert.equal(verifyPayment(order,sig,{...good,blockTime:Math.floor(new Date(order.expiresAt).getTime()/1000)+60}).state,'needs_review');
+});

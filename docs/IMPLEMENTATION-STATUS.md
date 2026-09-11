@@ -10,7 +10,7 @@ Updated 12 September 2026. Goal remains the full game described in COMPLETE-GAME
 | Dynamic guards | Existing patrol/occluded vision renders in 3D. Investigation/search and pickup-triggered security changes still need implementation. |
 | Twelve levels | One geometry and two modes still. Parameterized levels and the other maps remain. |
 | Native wallet | MWA Kit provider, secure native authorization cache, devnet wallet panel and memo transaction diagnostic implemented. Android build, wallet panel and missing-wallet handling pass on the emulator. Physical Phantom approval and successful devnet transaction remain unverified. |
-| Purchase/backend | Not implemented. Memo diagnostic is not commerce. Signed backend login, mint tooling, orders, verification and restore remain. |
+| Purchase/backend | PostgreSQL API, signed wallet login, immutable orders, finalized-transfer verification, reference recovery and entitlement restore implemented; 4 integration scenarios pass. Native test shop is wired in source. Live mint/payment, physical Phantom, stable HTTPS deployment and full recovery remain. See server/README.md. |
 | Progress/shop | Not implemented. All catalog products and persistent progression remain. |
 | Daily/ranking | Not implemented. Shared deterministic run validation remains. |
 | Test entry/return | Not implemented. Reserve, settlement, recovery and receipt verification remain. |
@@ -25,3 +25,9 @@ The physics/game simulation still uses the existing fixed-step rules. Do not inf
 ## First combined test APK
 
 `releases/steal-a-seeker-3d-wallet-devnet-preview.apk` is the development-signed native build. Its checksum and source hashes are in `verification/3d-wallet-build.json`. Native UI evidence is in `verification/3d-wallet-native-check.json`; the complete 3D browser route is in `verification/3d-web-playtest.json`. The existing 2D pointer/keyboard regression route also passed after the upgrade.
+
+## Commerce increment
+
+Local API listens on 8790. `npm run server:test` uses a dedicated PostgreSQL test database and synthetic chain responses; it does not prove a live payment. The public devnet faucet declined the initial funding request. Dedicated signing files are private and outside git. Access enforcement and cosmetic rendering are still outstanding.
+
+Hosting attempt: Railway refused project creation because the account trial expired. No game service or database was created there. Stable HTTPS remains pending; Dockerfile.api and railway.toml prepare the scoped service deployment. Do not treat the local endpoint as reachable from a physical phone.
