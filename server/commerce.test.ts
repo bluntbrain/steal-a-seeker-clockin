@@ -9,13 +9,18 @@ import {CommerceService} from './service';
 import {createApp} from './app';
 import {verifyPayment,TOKEN_PROGRAM,MEMO_PROGRAM,type PaymentChain} from './chain';
 import type {Order,SignInChallenge} from '../shared/commerce';
+import {RankedService,dailyMission} from './ranked-service';
+import {fixtureReplay} from '../tests/fixtures/replay';
+import type {DailyManifest,RunTicket} from '../shared/ranked';
 const b58=(b:Uint8Array)=>getBase58Decoder().decode(b),pub=()=>b58(randomBytes(32));
 const pool=database('postgresql://localhost/seeker_clockin_test');
 const transactions=new Map<string,unknown>(),references=new Map<string,string[]>();
 let chainHeight=100,chainUnavailable=false;
 const chain:PaymentChain={ready:async()=>{},verify:async(o,s)=>verifyPayment(o,s,transactions.get(s)??null),find:async r=>{if(chainUnavailable)throw new Error('RPC unavailable');return references.get(r)||[];},lifetime:async()=>({blockhash:pub(),lastValidBlockHeight:String(chainHeight+150),contextSlot:String(chainHeight+1000)}),height:async()=>chainHeight};
+let rankClock=new Date('2026-01-01T12:00:00Z');while(dailyMission(rankClock)!=='practice')rankClock=new Date(rankClock.getTime()+86400000);
+const ranked=new RankedService(pool,{now:()=>rankClock});
 let service:CommerceService,app:Awaited<ReturnType<typeof createApp>>;
-before(async()=>{assert.equal((await pool.query('SELECT current_database() AS name')).rows[0].name,'seeker_clockin_test');await migrate(pool);await pool.query('TRUNCATE wallets,auth_challenges,sessions,orders,order_attempts,payment_receipts,entitlements CASCADE');const mint=pub(),recipient=pub();const [destination]=await findAssociatedTokenPda({owner:address(recipient),mint:address(mint),tokenProgram:address(TOKEN_PROGRAM)});service=new CommerceService(pool,chain,{mint,recipient,destination,decimals:6,identityUri:'https://github.com/bluntbrain'});app=await createApp(service);});
+before(async()=>{assert.equal((await pool.query('SELECT current_database() AS name')).rows[0].name,'seeker_clockin_test');await migrate(pool);await pool.query('TRUNCATE wallets,auth_challenges,sessions,orders,order_attempts,payment_receipts,entitlements CASCADE');const mint=pub(),recipient=pub();const [destination]=await findAssociatedTokenPda({owner:address(recipient),mint:address(mint),tokenProgram:address(TOKEN_PROGRAM)});service=new CommerceService(pool,chain,{mint,recipient,destination,decimals:6,identityUri:'https://github.com/bluntbrain'});app=await createApp(service,ranked);});
 after(async()=>{await app.close();await pool.end();});
 async function login(){const keys=generateKeyPairSync('ed25519'),wallet=b58(keys.publicKey.export({type:'spki',format:'der'}).subarray(-32));const response=await app.inject({method:'POST',url:'/auth/challenge',payload:{wallet}});assert.equal(response.statusCode,200);const c=response.json<SignInChallenge>(),message=createSignInMessage(c.payload),signature=sign(null,message,keys.privateKey);const payload={id:c.id,wallet,signedMessage:Buffer.from(message).toString('base64'),signature:signature.toString('base64')};const auth=await app.inject({method:'POST',url:'/auth/verify',payload});assert.equal(auth.statusCode,200,auth.body);return {keys,wallet,token:auth.json().token,headers:{authorization:`Bearer ${auth.json().token}`},payload};}
 function paidTx(o:Order,sig:string){const keys=[o.wallet,o.source,o.mint,o.destination,o.reference,TOKEN_PROGRAM,MEMO_PROGRAM];const data=Buffer.alloc(10);data[0]=12;data.writeBigUInt64LE(BigInt(o.amount),1);data[9]=o.decimals;const balance=(accountIndex:number,owner:string,amount:string)=>({accountIndex,owner,mint:o.mint,uiTokenAmount:{amount,decimals:o.decimals}});return {slot:42,blockTime:Math.floor(Date.now()/1000),transaction:{signatures:[sig],message:{header:{numRequiredSignatures:1},accountKeys:keys,instructions:[{programIdIndex:5,accounts:[1,2,3,0,4],data:b58(data)},{programIdIndex:6,accounts:[],data:b58(Buffer.from(o.memo))}]}},meta:{err:null,preTokenBalances:[balance(1,o.wallet,o.amount),balance(3,o.recipient,'0')],postTokenBalances:[balance(1,o.wallet,'0'),balance(3,o.recipient,o.amount)]}};}
@@ -94,4 +99,42 @@ test('incomplete finalized RPC history blocks reapproval; an expired unpaid quot
  references.set(o.reference,[]);await pool.query("UPDATE orders SET expires_at=now()-interval '1 minute' WHERE id=$1",[o.id]);
  const expired=await service.preparePayment(user.wallet,o.id);assert.equal(expired.status,'quoted');assert.equal(expired.payment,undefined);
  const replacement=await quote(user);assert.notEqual(replacement.id,o.id);
+});
+
+async function campaignOwner(){const user=await login(),o=await quote(user),sig=b58(randomBytes(64));transactions.set(sig,paidTx(o,sig));await service.attach(user.wallet,o.id,sig);return user;}
+async function rankStart(user:Awaited<ReturnType<typeof login>>){const manifest=await ranked.daily();const r=await app.inject({method:'POST',url:'/runs',headers:user.headers,payload:{day:manifest.day,rulesHash:manifest.rulesHash,requestKey:randomUUID()}});assert.equal(r.statusCode,200,r.body);return r.json<RunTicket>();}
+test('daily tickets bind rules, require campaign ownership and reject another wallet, stale clients and instant runs',async()=>{
+ const unowned=await login(),manifest=(await app.inject({method:'GET',url:'/daily'})).json<DailyManifest>();assert.equal(manifest.mission,'practice');assert.equal(manifest.seed,0);assert.equal(manifest.loadout,'standard');
+ const payload={day:manifest.day,rulesHash:manifest.rulesHash,requestKey:randomUUID()};assert.equal((await app.inject({method:'POST',url:'/runs',headers:unowned.headers,payload})).statusCode,403);
+ const user=await campaignOwner();assert.equal((await app.inject({method:'POST',url:'/runs',headers:user.headers,payload:{...payload,rulesHash:'a'.repeat(64)}})).statusCode,409);
+ const run=await rankStart(user);assert.equal((await app.inject({method:'GET',url:`/runs/${run.id}`,headers:unowned.headers})).statusCode,404);
+ assert.equal((await app.inject({method:'POST',url:'/runs',headers:user.headers,payload})).statusCode,409);
+ const body={rulesHash:manifest.rulesHash,replay:fixtureReplay().replay};assert.equal((await app.inject({method:'POST',url:`/runs/${run.id}/finish`,headers:user.headers,payload:body})).statusCode,400);
+ const abandon=await app.inject({method:'POST',url:`/runs/${run.id}/abandon`,headers:user.headers,payload:{}});assert.equal(abandon.json().status,'abandoned');
+ rankClock=new Date(rankClock.getTime()+20000);assert.equal((await app.inject({method:'POST',url:`/runs/${run.id}/finish`,headers:user.headers,payload:body})).statusCode,409);
+});
+test('ranked input replay survives worker restart, rejects changed reuse and publishes only a computed best',async()=>{
+ const user=await campaignOwner(),run=await rankStart(user),{state,replay}=fixtureReplay();assert.equal(state.status,'won');rankClock=new Date(rankClock.getTime()+20000);
+ const payload={rulesHash:run.manifest.rulesHash,replay},send=()=>app.inject({method:'POST',url:`/runs/${run.id}/finish`,headers:user.headers,payload});
+ const first=await send();assert.equal(first.statusCode,200,first.body);assert.equal(first.json().status,'verifying');assert.equal((await send()).json().status,'verifying');
+ assert.equal((await app.inject({method:'POST',url:`/runs/${run.id}/finish`,headers:user.headers,payload:{...payload,replay:{version:1,chunks:[{x:0,y:0,buttons:0,ticks:1}]}}})).statusCode,409);
+ await pool.query("UPDATE ranked_runs SET lease_until=now()+interval '1 minute' WHERE id=$1",[run.id]);assert.equal(await ranked.process(),0);
+ await pool.query("UPDATE ranked_runs SET lease_until=now()-interval '1 second' WHERE id=$1",[run.id]);const restarted=new RankedService(pool,{now:()=>rankClock});assert.equal(await restarted.process(),1);
+ const finished=await ranked.get(user.wallet,run.id);assert.equal(finished.status,'verified');assert.equal(finished.result?.score,state.score);assert.equal(finished.result?.ticks,state.ticks);
+ assert.equal((await send()).json().status,'verified');assert.equal(await ranked.process(),0);
+ const board=(await app.inject({method:'GET',url:`/daily/${run.manifest.day}/leaderboard`,headers:user.headers})).json();assert.equal(board.personal.wallet,user.wallet);assert.equal(board.personal.score,state.score);assert.equal(board.entries.filter((x:{wallet:string})=>x.wallet===user.wallet).length,1);
+ const next=await rankStart(user);rankClock=new Date(rankClock.getTime()+20000);await ranked.submit(user.wallet,next.id,{rulesHash:next.manifest.rulesHash,replay});await ranked.process();assert.equal((await ranked.leaderboard(run.manifest.day,user.wallet)).entries.filter(x=>x.wallet===user.wallet).length,1);
+});
+test('expired tickets, unfinished runs and invalid action replays never enter the leaderboard',async()=>{
+ const user=await campaignOwner(),expired=await rankStart(user);rankClock=new Date(new Date(expired.expiresAt).getTime()+1);
+ await assert.rejects(ranked.submit(user.wallet,expired.id,{rulesHash:expired.manifest.rulesHash,replay:{version:1,chunks:[{x:0,y:0,buttons:0,ticks:1}]}}),/expired/);
+ const incomplete=await rankStart(user);rankClock=new Date(rankClock.getTime()+1000);await ranked.submit(user.wallet,incomplete.id,{rulesHash:incomplete.manifest.rulesHash,replay:{version:1,chunks:[{x:0,y:0,buttons:0,ticks:1}]}});await ranked.process();assert.equal((await ranked.get(user.wallet,incomplete.id)).status,'rejected');
+ const invalid=await rankStart(user);rankClock=new Date(rankClock.getTime()+1000);await ranked.submit(user.wallet,invalid.id,{rulesHash:invalid.manifest.rulesHash,replay:{version:1,chunks:[{x:0,y:0,buttons:2,ticks:2}]}});await ranked.process();assert.equal((await ranked.get(user.wallet,invalid.id)).status,'rejected');assert.equal((await ranked.leaderboard(invalid.manifest.day,user.wallet)).personal,null);
+});
+
+test('leaderboard keeps top fifty rows and the signed-in player even when sixty players tie',async()=>{
+ const manifest=await ranked.daily(),day='2025-01-01';await pool.query('INSERT INTO daily_manifests(day,manifest) VALUES($1,$2) ON CONFLICT DO NOTHING',[day,{...manifest,day}]);
+ const wallets=Array.from({length:60},()=>pub()).sort();
+ for(const wallet of wallets){await pool.query('INSERT INTO wallets(address) VALUES($1)',[wallet]);await pool.query("INSERT INTO ranked_runs(id,wallet,day,request_key,manifest,status,issued_at,expires_at,result) VALUES($1,$2,$3,$4,$5,'verified',now(),now(),$6)",[randomUUID(),wallet,day,randomUUID(),{...manifest,day},{status:'won',score:12000,ticks:400,seconds:400/30,battery:100,delivered:1,spotted:false}]);}
+ const board=await ranked.leaderboard(day,wallets[59]);assert.equal(board.entries.length,50);assert.deepEqual(board.entries.map(e=>e.wallet),wallets.slice(0,50));assert.equal(board.personal?.wallet,wallets[59]);assert.equal(board.personal?.rank,1);assert(board.entries.every(e=>e.rank===1));
 });

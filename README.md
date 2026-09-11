@@ -11,13 +11,13 @@ Status: 12 September 2026. The complete goal remains in [the game plan](docs/COM
 - Local stars, best runs, sequential unlocks and a collection display. Android saves are scoped to the connected wallet; cloud sync preserves each device's best records.
 - Native campaign paywall and secure cache of verified ownership for offline use. Catalog equipment drives 3D courier materials, an escape trail, a profile frame and a collection-rack finish.
 - Native devnet wallet connection, signed login, checkout/restore, finalized-transfer verification and durable payment lifetimes. Resumed approvals reuse identical transaction bytes.
-- Bounded server replay verification. Run tickets, client recording, online ranks and the separate paid-entry/success-return mode are still outstanding.
+- Daily challenges with wallet-bound tickets, quantized input recording, a durable verification queue, immutable rule bundles and one best verified score per wallet. The separate paid-entry/success-return mode remains outstanding.
 
 **Live purchases are not ready:** the current APK has no configured HTTPS API, the devnet test mint awaits funding, and physical Phantom sign-in/payment/restore remain unverified. TEST SKR has no monetary value. Mainnet SKR payments are not enabled.
 
 ## Try it
 
-[Browser gameplay preview](http://127.0.0.1:8787) · [12-mission development playtest APK](releases/steal-a-seeker-twelve-missions-devnet-preview.apk) · [Account/paywall preview APK](releases/steal-a-seeker-account-devnet-preview.apk)
+[Browser gameplay preview](http://127.0.0.1:8787) · [12-mission development playtest APK](releases/steal-a-seeker-twelve-missions-devnet-preview.apk) · [Daily/account preview APK](releases/steal-a-seeker-ranked-devnet-preview.apk)
 
 APKs are local, ignored release artifacts; they are not uploaded to GitHub. Both are development-signed ARM64 builds, not production store releases. The twelve-mission checkpoint allows free development playtesting. The newer account build enforces the requested campaign gate and needs the purchase service to unlock it.
 
@@ -42,14 +42,14 @@ Metro uses 8082; the static gameplay preview uses 8787. Set `EXPO_PUBLIC_API_URL
 
 ## Verification
 
-`npm run typecheck`, `npm test` and `npm run server:test` currently pass: 46 game/client tests and 14 server tests. Server tests require the dedicated local `seeker_clockin_test` database; they use synthetic chain responses and never establish a live token payment.
+`npm run typecheck`, `npm test` and `npm run server:test` currently pass: 58 game/client tests and 18 server tests. Server tests require the dedicated local `seeker_clockin_test` database; they use synthetic chain responses and never establish a live token payment.
 
-`scripts/playtest-campaign.cjs` exercised all twelve rooms through pointer joystick input, with no teleport or forced-win hooks. Results and source hashes are in [the campaign report](verification/campaign-web-playtest.json). After account integration, `scripts/playtest-account.cjs` verifies extraction, collection, wallet guidance and reload restoration. Both require Playwright and Chrome. Earlier v0.2 patrol scripts/reports are historical evidence and predate current navigation.
+`scripts/playtest-campaign.cjs` exercised all twelve rooms through pointer joystick input, with no teleport or forced-win hooks. Results and source hashes are in [the campaign report](verification/campaign-web-playtest.json). After account/ranking integration, `scripts/playtest-account.cjs` verifies extraction, collection, public daily reads, native wallet guidance and reload restoration. `npx tsx scripts/verify-browser-replay.ts` checks its actual input recording against the pinned server verifier. Both require Playwright and Chrome. Earlier v0.2 patrol scripts/reports are historical evidence and predate current navigation.
 
-Android builds/install and native GL startup pass on the emulator. The paywall and missing-wallet return are checked separately. Full native campaign completion, owned-item rendering after a real purchase, physical Phantom, cross-device live sync and sustained phone performance remain to be tested. The FPS label measures frame-callback cadence, not GPU presentation.
+Android builds/install and native GL startup pass on the emulator. The paywall and missing-wallet return are checked separately. Fourteen Android Reanimated UI-runtime replay cases match Node fixtures; see [daily verification details](docs/RANKED-RUNS.md). Full native touch campaign completion, actual native ranked submission, owned-item rendering after a real purchase, physical Phantom, cross-device live sync and sustained phone performance remain to be tested. The FPS label measures frame-callback cadence, not GPU presentation.
 
 ## Code layout
 
 `src/game` contains shared maps, deterministic rules, navigation and scoring. `src/three` renders the native/browser 3D scene; `src/components/GameCanvas.tsx` preserves the 2D diagnostic renderer. `src/commerce` handles wallet account state, checkout, access and equipment. `src/progress` stores campaign bests. `server` owns authenticated records, payment verification, migrations and replay workers. Client-reported campaign saves never authorize ranks or payouts.
 
-Private deployment, refunds/support, daily rankings, paid-entry settlement, final art polish, physical validation and submission packaging remain required before calling the game complete.
+Private deployment, refunds/support, paid-entry settlement, final art polish, physical validation and submission packaging remain required before calling the game complete.

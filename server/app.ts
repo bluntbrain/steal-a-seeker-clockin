@@ -5,9 +5,10 @@ import {address,signature as validateSignature} from '@solana/kit';
 import {PRODUCTS,type ProductId} from '../shared/commerce';
 import {progressInput} from './progress';
 import {CommerceService,ServiceError} from './service';
+import {RankedService} from './ranked-service';
 const wallet=z.string().refine(v=>{try{address(v);return true;}catch{return false;}}),uuid=z.string().uuid(),sku=z.enum(PRODUCTS.map(p=>p.id) as [ProductId,...ProductId[]]);
 const bytes=z.string().max(8192).regex(/^[A-Za-z0-9+/]*={0,2}$/);
-export async function createApp(service:CommerceService){
+export async function createApp(service:CommerceService,ranked=new RankedService(service.pool)){
  const app=Fastify({bodyLimit:16*1024,logger:{level:'warn',redact:['req.headers.authorization']}});await app.register(rateLimit,{max:180,timeWindow:'1 minute'});
  app.setErrorHandler((error,req,reply)=>{if(error instanceof ZodError)return reply.code(400).send({error:'Invalid request.'});if(error instanceof ServiceError)return reply.code(error.status).send({error:error.message});const e=error as {statusCode?:number};if(e.statusCode&&e.statusCode<500)return reply.code(e.statusCode).send({error:'Request could not be accepted.'});req.log.error({message:error instanceof Error?error.message:'Service error'},'Request failed');return reply.code(503).send({error:'Service temporarily unavailable. Your payment will be reconciled; do not pay again.'});});
  async function account(header:string|undefined){if(!header?.startsWith('Bearer '))throw new ServiceError(401,'Wallet sign-in required.');const token=header.slice(7);if(!/^[0-9a-f]{64}$/.test(token))throw new ServiceError(401,'Invalid session.');return {wallet:await service.authenticate(token),token};}
@@ -25,5 +26,13 @@ export async function createApp(service:CommerceService){
  app.post('/orders/:id/reconcile',async req=>{const a=await account(req.headers.authorization),{id}=z.object({id:uuid}).parse(req.params);await service.getOrder(a.wallet,id);await service.reconcile(id);return service.getOrder(a.wallet,id);});
  app.put('/me/progress',async req=>service.syncProgress((await account(req.headers.authorization)).wallet,progressInput.parse(req.body)));
  app.put('/me/equipment',async req=>service.equip((await account(req.headers.authorization)).wallet,z.object({sku}).strict().parse(req.body).sku));
+ app.get('/daily',async()=>ranked.daily());
+ const day=z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine(v=>{try{return new Date(`${v}T00:00:00Z`).toISOString().slice(0,10)===v;}catch{return false;}}),rulesHash=z.string().regex(/^[a-f0-9]{64}$/);
+ app.get('/daily/:day/leaderboard',async req=>{const input=z.object({day}).parse(req.params),wallet=req.headers.authorization?(await account(req.headers.authorization)).wallet:undefined;return ranked.leaderboard(input.day,wallet);});
+ app.get('/runs/current',async req=>ranked.current((await account(req.headers.authorization)).wallet));
+ app.post('/runs',{config:{rateLimit:{max:12,timeWindow:'1 minute'}}},async req=>ranked.start((await account(req.headers.authorization)).wallet,z.object({day,rulesHash,requestKey:uuid}).strict().parse(req.body)));
+ app.get('/runs/:id',async req=>ranked.get((await account(req.headers.authorization)).wallet,z.object({id:uuid}).parse(req.params).id));
+ app.post('/runs/:id/abandon',async req=>ranked.abandon((await account(req.headers.authorization)).wallet,z.object({id:uuid}).parse(req.params).id));
+ app.post('/runs/:id/finish',{bodyLimit:1024*1024,config:{rateLimit:{max:12,timeWindow:'1 minute'}}},async req=>ranked.submit((await account(req.headers.authorization)).wallet,z.object({id:uuid}).parse(req.params).id,z.object({rulesHash,replay:z.unknown()}).strict().parse(req.body)));
  return app;
 }

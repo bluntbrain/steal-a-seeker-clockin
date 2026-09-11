@@ -9,11 +9,13 @@
     "web": "expo start --web --port 8082",
     "typecheck": "tsc --noEmit",
     "test": "tsx --test tests/*.test.ts",
-    "export:web": "expo export --platform web",
-    "build:apk": "cd android && ./gradlew :app:assembleRelease --no-daemon",
+    "export:web": "npm run rules:check && expo export --platform web",
+    "build:apk": "npm run rules:check && cd android && ./gradlew :app:assembleRelease --no-daemon",
     "preview": "node scripts/preview.cjs",
     "server:dev": "tsx server/main.ts",
-    "server:test": "tsx --test server/*.test.ts"
+    "server:test": "tsx --test server/*.test.ts",
+    "rules:generate": "tsx scripts/rules-manifest.ts",
+    "rules:check": "tsx scripts/rules-manifest.ts --check"
   },
   "dependencies": {
     "@fastify/rate-limit": "^11.2.0",
@@ -53,6 +55,7 @@
     "@types/pg": "^8.23.1",
     "@types/react": "~19.2.0",
     "@types/three": "^0.180.0",
+    "esbuild": "0.28.2",
     "tsx": "^4.20.0",
     "typescript": "~5.9.2"
   }

@@ -47,7 +47,7 @@ The current worker scans recent open orders; explicit restore/reconcile can revi
 
 `server/commerce.test.ts` uses genuine Ed25519 signatures and a real PostgreSQL database. It checks nonce reuse, wrong nonce, expired/revoked session handling through the API, cross-wallet isolation, immutable quote requests, duplicate callbacks, loss of callback, restore from a new service instance, unowned equipment, and tampered transfer fields. Tests also cover concurrent preparation, expired approval, unavailable RPC, incomplete transaction data, quote replacement and byte-identical resumed approvals. This does not substitute for live chain verification.
 
-Remaining: live test mint/payment, physical Phantom round trip, stable HTTPS deployment, operator refunds, purchase-to-game/equipment validation on Android, rankings and reward settlement. Mainnet commerce is not enabled.
+Remaining: live test mint/payment, physical Phantom round trip, stable HTTPS deployment, operator refunds, purchase-to-game/equipment validation on Android and reward settlement. Daily rankings are implemented and locally verified. Mainnet commerce is not enabled.
 
 ## Hosting status
 
@@ -60,3 +60,7 @@ Railway creation was rejected on 12 September because the account trial expired.
 ## Migration 002
 
 `002-payment-lifetimes.sql` adds durable payment authorization to orders. Migration 001 remains byte-for-byte unchanged. The migration runner applies both under the same advisory lock and verifies each stored checksum.
+
+## Daily runs
+
+Migration 003 adds immutable UTC daily manifests and wallet-bound run tickets. `server/ranked-service.ts` persists submitted input replays before queueing verification. Worker leases and claim tokens support process-restart recovery. Each ticket selects a checksum-verified immutable bundle in `server/rule-bundles`; API startup checks the current rules manifest. Native recording and pending-result recovery are wired. Public daily routes are available through the local browser preview; native requests still need a configured HTTPS endpoint. See [daily-run details](../docs/RANKED-RUNS.md) for APIs, evidence and limitations. There is no payout in daily mode.

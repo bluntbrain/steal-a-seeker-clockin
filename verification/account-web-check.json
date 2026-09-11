@@ -7,6 +7,8 @@
     "shop explains native wallet requirement",
     "wallet-specific provider preserves web playtest save",
     "reload restores collection",
+    "published daily and leaderboard read through local API",
+    "browser native-only entry guidance",
     "no runtime errors"
   ],
   "notVerified": [
@@ -15,10 +17,15 @@
     "owned item rendering"
   ],
   "sourceHashes": {
-    "src/GameScreen.tsx": "0d9da3ab467ae01823796cc0c159c8724c44bdffd1acbc4fcc4d630638c752e5",
+    "App.tsx": "cc1c061441b4d4085dc5f7a3782032968d0d90272c9db869aea7b110340404cc",
+    "src/game/recording.ts": "acd3a185c990bd569b0c1ccc802940d3443ee540032ba44a6b09276c328f71b3",
+    "shared/replay.ts": "1ac8f162e290583d818f15eb8361472b4fbc4b2d8848ae2c26111951e96b1d23",
+    "shared/rules-manifest.json": "d5d25edbcf701a264c4a672c4501761fb0921a4515234016cb42b52b5bdf4578",
+    "src/ranked/DailyPanel.tsx": "d2d1a0f28e61e36d6db8dab5eed83f7819cabf1b7c172c9d80270695d88737d3",
+    "src/GameScreen.tsx": "5925ece35ee6cbb5ddb2d59884066b4d8bcaf16f8af793671043ea0679f5eb38",
     "src/commerce/account-context.ts": "ef144b16f87eda4f2ef19be001b28cf4554bc78f03c77f01bf3134c97c06e255",
     "src/commerce/AccountProvider.web.tsx": "6dd049037970d17b51d29afcabbbc392fa94c7c937a32c7c201f398c7269eb0c",
-    "src/components/Hideout.tsx": "1941069228eacb39b6590719dd87112506ec1f5375326e26361f0d0a1d913690",
+    "src/components/Hideout.tsx": "89805b0094fab260954c3cf8a029a6bb581bb5d445d4a2795cb324f9afa23801",
     "src/progress/useProgress.ts": "f9b68891b0c29c04a0203aac53c558f896e70360191bd85bc08ea9bf5c674f95",
     "src/progress/model.ts": "69b5b4d7eeaba6a1b81019fef8cc96f09575f24e26e7ea0f0022c9b8077bd47d",
     "src/three/HeistScene.tsx": "5ca9b549b830abe7381def79ebd4a5e9ab934f0141c837124430eee39f51faa8"
