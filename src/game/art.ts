@@ -1,10 +1,11 @@
 import { createPicture, Skia, type SkCanvas } from '@shopify/react-native-skia';
 import { LEVEL,type LevelDefinition } from './level';
+import {districtFor} from './environment';
 const palette={ floor:'#20292c', line:'#293337', mint:'#cfe6e4', edge:'#465054' };
 // Code-native environment art is recorded once, not recreated on each animation frame.
 export function makeWarehouse(drawFloor=true,level:LevelDefinition=LEVEL){
   return createPicture((c:SkCanvas)=>{
-    const rooftop=level.number>=5&&level.number<=8,power=level.number>=9;
+    const district=districtFor(level.number),rooftop=district==='rooftops',power=district==='powerworks';
     const p=Skia.Paint();p.setAntiAlias(true);
     const rect=(x:number,y:number,w:number,h:number,color:string)=>{p.setColor(Skia.Color(color));c.drawRect(Skia.XYWHRect(x,y,w,h),p);};
     const round=(x:number,y:number,w:number,h:number,r:number,color:string)=>{p.setColor(Skia.Color(color));c.drawRRect(Skia.RRectXY(Skia.XYWHRect(x,y,w,h),r,r),p);};
@@ -13,7 +14,7 @@ export function makeWarehouse(drawFloor=true,level:LevelDefinition=LEVEL){
     if(drawFloor){
     rect(0,0,12,20,'#131b1e');
     for(let y=0;y<20;y++)for(let x=0;x<12;x++){
-      rect(x+.025,y+.025,.95,.95,(x*3+y*7)%6===0?'#263033':palette.floor);
+      rect(x+.025,y+.025,.95,.95,rooftop?'#344E64':power?'#69776E':(x*3+y*7)%6===0?'#263033':palette.floor);
       line(x+.04,y+.04,x+.95,y+.04,'#303b3e',.025);
       if((x*13+y*17)%11===0){line(x+.17,y+.7,x+.48,y+.7,'#2e393b',.015);line(x+.36,y+.22,x+.7,y+.22,'#1b2427',.025);}
     }
@@ -21,10 +22,32 @@ export function makeWarehouse(drawFloor=true,level:LevelDefinition=LEVEL){
     for(let y=4;y<18;y+=1.2){rect(3.95,y,.035,.45,'#52635f');rect(10.7,y,.035,.45,'#3d4f4d');}
     }
     // District floor markings and perimeter depth remain outside walking geometry.
+    if(!rooftop&&!power){
+      // Flat loading-bay paint: never looks like raised, collidable cover.
+      const bayY=[15.8,12.1,16.2,13][Math.max(0,level.number-1)%4]!;
+      for(const x of [1,7.6]){line(x,bayY,x+3.3,bayY,'#B49D6A',.055);line(x,bayY,x,bayY+1.7,'#B49D6A',.055);}
+      if(level.number===3)for(let y=2;y<19;y+=.9){rect(7.8,y,.065,.48,'#CCB776');rect(10.95,y,.065,.48,'#CCB776');}
+      if(level.number===4)for(let x=1;x<11;x+=.55){rect(x,12.8,.28,.07,'#AB9670');rect(x,4,.28,.07,'#AB9670');}
+    }
+    if(power){
+      // Recessed cable traces connect the real control pads to real door channels.
+      for(const sw of level.switches??[]){const gate=level.gates?.find(g=>sw.kind==='power'?g.mode==='power':g.relay===(sw.channel??0));if(!gate)continue;
+        const xx=gate.box.x+gate.box.w/2,yy=gate.box.y+gate.box.h/2;
+        line(sw.x,sw.y,xx,sw.y,'#3C4A50',.13);line(xx,sw.y,xx,yy,'#3C4A50',.13);
+        line(sw.x,sw.y,xx,sw.y,sw.kind==='power'?'#72928A':'#8D789F',.045);line(xx,sw.y,xx,yy,sw.kind==='power'?'#72928A':'#8D789F',.045);
+      }
+      if(level.number===10||level.number===12)for(const target of level.targets??[]){
+        for(const radius of [1.05,1.2]){p.setColor(Skia.Color(level.number===12?'#B6A071':'#827098'));p.setStyle(1);p.setStrokeWidth(.045);c.drawCircle(target.x,target.y,radius,p);p.setStyle(0);}
+      }
+    }
     if(rooftop){
       rect(0,0,.55,20,'#090F18');rect(11.45,0,.55,20,'#090F18');
       for(let y=1;y<20;y+=1.3)for(const x of [.08,11.62]){rect(x,y,.3,.7,'#25303D');rect(x+.07,y+.1,.06,.08,'#78AAAE');rect(x+.18,y+.3,.05,.07,'#416B7E');}
       for(let y=3;y<19;y+=5){line(.65,y,11.35,y,'#344B55',.045);for(let x=.8;x<11.3;x+=.3)line(x,y-.12,x,y+.12,'#435A60',.02);}
+      if(level.number===8){ // Worn landing-zone paint, underneath all game objects.
+        p.setColor(Skia.Color('#A6B6B45A'));p.setStyle(1);p.setStrokeWidth(.09);c.drawCircle(6,9.5,2.6,p);p.setStyle(0);
+        line(5,8.3,5,10.7,'#A6B6B45A',.14);line(7,8.3,7,10.7,'#A6B6B45A',.14);line(5,9.5,7,9.5,'#A6B6B45A',.14);
+      }
     }else{
       for(let y=1.4;y<19;y+=1.1){rect(1.1,y,.045,.48,power?'#6F637D':'#536960');rect(10.85,y,.045,.48,'#3C5151');}
       for(let y=4;y<19;y+=6){rect(.64,y,1,.05,'#677B7D');for(let x=.7;x<1.6;x+=.16)line(x,y-.16,x+.1,y-.06,'#7D8F87',.025);}
@@ -45,10 +68,19 @@ export function makeWarehouse(drawFloor=true,level:LevelDefinition=LEVEL){
         continue;
       }
       if(b.kind==='wall'){
+        if(rooftop){
+          // City depth occupies the existing boundary collider. Inner rail marks its edge.
+          rect(b.x,b.y,b.w,b.h,'#0B1729');
+          if(b.h>b.w){for(let yy=b.y+.3;yy<b.y+b.h-.3;yy+=1.25){rect(b.x+.06,yy,b.w-.13,.95,'#243649');rect(b.x+.12,yy+.18,.09,.25,'#608D99');}
+            const xx=b.x<6?b.x+b.w-.14:b.x+.03;rect(xx,b.y,.11,b.h,'#789FA3');rect(xx+.015,b.y,.035,b.h,'#B9E6DD');
+          }else{rect(b.x,b.y+(b.y<10?b.h-.18:0),b.w,.16,'#8AAEAD');}
+          continue;
+        }
         rect(b.x,b.y+.16,b.w,b.h,'#080d10');rect(b.x,b.y,b.w,b.h,'#333f43');
         rect(b.x+.08,b.y+.08,Math.max(.1,b.w-.16),Math.max(.1,b.h-.16),'#343B41');line(b.x+.06,b.y+.04,b.x+b.w-.06,b.y+.04,rooftop?'#ACE5D8':'#B4C2C4',.055);
         if(rooftop){line(b.x+.06,b.y+.13,b.x+b.w-.06,b.y+.13,'#527F80',.03);if(b.w<1)line(b.x+.28,b.y+.1,b.x+.28,b.y+b.h-.1,'#8DC8C1',.05);}
         else for(let y=b.y+.4;y<b.y+b.h-.2;y+=1.5){rect(b.x+.08,y,Math.max(.05,b.w-.16),.04,'#19232A');}
+        if(power&&b.h>b.w){line(b.x+b.w*.4,b.y+.1,b.x+b.w*.4,b.y+b.h-.1,'#9B8AAE',.07);line(b.x+b.w*.7,b.y+.1,b.x+b.w*.7,b.y+b.h-.1,'#798C83',.06);}
         continue;
       }
       round(b.x+.11,b.y+.2,b.w,b.h,.08,'#11191bc9');
@@ -77,11 +109,21 @@ export function makeWarehouse(drawFloor=true,level:LevelDefinition=LEVEL){
         }
         rect(b.x+.2,b.y+b.h-.25,b.w-.4,.08,'#BDE7D9');
         if(index%3===0){circle(b.x+b.w-.28,b.y+.3,.13,'#D6E2D5');line(b.x+b.w-.28,b.y+.3,b.x+b.w-.18,b.y+.1,'#BDD3C9',.045);}
+        if(level.number===7&&b.kind==='rack'){
+          const cx=b.x+b.w/2,cy=b.y+b.h/2,r=Math.min(b.w,b.h)*.36;
+          circle(cx+.05,cy+.1,r,'#263B49');circle(cx,cy,r,'#B7C9C8');circle(cx,cy,r*.78,'#829EA6');
+          line(cx,cy,cx+r*.85,cy-r*.85,'#DCE7DD',.09);circle(cx+r*.85,cy-r*.85,.085,'#C4F0DE');
+        }
       }else if(power){
         round(b.x+.13,b.y+.15,b.w-.26,b.h-.46,.045,'#202C38');
         const cols=Math.max(1,Math.floor(b.w/.5));
         for(let col=0;col<cols;col++)for(let y=b.y+.3;y<b.y+b.h-.4;y+=.34){const x=b.x+.21+col*(b.w-.4)/cols;rect(x,y,(b.w-.4)/cols-.07,.19,'#3D485C');rect(x+.035,y+.04,.04,.04,(Math.floor(y*3)+col)%3?'#B7A2D7':'#A7E0D2');line(x+.12,y+.13,x+(b.w-.4)/cols-.1,y+.13,'#17242C',.03);}
         rect(b.x+.18,b.y+b.h-.27,b.w-.36,.055,'#B397D6');
+        if((level.number===9||level.number===12)&&b.kind==='crate'){
+          const cx=b.x+b.w/2,cy=b.y+(b.h-.2)/2,r=Math.min(b.w-.3,b.h-.5)/2;
+          circle(cx,cy,r,'#8DA59F');circle(cx,cy,r*.8,'#263C43');circle(cx,cy,r*.59,level.number===12?'#B3A77E':'#8CC7B3');circle(cx,cy,r*.3,'#344E52');
+          for(let k=0;k<8;k++){const a=k*Math.PI/4;line(cx+Math.cos(a)*r*.65,cy+Math.sin(a)*r*.65,cx+Math.cos(a)*r*.92,cy+Math.sin(a)*r*.92,'#D3DBCC',.07);}
+        }
       }else if(b.kind==='crate'){
         // Shipping straps, paper labels and inset handles.
         rect(b.x+b.w*.26,b.y+.12,.085,b.h-.42,'#A9B9A9');rect(b.x+b.w*.73,b.y+.12,.085,b.h-.42,'#7F9389');

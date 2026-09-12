@@ -2,6 +2,7 @@ import React,{memo,useMemo} from 'react';
 import {Canvas,Group,Picture,Image,Atlas,Circle,RoundedRect,Oval,Line,Path,Skia,DashPathEffect,ColorMatrix,useImage,useRSXformBuffer} from '@shopify/react-native-skia';
 import {useDerivedValue,type SharedValue} from 'react-native-reanimated';
 import {makeWarehouse} from '../game/art';
+import {districtFor,environmentFor} from '../game/environment';
 import {TUNING,SECURITY,type LevelDefinition} from '../game/level';
 import {targetPhone,decoyLanding,type GameState,type Input} from '../game/simulation';
 import {editionIndex} from '../game/collection';
@@ -28,7 +29,8 @@ function DecoyLayer({game,input,reduced}:{game:SharedValue<GameState>;input:Shar
 function SwitchLayer({game,level,index}:Pick<Props,'game'|'level'>&{index:number}){const p=level.switches![index]!,color=useDerivedValue(()=>(p.kind==='power'?game.value.power===1:(game.value.relayTimers[p.channel??0]??0)>0)?'#a8ecd7':'#edb768');return <RoundedRect x={p.x-.4} y={p.y-.4} width={.8} height={.8} r={.06} color={color}/>;}
 export default memo(function GameCanvas({size,input,game,alpha,clock,level,appearance={}}:Props){
  const world=useMemo(()=>makeWarehouse(false,level),[level]),fallbackWorld=useMemo(()=>makeWarehouse(true,level),[level]);
- const floor=useImage(require('../../assets/world-v3/floor.png'));
+ const district=districtFor(level.number),environment=environmentFor(level);
+ const floor=useImage(district==='rooftops'?require('../../assets/world-v4/rooftop-floor.png'):district==='powerworks'?require('../../assets/world-v4/powerworks-floor.png'):require('../../assets/world-v3/floor.png'));
  const phones=useImage(require('../../assets/world-v3/phones.png'));
  const phoneIndex=editionIndex(level.mission),phoneFrame=phoneAtlas.frames[phoneIndex]!;
  const phoneScale=1.18/phoneFrame.height;
@@ -63,7 +65,8 @@ export default memo(function GameCanvas({size,input,game,alpha,clock,level,appea
  const pickupWidth=useDerivedValue(()=>game.value.pickup/TUNING.pickupHold*1.1);
  return <Canvas style={{width:size,height:size*20/12}} accessible={false}>
   <Group transform={[{scale:size/12}]}>
-   {Array.from({length:16},(_,i)=><Image key={i} image={floor} x={(i%4)*3} y={Math.floor(i/4)*5} width={3} height={5} fit="fill"/>)}
+   {district==='warehouse'?Array.from({length:16},(_,i)=><Image key={i} image={floor} x={(i%4)*3} y={Math.floor(i/4)*5} width={3} height={5} fit="fill"/>):<Image image={floor} x={0} y={0} width={12} height={20} fit="fill"/>}
+   <RoundedRect x={0} y={0} width={12} height={20} r={0} color={environment.tint}/>
    <Picture picture={floor?world:fallbackWorld}/>
    {level.gates?.map((_,index)=><GateLayer key={index} game={game} level={level} index={index}/>)}
    <RoundedRect x={level.exit.x} y={level.exit.y} width={level.exit.w} height={level.exit.h} r={.1} color="#b9e6d6" opacity={glow}/>
