@@ -46,7 +46,7 @@ for(const id of CAMPAIGN_IDS){
     const state=JSON.parse(JSON.stringify(node.state)) as GameState,leg=perform(state,intent,wait,direction);if(leg)next.push({state,legs:[...node.legs,leg]});
    }
    next.sort((a,b)=>a.state.elapsed-b.state.elapsed);const slots=new Set<string>();frontier=[];
-   for(const node of next){const key=Math.floor(node.state.elapsed*2)+':'+node.state.decoysLeft+':'+node.legs.at(-1)!.decoyDirection;if(slots.has(key))continue;slots.add(key);frontier.push(node);if(frontier.length>=36)break;}
+   for(const node of next){const key=Math.floor(node.state.elapsed*2)+':'+node.state.decoysLeft+':'+node.legs.at(-1)!.decoyDirection;if(slots.has(key))continue;slots.add(key);frontier.push(node);if(frontier.length>=(id==='last-vault'||id==='warden-gate'?100:36))break;}
    console.log(id,'tactical stage',intent.action,frontier.length);
    if(!frontier.length)break;
   }
@@ -55,4 +55,4 @@ for(const id of CAMPAIGN_IDS){
  if(!chosen){console.error(id,'no verified route');process.exitCode=1;continue;}
  const {state,legs,delayTicks}=chosen;reports.push({mission:id,delayTicks,legs,phone:legs.find(l=>l.action==='pickup')!.points,exit:legs.find(l=>l.action==='deliver')!.points,seconds:state.elapsed,score:state.score,deliveries:state.delivered,activations:state.activations});console.log(id,state.elapsed.toFixed(2),'delay',delayTicks,'lures',legs.filter(l=>l.decoyDirection>=0).length);
 }
-if(!process.exitCode)writeFileSync('verification/campaign-routes.json',JSON.stringify({note:'Deterministic security-v2 routes, including explicit waits and decoy directions. Not touchscreen verification.',routes:reports},null,2));
+if(!process.exitCode)writeFileSync('verification/campaign-routes.json',JSON.stringify({note:'Deterministic security-v3 routes, including explicit waits and decoy directions. Not touchscreen verification.',routes:reports},null,2));

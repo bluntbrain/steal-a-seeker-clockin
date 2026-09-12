@@ -9,7 +9,7 @@ export const PATROLS = [
   [{x:3.7,y:10.5},{x:6.6,y:10.5},{x:6.6,y:7.6},{x:4.3,y:7.6},{x:4.3,y:10.5}],
   [{x:7.3,y:4.2},{x:10.5,y:4.2},{x:10.5,y:7.1},{x:7.3,y:7.1}],
 ];
-export const SECURITY={alarmBaseSpeed:1.4,alarmMaxSpeed:1.8,alarmRampSeconds:30,decoySeconds:6,decoyHearing:9,decoyRange:4.4};
+export const SECURITY={alarmBaseSpeed:2.2,alarmMaxSpeed:2.8,alarmRampSeconds:20,reportSeconds:4,chaseRepathSeconds:.45,decoySeconds:6,decoyHearing:9,decoyRange:4.4};
 export function alarmSpeed(seconds:number){'worklet';return seconds<0?1:SECURITY.alarmBaseSpeed+(SECURITY.alarmMaxSpeed-SECURITY.alarmBaseSpeed)*Math.min(1,seconds/SECURITY.alarmRampSeconds);}
 export const GUARD_TUNING = { speed: 1.05, range: 3.7, halfAngle: Math.PI / 5, spotSeconds: .8, forgetSeconds: .55, pauseSeconds: .7 };
 // World units are tiles. Art, collision and test routes share this single definition.
@@ -134,12 +134,12 @@ export const CAMPAIGN_IDS:MissionId[]=['practice','cone-lesson','battery-dash','
 // Authored reinforcements keep clear of the initial spawn and existing cover.
 // The lower sweep pressures the return trip; upper sweeps protect later objectives.
 for(const id of CAMPAIGN_IDS){
- const l=LEVELS[id];l.id=l.id+'-security-v2';
- l.decoys=l.number>=9?3:2;
+ const l=LEVELS[id];l.id=l.id+'-security-v3';
+ l.decoys=l.number===12?6:l.number>=8?3:2;
  for(const guard of l.patrols){if(guard.kind!=='scanner'){guard.investigates=true;guard.hearing=SECURITY.decoyHearing;}guard.alertAfterDelivery=false;}
  if(l.number>=2)l.patrols.push({...patrol(l.number<=5?[{x:10.85,y:3},{x:10.85,y:17.5}]:[{x:2,y:18.6},{x:10.6,y:18.6}],.95,3.2),spotSeconds:1,investigates:true,hearing:SECURITY.decoyHearing});
  if(l.number>=6)l.patrols.push({...patrol(l.mission==='last-vault'?[{x:7,y:1.25},{x:10.6,y:1.25}]:[{x:1.2,y:1.25},{x:10.6,y:1.25}],.85,3),spotSeconds:1,investigates:true,hearing:SECURITY.decoyHearing});
- l.briefing+=' Alarm: guards move 40% faster as soon as you take a phone, rising to 80% faster after 30 seconds. Decoys beep for six seconds; mobile guards within nine tiles investigate.';
+ l.briefing+=' Alarm: guards move 120% faster after pickup, rising to 180% faster after 20 seconds. The stolen phone broadcasts your location every four seconds; guards pursue sightings and search the last reported position. Decoys beep for six seconds; mobile guards within nine tiles investigate.';
 }
 export const MISSIONS=CAMPAIGN_IDS.map(id=>({id,title:LEVELS[id].title,label:`${String(LEVELS[id].number).padStart(2,'0')} · ${LEVELS[id].title}`}));
 // Retained for original regression fixtures. Gameplay resolves its own mission.

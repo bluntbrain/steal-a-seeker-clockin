@@ -1,0 +1,122 @@
+[
+  {
+    "name": "pickup",
+    "duration": 1.3,
+    "loop": false,
+    "prompt": "Premium arcade stealth game PHONE THEFT sound. Immediate tactile magnetic latch snap, a satisfying glassy electronic rising chirrup, then a tight low alarm impact. One coherent polished sound with a punchy attack and short clean tail. Mischievous high tech heist, crisp on phone speakers. No voices, no melody, no ambience.",
+    "provider": "ElevenLabs",
+    "model": "eleven_text_to_sound_v2",
+    "runtimeFile": "pickup.wav",
+    "gainDb": -6.0,
+    "sampleRate": 44100,
+    "channels": 1
+  },
+  {
+    "name": "alarm",
+    "duration": 6,
+    "loop": true,
+    "prompt": "Seamless science fiction security alert loop for a playful heist game. Controlled alternating two tone electronic alarm, short rounded midrange pulses, distant mechanical warning texture. Urgent and readable but not shrill, no piercing frequencies, no real emergency siren. Sparse dry sound design, consistent loudness. No voices, no music, no big impacts.",
+    "provider": "ElevenLabs",
+    "model": "eleven_text_to_sound_v2",
+    "runtimeFile": "alarm.wav",
+    "gainDb": -5.3,
+    "sampleRate": 44100,
+    "channels": 1
+  },
+  {
+    "name": "chase",
+    "duration": 12,
+    "loop": true,
+    "prompt": "Seamless energetic arcade heist chase tension texture. Fast dry clockwork clicks, muted electronic percussion, soft punchy low pulses, subtle ticking at an even 120 beats per minute. Fun and tense like a cartoon robot pursuit. Sparse spacious mix with room for foreground game sounds. No tune, no vocals, no alarm, no crescendos, constant intensity, seamless ending.",
+    "provider": "ElevenLabs",
+    "model": "eleven_text_to_sound_v2",
+    "runtimeFile": "chase.wav",
+    "gainDb": -0.8,
+    "sampleRate": 44100,
+    "channels": 1
+  },
+  {
+    "name": "stealth",
+    "duration": 12,
+    "loop": true,
+    "prompt": "Seamless quiet futuristic vault room ambience for a stealth game. Soft ventilation hum, delicate irregular relay ticking, faint warm electrical buzz, occasional muted distant metal creak. Suspenseful, spacious and low intensity. No music, no beat, no melody, no voices, no sudden loud sound. Smooth consistent looping texture.",
+    "provider": "ElevenLabs",
+    "model": "eleven_text_to_sound_v2",
+    "runtimeFile": "stealth.wav",
+    "gainDb": 22.7,
+    "sampleRate": 44100,
+    "channels": 1
+  },
+  {
+    "name": "spot",
+    "duration": 0.6,
+    "loop": false,
+    "prompt": "Instant robot sighting warning for an arcade stealth game. Two tight sharp but rounded digital radar pips rising in pitch with a tiny metallic click. Highly readable short warning. Dry and punchy, no reverb wash, no voice, no music, no long tail.",
+    "provider": "ElevenLabs",
+    "model": "eleven_text_to_sound_v2",
+    "runtimeFile": "spot.wav",
+    "gainDb": -5.7,
+    "sampleRate": 44100,
+    "channels": 1
+  },
+  {
+    "name": "dash",
+    "duration": 0.6,
+    "loop": false,
+    "prompt": "Single compact futuristic courier dash: snappy compressed air release, quick stereo-like turbine whoosh and soft rubber shoe skid finish. Fast satisfying burst, clean and punchy on small speakers, no explosions, no voices, no music, no ambience.",
+    "provider": "ElevenLabs",
+    "model": "eleven_text_to_sound_v2",
+    "runtimeFile": "dash.wav",
+    "gainDb": -6.0,
+    "sampleRate": 44100,
+    "channels": 1
+  },
+  {
+    "name": "decoy",
+    "duration": 1.2,
+    "loop": false,
+    "prompt": "A small robot noise lure tossed onto a metal floor: one crisp light clack followed immediately by three cheeky rounded electronic chirps, like a toy pretending to be a phone. Playful tactical game sound, distinct from a warning alarm. Dry foreground effect, no music, no voices.",
+    "provider": "ElevenLabs",
+    "model": "eleven_text_to_sound_v2",
+    "runtimeFile": "decoy.wav",
+    "gainDb": -5.6,
+    "sampleRate": 44100,
+    "channels": 1
+  },
+  {
+    "name": "switch",
+    "duration": 0.65,
+    "loop": false,
+    "prompt": "A futuristic relay is activated: satisfying heavy toggle click, tiny electrical zap and a warm short power-up hum. One clean compact switch interaction with an immediate attack. Mechanical and tactile, not a musical notification. No voice, no background ambience.",
+    "provider": "ElevenLabs",
+    "model": "eleven_text_to_sound_v2",
+    "runtimeFile": "switch.wav",
+    "gainDb": -6.0,
+    "sampleRate": 44100,
+    "channels": 1
+  },
+  {
+    "name": "caught",
+    "duration": 1.2,
+    "loop": false,
+    "prompt": "Arcade stealth game captured sound: snappy robot clamp shutting, quick power-down electronic wobble and soft comic rubber thud. Short playful failure, motivates an instant retry, not scary or punishing. No voices, no music, no ambience.",
+    "provider": "ElevenLabs",
+    "model": "eleven_text_to_sound_v2",
+    "runtimeFile": "caught.wav",
+    "gainDb": -3.7,
+    "sampleRate": 44100,
+    "channels": 1
+  },
+  {
+    "name": "extract",
+    "duration": 1.8,
+    "loop": false,
+    "prompt": "Successful sci-fi courier escape: secure docking latch clack, then a bright compact three-step ascending synth reward flourish with a warm short sparkle finish. Satisfying premium arcade game victory effect. Clean foreground sound, immediate attack, no voices, no backing music, no long reverb.",
+    "provider": "ElevenLabs",
+    "model": "eleven_text_to_sound_v2",
+    "runtimeFile": "extract.wav",
+    "gainDb": -5.2,
+    "sampleRate": 44100,
+    "channels": 1
+  }
+]

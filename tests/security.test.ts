@@ -4,12 +4,12 @@ import {initialState,idleInput,step,decoyLanding} from '../src/game/simulation';
 import {makeGuards,updateGuards} from '../src/game/guards';
 import {decoyMessage} from '../src/game/feedback';
 test('real pickup triggers alarm immediately and delivery does not reset it',()=>{
- const s=initialState('two-targets'),l=getLevel(s.mission);s.guards=[];Object.assign(s,{x:l.phone.x,y:l.phone.y});for(let i=0;i<12;i++)step(s,{...idleInput(),interact:true});assert(s.carrying);assert(s.securityAlarm);assert.equal(s.thefts,1);assert.equal(alarmSpeed(s.alarmSeconds),1.4);
+ const s=initialState('two-targets'),l=getLevel(s.mission);s.guards=[];Object.assign(s,{x:l.phone.x,y:l.phone.y});for(let i=0;i<12;i++)step(s,{...idleInput(),interact:true});assert(s.carrying);assert(s.securityAlarm);assert.equal(s.thefts,1);assert.equal(alarmSpeed(s.alarmSeconds),2.2);
  Object.assign(s,{x:l.exit.x+1,y:l.exit.y+.7});for(let i=0;i<31;i++)step(s,idleInput());assert.equal(s.delivered,1);assert(!s.carrying);assert(s.securityAlarm);assert(s.alarmSeconds>=1);assert.equal(initialState(s.mission).securityAlarm,false);
 });
 test('alarm increases actual patrol travel immediately and caps the escalation',()=>{
  const l=getLevel('cone-lesson'),normal=makeGuards(l.mission),fast=makeGuards(l.mission),start=normal[0]!.x;
- updateGuards(normal,-100,-100,.5,l);updateGuards(fast,-100,-100,.5,l,undefined,{power:0,delivered:0,alarmSeconds:0});assert(Math.abs((fast[0]!.x-start)/(normal[0]!.x-start)-1.4)<1e-6);assert.equal(alarmSpeed(30),1.8);assert.equal(alarmSpeed(600),1.8);
+ updateGuards(normal,-100,-100,.5,l);updateGuards(fast,-100,-100,.5,l,undefined,{power:0,delivered:0,alarmSeconds:0});assert(Math.abs((fast[0]!.x-start)/(normal[0]!.x-start)-2.2)<1e-6);assert.equal(alarmSpeed(20),2.8);assert.equal(alarmSpeed(600),2.8);
  const scanner=getLevel('sweep-window'),a=makeGuards(scanner.mission),b=makeGuards(scanner.mission);updateGuards(a,-100,-100,.5,scanner);updateGuards(b,-100,-100,.5,scanner,undefined,{power:0,delivered:0,alarmSeconds:30});assert(b[0]!.clock>a[0]!.clock);assert.notEqual(b[0]!.angle,a[0]!.angle);
 });
 test('all twelve missions have reinforcements and noise lures',()=>{
@@ -33,4 +33,22 @@ test('a guard on a valid narrow patrol lane can path to a decoy beside cover',()
  // x=1.1 is clear for the authored .26 body but rejected by the old .37 navigator.
  assert.equal(g.x,1.1);updateGuards(guards,-100,-100,1/30,l,{x:3.8,y:11.9,kind:'decoy',id:1,ttl:6});assert.equal(g.lureId,1);assert.equal(g.mode,'investigate');
  const old={x:g.x,y:g.y};for(let i=0;i<30;i++)updateGuards(guards,-100,-100,1/30,l,{x:3.8,y:11.9,kind:'decoy',id:1,ttl:5});assert(Math.hypot(g.x-old.x,g.y-old.y)>.5);
+});
+test('theft reports send mobile guards toward the courier around cover, without teleporting',()=>{
+ const l=getLevel('practice'),gs=makeGuards(l.mission),g=gs[0]!,target={x:2.2,y:17.6},before={x:g.x,y:g.y};
+ updateGuards(gs,target.x,target.y,1/30,l,undefined,{power:0,delivered:0,alarmSeconds:0});
+ assert.equal(g.mode,'investigate');assert.deepEqual(g.lastSeen,target);assert(g.path.length>0);assert(Math.hypot(g.x-before.x,g.y-before.y)<.2);
+ const remembered={...g.lastSeen};updateGuards(gs,2.2,16.8,1/30,l,undefined,{power:0,delivered:0,alarmSeconds:.04});assert.deepEqual(g.lastSeen,remembered,'Radio does not know every hidden movement');
+ for(let n=0;n<150;n++)updateGuards(gs,2.2,16.8,1/30,l,undefined,{power:0,delivered:0,alarmSeconds:(n+2)/30});
+ assert.deepEqual(g.lastSeen,{x:2.2,y:16.8});assert(Math.hypot(g.x-before.x,g.y-before.y)>1);
+});
+test('alarm pursuit keeps moving during detection instead of freezing in the cone',()=>{
+ const l={...getLevel('practice'),blockers:[]},gs=makeGuards(l.mission),g=gs[0]!;Object.assign(g,{x:3,y:3,angle:0,wait:3,exposure:.3,seesPlayer:true});const before=g.x;
+ for(let n=0;n<5;n++)updateGuards(gs,5,3,1/30,l,undefined,{power:0,delivered:0,alarmSeconds:n/30});assert(g.x>before);assert(g.exposure>.3);
+});
+test('a decoy can override hidden phone reports and stationary scanners never chase',()=>{
+ const l={...getLevel('practice'),blockers:[]},gs=makeGuards(l.mission),g=gs[0]!;Object.assign(g,{x:3,y:3,angle:0,wait:0});const noise={x:5,y:3,kind:'decoy' as const,id:9,ttl:6};
+ updateGuards(gs,1,15,1/30,l,noise,{power:0,delivered:0,alarmSeconds:0});assert.equal(g.lureId,9);const lurePath=JSON.stringify(g.path);g.nextReport=0;
+ updateGuards(gs,2,15,1/30,l,noise,{power:0,delivered:0,alarmSeconds:1});assert.equal(JSON.stringify(g.path),lurePath);
+ const scan=getLevel('sweep-window'),ss=makeGuards(scan.mission),before={x:ss[0]!.x,y:ss[0]!.y};for(let n=0;n<30;n++)updateGuards(ss,3,15,1/30,scan,undefined,{power:0,delivered:0,alarmSeconds:n/30});assert.deepEqual({x:ss[0]!.x,y:ss[0]!.y},before);
 });

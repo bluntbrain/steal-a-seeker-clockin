@@ -17,3 +17,7 @@ The target is the Archive phone in the top-right corner. The exit is back near y
 - **Dash is optional:** it works while carrying and costs 20 charge. It is not required to open relays.
 
 This guide is also available in **Pause → Settings** while playing level 11. The UI shows relay time while a door is powered. There are four relay activations on the normal out-and-back route; timing around guards can vary.
+
+## Pursuit update
+
+The sound/pursuit v3 update makes guards 2.2× faster after theft, rising to 2.8×, with phone-location reports every four seconds. The earlier browser-run timing above predates that change. Keep the relay order and cover strategy, but save decoys for the escape and throw them away from your next route while hidden. A new deterministic winning route is recorded in `verification/campaign-routes.json`; this is not a replacement for a human touchscreen playtest.
