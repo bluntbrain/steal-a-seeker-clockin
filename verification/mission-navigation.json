@@ -1,0 +1,30 @@
+{
+  "passed": true,
+  "checks": [
+    {
+      "width": 320,
+      "height": 568,
+      "passed": true
+    },
+    {
+      "width": 390,
+      "height": 844,
+      "passed": true
+    },
+    {
+      "width": 430,
+      "height": 932,
+      "passed": true
+    }
+  ],
+  "coverage": [
+    "Missions on first paid entry and reload",
+    "Twelve map nodes",
+    "Hideout only through explicit entry",
+    "Phone inspector retained",
+    "Back to missions",
+    "Locked missions remain locked",
+    "Briefing starts gameplay",
+    "Gameplay returns to missions and pauses"
+  ]
+}
