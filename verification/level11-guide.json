@@ -1,0 +1,25 @@
+{
+  "passed": true,
+  "scope": "Real joystick and action-button input on level 11; prior campaign unlocks seeded only in isolated test profile",
+  "attempts": [
+    {
+      "attempt": 1,
+      "status": "caught",
+      "seconds": 17.466666666666693
+    },
+    {
+      "attempt": 2,
+      "status": "caught",
+      "seconds": 18.200000000000063
+    },
+    {
+      "attempt": 3,
+      "status": "won",
+      "seconds": 37.16666666666712
+    }
+  ],
+  "activations": 4,
+  "battery": 100,
+  "score": 12860,
+  "errors": []
+}
