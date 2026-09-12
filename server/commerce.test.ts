@@ -12,6 +12,8 @@ import type {Order,PaymentQuote,SignInChallenge} from '../shared/commerce';
 import {RankedService,dailyMission} from './ranked-service';
 import {fixtureReplay} from '../tests/fixtures/replay';
 import {PaidService} from './paid-service';
+import {OperatorReview,type ReviewRequest} from './operator-review';
+import {ReplayInvalidError,verifyReplayInWorker} from './replay-runner';
 import type {PaidEntry} from '../shared/paid';
 import {paymentTransaction} from '../src/commerce/payment';
 import {initialState,idleInput} from '../src/game/simulation';
@@ -229,7 +231,7 @@ async function paidHarness(t:{after:(fn:()=>Promise<void>)=>void},options:{token
  const pay=async(entry:PaidEntry,attach=true)=>{const sig=b58(randomBytes(64)),tx=paidTx(entry.quote,sig);tx.blockTime=Math.floor(now.getTime()/1000);txs.set(sig,tx);refs.set(entry.quote.reference,[sig]);if(attach){const r=await post(`/paid/entries/${entry.id}/transaction`,{signature:sig});assert.equal(r.statusCode,200,r.body);return {entry:r.json<PaidEntry>(),sig,tx};}return {entry,sig,tx};};
  const startKeys=new Map<string,string>();
  const start=async(entry:PaidEntry)=>{const startKey=startKeys.get(entry.id)??randomUUID();startKeys.set(entry.id,startKey);const r=await post(`/paid/entries/${entry.id}/start`,{rulesHash:entry.manifest.rulesHash,startKey});assert.equal(r.statusCode,200,r.body);return r.json<PaidEntry>();};
- return {...h,paid,api,post,quoteEntry,pay,start,txs,refs,restart:make,advance:(ms:number)=>{now=new Date(now.getTime()+ms);},blocks:(n:number)=>{height=n;},rpcUnavailable:(v:boolean)=>{unavailable=v;}};
+ return {...h,paid,api,post,quoteEntry,pay,start,txs,refs,entryChain,restart:make,advance:(ms:number)=>{now=new Date(now.getTime()+ms);},blocks:(n:number)=>{height=n;},rpcUnavailable:(v:boolean)=>{unavailable=v;}};
 }
 test('paid entry requires terms and campaign ownership, reserves once, and refuses insufficient return capacity',async t=>{
  const h=await paidHarness(t);assert.equal((await app.inject({method:'GET',url:'/paid/challenge'})).json().enabled,false);
@@ -306,4 +308,48 @@ test('pausing new entries preserves reconciliation, cancellation and queued retu
  const refund=(await h.post(`/paid/entries/${entry.id}/cancel`)).json<PaidEntry>();assert.equal(refund.status,'refunding');
  await h.service.process();h.setInspection({state:'settled',slot:1000});await h.retry();await h.service.process();
  assert.equal((await h.paid.get(h.user.wallet,entry.id)).status,'refunded');assert.equal(h.prepared.length,1);
+});
+function operatorRequest(action:ReviewRequest['action'],targetId:string,expectedHash:string):ReviewRequest{return {id:randomUUID(),action,targetId,expectedHash,actor:'test-operator',note:'Reviewed preserved evidence in this isolated test.',};}
+async function reviewedMissingRun(t:Parameters<typeof paidHarness>[0]){const h=await paidHarness(t),entry=await h.start((await h.pay(await h.quoteEntry())).entry);h.advance(421000);await h.paid.process();assert.equal((await h.paid.get(h.user.wallet,entry.id)).status,'review');return {...h,entry,review:new OperatorReview(pool,h.entryChain,h.service)};}
+test('operator refund is audited once and concurrent or altered retries cannot allocate twice',async t=>{
+ const h=await reviewedMissingRun(t),snapshot=await h.review.inspectEntry(h.entry.id),request=operatorRequest('refund-entry',h.entry.id,snapshot.expectedHash);
+ assert.equal((await h.api.inject({method:'POST',url:'/operator/reviews',headers:h.user.headers,payload:request})).statusCode,404);
+ const [a,b]=await Promise.all([h.review.apply(request),h.review.apply(request)]);assert.deepEqual(a,b);assert.equal(a.status,'refunding');assert.equal((await pool.query('SELECT count(*) FROM return_allocations')).rows[0].count,'1');
+ assert.equal((await pool.query('SELECT count(*) FROM operator_reviews WHERE id=$1',[request.id])).rows[0].count,'1');
+ await assert.rejects(h.review.apply({...request,note:'A different instruction is not the same retry.'}),/different instructions/);
+ await assert.rejects(h.review.apply({...request,id:randomUUID()}),/changed/);
+ await h.service.process();h.setInspection({state:'settled',slot:2000});await h.retry();await h.service.process();assert.equal((await h.paid.get(h.user.wallet,h.entry.id)).status,'refunded');
+});
+test('operator entry review refuses RPC uncertainty, missing receipts and stale decisions without altering reserves',async t=>{
+ const h=await reviewedMissingRun(t),snapshot=await h.review.inspectEntry(h.entry.id),request=operatorRequest('refund-entry',h.entry.id,snapshot.expectedHash);
+ h.rpcUnavailable(true);await assert.rejects(h.review.apply(request),/RPC unavailable/);h.rpcUnavailable(false);
+ const original=h.txs.get(h.entry.quote.signature!);h.txs.delete(h.entry.quote.signature!);await assert.rejects(h.review.apply(request),/could not be reconfirmed/);h.txs.set(h.entry.quote.signature!,original);
+ await pool.query("UPDATE paid_entries SET detail='New evidence arrived' WHERE id=$1",[h.entry.id]);await assert.rejects(h.review.apply(request),/changed/);
+ const fresh=operatorRequest('refund-entry',h.entry.id,(await h.review.inspectEntry(h.entry.id)).expectedHash);await pool.query("DELETE FROM transfer_receipts WHERE source_kind='paid_entry' AND source_id=$1",[h.entry.id]);await assert.rejects(h.review.apply(fresh),/matching payment receipt/);
+ assert.equal((await pool.query('SELECT count(*) FROM return_allocations')).rows[0].count,'0');assert.equal((await pool.query('SELECT state FROM return_reservations')).rows[0].state,'held');assert.equal((await pool.query('SELECT count(*) FROM operator_reviews WHERE id=ANY($1::uuid[])',[[request.id,fresh.id]])).rows[0].count,'0');
+});
+test('operator retry uses the intact stored replay and the pinned verifier rather than an assigned score',async t=>{
+ let broken=true;const h=await paidHarness(t,{verify:async(...args)=>{if(broken)throw new ReplayInvalidError('Archived verifier temporarily unavailable');return verifyReplayInWorker(...args);}}),entry=await h.start((await h.pay(await h.quoteEntry())).entry),{state,replay}=fixtureReplay('battery-dash');h.advance(state.ticks/30*1000+1000);await h.paid.submit(h.user.wallet,entry.id,{runId:entry.run!.id,rulesHash:entry.manifest.rulesHash,replay});await h.paid.process();
+ const review=new OperatorReview(pool,h.entryChain,h.service),snapshot=await review.inspectEntry(entry.id);assert.equal(snapshot.status,'review');
+ const changed=JSON.parse(JSON.stringify(replay));changed.chunks[0].x=changed.chunks[0].x===0?1:0;
+ await pool.query('UPDATE paid_entries SET replay=$2 WHERE id=$1',[entry.id,changed]);await assert.rejects(review.apply(operatorRequest('retry-replay',entry.id,snapshot.expectedHash)),/No intact/);
+ await pool.query('UPDATE paid_entries SET replay=$2 WHERE id=$1',[entry.id,replay]);
+ const result=await review.apply(operatorRequest('retry-replay',entry.id,snapshot.expectedHash));assert.equal(result.status,'verifying_run');broken=false;await h.paid.process();const won=await h.paid.get(h.user.wallet,entry.id);assert.equal(won.status,'won');assert.equal(won.run?.result?.score,state.score);assert.equal(won.return?.outcome,'success');
+});
+test('retrying a return in review preserves its active signed bytes and waits for verified finality',async t=>{
+ const h=await reviewedMissingRun(t),refund=await h.review.apply(operatorRequest('refund-entry',h.entry.id,(await h.review.inspectEntry(h.entry.id)).expectedHash)),id=String(refund.allocationId);
+ await h.service.process();h.setInspection({state:'review',detail:'History needs another provider.'});await h.retry();await h.service.process();const snapshot=await h.review.inspectReturn(id);assert.equal(snapshot.state,'review');assert(snapshot.activeAttempt);
+ const before=(await pool.query('SELECT signature,wire FROM return_attempts WHERE id=$1',[snapshot.activeAttempt])).rows[0];await h.review.apply(operatorRequest('retry-return',id,snapshot.expectedHash));h.setInspection({state:'pending',detail:'Still waiting for finality.'});await h.service.process();assert.equal(h.prepared.length,1);assert.equal(h.sent[1]?.signature,before.signature);assert.equal(h.sent[1]?.wire,before.wire);
+ h.setInspection({state:'settled',slot:2001});await h.retry();await h.service.process();const settled=await h.review.inspectReturn(id);assert.equal(settled.state,'settled');await assert.rejects(h.review.apply(operatorRequest('retry-return',id,settled.expectedHash)),/Only a held/);
+});
+test('operator retry grants a bounded new return budget after eight conclusively failed lifetimes',async t=>{
+ const h=await reviewedMissingRun(t),refund=await h.review.apply(operatorRequest('refund-entry',h.entry.id,(await h.review.inspectEntry(h.entry.id)).expectedHash)),id=String(refund.allocationId);
+ await h.service.process();h.setInspection({state:'failed',detail:'Finalized failure.'});for(let i=0;i<8;i++){await h.retry();await h.service.process();}assert.equal(h.prepared.length,8);
+ const snapshot=await h.review.inspectReturn(id);assert.equal(snapshot.state,'review');assert.equal(snapshot.activeAttempt,null);assert.equal(snapshot.attempts,8);
+ await h.review.apply(operatorRequest('retry-return',id,snapshot.expectedHash));await h.service.process();assert.equal(h.prepared.length,9);assert.equal((await h.review.inspectReturn(id)).attemptCeiling,16);
+});
+test('reviewing an original entry cannot hide an unresolved additional payment',async t=>{
+ const h=await reviewedMissingRun(t);await h.pay(h.entry);
+ const snapshot=await h.review.inspectEntry(h.entry.id);await assert.rejects(h.review.apply(operatorRequest('refund-entry',h.entry.id,snapshot.expectedHash)),/additional payment is unresolved/);
+ assert.equal((await pool.query('SELECT count(*) FROM return_allocations')).rows[0].count,'0');assert.equal((await h.paid.get(h.user.wallet,h.entry.id)).status,'review');
 });

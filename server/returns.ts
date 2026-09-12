@@ -134,7 +134,7 @@ export class ReturnService {
       }
       if (!attempt) {
         const count = Number((await this.pool.query('SELECT count(*) FROM return_attempts WHERE allocation_id=$1', [job.id])).rows[0].count);
-        if (count >= 8) {await update('review', 'Eight transaction lifetimes could not settle. Funds remain reserved for support.'); return true;}
+        if (count >= job.attempt_ceiling) {await update('review', 'The transaction retry budget was exhausted. Funds remain reserved for support.'); return true;}
         const signed = await chain.prepare(binding); // Local sign only.
         const saved = await transaction(this.pool, async db => {
           const current = await db.query('SELECT lease_token,active_attempt,state FROM return_allocations WHERE id=$1 FOR UPDATE', [job.id]);
