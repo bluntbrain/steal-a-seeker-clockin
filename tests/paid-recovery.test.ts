@@ -7,8 +7,8 @@ import rules from '../shared/rules-manifest.json';
 import {createPaidStore} from '../src/paid/store-core';
 import {assertPaidRules,replayTicks,restorePaidState} from '../src/paid/recovery';
 import {recordStep} from '../src/game/recording';
-import {getLevel,type MissionId} from '../src/game/level';
-import fixtures from '../verification/native-replay-fixtures.json';
+import {CAMPAIGN_IDS,getLevel,type MissionId} from '../src/game/level';
+import {fixtureReplay} from './fixtures/replay';
 const wallet='11111111111111111111111111111111';
 function entry():PaidEntry{
  const id=randomUUID(),now=new Date().toISOString();
@@ -53,8 +53,9 @@ test('saved replays reject invalid axes, repeated action edges and oversized run
  for(const c of [{x:128,y:0,buttons:0,ticks:1},{x:0,y:0,buttons:2,ticks:2},{x:0,y:0,buttons:0,ticks:7201},{x:0,y:NaN,buttons:0,ticks:1}])assert.throws(()=>replayTicks({version:1,chunks:[c]},7200));
  assert.equal(replayTicks({version:1,chunks:[]},7200),0);
 });
-test('restored partial runs continue with identical state and recording across all native parity fixtures',()=>{
- for(const f of fixtures.cases){
+test('restored partial runs continue with identical state and recording across all current campaign replays',()=>{
+ for(const id of CAMPAIGN_IDS){
+  const f={name:id,mission:id,replay:fixtureReplay(id).replay};
   const input=f.replay as Replay,mission=f.mission as MissionId;replayTicks(input,getLevel(mission).hardLimitSeconds*30);
   const split=Math.max(1,Math.floor(input.chunks.length/2)),prefix:Replay={version:1,chunks:input.chunks.slice(0,split).map(c=>({...c}))};
   const state=restorePaidState(mission,prefix),recording:ReplayChunk[]=prefix.chunks.map(c=>({...c}));let dash=state.dashSeen,tool=state.toolSeen;

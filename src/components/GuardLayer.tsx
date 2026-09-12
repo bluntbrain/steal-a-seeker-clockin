@@ -1,5 +1,5 @@
 import React from 'react';
-import {Circle,Group,Oval,Path,RoundedRect,Skia} from '@shopify/react-native-skia';
+import {Circle,Group,Oval,Path,DashPathEffect,RoundedRect,Skia} from '@shopify/react-native-skia';
 import {useDerivedValue,type SharedValue} from 'react-native-reanimated';
 import {getLevel} from '../game/level';
 import {sightDistance} from '../game/guards';
@@ -22,8 +22,10 @@ export default function GuardLayer({game,alpha,index}:Props){
   }
   p.close();return p;
  });
+ const lurePath=useDerivedValue(()=>{const p=Skia.Path.Make(),g=game.value.guards[index];if(!g||!g.active||g.seesPlayer||game.value.decoy.ttl<=0||g.lureId!==game.value.decoy.id||g.mode!=='investigate')return p;p.moveTo(g.x,g.y);for(let i=g.pathIndex;i<g.path.length;i++)p.lineTo(g.path[i]!.x,g.path[i]!.y);return p;});
+ const listening=useDerivedValue(()=>{const g=game.value.guards[index];return g&&g.active&&!g.seesPlayer&&game.value.decoy.ttl>0&&g.lureId===game.value.decoy.id&&(g.mode==='investigate'||g.mode==='search')?1:0;});
  return <Group opacity={visible}>
-  <Path path={cone} color={color} opacity={opacity}/>
+  <Path path={lurePath} color="#CFE6E4" style="stroke" strokeWidth={.035} opacity={.65}><DashPathEffect intervals={[.12,.12]}/></Path><Path path={cone} color={color} opacity={opacity}/>
   <Path path={cone} color={color} opacity={opacity} style="stroke" strokeWidth={.025}/>
   <Group transform={pose}>
    <Oval x={-.42} y={-.39} width={.84} height={.84} color="#06080B" opacity={.65}/>
@@ -54,7 +56,7 @@ export default function GuardLayer({game,alpha,index}:Props){
     {kind!=='warden'&&<Circle cx={-.32} cy={0} r={.05} color={color}/>}
    </>}
   </Group>
-  <Group transform={bar}>
+  <Group transform={bar}><Circle cx={.45} cy={-.18} r={.13} color="#CFE6E4" opacity={listening}/><Circle cx={.45} cy={-.18} r={.065} color="#243F48" opacity={listening}/>
    <RoundedRect x={0} y={0} width={.9} height={.10} r={.04} color="#152023"/>
    <RoundedRect x={0} y={0} width={width} height={.10} r={.04} color="#ff8169"/>
   </Group>

@@ -1,5 +1,5 @@
 const {chromium}=require('playwright'),fs=require('fs'),assert=require('node:assert/strict');
-(async()=>{const verified=JSON.parse(fs.readFileSync('verification/2d-campaign-web-playtest.json'));assert.equal(verified.status,'passed');assert.equal(verified.results.length,12);
+(async()=>{const verified=JSON.parse(fs.readFileSync('verification/security-campaign-web-playtest.json'));assert.equal(verified.status,'passed');assert.equal(verified.results.length,12);
  const browser=await chromium.launch({executablePath:'/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',headless:true});try{const page=await browser.newPage({viewport:{width:430,height:932}}),errors=[];page.on('pageerror',e=>errors.push(e.message));
  // A separate gallery profile restores only the real completed campaign results.
  const missions=Object.fromEntries(verified.results.map(({mission,result:s})=>[mission,{stars:1+Number(s.battery>=40)+Number(!s.spotted),seconds:s.elapsed,score:s.score,battery:s.battery,completions:1}]));

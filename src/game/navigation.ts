@@ -1,6 +1,8 @@
 import {intersectsBox} from './geometry';
-import type {LevelDefinition,Point} from './level';
-const RADIUS=.37;
+import {TUNING,type LevelDefinition,type Point} from './level';
+// Use the authored collision radius: a larger pathfinding radius rejects guards
+// already standing on valid patrol lanes, making decoys appear to do nothing.
+const RADIUS=TUNING.radius;
 function blocked(x:number,y:number,level:LevelDefinition){'worklet';for(const b of level.blockers)if(intersectsBox(x,y,b,RADIUS))return true;return false;}
 export function walkableSegment(a:Point,b:Point,level:LevelDefinition){'worklet';const steps=Math.max(1,Math.ceil(Math.hypot(a.x-b.x,a.y-b.y)/.08));for(let i=0;i<=steps;i++)if(blocked(a.x+(b.x-a.x)*i/steps,a.y+(b.y-a.y)*i/steps,level))return false;return true;}
 // Bounded half-tile grid, deterministic neighbor order. Used only when an AI

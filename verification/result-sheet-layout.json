@@ -1,0 +1,150 @@
+{
+  "passed": true,
+  "scope": "Actual shared React Native Web ResultSheet component with labelled sample messages; layout-only gallery",
+  "results": [
+    {
+      "state": "success",
+      "width": 320,
+      "height": 568,
+      "sheetHeight": 225
+    },
+    {
+      "state": "caught",
+      "width": 320,
+      "height": 568,
+      "sheetHeight": 214
+    },
+    {
+      "state": "timeout",
+      "width": 320,
+      "height": 568,
+      "sheetHeight": 214
+    },
+    {
+      "state": "pause",
+      "width": 320,
+      "height": 568,
+      "sheetHeight": 256
+    },
+    {
+      "state": "recovery",
+      "width": 320,
+      "height": 568,
+      "sheetHeight": 250
+    },
+    {
+      "state": "pending",
+      "width": 320,
+      "height": 568,
+      "sheetHeight": 252
+    },
+    {
+      "state": "success",
+      "width": 390,
+      "height": 844,
+      "sheetHeight": 242
+    },
+    {
+      "state": "caught",
+      "width": 390,
+      "height": 844,
+      "sheetHeight": 242
+    },
+    {
+      "state": "timeout",
+      "width": 390,
+      "height": 844,
+      "sheetHeight": 242
+    },
+    {
+      "state": "pause",
+      "width": 390,
+      "height": 844,
+      "sheetHeight": 286
+    },
+    {
+      "state": "recovery",
+      "width": 390,
+      "height": 844,
+      "sheetHeight": 280
+    },
+    {
+      "state": "pending",
+      "width": 390,
+      "height": 844,
+      "sheetHeight": 280
+    },
+    {
+      "state": "success",
+      "width": 430,
+      "height": 932,
+      "sheetHeight": 242
+    },
+    {
+      "state": "caught",
+      "width": 430,
+      "height": 932,
+      "sheetHeight": 242
+    },
+    {
+      "state": "timeout",
+      "width": 430,
+      "height": 932,
+      "sheetHeight": 242
+    },
+    {
+      "state": "pause",
+      "width": 430,
+      "height": 932,
+      "sheetHeight": 286
+    },
+    {
+      "state": "recovery",
+      "width": 430,
+      "height": 932,
+      "sheetHeight": 280
+    },
+    {
+      "state": "pending",
+      "width": 430,
+      "height": 932,
+      "sheetHeight": 280
+    },
+    {
+      "state": "success",
+      "width": 844,
+      "height": 390,
+      "sheetHeight": 225
+    },
+    {
+      "state": "caught",
+      "width": 844,
+      "height": 390,
+      "sheetHeight": 212
+    },
+    {
+      "state": "timeout",
+      "width": 844,
+      "height": 390,
+      "sheetHeight": 212
+    },
+    {
+      "state": "pause",
+      "width": 844,
+      "height": 390,
+      "sheetHeight": 256
+    },
+    {
+      "state": "recovery",
+      "width": 844,
+      "height": 390,
+      "sheetHeight": 250
+    },
+    {
+      "state": "pending",
+      "width": 844,
+      "height": 390,
+      "sheetHeight": 250
+    }
+  ]
+}

@@ -1,17 +1,30 @@
 import React,{memo,useMemo} from 'react';
-import {Canvas,Group,Picture,Image,Atlas,Circle,RoundedRect,Oval,Line,ColorMatrix,useImage,useRSXformBuffer} from '@shopify/react-native-skia';
+import {Canvas,Group,Picture,Image,Atlas,Circle,RoundedRect,Oval,Line,Path,Skia,DashPathEffect,ColorMatrix,useImage,useRSXformBuffer} from '@shopify/react-native-skia';
 import {useDerivedValue,type SharedValue} from 'react-native-reanimated';
 import {makeWarehouse} from '../game/art';
-import {TUNING,type LevelDefinition} from '../game/level';
-import {targetPhone,type GameState} from '../game/simulation';
+import {TUNING,SECURITY,type LevelDefinition} from '../game/level';
+import {targetPhone,decoyLanding,type GameState,type Input} from '../game/simulation';
 import frames from '../../assets/courier.frames.json';
 import GuardLayer from './GuardLayer';
-type Props={size:number;game:SharedValue<GameState>;alpha:SharedValue<number>;clock:SharedValue<number>;level:LevelDefinition;appearance?:{outfit?:string;trail?:string;reducedEffects?:boolean}};
+type Props={size:number;input:SharedValue<Input>;game:SharedValue<GameState>;alpha:SharedValue<number>;clock:SharedValue<number>;level:LevelDefinition;appearance?:{outfit?:string;trail?:string;reducedEffects?:boolean}};
 const cleanAlpha=[1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,1.5,-.5];
 function GateLayer({game,level,index}:Pick<Props,'game'|'level'>&{index:number}){const b=level.gates![index]!.box,color=useDerivedValue(()=>game.value.closedGates[index]?'#edb768':'#99dfc4'),opacity=useDerivedValue(()=>game.value.closedGates[index]?.85:.2);return <RoundedRect x={b.x} y={b.y} width={b.w} height={b.h} r={.04} color={color} opacity={opacity}/>;}
-function DecoyLayer({game}:Pick<Props,'game'>){const x=useDerivedValue(()=>game.value.decoy.x),y=useDerivedValue(()=>game.value.decoy.y),radius=useDerivedValue(()=>.45+(2.5-game.value.decoy.ttl)*.4),opacity=useDerivedValue(()=>game.value.decoy.ttl/2.5*.5);return <Circle cx={x} cy={y} r={radius} color="#ffc778" opacity={opacity}/>;}
+function DecoyLayer({game,input,reduced}:{game:SharedValue<GameState>;input:SharedValue<Input>;reduced:boolean}){
+ const landing=useDerivedValue(()=>decoyLanding(game.value,input.value));
+ const aim=useDerivedValue(()=>{const p=Skia.Path.Make();p.moveTo(game.value.x,game.value.y);p.lineTo(landing.value.x,landing.value.y);return p;});
+ const aimOpacity=useDerivedValue(()=>game.value.status==='playing'&&game.value.decoysLeft>0&&game.value.decoy.ttl===0?.38:0);
+ const aimColor=useDerivedValue(()=>landing.value.distance>=.6?'#CFE6E4':'#FF827A');
+ const aimX=useDerivedValue(()=>landing.value.x),aimY=useDerivedValue(()=>landing.value.y);
+ const x=useDerivedValue(()=>game.value.decoy.x),y=useDerivedValue(()=>game.value.decoy.y);
+ const radius=useDerivedValue(()=>reduced?.8:.35+((SECURITY.decoySeconds-game.value.decoy.ttl)%1)*2.1);
+ const opacity=useDerivedValue(()=>game.value.decoy.ttl>0?1:0);
+ return <>
+ <Group opacity={aimOpacity}><Path path={aim} color={aimColor} style="stroke" strokeWidth={.035}><DashPathEffect intervals={[.14,.12]}/></Path><Circle cx={aimX} cy={aimY} r={.23} style="stroke" strokeWidth={.035} color={aimColor}/></Group>
+ <Group opacity={opacity}><Circle cx={x} cy={y} r={radius} style="stroke" strokeWidth={.045} color="#CFE6E4" opacity={.65}/><Circle cx={x} cy={y} r={.26} color="#152D37"/><Circle cx={x} cy={y} r={.18} color="#CFE6E4"/><Circle cx={x} cy={y} r={.07} color="#304E56"/></Group>
+ </>;
+}
 function SwitchLayer({game,level,index}:Pick<Props,'game'|'level'>&{index:number}){const p=level.switches![index]!,color=useDerivedValue(()=>(p.kind==='power'?game.value.power===1:(game.value.relayTimers[p.channel??0]??0)>0)?'#a8ecd7':'#edb768');return <RoundedRect x={p.x-.4} y={p.y-.4} width={.8} height={.8} r={.06} color={color}/>;}
-export default memo(function GameCanvas({size,game,alpha,clock,level,appearance={}}:Props){
+export default memo(function GameCanvas({size,input,game,alpha,clock,level,appearance={}}:Props){
  const world=useMemo(()=>makeWarehouse(false,level),[level]),fallbackWorld=useMemo(()=>makeWarehouse(true,level),[level]);
  const floor=useImage(level.number>=9?require('../../assets/visual-v2/vault-floor-v2.png'):level.number>=5?require('../../assets/visual-v2/rooftop-floor-v2.png'):require('../../assets/warehouse-floor-v1.png'));
  const cabinet=useImage(require('../../assets/visual-v2/cover-cabinet-v2.png'));
@@ -59,7 +72,7 @@ export default memo(function GameCanvas({size,game,alpha,clock,level,appearance=
    </Group>
    {level.patrols.map((_,index)=><GuardLayer key={index} game={game} alpha={alpha} index={index}/>)}
    {level.switches?.map((_,index)=><SwitchLayer key={index} game={game} level={level} index={index}/>)}
-   <DecoyLayer game={game}/>
+   <DecoyLayer game={game} input={input} reduced={reduced}/>
    <Group transform={escapeTransform} opacity={escapeOpacity}>
     <RoundedRect x={-.9} y={-.045} width={.7} height={.09} r={.045} color="#CFE6E4"/>
     <Circle cx={-1.05} cy={0} r={.045} color="#CFE6E4"/>

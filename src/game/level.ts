@@ -9,6 +9,8 @@ export const PATROLS = [
   [{x:3.7,y:10.5},{x:6.6,y:10.5},{x:6.6,y:7.6},{x:4.3,y:7.6},{x:4.3,y:10.5}],
   [{x:7.3,y:4.2},{x:10.5,y:4.2},{x:10.5,y:7.1},{x:7.3,y:7.1}],
 ];
+export const SECURITY={alarmBaseSpeed:1.4,alarmMaxSpeed:1.8,alarmRampSeconds:30,decoySeconds:6,decoyHearing:9,decoyRange:4.4};
+export function alarmSpeed(seconds:number){'worklet';return seconds<0?1:SECURITY.alarmBaseSpeed+(SECURITY.alarmMaxSpeed-SECURITY.alarmBaseSpeed)*Math.min(1,seconds/SECURITY.alarmRampSeconds);}
 export const GUARD_TUNING = { speed: 1.05, range: 3.7, halfAngle: Math.PI / 5, spotSeconds: .8, forgetSeconds: .55, pauseSeconds: .7 };
 // World units are tiles. Art, collision and test routes share this single definition.
 const original = {
@@ -41,11 +43,11 @@ const crate=(x:number,y:number,w:number,h:number):Box=>({x,y,w,h,kind:'crate'});
 const rack=(x:number,y:number,w:number,h:number):Box=>({x,y,w,h,kind:'rack'});
 const patrol=(route:Point[],speed=1.05,range=3.7):GuardSpec=>({route,speed,range,halfAngle:Math.PI/5,spotSeconds:.8,pauseSeconds:.7});
 export const LEVELS:Record<MissionId,LevelDefinition> = {
- practice:{...original,mission:'practice',title:'Quiet Pickup',number:1,briefing:'Find the phone, stop and hold TAKE. Carry it to the mint exit. No guards in this first room.',patrols:[],floorColor:'#263938'},
+ practice:{...original,mission:'practice',title:'Quiet Pickup',number:1,briefing:'Find the phone, stop and hold TAKE. Carry it to the mint exit. One guard watches the pickup lane. Taking the phone raises the alarm. Use a decoy, then dash to the exit.',patrols:[{...patrol([{x:7,y:7.5},{x:10.5,y:7.5}],.75,2.8),spotSeconds:1.1}],floorColor:'#263938'},
  'cone-lesson':{
   id:'cone-lesson-v1',mission:'cone-lesson',title:'Cone Lesson',number:2,width:12,height:20,
   spawn:{x:2,y:17.6},phone:{x:9.3,y:4.1},exit:{x:1.2,y:1.2,w:2.5,h:1.8},targetSeconds:90,hardLimitSeconds:180,
-  briefing:'One robot circles the central rack. Its amber cone stops at cover. Wait for it to turn, then cross the open lane.',floorColor:'#2d3c42',
+  briefing:'Two robots cover the central rack and the lower lane. Its amber cone stops at cover. Wait for it to turn, then cross the open lane.',floorColor:'#2d3c42',
   blockers:[...boundary,rack(4.5,7.8,2.8,4.4),crate(1.6,12.5,1.8,2),crate(8.4,13.7,2,2.3),crate(8.3,6.6,2.1,1.3),rack(4.8,2.7,1.6,2.7)],
   patrols:[patrol([{x:3.7,y:12.9},{x:7.9,y:12.9},{x:7.9,y:8.5},{x:7.9,y:6},{x:3.7,y:6}],.95,3.4)]
  },
@@ -104,7 +106,7 @@ export const LEVELS:Record<MissionId,LevelDefinition> = {
  'two-targets':{
   id:'two-targets-v1',mission:'two-targets',title:'Two Targets',number:10,width:12,height:20,
   spawn:{x:2,y:17.5},phone:{x:2.2,y:2.5},targets:[{x:2.2,y:2.5},{x:9.5,y:3}],exit:{x:7.2,y:16.8,w:2.5,h:1.8},targetSeconds:240,hardLimitSeconds:480,decoys:2,
-  briefing:'Recover two phones, one at a time. Deliver the first before collecting the second. The patrol speeds up after your first delivery. Each phone has its own charge.',floorColor:'#30374a',
+  briefing:'Recover two phones, one at a time. Deliver the first before collecting the second. The alarm starts on the first pickup and stays on between deliveries. Each phone has its own charge.',floorColor:'#30374a',
   blockers:[...boundary,rack(4.7,9.2,2,4.1),crate(1.4,12.1,1.8,2),crate(8.5,11.8,1.9,2),rack(4.5,2.3,1.6,2.5),crate(1.5,6.5,1.8,1.7),crate(8.6,6.8,1.8,1.7)],
   patrols:[{...patrol([{x:3.8,y:7.8},{x:7.9,y:7.8},{x:7.9,y:5.6},{x:3.8,y:5.6}],.95,3.6),investigates:true,alertAfterDelivery:true}]
  },
@@ -129,6 +131,16 @@ export const LEVELS:Record<MissionId,LevelDefinition> = {
  'night-shift':{...original,id:'legacy-night-shift-v1',mission:'night-shift',title:'Night Shift',number:0,briefing:'Original two-patrol test room. This is a separate practice room, outside campaign progression.',patrols:PATROLS.map(route=>patrol(route)),floorColor:'#263938'},
 };
 export const CAMPAIGN_IDS:MissionId[]=['practice','cone-lesson','battery-dash','crossing-signals','sweep-window','narrow-crossing','false-footsteps','warden-gate','power-trade','two-targets','silent-circuit','last-vault'];
+// Authored reinforcements keep clear of the initial spawn and existing cover.
+// The lower sweep pressures the return trip; upper sweeps protect later objectives.
+for(const id of CAMPAIGN_IDS){
+ const l=LEVELS[id];l.id=l.id+'-security-v2';
+ l.decoys=l.number>=9?3:2;
+ for(const guard of l.patrols){if(guard.kind!=='scanner'){guard.investigates=true;guard.hearing=SECURITY.decoyHearing;}guard.alertAfterDelivery=false;}
+ if(l.number>=2)l.patrols.push({...patrol(l.number<=5?[{x:10.85,y:3},{x:10.85,y:17.5}]:[{x:2,y:18.6},{x:10.6,y:18.6}],.95,3.2),spotSeconds:1,investigates:true,hearing:SECURITY.decoyHearing});
+ if(l.number>=6)l.patrols.push({...patrol(l.mission==='last-vault'?[{x:7,y:1.25},{x:10.6,y:1.25}]:[{x:1.2,y:1.25},{x:10.6,y:1.25}],.85,3),spotSeconds:1,investigates:true,hearing:SECURITY.decoyHearing});
+ l.briefing+=' Alarm: guards move 40% faster as soon as you take a phone, rising to 80% faster after 30 seconds. Decoys beep for six seconds; mobile guards within nine tiles investigate.';
+}
 export const MISSIONS=CAMPAIGN_IDS.map(id=>({id,title:LEVELS[id].title,label:`${String(LEVELS[id].number).padStart(2,'0')} · ${LEVELS[id].title}`}));
 // Retained for original regression fixtures. Gameplay resolves its own mission.
 export const LEVEL=LEVELS.practice;

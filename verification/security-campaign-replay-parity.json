@@ -1,0 +1,173 @@
+{
+  "scope": "Actual browser input recorder compared with pinned server verifier",
+  "results": [
+    {
+      "mission": "practice",
+      "rulesHash": "a3d5bfdb883359836b5fa5abfd76474940c6eac158a456d65a30f993971c0769",
+      "status": "passed",
+      "result": {
+        "status": "won",
+        "score": 12235,
+        "ticks": 361,
+        "seconds": 12.033333333333301,
+        "battery": 100,
+        "delivered": 1,
+        "spotted": true
+      }
+    },
+    {
+      "mission": "cone-lesson",
+      "rulesHash": "a3d5bfdb883359836b5fa5abfd76474940c6eac158a456d65a30f993971c0769",
+      "status": "passed",
+      "result": {
+        "status": "won",
+        "score": 12380,
+        "ticks": 395,
+        "seconds": 13.16666666666663,
+        "battery": 100,
+        "delivered": 1,
+        "spotted": false
+      }
+    },
+    {
+      "mission": "battery-dash",
+      "rulesHash": "a3d5bfdb883359836b5fa5abfd76474940c6eac158a456d65a30f993971c0769",
+      "status": "passed",
+      "result": {
+        "status": "won",
+        "score": 12495,
+        "ticks": 608,
+        "seconds": 20.266666666666833,
+        "battery": 100,
+        "delivered": 1,
+        "spotted": false
+      }
+    },
+    {
+      "mission": "crossing-signals",
+      "rulesHash": "a3d5bfdb883359836b5fa5abfd76474940c6eac158a456d65a30f993971c0769",
+      "status": "passed",
+      "result": {
+        "status": "won",
+        "score": 12685,
+        "ticks": 379,
+        "seconds": 12.633333333333299,
+        "battery": 100,
+        "delivered": 1,
+        "spotted": true
+      }
+    },
+    {
+      "mission": "sweep-window",
+      "rulesHash": "a3d5bfdb883359836b5fa5abfd76474940c6eac158a456d65a30f993971c0769",
+      "status": "passed",
+      "result": {
+        "status": "won",
+        "score": 12685,
+        "ticks": 388,
+        "seconds": 12.933333333333298,
+        "battery": 100,
+        "delivered": 1,
+        "spotted": false
+      }
+    },
+    {
+      "mission": "narrow-crossing",
+      "rulesHash": "a3d5bfdb883359836b5fa5abfd76474940c6eac158a456d65a30f993971c0769",
+      "status": "passed",
+      "result": {
+        "status": "won",
+        "score": 12815,
+        "ticks": 486,
+        "seconds": 16.199999999999964,
+        "battery": 100,
+        "delivered": 1,
+        "spotted": true
+      }
+    },
+    {
+      "mission": "false-footsteps",
+      "rulesHash": "a3d5bfdb883359836b5fa5abfd76474940c6eac158a456d65a30f993971c0769",
+      "status": "passed",
+      "result": {
+        "status": "won",
+        "score": 12835,
+        "ticks": 385,
+        "seconds": 12.833333333333298,
+        "battery": 100,
+        "delivered": 1,
+        "spotted": false
+      }
+    },
+    {
+      "mission": "warden-gate",
+      "rulesHash": "a3d5bfdb883359836b5fa5abfd76474940c6eac158a456d65a30f993971c0769",
+      "status": "passed",
+      "result": {
+        "status": "won",
+        "score": 12975,
+        "ticks": 446,
+        "seconds": 14.866666666666625,
+        "battery": 100,
+        "delivered": 1,
+        "spotted": true
+      }
+    },
+    {
+      "mission": "power-trade",
+      "rulesHash": "a3d5bfdb883359836b5fa5abfd76474940c6eac158a456d65a30f993971c0769",
+      "status": "passed",
+      "result": {
+        "status": "won",
+        "score": 12775,
+        "ticks": 749,
+        "seconds": 24.966666666667066,
+        "battery": 100,
+        "delivered": 1,
+        "spotted": true
+      }
+    },
+    {
+      "mission": "two-targets",
+      "rulesHash": "a3d5bfdb883359836b5fa5abfd76474940c6eac158a456d65a30f993971c0769",
+      "status": "passed",
+      "result": {
+        "status": "won",
+        "score": 15000,
+        "ticks": 1181,
+        "seconds": 39.366666666666994,
+        "battery": 100,
+        "delivered": 2,
+        "spotted": true
+      }
+    },
+    {
+      "mission": "silent-circuit",
+      "rulesHash": "a3d5bfdb883359836b5fa5abfd76474940c6eac158a456d65a30f993971c0769",
+      "status": "passed",
+      "result": {
+        "status": "won",
+        "score": 12860,
+        "ticks": 1123,
+        "seconds": 37.43333333333377,
+        "battery": 100,
+        "delivered": 1,
+        "spotted": false
+      }
+    },
+    {
+      "mission": "last-vault",
+      "rulesHash": "a3d5bfdb883359836b5fa5abfd76474940c6eac158a456d65a30f993971c0769",
+      "status": "passed",
+      "result": {
+        "status": "won",
+        "score": 14965,
+        "ticks": 1398,
+        "seconds": 46.599999999999916,
+        "battery": 100,
+        "delivered": 2,
+        "spotted": true
+      }
+    }
+  ]
+}

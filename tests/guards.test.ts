@@ -4,8 +4,8 @@ import { initialState, idleInput, step, blocked } from '../src/game/simulation';
 import { makeGuards, sees, sightDistance, updateGuards } from '../src/game/guards';
 import { GUARD_TUNING } from '../src/game/level';
 
-test('practice is unguarded; night shift starts with two independent patrols',()=>{
- assert.equal(initialState().guards.length,0);
+test('opening mission has a guard; legacy night shift retains two independent patrols',()=>{
+ assert.equal(initialState().guards.length,1);
  const a=initialState('night-shift'),b=initialState('night-shift');
  assert.equal(a.guards.length,2);a.guards[0]!.exposure=.5;assert.equal(b.guards[0]!.exposure,0);
 });

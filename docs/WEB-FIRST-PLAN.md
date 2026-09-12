@@ -24,3 +24,7 @@ The user rejected live 3D on 12 September. All active modes now use Skia 2D and 
 ## Deferred, still required for release
 
 Physical Android / Phantom test, stable HTTPS API, funded devnet mint and live settlement, production signing, performance / thermal run, final asset polish, hackathon APK / demo / deck. Browser playtest completion does not establish these.
+
+## Completed browser security pass
+
+More guards across all missions, six-second noise beacons with visible guard response, pickup-triggered red alarm and siren, 40–80% escalating speed, and persistent alarm between deliveries are implemented. All twelve browser routes and pinned replay checks pass. Detailed rules and test instructions: [SECURITY-DIFFICULTY.md](SECURITY-DIFFICULTY.md).

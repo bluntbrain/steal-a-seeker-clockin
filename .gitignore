@@ -18,3 +18,7 @@ __pycache__/
 *.jks
 *.keystore
 !android/app/debug.keystore
+
+# Generated component gallery; rebuilt by export:web
+design/visual-v2/sheets/preview.js
+design/visual-v2/sheets/assets/

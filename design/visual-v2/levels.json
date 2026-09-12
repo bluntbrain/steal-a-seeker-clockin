@@ -3,84 +3,84 @@
     "id": "practice",
     "number": 1,
     "title": "Quiet Pickup",
-    "briefing": "Find the phone, stop and hold TAKE. Carry it to the mint exit. No guards in this first room.",
-    "guards": 0
+    "briefing": "Find the phone, stop and hold TAKE. Carry it to the mint exit. One guard watches the pickup lane. Taking the phone raises the alarm. Use a decoy, then dash to the exit. Alarm: guards move 40% faster as soon as you take a phone, rising to 80% faster after 30 seconds. Decoys beep for six seconds; mobile guards within nine tiles investigate.",
+    "guards": 1
   },
   {
     "id": "cone-lesson",
     "number": 2,
     "title": "Cone Lesson",
-    "briefing": "One robot circles the central rack. Its amber cone stops at cover. Wait for it to turn, then cross the open lane.",
-    "guards": 1
+    "briefing": "Two robots cover the central rack and the lower lane. Its amber cone stops at cover. Wait for it to turn, then cross the open lane. Alarm: guards move 40% faster as soon as you take a phone, rising to 80% faster after 30 seconds. Decoys beep for six seconds; mobile guards within nine tiles investigate.",
+    "guards": 2
   },
   {
     "id": "battery-dash",
     "number": 3,
     "title": "Battery Dash",
-    "briefing": "Bring the phone back down the east lane. Dash across the exposed stretch, or take the longer route behind the racks. Empty charge still lets you walk.",
-    "guards": 1
+    "briefing": "Bring the phone back down the east lane. Dash across the exposed stretch, or take the longer route behind the racks. Empty charge still lets you walk. Alarm: guards move 40% faster as soon as you take a phone, rising to 80% faster after 30 seconds. Decoys beep for six seconds; mobile guards within nine tiles investigate.",
+    "guards": 2
   },
   {
     "id": "crossing-signals",
     "number": 4,
     "title": "Crossing Signals",
-    "briefing": "Two patrols cover different crossings. The central crates make a waiting pocket. Cross one lane at a time; rushing both is harder.",
-    "guards": 2
+    "briefing": "Two patrols cover different crossings. The central crates make a waiting pocket. Cross one lane at a time; rushing both is harder. Alarm: guards move 40% faster as soon as you take a phone, rising to 80% faster after 30 seconds. Decoys beep for six seconds; mobile guards within nine tiles investigate.",
+    "guards": 3
   },
   {
     "id": "sweep-window",
     "number": 5,
     "title": "Sweep Window",
-    "briefing": "The tower scanner sweeps across the roof. Wait behind a shelter, then move while its beam turns away. The beam cannot see through cover.",
-    "guards": 1
+    "briefing": "The tower scanner sweeps across the roof. Wait behind a shelter, then move while its beam turns away. The beam cannot see through cover. Alarm: guards move 40% faster as soon as you take a phone, rising to 80% faster after 30 seconds. Decoys beep for six seconds; mobile guards within nine tiles investigate.",
+    "guards": 2
   },
   {
     "id": "narrow-crossing",
     "number": 6,
     "title": "Narrow Crossing",
-    "briefing": "Two gates alternate across the middle of the roof. Mint means open; amber means wait. The gates wait for you to clear the doorway before closing.",
-    "guards": 1
+    "briefing": "Two gates alternate across the middle of the roof. Mint means open; amber means wait. The gates wait for you to clear the doorway before closing. Alarm: guards move 40% faster as soon as you take a phone, rising to 80% faster after 30 seconds. Decoys beep for six seconds; mobile guards within nine tiles investigate.",
+    "guards": 3
   },
   {
     "id": "false-footsteps",
     "number": 7,
     "title": "False Footsteps",
-    "briefing": "Throw a decoy in the direction you face. Nearby robots investigate the sound, search there, then return. Use the opening or take the long route behind cover.",
-    "guards": 1
+    "briefing": "Throw a decoy in the direction you face. Nearby robots investigate the sound, search there, then return. Use the opening or take the long route behind cover. Alarm: guards move 40% faster as soon as you take a phone, rising to 80% faster after 30 seconds. Decoys beep for six seconds; mobile guards within nine tiles investigate.",
+    "guards": 3
   },
   {
     "id": "warden-gate",
     "number": 8,
     "title": "Warden Gate",
-    "briefing": "The Warden is slow, with a longer view. Lure it away from the exit. A dash also makes noise, so save it for the escape.",
-    "guards": 1
+    "briefing": "The Warden is slow, with a longer view. Lure it away from the exit. A dash also makes noise, so save it for the escape. Alarm: guards move 40% faster as soon as you take a phone, rising to 80% faster after 30 seconds. Decoys beep for six seconds; mobile guards within nine tiles investigate.",
+    "guards": 3
   },
   {
     "id": "power-trade",
     "number": 9,
     "title": "Power Trade",
-    "briefing": "Power A opens the west door. Power B opens the east door and turns on its scanner. Stop on a switch and press ACT to change circuits. There is a switch on each side.",
-    "guards": 1
+    "briefing": "Power A opens the west door. Power B opens the east door and turns on its scanner. Stop on a switch and press ACT to change circuits. There is a switch on each side. Alarm: guards move 40% faster as soon as you take a phone, rising to 80% faster after 30 seconds. Decoys beep for six seconds; mobile guards within nine tiles investigate.",
+    "guards": 3
   },
   {
     "id": "two-targets",
     "number": 10,
     "title": "Two Targets",
-    "briefing": "Recover two phones, one at a time. Deliver the first before collecting the second. The patrol speeds up after your first delivery. Each phone has its own charge.",
-    "guards": 1
+    "briefing": "Recover two phones, one at a time. Deliver the first before collecting the second. The alarm starts on the first pickup and stays on between deliveries. Each phone has its own charge. Alarm: guards move 40% faster as soon as you take a phone, rising to 80% faster after 30 seconds. Decoys beep for six seconds; mobile guards within nine tiles investigate.",
+    "guards": 3
   },
   {
     "id": "silent-circuit",
     "number": 11,
     "title": "Silent Circuit",
-    "briefing": "Relay pads open their nearby door for nine seconds. Use the pads on both sides for the return trip. A clean run is optional: use a decoy if the investigating patrol blocks your crossing.",
-    "guards": 1
+    "briefing": "Relay pads open their nearby door for nine seconds. Use the pads on both sides for the return trip. A clean run is optional: use a decoy if the investigating patrol blocks your crossing. Alarm: guards move 40% faster as soon as you take a phone, rising to 80% faster after 30 seconds. Decoys beep for six seconds; mobile guards within nine tiles investigate.",
+    "guards": 3
   },
   {
     "id": "last-vault",
     "number": 12,
     "title": "The Last Vault",
-    "briefing": "Two deliveries finish the job. Switch circuits to choose a crossing, watch the scanner, then use the relay to open the inner vault. The Warden hears decoys and dashes.",
-    "guards": 2
+    "briefing": "Two deliveries finish the job. Switch circuits to choose a crossing, watch the scanner, then use the relay to open the inner vault. The Warden hears decoys and dashes. Alarm: guards move 40% faster as soon as you take a phone, rising to 80% faster after 30 seconds. Decoys beep for six seconds; mobile guards within nine tiles investigate.",
+    "guards": 4
   }
 ]

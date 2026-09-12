@@ -1,0 +1,15 @@
+{
+  "passed": true,
+  "scope": "Actual browser keyboard and pointer controls, 390×844 viewport",
+  "checks": [
+    "phone pickup starts alarm",
+    "red wash and border render",
+    "looping siren plays",
+    "pause stops siren and pulse",
+    "decoy button attracts a guard and guard moves toward it",
+    "mute stops alarm sound",
+    "reduced effects uses steady border without wash",
+    "controls fit phone viewport",
+    "no runtime errors"
+  ]
+}

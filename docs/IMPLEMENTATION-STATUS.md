@@ -126,3 +126,21 @@ Charcoal interface, bottom-anchored shop/daily/entry/settings and pause/results,
 Verification: TypeScript and 67 tests pass; all twelve campaign missions completed with actual browser pointer controls; all twelve captured input logs match the pinned server verifier; browser shop/equip, local balance, save/reload, entry recovery/abandonment and daily flow pass. Separate entry test captured a failure and a success with exactly one return of 10 local credits. Design checks verify real dash motion and charge, bottom sheet edge placement, desktop/phone fit and no runtime errors. Final cabinet artwork and sheet placement were visually checked after the full campaign run; they do not change simulation rules.
 
 `design/visual-v2/` contains the implementation plan, exact image prompts, asset provenance, twelve current level screenshots, thirteen UI captures and a local gallery at `/design/index.html`. This is browser validation only. Live Phantom/devnet funding, hosting, settlement, APK and physical Android checks remain unfinished/deferred. Existing unrelated native-recovery diagnostics are not included in this visual commit.
+
+## Security difficulty pass — 12 September 2026
+
+All twelve campaign maps now have one to four guards/scanners, two or three decoys, and an immediate theft alarm. Mobile guards move 40% faster on pickup, rising to 80% over 30 active seconds; scanner sweeps accelerate too. The alarm persists between deliveries. The red wash, border and original looping siren stop on pause/results; mute and reduced effects work independently.
+
+Decoys are six-second beacons. Every mobile campaign guard can hear them within nine tiles, navigate to them and search. Watching guards prioritize the courier and scanners ignore noise. Landing previews, actual investigation paths, responder counts and blocked/out-of-range feedback explain the tool. The pathfinding/collision radius mismatch that rejected legitimate patrol lanes is fixed. See SECURITY-DIFFICULTY.md.
+
+Validation: 74 game/client tests, 48 server tests and TypeScript pass. All 12 campaign missions completed through real browser controls, with sequential unlocks and restored progress. Two Targets needed two attempts, Silent Circuit three, and the final vault used two explicit decoys. All 12 captured input logs match the pinned server verifier. A separate 390×844 browser check verified actual decoy movement, alarm audio, pause, mute and steady reduced-effects rendering. Local paid-entry testing observed a capture with no return and then a successful escape with exactly one 10-credit return, retained after reload.
+
+Evidence: verification/security-*. Immutable historical rule bundles are retained. Old native fixtures are not evidence of this changed simulation; current recovery tests use current campaign replays. No Android build or physical-device claim is made, and no real token transaction was sent. Existing user purchases and stars are preserved.
+
+## Compact result sheets — 12 September 2026
+
+The in-board scrolling result card is replaced by a content-sized sheet anchored to the screen bottom. Courier illustration and short copy sit side by side; primary and secondary actions share one row. Success shows stars and one compact stats line. Pause, caught and timeout each have one short instruction. Saving/recovery indicators and retry actions remain available without nested scrolling. Shop/catalog and settings are separate content panels; this change concerns game message sheets.
+
+Six generated illustrations in assets/messages match the supplied courier references: success, caught, timeout, pause, recovery and pending. The art README records exact prompts and provenance. The gallery at /design/sheets/index.html renders the actual shared component with clearly labelled sample data.
+
+All 24 layout combinations (six states at 320×568, 390×844, 430×932 and 844×390) fit without scrollable or clipped children. Live gameplay checks pass for pause/resume and paid-entry capture/win, including saved credits and the result receipt. Security sound/decoy checks were rerun with the new overlay. TypeScript and web export pass. These are browser checks, not a fresh Android validation.

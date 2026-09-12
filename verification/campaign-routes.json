@@ -1,9 +1,9 @@
 {
-  "note": "Deterministic simulation routes, not touchscreen verification",
+  "note": "Deterministic security-v2 routes, including explicit waits and decoy directions. Not touchscreen verification.",
   "routes": [
     {
       "mission": "practice",
-      "delayTicks": 0,
+      "delayTicks": 45,
       "legs": [
         {
           "action": "pickup",
@@ -48,7 +48,9 @@
               "x": 8.9,
               "y": 5.8
             }
-          ]
+          ],
+          "waitTicks": 0,
+          "decoyDirection": -1
         },
         {
           "action": "deliver",
@@ -69,7 +71,9 @@
               "x": 9.450000000000001,
               "y": 2.05
             }
-          ]
+          ],
+          "waitTicks": 0,
+          "decoyDirection": -1
         }
       ],
       "phone": [
@@ -132,8 +136,8 @@
           "y": 2.05
         }
       ],
-      "seconds": 10.766666666666639,
-      "score": 12245,
+      "seconds": 12.266666666666634,
+      "score": 12235,
       "deliveries": 1,
       "activations": 0
     },
@@ -176,7 +180,9 @@
               "x": 9.3,
               "y": 4.1
             }
-          ]
+          ],
+          "waitTicks": 0,
+          "decoyDirection": -1
         },
         {
           "action": "deliver",
@@ -197,7 +203,9 @@
               "x": 2.45,
               "y": 2.1
             }
-          ]
+          ],
+          "waitTicks": 0,
+          "decoyDirection": -1
         }
       ],
       "phone": [
@@ -259,7 +267,7 @@
     },
     {
       "mission": "battery-dash",
-      "delayTicks": 105,
+      "delayTicks": 90,
       "legs": [
         {
           "action": "pickup",
@@ -304,7 +312,9 @@
               "x": 9.4,
               "y": 3.1
             }
-          ]
+          ],
+          "waitTicks": 0,
+          "decoyDirection": -1
         },
         {
           "action": "deliver",
@@ -333,7 +343,9 @@
               "x": 9.35,
               "y": 17.7
             }
-          ]
+          ],
+          "waitTicks": 0,
+          "decoyDirection": -1
         }
       ],
       "phone": [
@@ -404,8 +416,8 @@
           "y": 17.7
         }
       ],
-      "seconds": 21.000000000000203,
-      "score": 12490,
+      "seconds": 20.500000000000178,
+      "score": 12495,
       "deliveries": 1,
       "activations": 0
     },
@@ -440,7 +452,9 @@
               "x": 9.5,
               "y": 3
             }
-          ]
+          ],
+          "waitTicks": 0,
+          "decoyDirection": -1
         },
         {
           "action": "deliver",
@@ -461,7 +475,9 @@
               "x": 2.45,
               "y": 2
             }
-          ]
+          ],
+          "waitTicks": 0,
+          "decoyDirection": -1
         }
       ],
       "phone": [
@@ -552,7 +568,9 @@
               "x": 9.4,
               "y": 2.5
             }
-          ]
+          ],
+          "waitTicks": 0,
+          "decoyDirection": -1
         },
         {
           "action": "deliver",
@@ -573,7 +591,9 @@
               "x": 2.45,
               "y": 2.05
             }
-          ]
+          ],
+          "waitTicks": 0,
+          "decoyDirection": -1
         }
       ],
       "phone": [
@@ -672,7 +692,9 @@
               "x": 9.4,
               "y": 2.5
             }
-          ]
+          ],
+          "waitTicks": 0,
+          "decoyDirection": -1
         },
         {
           "action": "deliver",
@@ -689,7 +711,9 @@
               "x": 9.45,
               "y": 17.7
             }
-          ]
+          ],
+          "waitTicks": 0,
+          "decoyDirection": -1
         }
       ],
       "phone": [
@@ -784,7 +808,9 @@
               "x": 9.5,
               "y": 3
             }
-          ]
+          ],
+          "waitTicks": 0,
+          "decoyDirection": -1
         },
         {
           "action": "deliver",
@@ -805,7 +831,9 @@
               "x": 2.45,
               "y": 2
             }
-          ]
+          ],
+          "waitTicks": 0,
+          "decoyDirection": -1
         }
       ],
       "phone": [
@@ -867,7 +895,7 @@
     },
     {
       "mission": "warden-gate",
-      "delayTicks": 90,
+      "delayTicks": 45,
       "legs": [
         {
           "action": "pickup",
@@ -896,7 +924,9 @@
               "x": 9.3,
               "y": 4.4
             }
-          ]
+          ],
+          "waitTicks": 0,
+          "decoyDirection": -1
         },
         {
           "action": "deliver",
@@ -921,7 +951,9 @@
               "x": 2.45,
               "y": 2
             }
-          ]
+          ],
+          "waitTicks": 0,
+          "decoyDirection": -1
         }
       ],
       "phone": [
@@ -972,8 +1004,8 @@
           "y": 2
         }
       ],
-      "seconds": 15.999999999999954,
-      "score": 12970,
+      "seconds": 14.49999999999996,
+      "score": 12975,
       "deliveries": 1,
       "activations": 0
     },
@@ -1001,7 +1033,9 @@
               "y": 12.3,
               "kind": "power"
             }
-          ]
+          ],
+          "waitTicks": 0,
+          "decoyDirection": -1
         },
         {
           "action": "pickup",
@@ -1038,7 +1072,9 @@
               "x": 9.3,
               "y": 2.4
             }
-          ]
+          ],
+          "waitTicks": 0,
+          "decoyDirection": -1
         },
         {
           "action": "switch",
@@ -1076,7 +1112,9 @@
               "y": 7.5,
               "kind": "power"
             }
-          ]
+          ],
+          "waitTicks": 0,
+          "decoyDirection": -1
         },
         {
           "action": "deliver",
@@ -1113,7 +1151,9 @@
               "x": 2.45,
               "y": 17.7
             }
-          ]
+          ],
+          "waitTicks": 0,
+          "decoyDirection": -1
         }
       ],
       "phone": [
@@ -1191,7 +1231,7 @@
     },
     {
       "mission": "two-targets",
-      "delayTicks": 390,
+      "delayTicks": 210,
       "legs": [
         {
           "action": "pickup",
@@ -1220,7 +1260,9 @@
               "x": 2.2,
               "y": 2.5
             }
-          ]
+          ],
+          "waitTicks": 0,
+          "decoyDirection": -1
         },
         {
           "action": "deliver",
@@ -1257,7 +1299,9 @@
               "x": 8.45,
               "y": 17.7
             }
-          ]
+          ],
+          "waitTicks": 0,
+          "decoyDirection": -1
         },
         {
           "action": "pickup",
@@ -1286,7 +1330,9 @@
               "x": 9.5,
               "y": 3
             }
-          ]
+          ],
+          "waitTicks": 0,
+          "decoyDirection": -1
         },
         {
           "action": "deliver",
@@ -1315,7 +1361,9 @@
               "x": 8.45,
               "y": 17.7
             }
-          ]
+          ],
+          "waitTicks": 0,
+          "decoyDirection": -1
         }
       ],
       "phone": [
@@ -1378,8 +1426,8 @@
           "y": 17.7
         }
       ],
-      "seconds": 45.59999999999997,
-      "score": 14970,
+      "seconds": 39.600000000000314,
+      "score": 15000,
       "deliveries": 2,
       "activations": 0
     },
@@ -1409,7 +1457,9 @@
               "channel": 0,
               "duration": 9
             }
-          ]
+          ],
+          "waitTicks": 0,
+          "decoyDirection": -1
         },
         {
           "action": "switch",
@@ -1449,7 +1499,9 @@
               "channel": 1,
               "duration": 9
             }
-          ]
+          ],
+          "waitTicks": 0,
+          "decoyDirection": -1
         },
         {
           "action": "pickup",
@@ -1470,7 +1522,9 @@
               "x": 9.3,
               "y": 2.3
             }
-          ]
+          ],
+          "waitTicks": 0,
+          "decoyDirection": -1
         },
         {
           "action": "switch",
@@ -1494,7 +1548,9 @@
               "channel": 1,
               "duration": 9
             }
-          ]
+          ],
+          "waitTicks": 0,
+          "decoyDirection": -1
         },
         {
           "action": "switch",
@@ -1526,7 +1582,9 @@
               "channel": 0,
               "duration": 9
             }
-          ]
+          ],
+          "waitTicks": 0,
+          "decoyDirection": -1
         },
         {
           "action": "deliver",
@@ -1555,7 +1613,9 @@
               "x": 2.45,
               "y": 17.7
             }
-          ]
+          ],
+          "waitTicks": 0,
+          "decoyDirection": -1
         }
       ],
       "phone": [
@@ -1609,7 +1669,7 @@
     },
     {
       "mission": "last-vault",
-      "delayTicks": 285,
+      "delayTicks": 0,
       "legs": [
         {
           "action": "switch",
@@ -1639,7 +1699,9 @@
               "y": 14,
               "kind": "power"
             }
-          ]
+          ],
+          "waitTicks": 0,
+          "decoyDirection": 0
         },
         {
           "action": "pickup",
@@ -1676,7 +1738,9 @@
               "x": 9.5,
               "y": 2.2
             }
-          ]
+          ],
+          "waitTicks": 0,
+          "decoyDirection": 1
         },
         {
           "action": "deliver",
@@ -1713,7 +1777,9 @@
               "x": 9.45,
               "y": 17.7
             }
-          ]
+          ],
+          "waitTicks": 0,
+          "decoyDirection": -1
         },
         {
           "action": "switch",
@@ -1739,7 +1805,9 @@
               "y": 14,
               "kind": "power"
             }
-          ]
+          ],
+          "waitTicks": 0,
+          "decoyDirection": -1
         },
         {
           "action": "switch",
@@ -1771,7 +1839,9 @@
               "channel": 0,
               "duration": 9
             }
-          ]
+          ],
+          "waitTicks": 0,
+          "decoyDirection": -1
         },
         {
           "action": "pickup",
@@ -1792,7 +1862,9 @@
               "x": 2.6,
               "y": 2.5
             }
-          ]
+          ],
+          "waitTicks": 0,
+          "decoyDirection": -1
         },
         {
           "action": "switch",
@@ -1816,7 +1888,9 @@
               "channel": 0,
               "duration": 9
             }
-          ]
+          ],
+          "waitTicks": 0,
+          "decoyDirection": -1
         },
         {
           "action": "deliver",
@@ -1853,7 +1927,9 @@
               "x": 9.45,
               "y": 17.7
             }
-          ]
+          ],
+          "waitTicks": 0,
+          "decoyDirection": -1
         }
       ],
       "phone": [
@@ -1924,8 +2000,8 @@
           "y": 17.7
         }
       ],
-      "seconds": 55.66666666666607,
-      "score": 14920,
+      "seconds": 46.46666666666659,
+      "score": 14965,
       "deliveries": 2,
       "activations": 4
     }
