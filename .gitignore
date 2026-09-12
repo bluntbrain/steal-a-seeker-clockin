@@ -22,3 +22,7 @@ __pycache__/
 # Generated component gallery; rebuilt by export:web
 design/visual-v2/sheets/preview.js
 design/visual-v2/sheets/assets/
+
+# Rebuilt paywall preview
+design/visual-v2/economy/paywall/preview.js
+design/visual-v2/economy/paywall/assets/
