@@ -1,0 +1,12 @@
+{
+  "passed": true,
+  "scope": "Isolated UI fixture populated with 12 deterministic simulation wins. This is not a manual browser campaign completion or a live token payout.",
+  "checks": [
+    "Claim available after 12 simulation wins",
+    "25 local credits once",
+    "Receipt persists after reload",
+    "Duplicate claim disabled",
+    "320x568 reward actions fit",
+    "No page errors"
+  ]
+}

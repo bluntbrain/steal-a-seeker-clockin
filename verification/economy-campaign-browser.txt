@@ -1,0 +1,32 @@
+practice 1 won 12.1
+cone-lesson 1 won 13.1
+battery-dash 1 won 20.2
+crossing-signals 1 won 12.7
+sweep-window 1 won 12.9
+narrow-crossing 1 won 16.2
+false-footsteps 1 won 12.9
+warden-gate 1 won 14.8
+power-trade 1 won 25.0
+two-targets 1 caught 25.9
+two-targets 2 won 39.5
+silent-circuit 1 caught 17.4
+silent-circuit 2 caught 18.2
+silent-circuit 3 won 37.4
+last-vault 1 caught 15.2
+last-vault 2 caught 15.3
+last-vault 3 caught 11.7
+last-vault 4 caught 31.4
+last-vault 5 caught 16.3
+last-vault 6 caught 16.8
+last-vault 7 caught 16.1
+last-vault 8 caught 19.1
+last-vault 9 caught 35.7
+AssertionError [ERR_ASSERTION]: The Last Vault: no successful pointer route in tested phases
+    at /Users/bluntbrain/Documents/code/clockin/seeker-game/scripts/playtest-web-campaign.cjs:22:3 {
+  generatedMessage: false,
+  code: 'ERR_ASSERTION',
+  actual: false,
+  expected: true,
+  operator: '==',
+  diff: 'simple'
+}

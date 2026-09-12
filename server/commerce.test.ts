@@ -45,7 +45,7 @@ test('signed authentication consumes one nonce, enforces account isolation and s
  await app.inject({method:'POST',url:'/auth/logout',headers:user.headers});assert.equal((await app.inject({method:'GET',url:'/me',headers:user.headers})).statusCode,401);
 });
 test('orders bind prices, isolate wallets, reject forged transfers and fulfill duplicate callbacks only once',async()=>{
- const user=await login(),other=await login(),key=randomUUID(),order=await quote(user,'campaign',key);assert.equal(order.amount,'50000000');assert.equal((await quote(user,'campaign',key)).id,order.id);
+ const user=await login(),other=await login(),key=randomUUID(),order=await quote(user,'campaign',key);assert.equal(order.amount,'100000000');assert.equal((await quote(user,'campaign',key)).id,order.id);
  assert.equal((await app.inject({method:'POST',url:'/orders',headers:user.headers,payload:{sku:'night-courier',idempotencyKey:key}})).statusCode,409);
  assert.equal((await app.inject({method:'GET',url:`/orders/${order.id}`,headers:other.headers})).statusCode,404);
  assert.equal((await app.inject({method:'POST',url:'/orders',headers:user.headers,payload:{sku:'campaign',idempotencyKey:randomUUID(),amount:'1'}})).statusCode,400);
@@ -352,4 +352,46 @@ test('reviewing an original entry cannot hide an unresolved additional payment',
  const h=await reviewedMissingRun(t);await h.pay(h.entry);
  const snapshot=await h.review.inspectEntry(h.entry.id);await assert.rejects(h.review.apply(operatorRequest('refund-entry',h.entry.id,snapshot.expectedHash)),/additional payment is unresolved/);
  assert.equal((await pool.query('SELECT count(*) FROM return_allocations')).rows[0].count,'0');assert.equal((await h.paid.get(h.user.wallet,h.entry.id)).status,'review');
+});
+
+test('campaign v2 reserves before approval, verifies all missions and settles one rebate through the collection treasury',async()=>{
+ const {CampaignService}=await import('./campaign-service'),{CAMPAIGN_IDS}=await import('../src/game/level'),rules=(await import('../shared/rules-manifest.json')).default;
+ const config={...service.config,campaignOffer:true},h=await returnHarness(1000_000_000n,100_000_000n,{mint:config.mint,treasury:config.recipient,source:config.destination,decimals:config.decimals});
+ const commerce=new CommerceService(pool,chain,config);commerce.campaignReturns=h.service;const campaign=new CampaignService(pool,h.service);
+ const order=await commerce.createOrder(h.user.wallet,'campaign',randomUUID());assert.equal(order.amount,'100000000');assert.equal(order.campaignTerms?.rebate,25);
+ assert.equal((await pool.query('SELECT count(*) FROM campaign_rebates')).rows[0].count,'0');
+ const prepared=await commerce.preparePayment(h.user.wallet,order.id);assert(prepared.payment);
+ await commerce.preparePayment(h.user.wallet,order.id);assert.equal((await pool.query('SELECT count(*) FROM campaign_rebates')).rows[0].count,'1');
+ await assert.rejects(campaign.claim(h.user.wallet),/pass required/);
+ const sig=b58(randomBytes(64));transactions.set(sig,paidTx(order,sig));await commerce.attach(h.user.wallet,order.id,sig);assert.equal((await commerce.me(h.user.wallet)).entitlements.includes('campaign'),true);
+ await assert.rejects(campaign.claim(h.user.wallet),/12 missions/);
+ // A fabricated cloud save never authorizes the rebate.
+ await commerce.syncProgress(h.user.wallet,{version:1,missions:Object.fromEntries(CAMPAIGN_IDS.map(id=>[id,{stars:3,seconds:1,score:99999,battery:100,completions:1}]))});
+ await assert.rejects(campaign.claim(h.user.wallet),/12 missions/);
+ await assert.rejects(campaign.submit(h.other.wallet,'practice',rules.rulesHash,fixtureReplay().replay),/pass required/);
+ await assert.rejects(campaign.submit(h.user.wallet,'practice',rules.rulesHash,{version:1,chunks:[{ticks:1,x:0,y:0,buttons:0}]}),/extraction/);
+ for(const mission of CAMPAIGN_IDS){const {state,replay}=fixtureReplay(mission);assert.equal(state.status,'won',mission);await campaign.submit(h.user.wallet,mission,rules.rulesHash,replay);}
+ await campaign.submit(h.user.wallet,'practice',rules.rulesHash,fixtureReplay().replay);assert.equal((await campaign.summary(h.user.wallet)).runs.length,12);
+ const [one,two]=await Promise.all([campaign.claim(h.user.wallet),campaign.claim(h.user.wallet)]);assert.equal(one.returnId,two.returnId);assert.equal(one.rebate,25);
+ const board=await campaign.leaderboard();assert.equal(board.find(r=>r.wallet===h.user.wallet)?.cleared,12);
+ await h.service.process();h.setInspection({state:'settled',slot:100});await h.retry();await new ReturnService(pool,h.chain,h.config).process();
+ assert.equal((await campaign.summary(h.user.wallet)).state,'settled');assert.equal(h.sent.length,1);assert.equal((await pool.query('SELECT amount FROM return_reservations')).rows[0].amount,'25000000');
+ await campaign.claim(h.user.wallet);assert.equal(h.sent.length,1);
+});
+
+test('unfunded campaign rebate never prepares a payment authorization',async()=>{
+ const config={...service.config,campaignOffer:true},h=await returnHarness(0n,0n,{mint:config.mint,treasury:config.recipient,source:config.destination,decimals:config.decimals}),commerce=new CommerceService(pool,chain,config);commerce.campaignReturns=h.service;
+ const order=await commerce.createOrder(h.user.wallet,'campaign',randomUUID());await assert.rejects(commerce.preparePayment(h.user.wallet,order.id),/cannot reserve/);
+ assert.equal((await commerce.getOrder(h.user.wallet,order.id)).payment,undefined);assert.equal((await pool.query('SELECT count(*) FROM campaign_rebates')).rows[0].count,'0');
+});
+
+test('abandoned campaign approvals release only after proven non-payment and a later purchase gets a fresh reservation',async()=>{
+ const config={...service.config,campaignOffer:true},h=await returnHarness(100_000_000n,100_000_000n,{mint:config.mint,treasury:config.recipient,source:config.destination,decimals:config.decimals}),commerce=new CommerceService(pool,chain,config);commerce.campaignReturns=h.service;
+ const order=await commerce.createOrder(h.user.wallet,'campaign',randomUUID());await commerce.preparePayment(h.user.wallet,order.id);const old=(await pool.query('SELECT reservation_id FROM campaign_rebates WHERE wallet=$1',[h.user.wallet])).rows[0].reservation_id;
+ assert.equal(await commerce.releaseUnpaidCampaignReservations(),0);
+ await pool.query("UPDATE orders SET expires_at=now()-interval '1 minute' WHERE id=$1",[order.id]);assert.equal(await commerce.releaseUnpaidCampaignReservations(),0);
+ chainHeight+=151;chainUnavailable=true;await assert.rejects(commerce.releaseUnpaidCampaignReservations());chainUnavailable=false;
+ assert.equal((await pool.query('SELECT state FROM return_reservations WHERE id=$1',[old])).rows[0].state,'held');assert.equal(await commerce.releaseUnpaidCampaignReservations(),1);
+ assert.equal((await pool.query('SELECT state FROM return_reservations WHERE id=$1',[old])).rows[0].state,'released');
+ const next=await commerce.createOrder(h.user.wallet,'campaign',randomUUID());await commerce.preparePayment(h.user.wallet,next.id);assert.notEqual((await pool.query('SELECT reservation_id FROM campaign_rebates WHERE wallet=$1',[h.user.wallet])).rows[0].reservation_id,old);
 });

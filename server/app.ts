@@ -1,3 +1,5 @@
+import {CampaignService} from './campaign-service';
+import {CAMPAIGN_IDS,type MissionId} from '../src/game/level';
 import Fastify from 'fastify';
 import rateLimit from '@fastify/rate-limit';
 import {z,ZodError} from 'zod';
@@ -11,6 +13,7 @@ import {PaidService} from './paid-service';
 const wallet=z.string().refine(v=>{try{address(v);return true;}catch{return false;}}),uuid=z.string().uuid(),sku=z.enum(PRODUCTS.map(p=>p.id) as [ProductId,...ProductId[]]);
 const bytes=z.string().max(8192).regex(/^[A-Za-z0-9+/]*={0,2}$/);
 export async function createApp(service:CommerceService,ranked=new RankedService(service.pool),paid=new PaidService(service.pool,service.chain,service.config,new ReturnService(service.pool,undefined,{mint:service.config.mint,treasury:service.config.recipient,source:service.config.destination,decimals:service.config.decimals}))){
+ const campaign=new CampaignService(service.pool,service.campaignReturns??new ReturnService(service.pool,undefined,{mint:service.config.mint,treasury:service.config.recipient,source:service.config.destination,decimals:service.config.decimals}));
  const app=Fastify({bodyLimit:16*1024,logger:{level:'warn',redact:['req.headers.authorization']}});await app.register(rateLimit,{max:180,timeWindow:'1 minute'});
  app.setErrorHandler((error,req,reply)=>{if(error instanceof ZodError)return reply.code(400).send({error:'Invalid request.'});if(error instanceof ServiceError)return reply.code(error.status).send({error:error.message});const e=error as {statusCode?:number};if(e.statusCode&&e.statusCode<500)return reply.code(e.statusCode).send({error:'Request could not be accepted.'});req.log.error({message:error instanceof Error?error.message:'Service error'},'Request failed');return reply.code(503).send({error:'Service temporarily unavailable. Your payment will be reconciled; do not pay again.'});});
  async function account(header:string|undefined){if(!header?.startsWith('Bearer '))throw new ServiceError(401,'Wallet sign-in required.');const token=header.slice(7);if(!/^[0-9a-f]{64}$/.test(token))throw new ServiceError(401,'Invalid session.');return {wallet:await service.authenticate(token),token};}
@@ -37,6 +40,10 @@ export async function createApp(service:CommerceService,ranked=new RankedService
  app.get('/runs/:id',async req=>ranked.get((await account(req.headers.authorization)).wallet,z.object({id:uuid}).parse(req.params).id));
  app.post('/runs/:id/abandon',async req=>ranked.abandon((await account(req.headers.authorization)).wallet,z.object({id:uuid}).parse(req.params).id));
  app.post('/runs/:id/finish',{bodyLimit:1024*1024,config:{rateLimit:{max:12,timeWindow:'1 minute'}}},async req=>ranked.submit((await account(req.headers.authorization)).wallet,z.object({id:uuid}).parse(req.params).id,z.object({rulesHash,replay:z.unknown()}).strict().parse(req.body)));
+ app.get('/campaign',async req=>campaign.summary((await account(req.headers.authorization)).wallet));
+ app.get('/campaign/leaderboard',async()=>campaign.leaderboard());
+ app.post('/campaign/claim',async req=>{z.object({}).strict().parse(req.body);return campaign.claim((await account(req.headers.authorization)).wallet);});
+ app.post('/campaign/runs',{bodyLimit:1024*1024,config:{rateLimit:{max:12,timeWindow:'1 minute'}}},async req=>{const a=await account(req.headers.authorization),b=z.object({mission:z.enum(CAMPAIGN_IDS as [MissionId,...MissionId[]]),rulesHash,replay:z.unknown()}).strict().parse(req.body);return campaign.submit(a.wallet,b.mission,b.rulesHash,b.replay);});
  app.get('/paid/challenge',async()=>paid.challenge());
  app.get('/paid/entries',async req=>paid.list((await account(req.headers.authorization)).wallet));
  app.post('/paid/entries',{config:{rateLimit:{max:12,timeWindow:'1 minute'}}},async req=>{const a=await account(req.headers.authorization),b=z.object({requestKey:uuid,termsVersion:z.literal('devnet-v1')}).strict().parse(req.body);return paid.quote(a.wallet,b.requestKey,b.termsVersion);});

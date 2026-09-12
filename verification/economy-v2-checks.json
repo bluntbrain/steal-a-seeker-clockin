@@ -1,0 +1,18 @@
+{
+  "passed": true,
+  "checks": [
+    "Review before purchase",
+    "Cancel does not debit",
+    "One trial consumed before play",
+    "Restart ends trial",
+    "Trial persists across reload",
+    "No trial campaign entitlement",
+    "100-credit single campaign purchase",
+    "Outfit cancel does not debit",
+    "All five cosmetics confirmed and equipped",
+    "Locked rebate before 12 wins",
+    "Purchases restore",
+    "320x568 paywall fit",
+    "No runtime errors"
+  ]
+}

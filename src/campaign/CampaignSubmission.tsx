@@ -1,0 +1,7 @@
+import React,{useEffect,useRef,useState} from 'react';
+import {Pressable,Text,View} from 'react-native';
+import {useAccount} from '../commerce/account-context';
+import {enqueue,syncCampaign} from './client';
+import type {GameState} from '../game/simulation';
+import type {Replay} from '../../shared/replay';
+export default function CampaignSubmission({state,replay}:{state:GameState;replay:Replay}){const account=useAccount(),started=useRef(false),[message,setMessage]=useState('Saving reward verification…'),[retry,setRetry]=useState(0),[failed,setFailed]=useState(false);useEffect(()=>{if(started.current||!account.wallet||state.status!=='won')return;started.current=true;setFailed(false);let alive=true;void(async()=>{try{await enqueue(account.wallet!,state.mission,replay);}catch{if(alive){setMessage('Replay could not be saved. Retry before leaving.');setFailed(true);}started.current=false;return;}try{const session=await account.session(false);await syncCampaign(session.wallet,session.token);if(alive)setMessage('Mission verified for your completion rebate.');}catch{if(alive)setMessage('Replay saved. Open Rewards to sign in and sync.');}})();return()=>{alive=false;};},[account.wallet,state.mission,replay,retry]);return <View style={{gap:4}}><Text style={{color:'#C7EADB',fontSize:10}}>{message}</Text>{failed&&<Pressable accessibilityRole="button" accessibilityLabel="Retry campaign replay save" onPress={()=>setRetry(n=>n+1)}><Text style={{color:'#E7FCD8',fontSize:11}}>Retry replay save</Text></Pressable>}</View>;}

@@ -1,3 +1,5 @@
+> **12 September 2026 — economy update:** See [PAYWALL-ECONOMY-V2.md](PAYWALL-ECONOMY-V2.md). The 100/25 test offer, cancellation trial, cosmetics review, campaign replay verification/rebate allocation, score-based board and audio are now implemented. Live devnet/Phantom and hosted deployment remain unverified. [Hosting comparison](BACKEND-HOSTING.md).
+
 # Steal a Seeker — remaining work
 
 Audit: 12 September 2026, source commit 96d9924. This is the current completion checklist. Earlier plans and checkpoints describe superseded work. Current direction: **2D gameplay, with 3D only for inspecting collectible phones.**

@@ -163,3 +163,7 @@ Android installation and physical-device Phantom testing remain deferred. These 
 ## Phone crop fix and 3D inspection — September 12
 
 Replaced guessed atlas cells with measured padded phone bounds; rack thumbnails also fit their actual slots at small widths. Added a lazy interactive 3D phone viewer from rack slots and detail cards, including uncollected previews. Six angle controls and drag rotation reveal authored backs, cameras, keys and ports. Exported twelve reusable GLB models. Web checks cover all editions, small viewports, gestures and return to the 2D game. Native device testing remains deferred. See docs/PHONE-COLLECTION-VIEWER.md and verification/phone-viewer/.
+
+## 12 September 2026 — campaign economy v2
+
+Implemented the versioned 100 TEST SKR campaign / 25 completion rebate offer, browser review and one-attempt cancellation trial, compact wardrobe purchase confirmation, campaign replay outbox and verification API, one-time reserved payout, campaign performance leaderboard, proven-unpaid reservation cleanup, and seven original ElevenLabs audio cues. Existing campaign access remains intact. Legacy entry receipts remain reachable; new per-run sales are retired. Details and remaining live-test boundaries: [PAYWALL-ECONOMY-V2.md](PAYWALL-ECONOMY-V2.md). Low-cost hosting research: [BACKEND-HOSTING.md](BACKEND-HOSTING.md).

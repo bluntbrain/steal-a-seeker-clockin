@@ -1,5 +1,7 @@
 # Devnet commerce service
 
+Current purchase design: [campaign economy v2](../docs/PAYWALL-ECONOMY-V2.md), with funded completion rebates and one campaign purchase. Hosting options: [BACKEND-HOSTING.md](../docs/BACKEND-HOSTING.md).
+
 Status, 12 September 2026: implemented and tested against a real local PostgreSQL database, with synthetic chain responses for success/failure cases. Native client integration compiles. A live token payment and physical Phantom sign-in are still unverified. The public devnet faucet rejected the first funding request, so the dedicated mint is not provisioned yet. No real SKR is involved.
 
 ## Run locally

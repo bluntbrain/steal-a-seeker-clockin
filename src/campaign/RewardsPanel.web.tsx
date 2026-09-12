@@ -1,0 +1,5 @@
+import React,{useState} from 'react';
+import RewardsView from './RewardsView';
+import {changePlaytest,claimRebate,usePlaytest} from '../playtest/store';
+import {CAMPAIGN_OFFER,campaignStats,type CampaignSummary} from '../../shared/economy';
+export default function RewardsPanel({visible,onClose,onLegacy}:{visible:boolean;onClose:()=>void;onLegacy?:()=>void}){const state=usePlaytest(),[message,setMessage]=useState(''),runs=state.campaignRuns??[],stats=campaignStats(runs);const summary:CampaignSummary={runs,rebate:state.offerVersion===CAMPAIGN_OFFER.version?CAMPAIGN_OFFER.rebate:0,state:state.rebateClaimed?'settled':state.offerVersion!==CAMPAIGN_OFFER.version?'legacy':stats.cleared===12?'ready':'locked'};return <RewardsView onLegacy={onLegacy} visible={visible} onClose={onClose} local summary={summary} board={stats.cleared?[{wallet:'local',rank:1,...stats}]:[]} message={message} busy={false} onSync={()=>{}} onClaim={()=>{try{changePlaytest(claimRebate);setMessage('25 credits added. Your campaign stays unlocked.');}catch(e){setMessage(String(e));}}}/>;}

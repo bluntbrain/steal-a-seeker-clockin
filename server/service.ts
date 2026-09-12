@@ -1,3 +1,5 @@
+import {campaignTerms} from '../shared/economy';
+import type {ReturnService} from './returns';
 import {randomBytes,randomUUID,createHash} from 'node:crypto';
 import type {Pool} from 'pg';
 import {address,getAddressEncoder,getBase58Decoder} from '@solana/kit';
@@ -8,11 +10,12 @@ import {transaction} from './db';
 import {mergeProgress,type SyncedProgress} from './progress';
 import {TOKEN_PROGRAM,type PaymentChain,type Verification} from './chain';
 export class ServiceError extends Error{constructor(public status:number,message:string){super(message);}}
-export type CommerceConfig={identityUri:string;mint:string;recipient:string;decimals:number;destination:string};
+export type CommerceConfig={identityUri:string;mint:string;recipient:string;decimals:number;destination:string;campaignOffer?:boolean};
 const hash=(s:string)=>createHash('sha256').update(s).digest('hex');
 const iso=(d:Date|string)=>new Date(d).toISOString();
-function orderFromRow(r:Record<string,any>):Order{return {id:r.id,wallet:r.wallet,sku:r.sku,status:r.status,cluster:r.cluster,mint:r.mint,tokenProgram:r.token_program,decimals:r.decimals,amount:r.amount,recipient:r.recipient,source:r.source,destination:r.destination,reference:r.reference,memo:r.memo,createdAt:iso(r.created_at),expiresAt:iso(r.expires_at),signature:r.signature,detail:r.detail,...(r.payment_authorization?{payment:r.payment_authorization}:{})};}
+function orderFromRow(r:Record<string,any>):Order{return {id:r.id,wallet:r.wallet,sku:r.sku,status:r.status,...(r.campaign_terms?{campaignTerms:r.campaign_terms}:{}),cluster:r.cluster,mint:r.mint,tokenProgram:r.token_program,decimals:r.decimals,amount:r.amount,recipient:r.recipient,source:r.source,destination:r.destination,reference:r.reference,memo:r.memo,createdAt:iso(r.created_at),expiresAt:iso(r.expires_at),signature:r.signature,detail:r.detail,...(r.payment_authorization?{payment:r.payment_authorization}:{})};}
 export class CommerceService {
+ campaignReturns?:ReturnService;
  constructor(public pool:Pool,public chain:PaymentChain,public config:CommerceConfig){}
  async challenge(wallet:string):Promise<SignInChallenge>{
   address(wallet);const now=new Date(),expires=new Date(now.getTime()+5*60_000),id=randomUUID();
@@ -42,7 +45,7 @@ export class CommerceService {
    const owned=await db.query('SELECT 1 FROM entitlements WHERE wallet=$1 AND sku=$2',[wallet,sku]);if(owned.rowCount)throw new ServiceError(409,'You already own this item. Restore your purchases.');
    const pending=await db.query("SELECT * FROM orders WHERE wallet=$1 AND sku=$2 AND (status IN ('verifying','needs_review') OR (status='quoted' AND expires_at>now())) ORDER BY created_at DESC LIMIT 1",[wallet,sku]);if(pending.rowCount)return orderFromRow(pending.rows[0]);
    const id=randomUUID(),reference=getBase58Decoder().decode(randomBytes(32)),created=new Date(),expires=new Date(created.getTime()+15*60_000),amount=(BigInt(product.price)*10n**BigInt(this.config.decimals)).toString();
-   const r=await db.query(`INSERT INTO orders(id,wallet,sku,idempotency_key,status,cluster,mint,token_program,decimals,amount,recipient,source,destination,reference,memo,created_at,expires_at) VALUES($1,$2,$3,$4,'quoted','solana:devnet',$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15) RETURNING *`,[id,wallet,sku,key,this.config.mint,TOKEN_PROGRAM,this.config.decimals,amount,this.config.recipient,source,this.config.destination,reference,`seeker-order:${id}`,created,expires]);return orderFromRow(r.rows[0]);
+   const r=await db.query(`INSERT INTO orders(id,wallet,sku,idempotency_key,status,cluster,mint,token_program,decimals,amount,recipient,source,destination,reference,memo,created_at,expires_at) VALUES($1,$2,$3,$4,'quoted','solana:devnet',$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15) RETURNING *`,[id,wallet,sku,key,this.config.mint,TOKEN_PROGRAM,this.config.decimals,amount,this.config.recipient,source,this.config.destination,reference,`seeker-order:${id}`,created,expires]);if(sku==='campaign'&&this.config.campaignOffer){await db.query('UPDATE orders SET campaign_terms=$2 WHERE id=$1',[id,campaignTerms]);r.rows[0].campaign_terms=campaignTerms;}return orderFromRow(r.rows[0]);
   });
  }
  async getOrder(wallet:string,id:string){const r=await this.pool.query('SELECT * FROM orders WHERE id=$1 AND wallet=$2',[id,wallet]);if(!r.rowCount)throw new ServiceError(404,'Order not found.');return orderFromRow(r.rows[0]);}
@@ -66,6 +69,16 @@ export class CommerceService {
    if(new Date(current.expiresAt).getTime()<=Date.now()){
     const ended=await db.query("UPDATE orders SET status='quoted',payment_authorization=NULL,signature=NULL,detail='Quote and payment lifetime expired. No finalized payment was found; request a new quote.' WHERE id=$1 RETURNING *",[id]);return orderFromRow(ended.rows[0]);
    }
+   if(current.campaignTerms){
+    if(this.campaignReturns&&(this.campaignReturns.config.mint!==current.mint||this.campaignReturns.config.treasury!==current.recipient||this.campaignReturns.config.source!==current.destination||this.campaignReturns.config.decimals!==current.decimals))throw new ServiceError(503,'Campaign treasury configuration does not match this order.');
+    if(!this.campaignReturns?.chain)throw new ServiceError(503,'Completion rebate funding is unavailable. No wallet payment has been requested.');
+    await db.query('SELECT address FROM wallets WHERE address=$1 FOR UPDATE',[wallet]);
+    const existing=await db.query('SELECT r.* FROM campaign_rebates c JOIN return_reservations r ON r.id=c.reservation_id WHERE c.wallet=$1',[wallet]);
+    const amount=BigInt(current.campaignTerms.rebate)*10n**BigInt(current.decimals);
+    if(existing.rowCount&&(existing.rows[0].state!=='held'||existing.rows[0].amount!==amount.toString()||existing.rows[0].mint!==current.mint||existing.rows[0].treasury!==current.recipient))throw new ServiceError(409,'Existing campaign reservation requires reconciliation.');
+    const reserve=existing.rows[0]??await this.campaignReturns.reserveInTransaction(db,wallet,`campaign-v2:${current.id}`,amount);
+    await db.query('INSERT INTO campaign_rebates(wallet,reservation_id,terms) VALUES($1,$2,$3) ON CONFLICT DO NOTHING',[wallet,reserve.id,current.campaignTerms]);
+   }
    const payment={id:randomUUID(),...lifetime};
    const updated=await db.query("UPDATE orders SET payment_authorization=$2,status='verifying',signature=NULL,detail='Wallet approval prepared. Resume the same transaction or restore its receipt.' WHERE id=$1 RETURNING *",[id,payment]);
    if(expired)await db.query("UPDATE order_attempts SET state='expired',detail='Blockhash expired; finalized reference scan found no completed payment.' WHERE order_id=$1 AND state='pending'",[id]);
@@ -82,6 +95,7 @@ export class CommerceService {
   await transaction(this.pool,async db=>{
    const current=await db.query('SELECT * FROM orders WHERE id=$1 FOR UPDATE',[order.id]);if(current.rows[0]?.status==='fulfilled')return;
    await db.query('SELECT address FROM wallets WHERE address=$1 FOR UPDATE',[order.wallet]);
+   if(order.campaignTerms){const reserve=await db.query("SELECT 1 FROM campaign_rebates c JOIN return_reservations r ON r.id=c.reservation_id WHERE c.wallet=$1 AND r.state='held'",[order.wallet]);if(!reserve.rowCount){await db.query("UPDATE orders SET status='needs_review',signature=$2,detail='Payment arrived without a reserved completion rebate. Support reconciliation required; do not pay again.' WHERE id=$1",[order.id,signature]);return;}}
    const duplicate=await db.query('SELECT order_id FROM payment_receipts WHERE signature=$1',[signature]);if(duplicate.rowCount&&duplicate.rows[0].order_id!==order.id)throw new ServiceError(409,'Payment already belongs to another order.');
    const owned=await db.query('SELECT 1 FROM entitlements WHERE wallet=$1 AND sku=$2',[order.wallet,order.sku]);
    if(owned.rowCount){await db.query("UPDATE orders SET status='needs_review',signature=$2,detail='Duplicate purchase payment needs a refund review.' WHERE id=$1",[order.id,signature]);return;}
@@ -96,6 +110,27 @@ export class CommerceService {
  async reconcile(id:string){const r=await this.pool.query('SELECT * FROM orders WHERE id=$1',[id]);if(!r.rowCount)return;const order=orderFromRow(r.rows[0]);if(order.status==='fulfilled')return;
   const attempts=await this.pool.query("SELECT signature FROM order_attempts WHERE order_id=$1 AND state='pending'",[id]);const signatures=new Set<string>(attempts.rows.map(r=>r.signature));if(order.signature)signatures.add(order.signature);for(const sig of await this.chain.find(order.reference))signatures.add(sig);
   for(const sig of signatures)await this.check(order,sig);await this.pool.query('UPDATE orders SET checked_at=now() WHERE id=$1',[id]);
+ }
+ async releaseUnpaidCampaignReservations(limit=4){
+  if(!this.campaignReturns)return 0;
+  const candidates=await this.pool.query("SELECT c.wallet,c.reservation_id FROM campaign_rebates c WHERE NOT EXISTS(SELECT 1 FROM entitlements e WHERE e.wallet=c.wallet AND e.sku='campaign') ORDER BY c.created_at LIMIT $1",[Math.max(1,Math.min(8,limit))]);
+  let released=0;
+  for(const candidate of candidates.rows){
+   const orders=await this.pool.query("SELECT * FROM orders WHERE wallet=$1 AND sku='campaign' AND campaign_terms IS NOT NULL",[candidate.wallet]);
+   if(orders.rows.some(o=>new Date(o.expires_at).getTime()>Date.now()||o.status==='needs_review'||o.status==='fulfilled'))continue;
+   // preparePayment proves the original blockhash can no longer land and
+   // scans finalized reference history before clearing an expired approval.
+   // An RPC failure or unresolved transaction leaves every liability held.
+   for(const o of orders.rows)await this.preparePayment(candidate.wallet,o.id);
+   const didRelease=await transaction(this.pool,async db=>{
+    await db.query('SELECT address FROM wallets WHERE address=$1 FOR UPDATE',[candidate.wallet]);
+    const owned=await db.query("SELECT 1 FROM entitlements WHERE wallet=$1 AND sku='campaign'",[candidate.wallet]);if(owned.rowCount)return false;
+    const current=await db.query("SELECT 1 FROM orders WHERE wallet=$1 AND sku='campaign' AND campaign_terms IS NOT NULL AND (expires_at>now() OR status<>'quoted' OR payment_authorization IS NOT NULL OR signature IS NOT NULL)",[candidate.wallet]);if(current.rowCount)return false;
+    const held=await db.query('SELECT reservation_id FROM campaign_rebates WHERE wallet=$1 FOR UPDATE',[candidate.wallet]);if(held.rows[0]?.reservation_id!==candidate.reservation_id)return false;
+    await this.campaignReturns!.releaseInTransaction(db,candidate.reservation_id,'unpaid-finalized-expiry');
+    await db.query('DELETE FROM campaign_rebates WHERE wallet=$1',[candidate.wallet]);return true;
+   });if(didRelease)released++;
+  }return released;
  }
  async syncProgress(wallet:string,incoming:SyncedProgress){
   await transaction(this.pool,async db=>{const row=await db.query('SELECT progress FROM wallets WHERE address=$1 FOR UPDATE',[wallet]);if(!row.rowCount)throw new ServiceError(404,'Account not found.');const owned=await db.query("SELECT 1 FROM entitlements WHERE wallet=$1 AND sku='campaign'",[wallet]);if(!owned.rowCount)throw new ServiceError(403,'Campaign access is required to sync campaign progress.');const next=mergeProgress(row.rows[0].progress,incoming);await db.query('UPDATE wallets SET progress=$2 WHERE address=$1',[wallet,next]);});return this.me(wallet);

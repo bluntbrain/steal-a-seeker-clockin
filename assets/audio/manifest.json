@@ -1,0 +1,86 @@
+[
+  {
+    "name": "decoy",
+    "duration": 1.2,
+    "loop": false,
+    "prompt": "A tiny metal sci-fi decoy puck lands with a soft clink then emits three playful electronic chirps. Isolated game sound, immediate attack, dry mix, no speech or music.",
+    "provider": "ElevenLabs",
+    "model": "eleven_text_to_sound_v2",
+    "runtimeFile": "decoy.wav",
+    "gainDb": -4.4,
+    "sampleRate": 22050,
+    "channels": 1
+  },
+  {
+    "name": "caught",
+    "duration": 1.4,
+    "loop": false,
+    "prompt": "Friendly stealth game failure: short robot scanner zap followed by a comical low descending synth bloop. Not frightening. Isolated effect, immediate attack, no speech.",
+    "provider": "ElevenLabs",
+    "model": "eleven_text_to_sound_v2",
+    "runtimeFile": "caught.wav",
+    "gainDb": -6.0,
+    "sampleRate": 22050,
+    "channels": 1
+  },
+  {
+    "name": "switch",
+    "duration": 0.6,
+    "loop": false,
+    "prompt": "Single satisfying chunky mechanical relay switch clack with a tiny electrical spark. Isolated close-up game sound, dry, immediate attack, no ambience.",
+    "provider": "ElevenLabs",
+    "model": "eleven_text_to_sound_v2",
+    "runtimeFile": "switch.wav",
+    "gainDb": -3.8,
+    "sampleRate": 22050,
+    "channels": 1
+  },
+  {
+    "name": "spot",
+    "duration": 0.7,
+    "loop": false,
+    "prompt": "Short urgent robot detection double beep, distinct pitched electronic warning, immediate attack, soft not harsh, no speech or music.",
+    "provider": "ElevenLabs",
+    "model": "eleven_text_to_sound_v2",
+    "runtimeFile": "spot.wav",
+    "gainDb": -2.7,
+    "sampleRate": 22050,
+    "channels": 1
+  },
+  {
+    "name": "extract",
+    "duration": 2.0,
+    "loop": false,
+    "prompt": "Successful tiny sci-fi heist: mechanical docking click then a bright warm ascending three-note electronic reward chime with a short shimmering tail. Immediate attack, no voice.",
+    "provider": "ElevenLabs",
+    "model": "eleven_text_to_sound_v2",
+    "runtimeFile": "extract.wav",
+    "gainDb": -4.7,
+    "sampleRate": 22050,
+    "channels": 1
+  },
+  {
+    "name": "purchase",
+    "duration": 1.1,
+    "loop": false,
+    "prompt": "A satisfying futuristic equipment unlock: soft magnetic latch click, warm two-note electronic confirmation, tiny glass shimmer, dry game UI sound, immediate attack, no voice.",
+    "provider": "ElevenLabs",
+    "model": "eleven_text_to_sound_v2",
+    "runtimeFile": "purchase.wav",
+    "gainDb": 0.6,
+    "sampleRate": 22050,
+    "channels": 1
+  },
+  {
+    "name": "stealth-loop",
+    "duration": 12,
+    "loop": true,
+    "prompt": "Seamless quiet stealth game background loop. Warm analog synth pulse, muted clockwork ticks, gentle sub bass and spacious ventilation hum. Playful suspense, sparse rhythmic texture, no melody or voices, no big impacts, constant volume.",
+    "provider": "ElevenLabs",
+    "model": "eleven_text_to_sound_v2",
+    "runtimeFile": "stealth-loop.wav",
+    "gainDb": -2.2,
+    "sampleRate": 22050,
+    "channels": 1
+  }
+]
