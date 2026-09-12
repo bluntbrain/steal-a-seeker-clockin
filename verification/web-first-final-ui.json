@@ -1,0 +1,10 @@
+{
+  "passed": true,
+  "checks": [
+    "final Hideout navigation",
+    "navigation label fits at 190px",
+    "final desktop and portrait framing",
+    "shop opens/closes",
+    "no runtime errors"
+  ]
+}

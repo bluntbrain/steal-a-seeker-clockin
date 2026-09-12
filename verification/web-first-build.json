@@ -1,0 +1,47 @@
+{
+  "createdAt": "2026-09-12T09:08:08.315899+00:00",
+  "baseCommit": "52ccd72c64da0f824193a54883a2bd6c067ebcf4",
+  "platform": "React Native Web / local browser playtest",
+  "url": "http://127.0.0.1:8787",
+  "checks": {
+    "typecheck": "passed",
+    "gameClientTests": 67,
+    "actualInputCampaignCompletions": 12,
+    "recordedCampaignsMatchingPinnedVerifier": 12,
+    "webProductFlow": "passed",
+    "localEntryCaptureAndWinReturn": "passed",
+    "finalUiFraming": "passed"
+  },
+  "economy": "Local credits only, no wallet, server entitlement or on-chain transaction",
+  "android": "Testing paused at user request; separate incomplete native diagnostic work is not part of this checkpoint",
+  "sources": {
+    "README.md": "a629bcb6f4636aef8f6a5543453fb94116353c823b5145887b94b010c984ec46",
+    "docs/IMPLEMENTATION-STATUS.md": "563c28d9a2e422d404e4f83ba9aea5c88b6326debe4bc8ec919ce11d2c1271d8",
+    "docs/WEB-FIRST-PLAN.md": "e126526fea0c54935571270072388d993a4e330f8e70ab7615294456cc74b4dc",
+    "docs/WEB-TEST-GUIDE.md": "c265d19e08398f5adef29273241ac23442b1e3ff38a32f5a30609969bc19a0bd",
+    "scripts/playtest-web-campaign.cjs": "4c89a3fb1275691fb1413add96acc50d29575dc45ec795f7a37519e17dca9171",
+    "scripts/playtest-web-entry.cjs": "c749f2367e0a6af1970ee63da49f14c536191a7ebda34a8620a14d95e287351c",
+    "scripts/playtest-web-flow.cjs": "140ebea9e73ae0436c577724df10f9eeb5b30f8738929cca74d794e28280ba5a",
+    "scripts/verify-browser-replay.ts": "d814a04e45aaa8de8b4c5463de262cdb009486306e471a572e9b2bf1aedaecac",
+    "src/GameScreen.tsx": "0e954587e2b46f418383f158b478139d8f1893713889a12c209700591b1794b2",
+    "src/commerce/AccountProvider.web.tsx": "68f326f39f48ebd2643cc3f43d2f1397be3f37a307c4449965f4f83de6582079",
+    "src/commerce/CampaignGate.web.tsx": "7e37e545ff6b49edcb0aca9d2f9dd6c8831b1b8bbd32f213dbde1a04a6275ad5",
+    "src/components/GameCanvas3D.tsx": "930a1c664e316d5aad026e3ac1cbc7ea12a0ea427eff8e3d0d014e14e1acb59a",
+    "src/components/Hideout.tsx": "70412b13648329d0687b043d3432b85dd485dea6d558386ded90f1e1acc91bd3",
+    "src/paid/PaidPanel.web.tsx": "0ebc56c010f23726ba807790ce23d197a5fe44799a3c2e8dbd4bb09cfba42df7",
+    "src/paid/PaidSubmission.web.tsx": "64d88823b4707efa9bab86022813fdc28656b17163e8c2c05967dd26bd6e8c9d",
+    "src/playtest/Panel.tsx": "35b92d8932b7f58d9b266c71b7e517a0a4f9408e7b5c0f2abeb130efdbaec6a4",
+    "src/playtest/store.ts": "85478d63451e1ac80ace408286d28164c3180962cf328496baabd13024fd70c4",
+    "src/playtest/tickets.ts": "40280830d848500e980e3361378397c4462696b9d0d829d86c5478c9cd2dce16",
+    "src/ranked/DailyPanel.web.tsx": "68351f5cc865687f5a8bf23cb592bb841ae95bc03463cb997c1249e768ef9d3d",
+    "src/ranked/RunSubmission.web.tsx": "5cc50e768a2906ce9433ddfd3c1ab9271de6e10ac6a65402ae1673c362317125",
+    "src/three/Canvas.web.tsx": "00a8e83e8a67d6c7b2899b7575cb33accd823923cabf09cad7c6d8808799ed36",
+    "src/three/HeistScene.tsx": "c7aa2b632f3f504d78e99b4c492f6543a6e72a32f867d60165de162f551ba183",
+    "src/wallet/WalletPanel.web.tsx": "9f5ce9c996dda05b96cc3646bee1276d159ae6f1faf52f786c58b2b82b7c600c",
+    "tests/browser-economy.test.ts": "358daec61ff4722f2cda1685555813216865d2f01552754766cba6c3ad044e02"
+  },
+  "webExport": {
+    "_expo/static/js/web/GameScreen-0f8db3ba98cf379f21769b6f4d2f657f.js": "18d79c63e9f0a6314a81c2d218dcf20aed7f995ee7f16f3505dade208060c0f8",
+    "_expo/static/js/web/index-aa3e71d5cfcb4b560ed56f0168a5fed7.js": "2d52f706a9078f32a63208b1397ed6c35f0ea48d4c2c4dd7c86a4ed15c97fc78"
+  }
+}

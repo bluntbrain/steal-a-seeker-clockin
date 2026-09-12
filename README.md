@@ -4,6 +4,10 @@ An Android solo stealth game with an angled overhead 3D camera. Sneak past robot
 
 Status: 12 September 2026. The complete goal remains in [the game plan](docs/COMPLETE-GAME-PLAN.md). [Implementation evidence and remaining work](docs/IMPLEMENTATION-STATUS.md) distinguishes tested features from unfinished integration.
 
+## Browser-first testing
+
+Android testing is paused for this iteration. Open the [browser game](http://127.0.0.1:8787) and follow the [end-to-end test guide](docs/WEB-TEST-GUIDE.md). The [three-screen plan](docs/WEB-FIRST-PLAN.md) covers Welcome, Hideout and Heist. The browser grants 250 local playtest credits; you can buy access, equip every cosmetic, save progress, play local daily runs and test entry/return behavior without a wallet. These credits are not SKR and never authorize server purchases or token transfers.
+
 ## Current build
 
 - Twelve authored missions: patrol timing, scanners, timed gates, decoys, investigation, a Warden, power switching, relay doors and two-phone deliveries.
@@ -43,7 +47,9 @@ Metro uses 8082; the static gameplay preview uses 8787. Set `EXPO_PUBLIC_API_URL
 
 ## Verification
 
-`npm run typecheck`, `npm test` and `npm run server:test` currently pass: 58 game/client tests and 32 server tests. Server tests require the dedicated local `seeker_clockin_test` database; they use synthetic chain responses and never establish a live token payment.
+`npm run typecheck`, `npm test` and `npm run server:test` currently pass: 67 game/client tests; the latest separate backend checkpoint passed 48 server tests. Server tests require the dedicated local `seeker_clockin_test` database; they use synthetic chain responses and never establish a live token payment.
+
+The current web flow is exercised by `scripts/playtest-web-flow.cjs`, `scripts/playtest-web-campaign.cjs` and `scripts/playtest-web-entry.cjs`. Earlier scripts below are historical and predate the new browser access / Hideout flow.
 
 `scripts/playtest-campaign.cjs` exercised all twelve rooms through pointer joystick input, with no teleport or forced-win hooks. Results and source hashes are in [the campaign report](verification/campaign-web-playtest.json). After account/ranking integration, `scripts/playtest-account.cjs` verifies extraction, collection, public daily reads, native wallet guidance and reload restoration. `npx tsx scripts/verify-browser-replay.ts` checks its actual input recording against the pinned server verifier. Both require Playwright and Chrome. `scripts/playtest-settings.cjs` checks restart persistence, storage-error recovery and pause-screen access. Earlier v0.2 patrol scripts/reports are historical evidence and predate current navigation.
 

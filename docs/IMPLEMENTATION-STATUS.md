@@ -1,6 +1,6 @@
 # Implementation evidence
 
-Updated 12 September 2026. Goal remains the full game described in COMPLETE-GAME-PLAN.md. This is a progress ledger, not a reduced definition of completion.
+Updated 12 September 2026. **Current priority: browser end-to-end playtesting; Android testing paused at the user’s request.** See WEB-FIRST-PLAN.md and WEB-TEST-GUIDE.md. Goal remains the full game described in COMPLETE-GAME-PLAN.md. This is a progress ledger, not a reduced definition of completion.
 
 | Requirement | Current evidence / remaining work |
 | --- | --- |
@@ -104,3 +104,15 @@ Latest local APK: `releases/steal-a-seeker-paid-flow-devnet-preview.apk`; manife
 Migration 007 and the local `server/review.ts` tool add audited decisions for original-entry refunds, exact stored-replay retries and reconciliation of existing returns. Decisions require an inspected-state hash, operator note and idempotent request UUID. Entry refunds reconfirm the original finalized receipt and allocate once; replay retries rehash the canonical stored inputs; return retries preserve the active signed transaction and permit only bounded additional lifetimes. There is no HTTP operator endpoint.
 
 48 server tests pass, with dedicated concurrency, stale-request, missing-receipt, corrupted-replay, preserved-signature and retry-budget checks. The normal APK and client code are unchanged. The local API restarted with migration 007 and paid entries still disabled; no live review or refund was applied. Late/additional-payment compensation remains a separate required workflow. Full native paid UI, SQLite process-death testing, physical Phantom, hosting, funded devnet setup and release validation remain.
+
+## Browser-first product flow and 3D detail
+
+Welcome, Hideout and Heist are the three main views. Mission selection, briefing, stars and the collection now share the Hideout. Shop, daily practice, entry challenge and settings are panels; pause/results remain overlays. Duplicate gameplay navigation and the normal 2D toggle were removed from the current UI. The 2D renderer remains in the source for historical diagnostics.
+
+The web platform now has an independent local playtest economy: 250 initial credits, 50-credit campaign access, all five purchasable cosmetics with equipment delivery, local receipts and restore, personal daily records, and a 10-credit entry with a 10-credit successful return. No web playtest code creates an authenticated wallet session, server entitlement or chain payment. Native platform providers retain the actual MWA/devnet implementation.
+
+67 game/client tests pass. The new browser flow check covers fresh purchase, every cosmetic, equipment persistence, menu keyboard isolation, unstarted cancellation, saved entry movement through reload without another debit, started abandonment and an actual daily escape. A separate actual-input entry check observed a capture with no return and then an escape with exactly one 10-credit return; reload preserved the result. All twelve campaign missions passed pointer routes with sequential unlocks and progress restore. Later routes needed several patrol phases; no teleport or forced-win hooks were used. All twelve recordings also match the pinned server verifier. Final navigation/camera framing refinements do not alter simulation or replay rules; the UI flow is rerun on the final export. Evidence: verification/web-first-*.
+
+3D art now includes rounded courier/robot parts, helmet/headset and backpack details, strapped crates, shelf contents, roof vent fans, vault lights, inset phone screens, floor markings, grounded shadows and distinct district palettes. Desktop has a larger scene and fixed room framing; portrait retains the follow camera. These remain procedural stylized assets, not final rigged production characters.
+
+Android work is explicitly paused. The synthetic native recovery diagnostic and UI-harness work remain an incomplete separate worktree task; no new native process-death pass is claimed. Physical Phantom, stable hosted API, funded mint, live devnet payment/return, device profiling, final production art and release/submission checks remain required.
