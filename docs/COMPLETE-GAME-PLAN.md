@@ -1,5 +1,7 @@
 # Steal a Seeker — complete game plan
 
+> Current completion checklist: [REMAINING-WORK.md](REMAINING-WORK.md). This document retains historical plans/checkpoints; older 3D gameplay, missing-feature and test-count statements are superseded. The selected game is 2D; 3D is used for phone inspection only.
+
 12 September 2026. Planned work, not implemented features. The user selected an **angled overhead view with real 3D depth and simpler controls**. See [3D-GAMEPLAY.md](3D-GAMEPLAY.md) for camera, input and the one-room prototype. The visual direction is selected; the renderer dependency still needs a native compatibility test.
 
 ## Current build

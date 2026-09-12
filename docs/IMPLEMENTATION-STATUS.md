@@ -1,5 +1,7 @@
 # Implementation evidence
 
+> Current completion checklist: [REMAINING-WORK.md](REMAINING-WORK.md). This document retains historical plans/checkpoints; older 3D gameplay, missing-feature and test-count statements are superseded. The selected game is 2D; 3D is used for phone inspection only.
+
 Updated 12 September 2026. **Current priority: browser end-to-end playtesting; Android testing paused at the user’s request.** See WEB-FIRST-PLAN.md and WEB-TEST-GUIDE.md. Goal remains the full game described in COMPLETE-GAME-PLAN.md. This is a progress ledger, not a reduced definition of completion.
 
 | Requirement | Current evidence / remaining work |
