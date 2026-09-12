@@ -12,7 +12,7 @@ Status: 12 September 2026. The complete goal remains in [the game plan](docs/COM
 - Native campaign paywall and secure cache of verified ownership for offline use. Catalog equipment drives 3D courier materials, an escape trail, a profile frame and a collection-rack finish.
 - Native devnet wallet connection, signed login, checkout/restore, finalized-transfer verification and durable payment lifetimes. Resumed approvals reuse identical transaction bytes.
 - Persistent sound, volume, vibration and reduced-effects preferences; controls help is available from the hideout and pause screen.
-- Daily challenges with wallet-bound tickets, quantized input recording, a durable verification queue, immutable rule bundles and one best verified score per wallet. The separate paid-entry/success-return mode is still incomplete; its reserve and signed-return worker now have local recovery tests.
+- Daily challenges with wallet-bound tickets, quantized input recording, a durable verification queue, immutable rule bundles and one best verified score per wallet. The separate paid-entry/success-return backend now connects payment recovery, one run and verified returns/refunds. Its native screens and live-chain testing remain incomplete; see `docs/PAID-ENTRIES.md`.
 
 **Live purchases are not ready:** the current APK has no configured HTTPS API, the devnet test mint awaits funding, and physical Phantom sign-in/payment/restore remain unverified. TEST SKR has no monetary value. Mainnet SKR payments are not enabled.
 

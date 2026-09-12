@@ -8,9 +8,15 @@ import {database,migrate} from './db';
 import {CommerceService} from './service';
 import {createApp} from './app';
 import {verifyPayment,TOKEN_PROGRAM,MEMO_PROGRAM,type PaymentChain} from './chain';
-import type {Order,SignInChallenge} from '../shared/commerce';
+import type {Order,PaymentQuote,SignInChallenge} from '../shared/commerce';
 import {RankedService,dailyMission} from './ranked-service';
 import {fixtureReplay} from '../tests/fixtures/replay';
+import {PaidService} from './paid-service';
+import type {PaidEntry} from '../shared/paid';
+import {paymentTransaction} from '../src/commerce/payment';
+import {initialState,idleInput} from '../src/game/simulation';
+import {recordStep} from '../src/game/recording';
+import type {ReplayChunk} from '../shared/replay';
 import {ReturnService, RETURN_FEE_RESERVE, type ReturnChain, type ReturnInspection, type SignedReturn} from './returns';
 import type {DailyManifest,RunTicket} from '../shared/ranked';
 const b58=(b:Uint8Array)=>getBase58Decoder().decode(b),pub=()=>b58(randomBytes(32));
@@ -21,10 +27,11 @@ const chain:PaymentChain={ready:async()=>{},verify:async(o,s)=>verifyPayment(o,s
 let rankClock=new Date('2026-01-01T12:00:00Z');while(dailyMission(rankClock)!=='practice')rankClock=new Date(rankClock.getTime()+86400000);
 const ranked=new RankedService(pool,{now:()=>rankClock});
 let service:CommerceService,app:Awaited<ReturnType<typeof createApp>>;
-before(async()=>{assert.equal((await pool.query('SELECT current_database() AS name')).rows[0].name,'seeker_clockin_test');await migrate(pool);await pool.query('TRUNCATE wallets,auth_challenges,sessions,orders,order_attempts,payment_receipts,entitlements CASCADE');const mint=pub(),recipient=pub();const [destination]=await findAssociatedTokenPda({owner:address(recipient),mint:address(mint),tokenProgram:address(TOKEN_PROGRAM)});service=new CommerceService(pool,chain,{mint,recipient,destination,decimals:6,identityUri:'https://github.com/bluntbrain'});app=await createApp(service,ranked);});
+before(async()=>{assert.equal((await pool.query('SELECT current_database() AS name')).rows[0].name,'seeker_clockin_test');await migrate(pool);await pool.query('TRUNCATE wallets,auth_challenges,sessions,orders,order_attempts,payment_receipts,entitlements,transfer_receipts CASCADE');const mint=pub(),recipient=pub();const [destination]=await findAssociatedTokenPda({owner:address(recipient),mint:address(mint),tokenProgram:address(TOKEN_PROGRAM)});service=new CommerceService(pool,chain,{mint,recipient,destination,decimals:6,identityUri:'https://github.com/bluntbrain'});app=await createApp(service,ranked);});
 after(async()=>{await app.close();await pool.end();});
-async function login(){const keys=generateKeyPairSync('ed25519'),wallet=b58(keys.publicKey.export({type:'spki',format:'der'}).subarray(-32));const response=await app.inject({method:'POST',url:'/auth/challenge',payload:{wallet}});assert.equal(response.statusCode,200);const c=response.json<SignInChallenge>(),message=createSignInMessage(c.payload),signature=sign(null,message,keys.privateKey);const payload={id:c.id,wallet,signedMessage:Buffer.from(message).toString('base64'),signature:signature.toString('base64')};const auth=await app.inject({method:'POST',url:'/auth/verify',payload});assert.equal(auth.statusCode,200,auth.body);return {keys,wallet,token:auth.json().token,headers:{authorization:`Bearer ${auth.json().token}`},payload};}
-function paidTx(o:Order,sig:string){const keys=[o.wallet,o.source,o.mint,o.destination,o.reference,TOKEN_PROGRAM,MEMO_PROGRAM];const data=Buffer.alloc(10);data[0]=12;data.writeBigUInt64LE(BigInt(o.amount),1);data[9]=o.decimals;const balance=(accountIndex:number,owner:string,amount:string)=>({accountIndex,owner,mint:o.mint,uiTokenAmount:{amount,decimals:o.decimals}});return {slot:42,blockTime:Math.floor(Date.now()/1000),transaction:{signatures:[sig],message:{header:{numRequiredSignatures:1},accountKeys:keys,instructions:[{programIdIndex:5,accounts:[1,2,3,0,4],data:b58(data)},{programIdIndex:6,accounts:[],data:b58(Buffer.from(o.memo))}]}},meta:{err:null,preTokenBalances:[balance(1,o.wallet,o.amount),balance(3,o.recipient,'0')],postTokenBalances:[balance(1,o.wallet,'0'),balance(3,o.recipient,o.amount)]}};}
+let testClient=0;
+async function login(){const remoteAddress=`127.0.1.${++testClient}`,keys=generateKeyPairSync('ed25519'),wallet=b58(keys.publicKey.export({type:'spki',format:'der'}).subarray(-32));const response=await app.inject({method:'POST',url:'/auth/challenge',remoteAddress,payload:{wallet}});assert.equal(response.statusCode,200);const c=response.json<SignInChallenge>(),message=createSignInMessage(c.payload),signature=sign(null,message,keys.privateKey);const payload={id:c.id,wallet,signedMessage:Buffer.from(message).toString('base64'),signature:signature.toString('base64')};const auth=await app.inject({method:'POST',url:'/auth/verify',remoteAddress,payload});assert.equal(auth.statusCode,200,auth.body);return {keys,wallet,token:auth.json().token,headers:{authorization:`Bearer ${auth.json().token}`},payload};}
+function paidTx(o:PaymentQuote,sig:string){const keys=[o.wallet,o.source,o.mint,o.destination,o.reference,TOKEN_PROGRAM,MEMO_PROGRAM];const data=Buffer.alloc(10);data[0]=12;data.writeBigUInt64LE(BigInt(o.amount),1);data[9]=o.decimals;const balance=(accountIndex:number,owner:string,amount:string)=>({accountIndex,owner,mint:o.mint,uiTokenAmount:{amount,decimals:o.decimals}});return {slot:42,blockTime:Math.floor(Date.now()/1000),transaction:{signatures:[sig],message:{header:{numRequiredSignatures:1},accountKeys:keys,instructions:[{programIdIndex:5,accounts:[1,2,3,0,4],data:b58(data)},{programIdIndex:6,accounts:[],data:b58(Buffer.from(o.memo))}]}},meta:{err:null,preTokenBalances:[balance(1,o.wallet,o.amount),balance(3,o.recipient,'0')],postTokenBalances:[balance(1,o.wallet,'0'),balance(3,o.recipient,o.amount)]}};}
 async function quote(user:Awaited<ReturnType<typeof login>>,sku='campaign',idempotencyKey=randomUUID()){const r=await app.inject({method:'POST',url:'/orders',headers:user.headers,payload:{sku,idempotencyKey}});assert.equal(r.statusCode,200,r.body);return r.json<Order>();}
 test('signed authentication consumes one nonce, enforces account isolation and supports revocation',async()=>{
  assert.equal((await app.inject({method:'GET',url:'/me'})).statusCode,401);
@@ -140,9 +147,10 @@ test('leaderboard keeps top fifty rows and the signed-in player even when sixty 
  const board=await ranked.leaderboard(day,wallets[59]);assert.equal(board.entries.length,50);assert.deepEqual(board.entries.map(e=>e.wallet),wallets.slice(0,50));assert.equal(board.personal?.wallet,wallets[59]);assert.equal(board.personal?.rank,1);assert(board.entries.every(e=>e.rank===1));
 });
 
-async function returnHarness(tokens=100_000_000n,lamports=100_000_000n){
+async function returnHarness(tokens=100_000_000n,lamports=100_000_000n,returnConfig?:{mint:string;treasury:string;source:string;decimals:number}){
  await pool.query('TRUNCATE return_allocations,return_attempts,return_reservations CASCADE');
- const user=await login(),other=await login(),config={mint:pub(),treasury:pub(),source:pub(),decimals:6};
+ await pool.query("DELETE FROM transfer_receipts WHERE source_kind='paid_entry'");
+ const user=await login(),other=await login(),config=returnConfig??{mint:pub(),treasury:pub(),source:pub(),decimals:6};
  const sent:SignedReturn[]=[],prepared:SignedReturn[]=[],minimumSlots:number[]=[];
  let inspection:ReturnInspection={state:'pending',detail:'Waiting.'},sendError=false,prepareError=false,beforeBroadcastError=false,onBalanceRead:(()=>Promise<void>)|undefined,beforeSave:(()=>Promise<void>)|undefined;
  const chain:ReturnChain={available:async min=>{minimumSlots.push(min??0);if(onBalanceRead)await onBalanceRead();return {tokens,lamports};},prepare:async()=>{const signed={signature:b58(randomBytes(64)),wire:randomBytes(80).toString('base64'),blockhash:pub(),lastValidHeight:'500',contextSlot:'200'};prepared.push(signed);if(beforeSave)await beforeSave();if(prepareError)throw new Error('Crash before persistence');return signed;},inspect:async()=>inspection,broadcast:async attempt=>{assert.equal((await pool.query('SELECT wire FROM return_attempts WHERE signature=$1',[attempt.signature])).rows[0]?.wire,attempt.wire,'bytes must exist durably before broadcast');if(beforeBroadcastError)throw new Error('Crash before broadcast');sent.push(attempt);if(sendError)throw new Error('RPC response lost after broadcast');}};
@@ -206,4 +214,95 @@ test('settlement cannot release a liability while a reservation holds a pre-tran
  await balanceCaptured;const settled=h.service.process();
  let waiting=false;try{const deadline=Date.now()+2000;while(Date.now()<deadline){const rows=await pool.query("SELECT 1 FROM pg_locks WHERE locktype='advisory' AND objid=1936024940 AND NOT granted AND database=(SELECT oid FROM pg_database WHERE datname=current_database())");if(rows.rowCount){waiting=true;break;}await new Promise(resolve=>setTimeout(resolve,10));}}finally{releaseBalance();}
  const result=await reserved;await settled;assert(waiting,'settlement must wait on the capacity lock');assert.equal(result.ok,false,'the in-flight liability still consumes the stale balance');assert.equal((await h.service.status(h.user.wallet,a.id)).state,'settled');
+});
+
+async function paidHarness(t:{after:(fn:()=>Promise<void>)=>void},options:{tokens?:bigint;verify?:typeof import('./replay-runner').verifyReplayInWorker}={}){
+ const h=await returnHarness(options.tokens??100_000_000n,100_000_000n,{mint:service.config.mint,treasury:service.config.recipient,source:service.config.destination,decimals:service.config.decimals});
+ const pass=await quote(h.user),passSig=b58(randomBytes(64));transactions.set(passSig,paidTx(pass,passSig));await service.attach(h.user.wallet,pass.id,passSig);
+ let now=new Date(),height=100,unavailable=false;
+ const txs=new Map<string,unknown>(),refs=new Map<string,string[]>();
+ const entryChain:PaymentChain={ready:async()=>{if(unavailable)throw new Error('RPC unavailable');},verify:async(o,s)=>verifyPayment(o,s,txs.get(s)??null),find:async ref=>{if(unavailable)throw new Error('RPC unavailable');return refs.get(ref)??[];},lifetime:async()=>{if(unavailable)throw new Error('RPC unavailable');return {blockhash:pub(),lastValidBlockHeight:String(height+150),contextSlot:'200'};},height:async()=>height};
+ const make=()=>new PaidService(pool,entryChain,service.config,h.service,{enabled:true,now:()=>now,...(options.verify?{verify:options.verify}:{})});
+ const paid=make(),api=await createApp(service,ranked,paid);t.after(()=>api.close());
+ const post=(path:string,body:Record<string,unknown>={},user=h.user)=>api.inject({method:'POST',url:path,headers:user.headers,payload:body});
+ const quoteEntry=async()=>{const r=await post('/paid/entries',{requestKey:randomUUID(),termsVersion:'devnet-v1'});assert.equal(r.statusCode,200,r.body);return r.json<PaidEntry>();};
+ const pay=async(entry:PaidEntry,attach=true)=>{const sig=b58(randomBytes(64)),tx=paidTx(entry.quote,sig);tx.blockTime=Math.floor(now.getTime()/1000);txs.set(sig,tx);refs.set(entry.quote.reference,[sig]);if(attach){const r=await post(`/paid/entries/${entry.id}/transaction`,{signature:sig});assert.equal(r.statusCode,200,r.body);return {entry:r.json<PaidEntry>(),sig,tx};}return {entry,sig,tx};};
+ const start=async(entry:PaidEntry)=>{const r=await post(`/paid/entries/${entry.id}/start`,{rulesHash:entry.manifest.rulesHash});assert.equal(r.statusCode,200,r.body);return r.json<PaidEntry>();};
+ return {...h,paid,api,post,quoteEntry,pay,start,txs,refs,restart:make,advance:(ms:number)=>{now=new Date(now.getTime()+ms);},blocks:(n:number)=>{height=n;},rpcUnavailable:(v:boolean)=>{unavailable=v;}};
+}
+test('paid entry requires terms and campaign ownership, reserves once, and refuses insufficient return capacity',async t=>{
+ const h=await paidHarness(t);assert.equal((await app.inject({method:'GET',url:'/paid/challenge'})).json().enabled,false);
+ assert.equal((await h.post('/paid/entries',{requestKey:randomUUID()})).statusCode,400);
+ assert.equal((await h.post('/paid/entries',{requestKey:randomUUID(),termsVersion:'devnet-v1',amount:'1'})).statusCode,400);
+ assert.equal((await h.post('/paid/entries',{requestKey:randomUUID(),termsVersion:'devnet-v1'},h.other)).statusCode,403);
+ const [a,b]=await Promise.all([h.quoteEntry(),h.quoteEntry()]);assert.equal(a.id,b.id);assert.equal(a.quote.amount,'10000000');assert.equal(a.status,'quoted');assert.equal((await pool.query('SELECT count(*) FROM return_reservations')).rows[0].count,'1');
+ assert.equal((await h.post(`/paid/entries/${a.id}/start`,{rulesHash:a.manifest.rulesHash})).statusCode,409);
+ const empty=await paidHarness(t,{tokens:0n});assert.equal((await empty.post('/paid/entries',{requestKey:randomUUID(),termsVersion:'devnet-v1'})).statusCode,503);assert.equal((await pool.query('SELECT count(*) FROM paid_entries')).rows[0].count,'0');assert.equal((await pool.query('SELECT count(*) FROM return_reservations')).rows[0].count,'0');
+});
+test('paid approvals keep identical bytes and lost callbacks restore one unstarted entry',async t=>{
+ const h=await paidHarness(t),entry=await h.quoteEntry();
+ assert.equal((await h.api.inject({method:'GET',url:`/paid/entries/${entry.id}`,headers:h.other.headers})).statusCode,404);
+ const first=(await h.post(`/paid/entries/${entry.id}/prepare`)).json<PaidEntry>(),second=(await h.post(`/paid/entries/${entry.id}/prepare`)).json<PaidEntry>();assert(first.quote.payment);assert.equal(first.quote.payment.id,second.quote.payment?.id);assert.deepEqual(paymentTransaction(first.quote).messageBytes,paymentTransaction(second.quote).messageBytes);
+ const {sig}=await h.pay(entry,false);const recovered=await h.restart().reconcile(h.user.wallet,entry.id);assert.equal(recovered.status,'ready');assert.equal(recovered.quote.signature,sig);assert.equal(recovered.run,null);assert(recovered.readyUntil);
+ const retry=(await h.post(`/paid/entries/${entry.id}/transaction`,{signature:sig})).json<PaidEntry>();assert.equal(retry.status,'ready');assert.equal((await pool.query("SELECT count(*) FROM transfer_receipts WHERE source_kind='paid_entry' AND source_id=$1",[entry.id])).rows[0].count,'1');
+});
+test('paid approval expiry never replaces a pending or incompletely described transfer',async t=>{
+ const h=await paidHarness(t),entry=await h.quoteEntry(),first=(await h.post(`/paid/entries/${entry.id}/prepare`)).json<PaidEntry>();h.blocks(251);
+ const sig=b58(randomBytes(64));h.refs.set(entry.quote.reference,[sig]);h.txs.set(sig,{slot:222,meta:{},transaction:{}});
+ const blocked=await h.post(`/paid/entries/${entry.id}/prepare`);assert.equal(blocked.statusCode,409);assert.equal((await h.paid.get(h.user.wallet,entry.id)).quote.payment?.id,first.quote.payment?.id);
+ h.refs.clear();h.txs.clear();await pool.query("UPDATE paid_payment_attempts SET state='invalid' WHERE entry_id=$1",[entry.id]);
+ const replacement=(await h.post(`/paid/entries/${entry.id}/prepare`)).json<PaidEntry>();assert.notEqual(replacement.quote.payment?.id,first.quote.payment?.id);assert.notDeepEqual(paymentTransaction(replacement.quote).messageBytes,paymentTransaction(first.quote).messageBytes);
+ h.rpcUnavailable(true);assert.equal((await h.post(`/paid/entries/${entry.id}/prepare`)).statusCode,503);
+});
+test('unpaid expiry releases its reserve only after finalized lifetime reconciliation and late payment goes to review',async t=>{
+ const h=await paidHarness(t),entry=await h.quoteEntry();await h.post(`/paid/entries/${entry.id}/prepare`);h.advance(16*60_000);
+ await h.paid.reconcile(h.user.wallet,entry.id);assert.equal((await h.paid.get(h.user.wallet,entry.id)).status,'verifying_payment');
+ h.blocks(251);await h.paid.reconcile(h.user.wallet,entry.id);assert.equal((await h.paid.get(h.user.wallet,entry.id)).status,'expired');assert.equal((await pool.query('SELECT state FROM return_reservations')).rows[0].state,'released');
+ const next=await h.quoteEntry();assert.notEqual(next.id,entry.id);const late=await h.pay(entry);assert.equal(late.entry.status,'review');assert.equal((await h.paid.get(h.user.wallet,next.id)).status,'quoted','late-review bookkeeping must not collide with the active-entry index');
+});
+test('paid start is idempotent, cannot cross wallets or rules, and a verified escape allocates one return',async t=>{
+ const h=await paidHarness(t),entry=(await h.pay(await h.quoteEntry())).entry;
+ assert.equal((await h.post(`/paid/entries/${entry.id}/start`,{rulesHash:entry.manifest.rulesHash},h.other)).statusCode,404);
+ assert.equal((await h.post(`/paid/entries/${entry.id}/start`,{rulesHash:'0'.repeat(64)})).statusCode,409);
+ const running=await h.start(entry),again=await h.start(entry);assert.equal(running.run?.id,again.run?.id);assert.equal(running.run?.expiresAt,again.run?.expiresAt);assert.equal((await h.post(`/paid/entries/${entry.id}/cancel`)).statusCode,409);
+ const {state,replay}=fixtureReplay('battery-dash');assert.equal(state.status,'won');const input={runId:running.run!.id,rulesHash:entry.manifest.rulesHash,replay};
+ assert.equal((await h.post(`/paid/entries/${entry.id}/finish`,input)).statusCode,400,'instant replay is rejected');h.advance(state.ticks/30*1000+1000);
+ assert.equal((await h.post(`/paid/entries/${entry.id}/finish`,{...input,score:999999})).statusCode,400);const submit=()=>h.post(`/paid/entries/${entry.id}/finish`,input);assert.equal((await submit()).json().status,'verifying_run');assert.equal((await submit()).json().status,'verifying_run');
+ assert.equal((await h.post(`/paid/entries/${entry.id}/finish`,{...input,replay:{version:1,chunks:[{x:0,y:0,buttons:0,ticks:1}]}})).statusCode,409);
+ await Promise.all([h.paid.process(),h.restart().process()]);const won=await h.paid.get(h.user.wallet,entry.id);assert.equal(won.status,'won');assert.equal(won.run?.result?.score,state.score);assert.equal(won.return?.amount,'10000000');assert.equal((await pool.query('SELECT count(*) FROM return_allocations')).rows[0].count,'1');
+ await h.service.process();h.setInspection({state:'settled',slot:999});await h.retry();await h.service.process();const returned=await h.paid.get(h.user.wallet,entry.id);assert.equal(returned.status,'returned');assert.equal(returned.return?.state,'settled');assert.equal((await submit()).json().status,'returned');assert.equal(h.prepared.length,1);assert.equal(h.sent.length,1);
+});
+test('verified paid timeout releases only its reserve and creates no return',async t=>{
+ const h=await paidHarness(t),entry=await h.start((await h.pay(await h.quoteEntry())).entry),state=initialState('battery-dash'),chunks:ReplayChunk[]=[];
+ while(state.status==='playing')recordStep(state,idleInput(),chunks);assert(['caught','timeout'].includes(state.status));h.advance(state.ticks/30*1000+1000);
+ await h.paid.submit(h.user.wallet,entry.id,{runId:entry.run!.id,rulesHash:entry.manifest.rulesHash,replay:{version:1,chunks}});await h.paid.process();
+ const lost=await h.paid.get(h.user.wallet,entry.id);assert.equal(lost.status,'lost');assert.equal(lost.return,null);assert.equal((await pool.query('SELECT state FROM return_reservations')).rows[0].state,'released');assert.equal((await pool.query('SELECT count(*) FROM return_allocations')).rows[0].count,'0');
+});
+test('unstarted cancellations and the 24-hour window queue one refund; started missing evidence stays held',async t=>{
+ const h=await paidHarness(t),entry=(await h.pay(await h.quoteEntry())).entry;
+ const [a,b]=await Promise.all([h.post(`/paid/entries/${entry.id}/cancel`),h.post(`/paid/entries/${entry.id}/cancel`)]);assert.equal(a.statusCode,200);assert.equal(a.json().return.id,b.json().return.id);assert.equal(a.json().status,'refunding');assert.equal((await h.post(`/paid/entries/${entry.id}/start`,{rulesHash:entry.manifest.rulesHash})).statusCode,409);
+ const expired=await paidHarness(t),paid=(await expired.pay(await expired.quoteEntry())).entry;expired.advance(24*3600_000+1);await expired.paid.process();assert.equal((await expired.paid.get(expired.user.wallet,paid.id)).status,'refunding');
+ const missing=await paidHarness(t),started=await missing.start((await missing.pay(await missing.quoteEntry())).entry);missing.advance((started.manifest.hardLimitSeconds+181)*1000);await missing.paid.process();assert.equal((await missing.paid.get(missing.user.wallet,started.id)).status,'review');assert.equal((await pool.query('SELECT state FROM return_reservations')).rows[0].state,'held');assert.equal((await pool.query('SELECT count(*) FROM return_allocations')).rows[0].count,'0');
+});
+test('paid infrastructure verification failures refund after retries instead of reporting a player loss',async t=>{
+ const h=await paidHarness(t,{verify:async()=>{throw new Error('Worker unavailable');}}),entry=await h.start((await h.pay(await h.quoteEntry())).entry),{state,replay}=fixtureReplay('battery-dash');h.advance(state.ticks/30*1000+1000);
+ await h.paid.submit(h.user.wallet,entry.id,{runId:entry.run!.id,rulesHash:entry.manifest.rulesHash,replay});
+ for(let i=0;i<5;i++){await pool.query("UPDATE paid_entries SET verify_after=now()-interval '1 second' WHERE id=$1",[entry.id]);await h.paid.process();}
+ const refunded=await h.paid.get(h.user.wallet,entry.id);assert.equal(refunded.status,'refunding');assert.equal(refunded.return?.outcome,'refund');assert.equal(refunded.run?.result,null);assert.equal((await pool.query('SELECT count(*) FROM return_allocations')).rows[0].count,'1');
+});
+test('a transfer instruction already used by another product cannot fund a paid entry',async t=>{
+ const h=await paidHarness(t),entry=await h.quoteEntry(),payment=await h.pay(entry,false);
+ await pool.query("INSERT INTO transfer_receipts(signature,instruction_index,source_kind,source_id,slot) VALUES($1,0,'order',$2,42)",[payment.sig,randomUUID()]);
+ const result=await h.post(`/paid/entries/${entry.id}/transaction`,{signature:payment.sig});assert.equal(result.json().status,'review');assert.equal(result.json().run,null);assert.equal((await pool.query('SELECT state FROM return_reservations')).rows[0].state,'held');
+});
+test('pausing new entries preserves reconciliation, cancellation and queued returns',async t=>{
+ const h=await paidHarness(t),entry=await h.quoteEntry();await h.post(`/paid/entries/${entry.id}/prepare`);
+ await h.pay(entry,false);h.paid.enabled=false;
+ assert.equal((await h.api.inject({method:'GET',url:'/paid/challenge'})).json().enabled,false);
+ assert.equal((await h.post('/paid/entries',{requestKey:randomUUID(),termsVersion:'devnet-v1'})).statusCode,503);
+ const restored=(await h.post(`/paid/entries/${entry.id}/reconcile`)).json<PaidEntry>();assert.equal(restored.status,'ready');
+ assert.equal((await h.post(`/paid/entries/${entry.id}/start`,{rulesHash:entry.manifest.rulesHash})).statusCode,503);
+ const refund=(await h.post(`/paid/entries/${entry.id}/cancel`)).json<PaidEntry>();assert.equal(refund.status,'refunding');
+ await h.service.process();h.setInspection({state:'settled',slot:1000});await h.retry();await h.service.process();
+ assert.equal((await h.paid.get(h.user.wallet,entry.id)).status,'refunded');assert.equal(h.prepared.length,1);
 });

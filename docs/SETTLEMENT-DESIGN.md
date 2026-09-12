@@ -1,6 +1,6 @@
 # Devnet paid challenge implementation contract
 
-Partially implemented: reservations, durable signed-return jobs and owner-only return status are now implemented and tested locally; see [return-worker evidence](RETURN-SETTLEMENT.md). Entry checkout, paid-run recovery and outcome authorization remain planned. This extends the complete-game plan; it does not enable mainnet money play. Daily leaderboards remain a separate, no-payout mode.
+Partially implemented: the backend now connects reserved entry quotes, finalized payment recovery, one explicit Start, pinned replay outcomes, refunds and durable signed returns; see [paid-entry evidence](PAID-ENTRIES.md). Native checkout, paid-run recovery and receipt screens remain planned. This extends the complete-game plan; it does not enable mainnet money play. Daily leaderboards remain a separate, no-payout mode.
 
 ## Player contract
 
@@ -8,7 +8,7 @@ A separate challenge screen quotes 10 TEST SKR entry and 10 TEST SKR gross succe
 
 The screen must explain the start window, run/submission deadline, restart/recovery behavior, verification and pending settlement before payment. Operator or verification infrastructure failure must be distinguished from a verified gameplay loss. The treasury is operator-controlled, not trustless escrow. Real SKR release requirements in the economy review remain unresolved.
 
-## Durable records to add
+## Durable backend records (implemented)
 
 - Entry quote: wallet, network/mint/program, amount, reference, memo, expiry and payment authorization.
 - Return reservation: entry, maximum token liability, active/released/settled state and expiry/reconciliation reason.

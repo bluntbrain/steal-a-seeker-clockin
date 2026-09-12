@@ -85,6 +85,8 @@ export class CommerceService {
    const duplicate=await db.query('SELECT order_id FROM payment_receipts WHERE signature=$1',[signature]);if(duplicate.rowCount&&duplicate.rows[0].order_id!==order.id)throw new ServiceError(409,'Payment already belongs to another order.');
    const owned=await db.query('SELECT 1 FROM entitlements WHERE wallet=$1 AND sku=$2',[order.wallet,order.sku]);
    if(owned.rowCount){await db.query("UPDATE orders SET status='needs_review',signature=$2,detail='Duplicate purchase payment needs a refund review.' WHERE id=$1",[order.id,signature]);return;}
+   const allocated=await db.query("INSERT INTO transfer_receipts(signature,instruction_index,source_kind,source_id,slot) VALUES($1,$2,'order',$3,$4) ON CONFLICT DO NOTHING RETURNING source_id",[signature,result.instructionIndex,order.id,result.slot]);
+   if(!allocated.rowCount)throw new ServiceError(409,'This transfer instruction already fulfilled another purchase or entry.');
    await db.query('INSERT INTO payment_receipts(signature,order_id,instruction_index,slot) VALUES($1,$2,$3,$4)',[signature,order.id,result.instructionIndex,result.slot]);
    await db.query('INSERT INTO entitlements(wallet,sku,order_id) VALUES($1,$2,$3)',[order.wallet,order.sku,order.id]);
    await db.query("UPDATE orders SET status='fulfilled',signature=$2,detail=NULL,checked_at=now() WHERE id=$1",[order.id,signature]);

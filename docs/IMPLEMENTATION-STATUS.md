@@ -82,3 +82,11 @@ Latest preferences build: `releases/steal-a-seeker-settings-devnet-preview.apk`;
 ## Return-worker checkpoint
 
 Migration 004, internal return reservations/allocations, durable signed transactions, claim-token recovery, expiry reconciliation and authenticated return status are implemented. Thirty-two server tests pass, including actual signed-wire encoding and a reproduced stale-balance/reserve-release race. The dedicated devnet key passes an offline identity/permissions check. The local API restarted with the new migration and returns 401 for unauthenticated return status. The worker remains disabled; there are no live return allocations. Entry/run/UI integration and physical/live-chain validation remain required. See RETURN-SETTLEMENT.md.
+
+## Paid-entry backend checkpoint
+
+Migration 005, reserved quotes, durable payment approvals, finalized callback recovery, explicit Start, owner-bound replay submission and pinned outcome allocation are implemented. An instruction receipt is now unique across both shop purchases and paid entries. Unstarted cancellation/24-hour expiry queues one token refund; verified capture/timeout releases only the reservation; missing/invalid evidence stays in review. Five verification infrastructure failures queue a refund. New-entry enablement is separate from return processing.
+
+42 server tests and 58 game/client tests pass. Paid tests use real database transactions and the pinned game verifier with synthetic chain responses. They cover repeated approval bytes, RPC uncertainty, quote expiry, late payment, concurrent cancellation, one Start, duplicate win submission, one finalized synthetic return and pausing entries while completing a refund. The local API restarted with migration 005, advertises paid entries disabled, and rejects unauthenticated entry history with 401. See `verification/paid-entry-check.json`.
+
+No paid native UI, recovered running input log, operator review-resolution workflow or live paid devnet attempt is established yet. The current APK is unchanged. Hosting, treasury provisioning and physical Phantom evidence remain pending.

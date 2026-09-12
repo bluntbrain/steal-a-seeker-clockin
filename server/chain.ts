@@ -5,13 +5,13 @@ export const TOKEN_PROGRAM='TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA';
 export const MEMO_PROGRAM='MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr';
 export const DEVNET_GENESIS='EtWTRABZaYq6iMfeYKouRu166VU2xqa1wcaWoxPkrZBG';
 export type Verification={state:'verified';instructionIndex:number;slot:number}|{state:'pending'|'invalid'|'needs_review';detail:string};
-export interface PaymentChain {verify(order:Order,signature:string):Promise<Verification>;find(reference:string,minContextSlot?:number):Promise<string[]>;ready():Promise<void>;lifetime():Promise<Omit<PaymentAuthorization,'id'>>;height(minContextSlot:number):Promise<number>}
+export interface PaymentChain {verify(order:TransferBinding,signature:string):Promise<Verification>;find(reference:string,minContextSlot?:number):Promise<string[]>;ready():Promise<void>;lifetime():Promise<Omit<PaymentAuthorization,'id'>>;height(minContextSlot:number):Promise<number>}
 const tokenBalance=z.object({accountIndex:z.number().int(),mint:z.string(),owner:z.string().optional(),uiTokenAmount:z.object({amount:z.string().regex(/^\d+$/),decimals:z.number().int()})});
 const txSchema=z.object({slot:z.number().int().nonnegative(),blockTime:z.number().nullable(),meta:z.object({err:z.unknown().nullable(),preTokenBalances:z.array(tokenBalance),postTokenBalances:z.array(tokenBalance),loadedAddresses:z.object({writable:z.array(z.string()),readonly:z.array(z.string())}).optional()}),transaction:z.object({signatures:z.array(z.string()),message:z.object({header:z.object({numRequiredSignatures:z.number().int()}),accountKeys:z.array(z.string()),instructions:z.array(z.object({programIdIndex:z.number().int(),accounts:z.array(z.number().int()),data:z.string()}))})})});
 export type TransferBinding=Pick<Order,'wallet'|'source'|'mint'|'destination'|'recipient'|'tokenProgram'|'decimals'|'amount'|'reference'|'memo'|'createdAt'|'expiresAt'>;
 export function verifyPayment(order:TransferBinding,signature:string,value:unknown,checkQuoteWindow=true):Verification{
  if(value===null)return {state:'pending',detail:'Waiting for a finalized transaction.'};
- const parsed=txSchema.safeParse(value);if(!parsed.success)return {state:'invalid',detail:'Unrecognized transaction response.'};
+ const parsed=txSchema.safeParse(value);if(!parsed.success)return {state:'pending',detail:'Finalized transaction data is incomplete; reconciliation must retry.'};
  const tx=parsed.data;if(tx.meta.err!==null)return {state:'invalid',detail:'Transaction failed on chain.'};
  if(tx.transaction.signatures[0]!==signature)return {state:'invalid',detail:'Transaction signature mismatch.'};
  const message=tx.transaction.message,keys=[...message.accountKeys,...(tx.meta.loadedAddresses?.writable||[]),...(tx.meta.loadedAddresses?.readonly||[])];
@@ -45,7 +45,7 @@ export class DevnetChain implements PaymentChain{
   const account=await rpc<{value:{owner:string;data:{parsed:{info:{owner:string;mint:string;state:string}}}}|null}>(this.config.rpcUrl,'getAccountInfo',[this.config.destination,{encoding:'jsonParsed',commitment:'finalized'}]);
   if(!account.value||account.value.owner!==TOKEN_PROGRAM||account.value.data.parsed.info.owner!==this.config.recipient||account.value.data.parsed.info.mint!==this.config.mint||account.value.data.parsed.info.state!=='initialized')throw new Error('The treasury token account is not ready.');
  }
- async verify(order:Order,signature:string){return verifyPayment(order,signature,await rpc(this.config.rpcUrl,'getTransaction',[signature,{encoding:'json',commitment:'finalized',maxSupportedTransactionVersion:0}]));}
+ async verify(order:TransferBinding,signature:string){return verifyPayment(order,signature,await rpc(this.config.rpcUrl,'getTransaction',[signature,{encoding:'json',commitment:'finalized',maxSupportedTransactionVersion:0}]));}
  async lifetime(){const r=await rpc<{context:{slot:number};value:{blockhash:string;lastValidBlockHeight:number}}>(this.config.rpcUrl,'getLatestBlockhash',[{commitment:'finalized'}]);return {blockhash:r.value.blockhash,lastValidBlockHeight:String(r.value.lastValidBlockHeight),contextSlot:String(r.context.slot)};}
  async height(minContextSlot:number){return rpc<number>(this.config.rpcUrl,'getBlockHeight',[{commitment:'finalized',minContextSlot}]);}
  async find(reference:string,minContextSlot?:number){const rows=await rpc<{signature:string;err:unknown}[]>(this.config.rpcUrl,'getSignaturesForAddress',[reference,{limit:1000,commitment:'finalized',...(minContextSlot?{minContextSlot}:{})}]);if(rows.length===1000)throw new Error('Reference history needs manual reconciliation.');return rows.filter(s=>!s.err).map(s=>s.signature);}

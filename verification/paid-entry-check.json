@@ -1,0 +1,51 @@
+{
+  "checkedAt": "2026-09-12T00:10:47.250931+00:00",
+  "scope": "Paid-entry backend with PostgreSQL and synthetic chain evidence; no live payment or native paid screen",
+  "baseCommit": "56c156c4b58c19578cf58f1bb03d309c1186bec2",
+  "tests": {
+    "server": {
+      "passed": 42,
+      "failed": 0
+    },
+    "gameClient": {
+      "passed": 58,
+      "failed": 0
+    },
+    "typecheck": "passed",
+    "rulesManifest": "unchanged; check passed",
+    "diffWhitespace": "passed"
+  },
+  "localApi": {
+    "port": 8790,
+    "migration": "005-paid-entries",
+    "publicChallengeEnabled": false,
+    "unauthenticatedEntryHistory": 401,
+    "paidEntries": 0
+  },
+  "liveDevnetTransferVerified": false,
+  "nativePaidChallengeVerified": false,
+  "sourceSha256": {
+    "server/005-paid-entries.sql": "6a1922248caefbfc351d670d3b1ee1025c5b26cd71b8e9b9d8e61ce6426a9ea1",
+    "server/paid-service.ts": "18d39cac88f6e33a8c3dc4e2a6220cf25cc921c327b5f44115b44cfd6d702b10",
+    "server/returns.ts": "99b5642457f405f09ae4d65aec236c8603ffdec4f084aff05f1ff54903a41e59",
+    "server/return-chain.ts": "84a7922dc0db27f7b34b60360d1dda178c29bf1457afb848519805933910172a",
+    "server/chain.ts": "0e269f70e8ba6d0a3b580dc7821631afd9414402478452160552898fb6d0f12d",
+    "server/service.ts": "6faef55e184a033ce2d0a1975ce58c3d440d3f9679766202e57823bd436c6141",
+    "server/app.ts": "b60323fc2da8c3978e826ebecac6787698fa42f08ebbb4762553355d5c7025cb",
+    "server/main.ts": "bb6635abdeedfcdc8485e80e85df96a3ca9d2c33d756aed71b3eb6281ea1228c",
+    "server/db.ts": "0786f065150b4ea39dc92e45531111544b0adb58680d623c55a96e817a26ecd3",
+    "server/commerce.test.ts": "51f7643aa48f722dc6bfcc5ae280251267346c521fce1860cb15d06194fff9e1",
+    "shared/commerce.ts": "824d92cdbaabea65d0845d6b8f0e23d848fa10e26e67fef60532599aa4063345",
+    "shared/paid.ts": "e1d7e5d41c525f80732e3b90688babb297ee38992439b0a51a15d1b5c0c4ee1c",
+    "shared/rules-manifest.json": "d5d25edbcf701a264c4a672c4501761fb0921a4515234016cb42b52b5bdf4578",
+    "src/commerce/payment.ts": "1b6dfca0cc1e1bc9876cc35e26959372d4687f3afc9dd521869f420ba221b684"
+  },
+  "remaining": [
+    "native checkout and terms",
+    "running replay recovery",
+    "native return receipts",
+    "operator review resolution",
+    "hosted HTTPS and funded devnet setup",
+    "physical Phantom entry and return"
+  ]
+}

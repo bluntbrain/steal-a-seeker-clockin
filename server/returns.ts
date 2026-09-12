@@ -1,7 +1,7 @@
 import {randomBytes, randomUUID} from 'node:crypto';
 import {address, getBase58Decoder} from '@solana/kit';
 import {findAssociatedTokenPda} from '@solana-program/token';
-import type {Pool} from 'pg';
+import type {Pool,PoolClient} from 'pg';
 import {transaction} from './db';
 import {TOKEN_PROGRAM} from './chain';
 import {ServiceError} from './service';
@@ -27,55 +27,59 @@ export async function returnStatus(pool: Pool, wallet: string, id: string): Prom
 /** Internal service only. A verified entry/outcome must authorize allocation;
  * there is deliberately no HTTP allocation or reservation-release endpoint. */
 export class ReturnService {
-  constructor(public pool: Pool, public chain: ReturnChain, public config: ReturnConfig) {}
+  constructor(public pool: Pool, public chain: ReturnChain | undefined, public config: ReturnConfig) {}
 
   async reserve(wallet: string, externalKey: string, amount: bigint) {
+    return transaction(this.pool, db => this.reserveInTransaction(db, wallet, externalKey, amount));
+  }
+  async reserveInTransaction(db: PoolClient, wallet: string, externalKey: string, amount: bigint) {
     address(wallet);
     if (amount <= 0n || amount > 18_446_744_073_709_551_615n || !externalKey || externalKey.length > 160) throw new ServiceError(400, 'Invalid return reservation.');
     const [destination] = await findAssociatedTokenPda({owner: address(wallet), mint: address(this.config.mint), tokenProgram: address(TOKEN_PROGRAM)});
-    return transaction(this.pool, async db => {
-      await db.query('SELECT pg_advisory_xact_lock(1936024940)');
-      const prior = await db.query('SELECT * FROM return_reservations WHERE external_key=$1', [externalKey]);
-      if (prior.rowCount) {
-        const row = prior.rows[0];
-        if (row.wallet !== wallet || row.amount !== amount.toString() || row.mint !== this.config.mint || row.treasury !== this.config.treasury || row.decimals !== this.config.decimals || row.source !== this.config.source || row.destination !== destination) throw new ServiceError(409, 'Reservation key is already bound to a different return.');
-        return row;
-      }
-      // Read balance while holding the allocation lock, then subtract every
-      // outstanding maximum return. Pending broadcasts still consume capacity.
-      const settled = (await db.query("SELECT coalesce(max((a.receipt->>'slot')::bigint),0)::text AS slot FROM return_allocations a JOIN return_reservations r ON r.id=a.reservation_id WHERE r.treasury=$1 AND a.state='settled'", [this.config.treasury])).rows[0];
-      const balance = await this.chain.available(Number(settled.slot));
-      const held = (await db.query("SELECT coalesce(sum(CASE WHEN mint=$1 THEN amount ELSE 0 END),0)::text AS tokens,coalesce(sum(fee_lamports),0)::text AS fees FROM return_reservations WHERE treasury=$2 AND state='held'", [this.config.mint, this.config.treasury])).rows[0];
-      if (balance.tokens < BigInt(held.tokens) + amount || balance.lamports < BigInt(held.fees) + RETURN_FEE_RESERVE) throw new ServiceError(503, 'The devnet treasury cannot reserve this return and its network costs.');
-      const row = await db.query("INSERT INTO return_reservations(id,external_key,wallet,cluster,mint,token_program,decimals,treasury,source,destination,amount,fee_lamports) VALUES($1,$2,$3,'solana:devnet',$4,$5,$6,$7,$8,$9,$10,$11) RETURNING *", [randomUUID(), externalKey, wallet, this.config.mint, TOKEN_PROGRAM, this.config.decimals, this.config.treasury, this.config.source, destination, amount.toString(), RETURN_FEE_RESERVE.toString()]);
-      return row.rows[0];
-    });
+    await db.query('SELECT pg_advisory_xact_lock(1936024940)');
+    const prior = await db.query('SELECT * FROM return_reservations WHERE external_key=$1', [externalKey]);
+    if (prior.rowCount) {
+      const row = prior.rows[0];
+      if (row.wallet !== wallet || row.amount !== amount.toString() || row.mint !== this.config.mint || row.treasury !== this.config.treasury || row.decimals !== this.config.decimals || row.source !== this.config.source || row.destination !== destination) throw new ServiceError(409, 'Reservation key is already bound to a different return.');
+      return row;
+    }
+    // Read balance while holding the allocation lock, then subtract every
+    // outstanding maximum return. Pending broadcasts still consume capacity.
+    const settled = (await db.query("SELECT coalesce(max((a.receipt->>'slot')::bigint),0)::text AS slot FROM return_allocations a JOIN return_reservations r ON r.id=a.reservation_id WHERE r.treasury=$1 AND a.state='settled'", [this.config.treasury])).rows[0];
+    if (!this.chain) throw new ServiceError(503, 'Devnet return funding is unavailable.');
+    const balance = await this.chain.available(Number(settled.slot));
+    const held = (await db.query("SELECT coalesce(sum(CASE WHEN mint=$1 THEN amount ELSE 0 END),0)::text AS tokens,coalesce(sum(fee_lamports),0)::text AS fees FROM return_reservations WHERE treasury=$2 AND state='held'", [this.config.mint, this.config.treasury])).rows[0];
+    if (balance.tokens < BigInt(held.tokens) + amount || balance.lamports < BigInt(held.fees) + RETURN_FEE_RESERVE) throw new ServiceError(503, 'The devnet treasury cannot reserve this return and its network costs.');
+    const row = await db.query("INSERT INTO return_reservations(id,external_key,wallet,cluster,mint,token_program,decimals,treasury,source,destination,amount,fee_lamports) VALUES($1,$2,$3,'solana:devnet',$4,$5,$6,$7,$8,$9,$10,$11) RETURNING *", [randomUUID(), externalKey, wallet, this.config.mint, TOKEN_PROGRAM, this.config.decimals, this.config.treasury, this.config.source, destination, amount.toString(), RETURN_FEE_RESERVE.toString()]);
+    return row.rows[0];
   }
 
   async release(id: string, reason: 'unpaid-finalized-expiry' | 'verified-loss') {
-    return transaction(this.pool, async db => {
-      const row = await db.query('SELECT * FROM return_reservations WHERE id=$1 FOR UPDATE', [id]);
-      if (!row.rowCount) throw new ServiceError(404, 'Reservation not found.');
-      const allocated = await db.query('SELECT 1 FROM return_allocations WHERE reservation_id=$1', [id]);
-      if (allocated.rowCount || row.rows[0].state === 'settled') throw new ServiceError(409, 'An allocated return cannot be released.');
-      if (row.rows[0].state === 'released') return;
-      await db.query("UPDATE return_reservations SET state='released',release_reason=$2 WHERE id=$1", [id, reason]);
-    });
+    return transaction(this.pool, db => this.releaseInTransaction(db, id, reason));
+  }
+  async releaseInTransaction(db: PoolClient, id: string, reason: 'unpaid-finalized-expiry' | 'verified-loss') {
+    const row = await db.query('SELECT * FROM return_reservations WHERE id=$1 FOR UPDATE', [id]);
+    if (!row.rowCount) throw new ServiceError(404, 'Reservation not found.');
+    const allocated = await db.query('SELECT 1 FROM return_allocations WHERE reservation_id=$1', [id]);
+    if (allocated.rowCount || row.rows[0].state === 'settled') throw new ServiceError(409, 'An allocated return cannot be released.');
+    if (row.rows[0].state === 'released') return;
+    await db.query("UPDATE return_reservations SET state='released',release_reason=$2 WHERE id=$1", [id, reason]);
   }
 
   async allocate(reservationId: string, outcome: 'success' | 'refund') {
-    return transaction(this.pool, async db => {
-      const reserve = await db.query('SELECT * FROM return_reservations WHERE id=$1 FOR UPDATE', [reservationId]);
-      if (!reserve.rowCount) throw new ServiceError(404, 'Reservation not found.');
-      const prior = await db.query('SELECT * FROM return_allocations WHERE reservation_id=$1', [reservationId]);
-      if (prior.rowCount) {
-        if (prior.rows[0].outcome !== outcome) throw new ServiceError(409, 'This entry already has a different allocated outcome.');
-        return prior.rows[0];
-      }
-      if (reserve.rows[0].state !== 'held') throw new ServiceError(409, 'Return funds are no longer reserved.');
-      const id = randomUUID(), reference = getBase58Decoder().decode(randomBytes(32));
-      return (await db.query('INSERT INTO return_allocations(id,reservation_id,outcome,reference,memo) VALUES($1,$2,$3,$4,$5) RETURNING *', [id, reservationId, outcome, reference, `seeker-return:${id}`])).rows[0];
-    });
+    return transaction(this.pool, db => this.allocateInTransaction(db, reservationId, outcome));
+  }
+  async allocateInTransaction(db: PoolClient, reservationId: string, outcome: 'success' | 'refund') {
+    const reserve = await db.query('SELECT * FROM return_reservations WHERE id=$1 FOR UPDATE', [reservationId]);
+    if (!reserve.rowCount) throw new ServiceError(404, 'Reservation not found.');
+    const prior = await db.query('SELECT * FROM return_allocations WHERE reservation_id=$1', [reservationId]);
+    if (prior.rowCount) {
+      if (prior.rows[0].outcome !== outcome) throw new ServiceError(409, 'This entry already has a different allocated outcome.');
+      return prior.rows[0];
+    }
+    if (reserve.rows[0].state !== 'held') throw new ServiceError(409, 'Return funds are no longer reserved.');
+    const id = randomUUID(), reference = getBase58Decoder().decode(randomBytes(32));
+    return (await db.query('INSERT INTO return_allocations(id,reservation_id,outcome,reference,memo) VALUES($1,$2,$3,$4,$5) RETURNING *', [id, reservationId, outcome, reference, `seeker-return:${id}`])).rows[0];
   }
 
   async status(wallet: string, id: string) {
@@ -83,6 +87,7 @@ export class ReturnService {
   }
 
   async process() {
+    const chain=this.chain;if(!chain)return false;
     const job = await transaction(this.pool, async db => {
       const found = await db.query("SELECT a.*,r.wallet,r.mint,r.decimals,r.treasury,r.source,r.destination,r.amount FROM return_allocations a JOIN return_reservations r ON r.id=a.reservation_id WHERE a.state IN ('queued','pending') AND a.process_after<=now() AND (a.lease_until IS NULL OR a.lease_until<now()) ORDER BY a.created_at FOR UPDATE OF a SKIP LOCKED LIMIT 1");
       if (!found.rowCount) return null;
@@ -100,7 +105,7 @@ export class ReturnService {
       const row = await this.pool.query('SELECT * FROM return_attempts WHERE id=$1', [job.active_attempt]);
       let attempt = row.rows[0];
       if (attempt) {
-        const signed = signedFromRow(attempt), result = await this.chain.inspect(binding, signed);
+        const signed = signedFromRow(attempt), result = await chain.inspect(binding, signed);
         if (result.state === 'settled') {
           await transaction(this.pool, async db => {
             // A capacity reader may already have a pre-transfer balance. Keep
@@ -114,7 +119,7 @@ export class ReturnService {
         }
         if (result.state === 'review') {await update('review', result.detail); return true;}
         if (result.state === 'pending') {
-          await this.chain.broadcast(signed);
+          await chain.broadcast(signed);
           await update('pending', result.detail); return true;
         }
         // Only definitive expiry/non-execution or finalized failure permits a
@@ -130,7 +135,7 @@ export class ReturnService {
       if (!attempt) {
         const count = Number((await this.pool.query('SELECT count(*) FROM return_attempts WHERE allocation_id=$1', [job.id])).rows[0].count);
         if (count >= 8) {await update('review', 'Eight transaction lifetimes could not settle. Funds remain reserved for support.'); return true;}
-        const signed = await this.chain.prepare(binding); // Local sign only.
+        const signed = await chain.prepare(binding); // Local sign only.
         const saved = await transaction(this.pool, async db => {
           const current = await db.query('SELECT lease_token,active_attempt,state FROM return_allocations WHERE id=$1 FOR UPDATE', [job.id]);
           if (current.rows[0].lease_token !== job.lease_token || current.rows[0].active_attempt || !['queued','pending'].includes(current.rows[0].state)) return false;
@@ -139,7 +144,7 @@ export class ReturnService {
           await db.query("UPDATE return_allocations SET active_attempt=$2,state='pending' WHERE id=$1", [job.id, id]); return true;
         });
         if (!saved) return true; // Never broadcast a discarded/stale signature.
-        await this.chain.broadcast(signed);
+        await chain.broadcast(signed);
         await update('pending', 'Return sent; waiting for finalized verification.');
       }
     } catch {

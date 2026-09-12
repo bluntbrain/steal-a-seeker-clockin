@@ -1,6 +1,6 @@
 # Devnet return worker
 
-Implemented backend foundation, 12 September 2026. This is not yet a playable paid challenge: entry checkout, paid-run recovery, verified-outcome wiring and the native settlement screen remain to be connected. No live return has been sent. The current local API leaves the return worker disabled.
+Implemented backend foundation, 12 September 2026. The backend now connects entry quotes, finalized payments, explicit Start, pinned replay verification and outcome allocation. Native entry checkout, running-replay recovery and settlement screens remain to be connected; this is not yet a playable paid challenge. No live return has been sent. The current local API leaves the return worker disabled.
 
 ## What is implemented
 
@@ -12,7 +12,7 @@ The queue uses claim tokens and leases. A worker prepares and signs locally, the
 
 A return is complete only after finalized RPC evidence matches the reserved authority, source, recipient, mint, amount, memo and reference. The receipt stores signature, slot and devnet cluster. A non-finalized status, missing transaction, stale provider, incomplete history or unknown reference keeps it unresolved. An unexpected finalized transfer requires review. The owner can read status through authenticated `GET /returns/:id`; no signing bytes or key material are exposed by that endpoint.
 
-There is no public reserve, allocate, release or force-success API. The future paid-entry service must call these internal methods only after verifying its payment and run/refund outcome. The reservation's external key must identify the paid entry, so success and refund share one allocation limit. This authorization wiring is required work, not established by having a worker.
+There is no public reserve, allocate, release or force-success API. `PaidService` calls transaction-scoped internal methods to create an entry and reserve atomically, and to allocate the pinned verifier's outcome or an eligible refund atomically. The reservation uses the paid entry ID as its external key, so success and refund share one allocation limit. See [paid-entry API and lifecycle](PAID-ENTRIES.md).
 
 ## Solana transaction
 
@@ -29,10 +29,12 @@ Purchase verification and the read-only return status endpoint need no signing k
 DEVNET_SIGNER_PATH=/absolute/private/devnet-treasury.json \
   node --env-file=.env.server --import tsx server/check-return-signer.ts
 
-# Enable only when the verified paid-entry flow is connected and tested.
+# Process existing obligations; new entry payments remain separately disabled.
 DEVNET_RETURNS_ENABLED=1 DEVNET_SIGNER_PATH=/absolute/private/devnet-treasury.json \
   node --env-file=.env.server --import tsx server/main.ts
 ```
+
+`DEVNET_PAID_ENTRIES_ENABLED=1` separately permits new quotes, payment approvals and starts. It requires the return worker and signer. Leave it off until the native recovery flow and live devnet test are ready. Turning it off must not stop processing existing returns or unstarted refunds.
 
 The check command validates file permissions and the configured public identity. It sends no transaction. Never mount a mainnet treasury key here. The worker independently rejects a non-devnet RPC before broadcasting.
 
@@ -40,8 +42,8 @@ Migration 004 creates reservations, allocations and signed attempts. It has been
 
 ## Evidence and remaining work
 
-The 32 server tests include eight PostgreSQL return tests and six tests of actual signed transaction encoding with synthetic RPC responses. They cover insufficient capacity, concurrent reservations/outcomes, owner-only status, persistence before broadcast, crashes before/after persistence, lost callbacks, lease replacement, exactly one allocation, finalized settlement, expiry/history checks, recipient identity and the stale-balance/released-reserve race. The generated wire transaction has a cryptographically valid treasury signature and the expected instruction accounts/amount.
+The original 32-test checkpoint included eight PostgreSQL return tests and six tests of actual signed transaction encoding with synthetic RPC responses. They cover insufficient capacity, concurrent reservations/outcomes, owner-only status, persistence before broadcast, crashes before/after persistence, lost callbacks, lease replacement, exactly one allocation, finalized settlement, expiry/history checks, recipient identity and the stale-balance/released-reserve race. The generated wire transaction has a cryptographically valid treasury signature and the expected instruction accounts/amount.
 
 `verification/return-worker-check.json` and `verification/return-worker-tests.txt` retain the checkpoint's scope and sources. The local API restarted with migration 004 and the authenticated status route. The dedicated development signing file passes the offline identity check. These tests do not establish a live devnet transfer, physical Phantom, paid-entry verification, player recovery or real-money readiness.
 
-Next: persist entry quotes and payment lifetimes; reserve before entry payment; issue a paid run only after payment finality and explicit Start; recover its input log; allocate a return from the pinned verifier; show pending/finalized/refund receipts in Android; test the complete flow with Phantom on a physical device. Unstarted entries, expired runs and infrastructure errors need the explicit policies in [the settlement contract](SETTLEMENT-DESIGN.md). Mainnet and economic release conditions remain unchanged.
+The expanded suite now has 42 server tests, including payment recovery through pinned verification and one finalized synthetic return. See `verification/paid-entry-check.json`. Remaining: native checkout and input-log recovery; Android pending/finalized/refund receipts; operator review resolution; live devnet and physical Phantom evidence. Mainnet and economic release conditions remain unchanged.
