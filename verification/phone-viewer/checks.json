@@ -1,0 +1,65 @@
+{
+  "passed": true,
+  "models": [
+    {
+      "edition": "Frost",
+      "bytes": 3534440
+    },
+    {
+      "edition": "Graphite",
+      "bytes": 3534456
+    },
+    {
+      "edition": "Tide",
+      "bytes": 3534420
+    },
+    {
+      "edition": "Static",
+      "bytes": 3534444
+    },
+    {
+      "edition": "Mist",
+      "bytes": 3534436
+    },
+    {
+      "edition": "Orbit",
+      "bytes": 3534432
+    },
+    {
+      "edition": "Pearl",
+      "bytes": 3534444
+    },
+    {
+      "edition": "Circuit",
+      "bytes": 3534456
+    },
+    {
+      "edition": "Relic",
+      "bytes": 3534428
+    },
+    {
+      "edition": "Flux",
+      "bytes": 3534372
+    },
+    {
+      "edition": "Archive",
+      "bytes": 3534452
+    },
+    {
+      "edition": "Ghost",
+      "bytes": 3534356
+    }
+  ],
+  "checks": [
+    "12 measured sprite crops",
+    "rack contains entire phone at 320/390/430 widths",
+    "12 matching textured 3D editions",
+    "six angle controls",
+    "pointer drag changes orientation",
+    "small-screen viewer buttons fit",
+    "12 valid GLB headers exported",
+    "close returns to rack; gameplay remains 2D",
+    "zero page errors"
+  ],
+  "scope": "Chrome web, isolated profile using prior actual-input wins. Native physical-device testing deferred."
+}

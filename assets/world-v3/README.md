@@ -31,3 +31,7 @@ One production district-map diorama illustration, only the POWERWORKS and final 
 Reference: assets/seeker/13-gameplay-core.jpg
 
 Create a production 2D game FLOOR TEXTURE inspired by the dark graphite industrial floor in this reference. Portrait 3:5. Straight overhead, orthographic, no perspective. Large charcoal square metal floor plates in a regular grid, subtle bevels, thin seams, sparse rivets, slight wear, soft dark graphite values. Clean toy-like premium miniature material, not photoreal concrete or rusty grunge. No walls, furniture, doors, objects, characters, phones, text, UI, lights, arrows or markings. Edge-to-edge floor only, evenly lit, easy to read game characters on top. Deep #202A30 to #333D43 palette.
+
+## Crop correction
+
+phones.frames.json contains measured padded rectangles. Do not split this source into equal grid cells: its phone spacing differs from the canvas cell size. Both the UI and Skia renderer read this metadata.
