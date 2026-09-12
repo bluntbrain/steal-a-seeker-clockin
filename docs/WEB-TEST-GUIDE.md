@@ -1,3 +1,5 @@
+> Current renderer: fixed overhead **2D**, in all active modes. Open `/design/index.html` on the local preview for assets and all twelve maps. Live 3D is superseded.
+
 # Test the game in your browser
 
 Open http://127.0.0.1:8787 in a desktop browser. Android testing is paused for this iteration.

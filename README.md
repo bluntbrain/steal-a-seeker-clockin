@@ -1,3 +1,7 @@
+# Current visual direction: 2D
+
+The active game now uses the fixed overhead 2D Skia renderer in campaign, daily and entry modes. The user rejected the live 3D experiment. See [the 2D design gallery](design/visual-v2/index.html) and [asset / UI plan](design/visual-v2/README.md). Browser testing is the current priority; Android and live Phantom checks remain deferred.
+
 # Steal a Seeker
 
 An Android solo stealth game with an angled overhead 3D camera. Sneak past robot guards, recover a Seeker and reach the exit. Built with React Native, Three.js / React Three Fiber, Expo GL and Solana Mobile Wallet Adapter. Android gameplay uses a native GL surface, not a WebView; the browser is a separate React Native Web playtest.

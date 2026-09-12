@@ -14,7 +14,7 @@ export default function SettingsPanel({visible, onClose}: {visible: boolean; onC
       <Text style={styles.eyebrow}>STEAL A SEEKER</Text><Text style={styles.title}>Make yourself comfortable.</Text>
       {toggle('Game sound', 'Pickup, dash and extraction cues.', settings.sound, sound => update({sound}))}
       <View style={{gap: 10}}><Text style={styles.label}>Volume · {Math.round(settings.volume * 100)}%</Text>
-        <View accessibilityRole="radiogroup" accessibilityLabel="Game volume" style={{flexDirection: 'row', gap: 8}}>{[.25, .5, .75, 1].map(volume => <Pressable key={volume} accessibilityRole="radio" accessibilityLabel={`Volume ${volume * 100}%`} accessibilityState={{checked: settings.volume === volume}} aria-checked={settings.volume === volume} disabled={!ready} onPress={() => update({volume})} style={[styles.volume, settings.volume === volume && {backgroundColor: '#38604e'}]}><Text style={styles.label}>{volume * 100}%</Text></Pressable>)}</View>
+        <View accessibilityRole="radiogroup" accessibilityLabel="Game volume" style={{flexDirection: 'row', gap: 8}}>{[.25, .5, .75, 1].map(volume => <Pressable key={volume} accessibilityRole="radio" accessibilityLabel={`Volume ${volume * 100}%`} accessibilityState={{checked: settings.volume === volume}} aria-checked={settings.volume === volume} disabled={!ready} onPress={() => update({volume})} style={[styles.volume, settings.volume === volume && {backgroundColor: '#415D60'}]}><Text style={styles.label}>{volume * 100}%</Text></Pressable>)}</View>
       </View>
       {toggle('Vibration', Platform.OS === 'web' ? 'Saved for this browser. Vibration feedback is used on Android.' : 'Feedback when taking the phone, dashing, escaping or getting caught.', settings.haptics, haptics => update({haptics}))}
       {toggle('Reduced effects', 'Hide escape trails and decorative bobbing, spinning and pulsing. Guard cones and movement stay visible.', settings.reducedEffects, reducedEffects => update({reducedEffects}))}
@@ -27,14 +27,14 @@ export default function SettingsPanel({visible, onClose}: {visible: boolean; onC
 }
 
 const styles = StyleSheet.create({
-  scrim: {flex: 1, backgroundColor: '#081210ed', padding: 20, justifyContent: 'center'},
-  panel: {flexGrow: 0, maxHeight: '92%', borderRadius: 24, backgroundColor: '#152724'},
+  scrim: {flex: 1, backgroundColor: '#0C0C0E99', padding: 12, justifyContent: 'flex-end', alignItems: 'center'},
+  panel: {width: '100%', maxWidth: 700, flexGrow: 0, maxHeight: '84%', borderRadius: 24, backgroundColor: '#161618'},
   eyebrow: {color: '#a8ecd7', fontSize: 11, letterSpacing: 2},
   title: {color: '#edf2e8', fontSize: 28, fontWeight: '700'},
   row: {flexDirection: 'row', gap: 15, alignItems: 'center'},
   label: {color: '#dcece2', fontSize: 15, fontWeight: '600'},
   detail: {color: '#adc8b8', fontSize: 13, lineHeight: 21},
-  volume: {flex: 1, minHeight: 44, borderRadius: 10, backgroundColor: '#233e32', justifyContent: 'center', alignItems: 'center'},
+  volume: {flex: 1, minHeight: 44, borderRadius: 10, backgroundColor: '#252E35', justifyContent: 'center', alignItems: 'center'},
   button: {padding: 16, borderRadius: 12, backgroundColor: '#cfe6e4'},
   buttonText: {color: '#19362c', fontWeight: '700', textAlign: 'center'},
 });

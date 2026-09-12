@@ -1,0 +1,77 @@
+{
+  "date": "2026-09-12",
+  "assets": [
+    {
+      "file": "assets/visual-v2/cover-crate-v2.png",
+      "tool": "built-in image_gen",
+      "reference": "../assets/seeker/originals/05-tileset-kit.png",
+      "size": [
+        1254,
+        1254
+      ],
+      "mode": "RGBA",
+      "sha256": "2d52a5f650ef9e1af7937741ff439089f436b88e1dfcf3a91d34cdac67ca2d7c",
+      "status": "runtime",
+      "prompt": "prompts/cover-crate-v2.txt"
+    },
+    {
+      "file": "assets/visual-v2/cover-cabinet-v2.png",
+      "tool": "built-in image_gen",
+      "reference": "../assets/seeker/originals/05-tileset-kit.png",
+      "size": [
+        1024,
+        1536
+      ],
+      "mode": "RGBA",
+      "sha256": "8ff807e0af684b259c94ab359b82f0e4d22a35ada54a90270fe17c4dc12d4a5c",
+      "status": "runtime",
+      "prompt": "prompts/cover-cabinet-v2.txt"
+    },
+    {
+      "file": "assets/visual-v2/rooftop-floor-v2.png",
+      "tool": "built-in image_gen",
+      "reference": "../assets/seeker/originals/05-tileset-kit.png",
+      "size": [
+        971,
+        1619
+      ],
+      "mode": "RGB",
+      "sha256": "2c19dd3a5e5864a17fa42b4ff7e455053a886cab91cdb29d4de8afd093a84875",
+      "status": "runtime",
+      "prompt": "prompts/rooftop-floor-v2.txt"
+    },
+    {
+      "file": "assets/visual-v2/vault-floor-v2.png",
+      "tool": "built-in image_gen",
+      "reference": "../assets/seeker/originals/05-tileset-kit.png",
+      "size": [
+        971,
+        1619
+      ],
+      "mode": "RGB",
+      "sha256": "1827be04e60dc327f54b0d1479ed04ff6cf85b22d0105a4bf164f845b4f91985",
+      "status": "runtime",
+      "prompt": "prompts/vault-floor-v2.txt"
+    },
+    {
+      "file": "assets/visual-v2/courier-portrait-v2.png",
+      "tool": "built-in image_gen",
+      "reference": "../assets/seeker/originals/01-character-sheet.png",
+      "size": [
+        1160,
+        1355
+      ],
+      "mode": "RGBA",
+      "sha256": "4049215a421954eca458e389026472a0502f755ba53f1202ca5c148d4a91ca3d",
+      "status": "runtime",
+      "prompt": "prompts/courier-portraits.txt"
+    }
+  ],
+  "rejected": [
+    {
+      "file": "drafts/security-sprites-rgb-rejected.png",
+      "reason": "RGB image has painted checkerboard, not real transparency. Not loaded into gameplay.",
+      "prompt": "prompts/security-sprites-v2.txt"
+    }
+  ]
+}

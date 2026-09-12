@@ -1,0 +1,18 @@
+{
+  "passed": true,
+  "checks": [
+    "fresh access purchase",
+    "all cosmetics bought and equipped",
+    "local purchases restored",
+    "menus block keyboard shortcuts",
+    "entry debit and unstarted cancellation",
+    "entry saved movement survives reload without another debit",
+    "started abandonment returns zero",
+    "actual daily run saved locally",
+    "settings accessible",
+    "desktop and portrait render",
+    "no runtime errors"
+  ],
+  "dailyOutcome": "won",
+  "scope": "Browser local playtest economy. No Phantom, server payment, token transfer or global rank."
+}

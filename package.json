@@ -9,7 +9,7 @@
     "web": "expo start --web --port 8082",
     "typecheck": "tsc --noEmit",
     "test": "tsx --test tests/*.test.ts",
-    "export:web": "npm run rules:check && expo export --platform web",
+    "export:web": "npm run rules:check && expo export --platform web && node scripts/copy-design.cjs",
     "build:apk": "npm run rules:check && cd android && ./gradlew :app:cleanCreateBundleReleaseJsAndAssets :app:assembleRelease --no-daemon",
     "preview": "node scripts/preview.cjs",
     "server:dev": "tsx server/main.ts",

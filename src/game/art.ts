@@ -21,7 +21,7 @@ export function makeWarehouse(drawFloor=true,level:LevelDefinition=LEVEL){
     for(const b of level.blockers){
       if(b.kind==='wall'){
         rect(b.x,b.y+.16,b.w,b.h,'#080d10');rect(b.x,b.y,b.w,b.h,'#333f43');
-        rect(b.x+.08,b.y+.08,Math.max(.1,b.w-.16),Math.max(.1,b.h-.16),'#293337');continue;
+        rect(b.x+.08,b.y+.08,Math.max(.1,b.w-.16),Math.max(.1,b.h-.16),'#343B41');line(b.x+.06,b.y+.04,b.x+b.w-.06,b.y+.04,'#B4C2C4',.055);continue;
       }
       round(b.x+.11,b.y+.2,b.w,b.h,.08,'#11191bc9');
       round(b.x,b.y,b.w,b.h,.07,'#0d1417');
@@ -33,7 +33,8 @@ export function makeWarehouse(drawFloor=true,level:LevelDefinition=LEVEL){
         rect(b.x+.25,b.y+.2,.11,b.h-.7,'#475256');rect(b.x+b.w-.37,b.y+.2,.11,b.h-.7,'#475256');
         line(b.x+.48,b.y+.38,b.x+b.w-.48,b.y+b.h-.55,'#222d31',.055);
         line(b.x+b.w-.48,b.y+.38,b.x+.48,b.y+b.h-.55,'#222d31',.055);
-        rect(b.x+b.w/2-.15,b.y+b.h-.25,.3,.075,'#8a9177');
+        rect(b.x+b.w/2-.24,b.y+b.h-.27,.48,.065,'#CFE6E4');
+        for(const xx of [b.x+.05,b.x+b.w-.26]){rect(xx,b.y+.04,.21,.19,'#CBD4D4');rect(xx,b.y+b.h-.36,.21,.17,'#9AA9AF');}
       }else{
         for(let y=b.y+.36;y<b.y+b.h-.4;y+=.5){rect(b.x+.22,y,b.w-.44,.25,'#121d21');line(b.x+.25,y+.03,b.x+b.w-.25,y+.03,'#56625f',.02);rect(b.x+.28,y+.08,.055,.055,'#8aac9d');}
       }
@@ -46,13 +47,15 @@ export function makeWarehouse(drawFloor=true,level:LevelDefinition=LEVEL){
     rect(e.x+.10,e.y+.10,e.w-.20,.035,'#b3dfd2');
     rect(e.x+.10,e.y+.10,.035,e.h-.2,'#88b8ab');rect(e.x+e.w-.14,e.y+.10,.035,e.h-.2,'#88b8ab');
     for(let y=0;y<3;y++){const yy=e.y+1.35-y*.22;line(e.x+.9,yy,e.x+e.w/2,yy-.17,'#acd2c6',.06);line(e.x+e.w/2,yy-.17,e.x+e.w-.9,yy,'#acd2c6',.06);}
-    round(level.phone.x-.68,level.phone.y-.34,1.36,.96,.14,'#111b1e');
-    round(level.phone.x-.60,level.phone.y-.39,1.20,.73,.12,'#596660');
-    round(level.phone.x-.51,level.phone.y-.34,1.02,.54,.08,'#263b39');
-    rect(level.phone.x-.3,level.phone.y+.34,.6,.035,'#b8ded0');
+    for(const phone of level.targets??[level.phone]){
+    round(phone.x-.68,phone.y-.34,1.36,.96,.14,'#111b1e');
+    round(phone.x-.60,phone.y-.39,1.20,.73,.12,'#596660');
+    round(phone.x-.51,phone.y-.34,1.02,.54,.08,'#263b39');
+    rect(phone.x-.3,phone.y+.34,.6,.035,'#b8ded0');
+    }
     // Boundary lights and entrance hatch.
     for(const y of [2.8,10.8,17.7]){rect(.55,y,.08,.8,'#adc6b6');rect(11.37,y,.08,.8,'#697f72');}
-    round(1.3,18.6,2.1,.42,.06,'#0e171b');
-    for(let x=1.4;x<3.3;x+=.25)line(x,18.65,x+.15,18.95,'#9f9864',.055);
+    round(level.spawn.x-.85,level.spawn.y+.7,1.7,.3,.06,'#0e171b');
+    for(let x=level.spawn.x-.75;x<level.spawn.x+.65;x+=.25)line(x,level.spawn.y+.73,x+.1,level.spawn.y+.95,'#A5B9BA',.04);
   },{width:12,height:20});
 }
