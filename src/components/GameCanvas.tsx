@@ -4,6 +4,7 @@ import {useDerivedValue,type SharedValue} from 'react-native-reanimated';
 import {makeWarehouse} from '../game/art';
 import {TUNING,SECURITY,type LevelDefinition} from '../game/level';
 import {targetPhone,decoyLanding,type GameState,type Input} from '../game/simulation';
+import {editionIndex} from '../game/collection';
 import frames from '../../assets/courier.frames.json';
 import GuardLayer from './GuardLayer';
 type Props={size:number;input:SharedValue<Input>;game:SharedValue<GameState>;alpha:SharedValue<number>;clock:SharedValue<number>;level:LevelDefinition;appearance?:{outfit?:string;trail?:string;reducedEffects?:boolean}};
@@ -26,9 +27,13 @@ function DecoyLayer({game,input,reduced}:{game:SharedValue<GameState>;input:Shar
 function SwitchLayer({game,level,index}:Pick<Props,'game'|'level'>&{index:number}){const p=level.switches![index]!,color=useDerivedValue(()=>(p.kind==='power'?game.value.power===1:(game.value.relayTimers[p.channel??0]??0)>0)?'#a8ecd7':'#edb768');return <RoundedRect x={p.x-.4} y={p.y-.4} width={.8} height={.8} r={.06} color={color}/>;}
 export default memo(function GameCanvas({size,input,game,alpha,clock,level,appearance={}}:Props){
  const world=useMemo(()=>makeWarehouse(false,level),[level]),fallbackWorld=useMemo(()=>makeWarehouse(true,level),[level]);
- const floor=useImage(level.number>=9?require('../../assets/visual-v2/vault-floor-v2.png'):level.number>=5?require('../../assets/visual-v2/rooftop-floor-v2.png'):require('../../assets/warehouse-floor-v1.png'));
- const cabinet=useImage(require('../../assets/visual-v2/cover-cabinet-v2.png'));
- const crate=useImage(require('../../assets/visual-v2/cover-crate-v2.png'));
+ const floor=useImage(require('../../assets/world-v3/floor.png'));
+ const phones=useImage(require('../../assets/world-v3/phones.png'));
+ const phoneIndex=editionIndex(level.mission),phoneFrame={x:(phoneIndex%6)*256+32,y:Math.floor(phoneIndex/6)*512+55,width:208,height:405};
+ const phoneScale=1.18/phoneFrame.height;
+ const phoneSprites=useMemo(()=>[phoneFrame],[phoneIndex]);
+ const phoneTransforms=useMemo(()=>[Skia.RSXform(phoneScale,0,-104*phoneScale,0)],[phoneIndex]);
+ const carryTransforms=useMemo(()=>[Skia.RSXform(.48/405,0,0,0)],[]);
  const sprite=useImage(require('../../assets/courier.png'));
  const reduced=!!appearance.reducedEffects;
  const costumeMatrix=useMemo(()=>appearance.outfit==='night-courier'?[.38,0,0,0,0,0,.43,0,0,.015,0,0,.49,0,.018,0,0,0,1.5,-.5]:cleanAlpha,[appearance.outfit]);
@@ -57,17 +62,14 @@ export default memo(function GameCanvas({size,input,game,alpha,clock,level,appea
  const pickupWidth=useDerivedValue(()=>game.value.pickup/TUNING.pickupHold*1.1);
  return <Canvas style={{width:size,height:size*20/12}} accessible={false}>
   <Group transform={[{scale:size/12}]}>
-   <Image image={floor} x={0} y={0} width={12} height={20} fit="fill"/>
+   {Array.from({length:16},(_,i)=><Image key={i} image={floor} x={(i%4)*3} y={Math.floor(i/4)*5} width={3} height={5} fit="fill"/>)}
    <Picture picture={floor?world:fallbackWorld}/>
-   {crate&&level.blockers.filter(b=>b.kind==='crate').map((b,i)=><Group key={`crate-${i}`} clip={{x:b.x,y:b.y,width:b.w,height:b.h}}><Image image={crate} x={b.x-b.w*.15} y={b.y-b.h*.15} width={b.w*1.3} height={b.h*1.3} fit="fill"/></Group>)}{cabinet&&level.blockers.filter(b=>b.kind==='rack').map((b,i)=><Group key={`rack-${i}`} clip={{x:b.x,y:b.y,width:b.w,height:b.h}}><Image image={cabinet} x={b.x-b.w*.46} y={b.y-b.h*.087} width={b.w*1.93} height={b.h*1.19} fit="fill"/></Group>)}
    {level.gates?.map((_,index)=><GateLayer key={index} game={game} level={level} index={index}/>)}
    <RoundedRect x={level.exit.x} y={level.exit.y} width={level.exit.w} height={level.exit.h} r={.1} color="#b9e6d6" opacity={glow}/>
    <RoundedRect x={level.exit.x} y={level.exit.y+level.exit.h-.10} width={extract} height={.08} r={.02} color="#e3fff5"/>
    <Group opacity={target} transform={phonePosition}>
     <Circle cx={0} cy={0-.13} r={.91} color="#a5e4d0" opacity={glow}/>
-    <RoundedRect x={0-.25} y={phoneBob} width={.5} height={.85} r={.07} color="#e5eee5"/>
-    <RoundedRect x={0-.20} y={useDerivedValue(()=>phoneBob.value+.07)} width={.40} height={.68} r={.04} color="#80cbb7"/>
-    <Line p1={{x:0-.09,y:0-.82}} p2={{x:0+.09,y:0-.82}} color="#1f504b" strokeWidth={.04}/>
+    <Group transform={useDerivedValue(()=>[{translateY:phoneBob.value}])}><Atlas image={phones} sprites={phoneSprites} transforms={phoneTransforms}/></Group>
     <RoundedRect x={0-.55} y={0+.65} width={pickupWidth} height={.07} r={.025} color="#d9fff0"/>
    </Group>
    {level.patrols.map((_,index)=><GuardLayer key={index} game={game} alpha={alpha} index={index}/>)}
@@ -88,8 +90,7 @@ export default memo(function GameCanvas({size,input,game,alpha,clock,level,appea
    {sprite && <Atlas image={sprite} sprites={sprites} transforms={transforms}><ColorMatrix matrix={costumeMatrix}/></Atlas>}
    {!!appearance.outfit&&<Group transform={trimTransform}><RoundedRect x={-.15} y={-.03} width={.3} height={.07} r={.02} color={trim}/></Group>}
    <Group transform={carriedTransform} opacity={carry}>
-    <RoundedRect x={0} y={0} width={.26} height={.45} r={.04} color="#f1f5e9"/>
-    <RoundedRect x={.03} y={.055} width={.20} height={.31} r={.025} color="#8cdac1"/>
+    <Atlas image={phones} sprites={phoneSprites} transforms={carryTransforms}/>
    </Group>
   </Group>
  </Canvas>;

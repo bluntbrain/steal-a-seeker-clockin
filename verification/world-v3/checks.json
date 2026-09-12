@@ -1,0 +1,25 @@
+{
+  "passed": true,
+  "scope": "Chrome web; 320×568, 390×844, 430×932. Full rack gallery uses previous verified campaign wins in isolated profile. Android deferred.",
+  "checks": [
+    "rack 320",
+    "map 320",
+    "locked briefing 320",
+    "briefing 320",
+    "game 320",
+    "rack 390",
+    "map 390",
+    "locked briefing 390",
+    "briefing 390",
+    "game 390",
+    "rack 430",
+    "map 430",
+    "locked briefing 430",
+    "briefing 430",
+    "game 430",
+    "12 earned collection slots restored from existing save",
+    "all 12 briefings and playable levels render",
+    "all mission nodes select their correct level",
+    "locks preserved"
+  ]
+}

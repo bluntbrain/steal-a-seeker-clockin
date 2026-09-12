@@ -1,0 +1,11 @@
+{
+  "passed": true,
+  "scope": "Fresh browser profile, actual keyboard/pointer input, no progress injection",
+  "checks": [
+    "Frost earned through extraction",
+    "result names the recovered edition",
+    "one slot lights up",
+    "collection persists on reload",
+    "next mission unlocks Graphite"
+  ]
+}

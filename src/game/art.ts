@@ -4,10 +4,12 @@ const palette={ floor:'#20292c', line:'#293337', mint:'#cfe6e4', edge:'#465054' 
 // Code-native environment art is recorded once, not recreated on each animation frame.
 export function makeWarehouse(drawFloor=true,level:LevelDefinition=LEVEL){
   return createPicture((c:SkCanvas)=>{
+    const rooftop=level.number>=5&&level.number<=8,power=level.number>=9;
     const p=Skia.Paint();p.setAntiAlias(true);
     const rect=(x:number,y:number,w:number,h:number,color:string)=>{p.setColor(Skia.Color(color));c.drawRect(Skia.XYWHRect(x,y,w,h),p);};
     const round=(x:number,y:number,w:number,h:number,r:number,color:string)=>{p.setColor(Skia.Color(color));c.drawRRect(Skia.RRectXY(Skia.XYWHRect(x,y,w,h),r,r),p);};
     const line=(x:number,y:number,x2:number,y2:number,color:string,width=.025)=>{p.setColor(Skia.Color(color));p.setStrokeWidth(width);c.drawLine(x,y,x2,y2,p);};
+    const circle=(x:number,y:number,r:number,color:string)=>{p.setColor(Skia.Color(color));c.drawCircle(x,y,r,p);};
     if(drawFloor){
     rect(0,0,12,20,'#131b1e');
     for(let y=0;y<20;y++)for(let x=0;x<12;x++){
@@ -18,10 +20,36 @@ export function makeWarehouse(drawFloor=true,level:LevelDefinition=LEVEL){
     // Painted loading lanes; a path indication, not an automatic solution line.
     for(let y=4;y<18;y+=1.2){rect(3.95,y,.035,.45,'#52635f');rect(10.7,y,.035,.45,'#3d4f4d');}
     }
-    for(const b of level.blockers){
+    // District floor markings and perimeter depth remain outside walking geometry.
+    if(rooftop){
+      rect(0,0,.55,20,'#090F18');rect(11.45,0,.55,20,'#090F18');
+      for(let y=1;y<20;y+=1.3)for(const x of [.08,11.62]){rect(x,y,.3,.7,'#25303D');rect(x+.07,y+.1,.06,.08,'#78AAAE');rect(x+.18,y+.3,.05,.07,'#416B7E');}
+      for(let y=3;y<19;y+=5){line(.65,y,11.35,y,'#344B55',.045);for(let x=.8;x<11.3;x+=.3)line(x,y-.12,x,y+.12,'#435A60',.02);}
+    }else{
+      for(let y=1.4;y<19;y+=1.1){rect(1.1,y,.045,.48,power?'#6F637D':'#536960');rect(10.85,y,.045,.48,'#3C5151');}
+      for(let y=4;y<19;y+=6){rect(.64,y,1,.05,'#677B7D');for(let x=.7;x<1.6;x+=.16)line(x,y-.16,x+.1,y-.06,'#7D8F87',.025);}
+    }
+    if(level.mission==='narrow-crossing'){
+      rect(.7,9.4,10.6,1.2,'#080E19');
+      for(let x=.8;x<11.2;x+=.55){rect(x,9.6,.36,.65,'#1D2939');rect(x+.08,9.75,.06,.06,'#598490');rect(x+.2,10,.05,.08,'#8BA8A5');}
+      for(const x of [1.8,8]){rect(x,9.4,2.2,1.2,'#53666A');for(let y=9.48;y<10.6;y+=.15)line(x+.1,y,x+2.1,y,'#182C36',.045);line(x+.07,9.4,x+.07,10.6,'#B4E9DA',.06);line(x+2.13,9.4,x+2.13,10.6,'#B4E9DA',.06);}
+    }
+    for(const [index,b] of level.blockers.entries()){
+      // In Narrow Crossing these blocked spans become fenced roof gaps;
+      // only the two actual timed doorways are traversable bridges.
+      if(level.mission==='narrow-crossing'&&b.kind==='rack'&&b.y===9.4){
+        rect(b.x,b.y,b.w,.16,'#526871');rect(b.x,b.y+b.h-.16,b.w,.16,'#32474F');
+        line(b.x,b.y+.03,b.x+b.w,b.y+.03,'#A6DED1',.05);
+        line(b.x,b.y+b.h-.03,b.x+b.w,b.y+b.h-.03,'#81B8B1',.05);
+        for(let x=b.x+.1;x<b.x+b.w;x+=.35){rect(x,b.y,.06,.24,'#BDDDD4');rect(x,b.y+b.h-.24,.06,.24,'#8EBFB8');}
+        continue;
+      }
       if(b.kind==='wall'){
         rect(b.x,b.y+.16,b.w,b.h,'#080d10');rect(b.x,b.y,b.w,b.h,'#333f43');
-        rect(b.x+.08,b.y+.08,Math.max(.1,b.w-.16),Math.max(.1,b.h-.16),'#343B41');line(b.x+.06,b.y+.04,b.x+b.w-.06,b.y+.04,'#B4C2C4',.055);continue;
+        rect(b.x+.08,b.y+.08,Math.max(.1,b.w-.16),Math.max(.1,b.h-.16),'#343B41');line(b.x+.06,b.y+.04,b.x+b.w-.06,b.y+.04,rooftop?'#ACE5D8':'#B4C2C4',.055);
+        if(rooftop){line(b.x+.06,b.y+.13,b.x+b.w-.06,b.y+.13,'#527F80',.03);if(b.w<1)line(b.x+.28,b.y+.1,b.x+.28,b.y+b.h-.1,'#8DC8C1',.05);}
+        else for(let y=b.y+.4;y<b.y+b.h-.2;y+=1.5){rect(b.x+.08,y,Math.max(.05,b.w-.16),.04,'#19232A');}
+        continue;
       }
       round(b.x+.11,b.y+.2,b.w,b.h,.08,'#11191bc9');
       round(b.x,b.y,b.w,b.h,.07,'#0d1417');
@@ -37,6 +65,28 @@ export function makeWarehouse(drawFloor=true,level:LevelDefinition=LEVEL){
         for(const xx of [b.x+.05,b.x+b.w-.26]){rect(xx,b.y+.04,.21,.19,'#CBD4D4');rect(xx,b.y+b.h-.36,.21,.17,'#9AA9AF');}
       }else{
         for(let y=b.y+.36;y<b.y+b.h-.4;y+=.5){rect(b.x+.22,y,b.w-.44,.25,'#121d21');line(b.x+.25,y+.03,b.x+b.w-.25,y+.03,'#56625f',.02);rect(b.x+.28,y+.08,.055,.055,'#8aac9d');}
+      }
+      if(rooftop){
+        // HVAC housings, fan grills and aerial equipment use the same collider footprint.
+        round(b.x+.12,b.y+.12,b.w-.24,b.h-.42,.08,index%2?'#546971':'#AABBB8');
+        const count=Math.max(1,Math.floor(b.h/1.25)),r=Math.min((b.w-.38)/2,(b.h-.5)/count/2)*.82;
+        for(let k=0;k<count;k++){const cx=b.x+b.w/2,cy=b.y+.28+(b.h-.62)*(k+.5)/count;circle(cx,cy,r,'#283B43');circle(cx,cy,r*.88,'#526870');circle(cx,cy,r*.7,'#1F303A');
+          for(let j=0;j<8;j++){const angle=j*Math.PI/4;line(cx,cy,cx+Math.cos(angle)*r*.9,cy+Math.sin(angle)*r*.9,'#9AAFAC',.035);}
+          circle(cx,cy,r*.22,'#A8BBB7');
+          for(let j=-2;j<=2;j++)line(cx-r*.8,cy+j*r*.27,cx+r*.8,cy+j*r*.27,'#77918D',.025);
+        }
+        rect(b.x+.2,b.y+b.h-.25,b.w-.4,.08,'#BDE7D9');
+        if(index%3===0){circle(b.x+b.w-.28,b.y+.3,.13,'#D6E2D5');line(b.x+b.w-.28,b.y+.3,b.x+b.w-.18,b.y+.1,'#BDD3C9',.045);}
+      }else if(power){
+        round(b.x+.13,b.y+.15,b.w-.26,b.h-.46,.045,'#202C38');
+        const cols=Math.max(1,Math.floor(b.w/.5));
+        for(let col=0;col<cols;col++)for(let y=b.y+.3;y<b.y+b.h-.4;y+=.34){const x=b.x+.21+col*(b.w-.4)/cols;rect(x,y,(b.w-.4)/cols-.07,.19,'#3D485C');rect(x+.035,y+.04,.04,.04,(Math.floor(y*3)+col)%3?'#B7A2D7':'#A7E0D2');line(x+.12,y+.13,x+(b.w-.4)/cols-.1,y+.13,'#17242C',.03);}
+        rect(b.x+.18,b.y+b.h-.27,b.w-.36,.055,'#B397D6');
+      }else if(b.kind==='crate'){
+        // Shipping straps, paper labels and inset handles.
+        rect(b.x+b.w*.26,b.y+.12,.085,b.h-.42,'#A9B9A9');rect(b.x+b.w*.73,b.y+.12,.085,b.h-.42,'#7F9389');
+        round(b.x+b.w*.4,b.y+.3,b.w*.21,.3,.025,'#D5DFCA');
+        for(let j=0;j<5;j++)line(b.x+b.w*.42+j*.04,b.y+.35,b.x+b.w*.42+j*.04,b.y+.52,'#4A5D58',.018);
       }
       for(const [x,y]of [[b.x+.16,b.y+.17],[b.x+b.w-.16,b.y+.17],[b.x+.16,b.y+b.h-.35],[b.x+b.w-.16,b.y+b.h-.35]]){p.setColor(Skia.Color('#97a09a'));c.drawCircle(x!,y!,.035,p);}
     }

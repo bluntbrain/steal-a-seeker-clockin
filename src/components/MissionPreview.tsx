@@ -1,0 +1,3 @@
+import React,{useEffect} from 'react';import {useSharedValue} from 'react-native-reanimated';
+import GameCanvas from './GameCanvas';import {getLevel,type MissionId} from '../game/level';import {initialState,idleInput} from '../game/simulation';
+export default function MissionPreview({mission,size}:{mission:MissionId;size:number}){const game=useSharedValue(initialState(mission)),input=useSharedValue(idleInput()),alpha=useSharedValue(0),clock=useSharedValue(0);useEffect(()=>{game.value=initialState(mission);},[mission]);return <GameCanvas size={size} game={game} input={input} alpha={alpha} clock={clock} level={getLevel(mission)} appearance={{reducedEffects:true}}/>;}

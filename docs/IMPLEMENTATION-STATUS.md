@@ -144,3 +144,16 @@ The in-board scrolling result card is replaced by a content-sized sheet anchored
 Six generated illustrations in assets/messages match the supplied courier references: success, caught, timeout, pause, recovery and pending. The art README records exact prompts and provenance. The gallery at /design/sheets/index.html renders the actual shared component with clearly labelled sample data.
 
 All 24 layout combinations (six states at 320×568, 390×844, 430×932 and 844×390) fit without scrollable or clipped children. Live gameplay checks pass for pause/resume and paid-entry capture/win, including saved credits and the result receipt. Security sound/decoy checks were rerun with the new overlay. TypeScript and web export pass. These are browser checks, not a fresh Android validation.
+
+## Reference-based collection and world pass — September 12
+
+Implemented in 2D:
+- Twelve distinct phone editions map to the twelve campaign missions. The same atlas edition appears in the mission briefing, pickup, courier's hand and collection. Multi-target missions deliver two of that mission's edition and award one collection slot after completion.
+- A generated hideout room contains a live 4×3 rack, actual stars and local balance. Existing progress restores earned phones without migration. Slots select phone details; shop, entry, daily and settings remain available.
+- Three generated district maps have twelve live mission nodes, connecting paths, locks and earned stars. Briefings render the actual level geometry.
+- Graphite floor art, warehouse shipping details, rooftop HVAC and railings, powerworks server hardware, and fenced roof gaps / timed bridges in Narrow Crossing. Walkable areas, guard visibility and recorded physics remain unchanged.
+- Smaller gameplay headers leave a 504px-tall board at 390×844, previously 448px. New hideout/map/briefing views fit without scrolling at tested portrait sizes.
+
+Validation: 74 gameplay/client tests and TypeScript pass. Browser checks cover 320×568, 390×844 and 430×932, every mission briefing and scene, lock behavior, restoration of existing completed saves and zero page errors. The full web flow also passed: purchase and equip all cosmetics, restore purchases after reload, debit/cancel an entry, restore a saved run without a second debit, abandon a started entry, save an actual daily result, and retain settings. The security browser test verifies decoy response, pickup alarm, sound, pause and reduced effects. See verification/world-v3 for screenshots and the fresh-profile collection extraction check. Full-rack gallery screenshots restore previously verified actual-input results in an isolated profile; they do not grant progress to the user's save.
+
+Android installation and physical-device Phantom testing remain deferred. These are virtual collectible phones; this change does not create NFTs or promise physical device rewards.
