@@ -227,7 +227,8 @@ async function paidHarness(t:{after:(fn:()=>Promise<void>)=>void},options:{token
  const post=(path:string,body:Record<string,unknown>={},user=h.user)=>api.inject({method:'POST',url:path,headers:user.headers,payload:body});
  const quoteEntry=async()=>{const r=await post('/paid/entries',{requestKey:randomUUID(),termsVersion:'devnet-v1'});assert.equal(r.statusCode,200,r.body);return r.json<PaidEntry>();};
  const pay=async(entry:PaidEntry,attach=true)=>{const sig=b58(randomBytes(64)),tx=paidTx(entry.quote,sig);tx.blockTime=Math.floor(now.getTime()/1000);txs.set(sig,tx);refs.set(entry.quote.reference,[sig]);if(attach){const r=await post(`/paid/entries/${entry.id}/transaction`,{signature:sig});assert.equal(r.statusCode,200,r.body);return {entry:r.json<PaidEntry>(),sig,tx};}return {entry,sig,tx};};
- const start=async(entry:PaidEntry)=>{const r=await post(`/paid/entries/${entry.id}/start`,{rulesHash:entry.manifest.rulesHash});assert.equal(r.statusCode,200,r.body);return r.json<PaidEntry>();};
+ const startKeys=new Map<string,string>();
+ const start=async(entry:PaidEntry)=>{const startKey=startKeys.get(entry.id)??randomUUID();startKeys.set(entry.id,startKey);const r=await post(`/paid/entries/${entry.id}/start`,{rulesHash:entry.manifest.rulesHash,startKey});assert.equal(r.statusCode,200,r.body);return r.json<PaidEntry>();};
  return {...h,paid,api,post,quoteEntry,pay,start,txs,refs,restart:make,advance:(ms:number)=>{now=new Date(now.getTime()+ms);},blocks:(n:number)=>{height=n;},rpcUnavailable:(v:boolean)=>{unavailable=v;}};
 }
 test('paid entry requires terms and campaign ownership, reserves once, and refuses insufficient return capacity',async t=>{
@@ -236,7 +237,7 @@ test('paid entry requires terms and campaign ownership, reserves once, and refus
  assert.equal((await h.post('/paid/entries',{requestKey:randomUUID(),termsVersion:'devnet-v1',amount:'1'})).statusCode,400);
  assert.equal((await h.post('/paid/entries',{requestKey:randomUUID(),termsVersion:'devnet-v1'},h.other)).statusCode,403);
  const [a,b]=await Promise.all([h.quoteEntry(),h.quoteEntry()]);assert.equal(a.id,b.id);assert.equal(a.quote.amount,'10000000');assert.equal(a.status,'quoted');assert.equal((await pool.query('SELECT count(*) FROM return_reservations')).rows[0].count,'1');
- assert.equal((await h.post(`/paid/entries/${a.id}/start`,{rulesHash:a.manifest.rulesHash})).statusCode,409);
+ assert.equal((await h.post(`/paid/entries/${a.id}/start`,{rulesHash:a.manifest.rulesHash,startKey:randomUUID()})).statusCode,409);
  const empty=await paidHarness(t,{tokens:0n});assert.equal((await empty.post('/paid/entries',{requestKey:randomUUID(),termsVersion:'devnet-v1'})).statusCode,503);assert.equal((await pool.query('SELECT count(*) FROM paid_entries')).rows[0].count,'0');assert.equal((await pool.query('SELECT count(*) FROM return_reservations')).rows[0].count,'0');
 });
 test('paid approvals keep identical bytes and lost callbacks restore one unstarted entry',async t=>{
@@ -262,9 +263,9 @@ test('unpaid expiry releases its reserve only after finalized lifetime reconcili
 });
 test('paid start is idempotent, cannot cross wallets or rules, and a verified escape allocates one return',async t=>{
  const h=await paidHarness(t),entry=(await h.pay(await h.quoteEntry())).entry;
- assert.equal((await h.post(`/paid/entries/${entry.id}/start`,{rulesHash:entry.manifest.rulesHash},h.other)).statusCode,404);
- assert.equal((await h.post(`/paid/entries/${entry.id}/start`,{rulesHash:'0'.repeat(64)})).statusCode,409);
- const running=await h.start(entry),again=await h.start(entry);assert.equal(running.run?.id,again.run?.id);assert.equal(running.run?.expiresAt,again.run?.expiresAt);assert.equal((await h.post(`/paid/entries/${entry.id}/cancel`)).statusCode,409);
+ assert.equal((await h.post(`/paid/entries/${entry.id}/start`,{rulesHash:entry.manifest.rulesHash,startKey:randomUUID()},h.other)).statusCode,404);
+ assert.equal((await h.post(`/paid/entries/${entry.id}/start`,{rulesHash:'0'.repeat(64),startKey:randomUUID()})).statusCode,409);
+ const running=await h.start(entry),again=await h.start(entry);assert.equal(running.run?.id,again.run?.id);assert.equal(running.run?.expiresAt,again.run?.expiresAt);assert.equal((await h.post(`/paid/entries/${entry.id}/start`,{rulesHash:entry.manifest.rulesHash,startKey:randomUUID()})).statusCode,409);assert.equal((await h.post(`/paid/entries/${entry.id}/cancel`)).statusCode,409);
  const {state,replay}=fixtureReplay('battery-dash');assert.equal(state.status,'won');const input={runId:running.run!.id,rulesHash:entry.manifest.rulesHash,replay};
  assert.equal((await h.post(`/paid/entries/${entry.id}/finish`,input)).statusCode,400,'instant replay is rejected');h.advance(state.ticks/30*1000+1000);
  assert.equal((await h.post(`/paid/entries/${entry.id}/finish`,{...input,score:999999})).statusCode,400);const submit=()=>h.post(`/paid/entries/${entry.id}/finish`,input);assert.equal((await submit()).json().status,'verifying_run');assert.equal((await submit()).json().status,'verifying_run');
@@ -280,7 +281,7 @@ test('verified paid timeout releases only its reserve and creates no return',asy
 });
 test('unstarted cancellations and the 24-hour window queue one refund; started missing evidence stays held',async t=>{
  const h=await paidHarness(t),entry=(await h.pay(await h.quoteEntry())).entry;
- const [a,b]=await Promise.all([h.post(`/paid/entries/${entry.id}/cancel`),h.post(`/paid/entries/${entry.id}/cancel`)]);assert.equal(a.statusCode,200);assert.equal(a.json().return.id,b.json().return.id);assert.equal(a.json().status,'refunding');assert.equal((await h.post(`/paid/entries/${entry.id}/start`,{rulesHash:entry.manifest.rulesHash})).statusCode,409);
+ const [a,b]=await Promise.all([h.post(`/paid/entries/${entry.id}/cancel`),h.post(`/paid/entries/${entry.id}/cancel`)]);assert.equal(a.statusCode,200);assert.equal(a.json().return.id,b.json().return.id);assert.equal(a.json().status,'refunding');assert.equal((await h.post(`/paid/entries/${entry.id}/start`,{rulesHash:entry.manifest.rulesHash,startKey:randomUUID()})).statusCode,409);
  const expired=await paidHarness(t),paid=(await expired.pay(await expired.quoteEntry())).entry;expired.advance(24*3600_000+1);await expired.paid.process();assert.equal((await expired.paid.get(expired.user.wallet,paid.id)).status,'refunding');
  const missing=await paidHarness(t),started=await missing.start((await missing.pay(await missing.quoteEntry())).entry);missing.advance((started.manifest.hardLimitSeconds+181)*1000);await missing.paid.process();assert.equal((await missing.paid.get(missing.user.wallet,started.id)).status,'review');assert.equal((await pool.query('SELECT state FROM return_reservations')).rows[0].state,'held');assert.equal((await pool.query('SELECT count(*) FROM return_allocations')).rows[0].count,'0');
 });
@@ -301,7 +302,7 @@ test('pausing new entries preserves reconciliation, cancellation and queued retu
  assert.equal((await h.api.inject({method:'GET',url:'/paid/challenge'})).json().enabled,false);
  assert.equal((await h.post('/paid/entries',{requestKey:randomUUID(),termsVersion:'devnet-v1'})).statusCode,503);
  const restored=(await h.post(`/paid/entries/${entry.id}/reconcile`)).json<PaidEntry>();assert.equal(restored.status,'ready');
- assert.equal((await h.post(`/paid/entries/${entry.id}/start`,{rulesHash:entry.manifest.rulesHash})).statusCode,503);
+ assert.equal((await h.post(`/paid/entries/${entry.id}/start`,{rulesHash:entry.manifest.rulesHash,startKey:randomUUID()})).statusCode,503);
  const refund=(await h.post(`/paid/entries/${entry.id}/cancel`)).json<PaidEntry>();assert.equal(refund.status,'refunding');
  await h.service.process();h.setInspection({state:'settled',slot:1000});await h.retry();await h.service.process();
  assert.equal((await h.paid.get(h.user.wallet,entry.id)).status,'refunded');assert.equal(h.prepared.length,1);

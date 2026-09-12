@@ -42,7 +42,7 @@ export class PaidService {
   private payment(row:Record<string,any>):PaymentQuote {return {...row.quote,payment:row.payment_authorization??undefined,signature:row.paid_signature??null,detail:row.detail??null};}
   private async entry(row:Record<string,any>):Promise<PaidEntry> {
     return {id:row.id,wallet:row.wallet,status:row.status,quote:this.payment(row),manifest:row.manifest,readyUntil:row.ready_until?iso(row.ready_until):null,
-      run:row.run_id?{id:row.run_id,wallet:row.wallet,manifest:row.manifest,issuedAt:iso(row.run_started_at),expiresAt:iso(row.run_expires_at),result:row.result}:null,
+      run:row.run_id?{id:row.run_id,wallet:row.wallet,startKey:row.start_key,manifest:row.manifest,issuedAt:iso(row.run_started_at),expiresAt:iso(row.run_expires_at),result:row.result}:null,
       detail:row.detail,return:row.allocation_id?await returnStatus(this.pool,row.wallet,row.allocation_id):null};
   }
   private async syncReturns(wallet?:string) {
@@ -130,15 +130,15 @@ export class PaidService {
     const attempts=await this.pool.query('SELECT count(*) FROM paid_payment_attempts WHERE entry_id=$1 AND signature<>$2',[id,signature]);if(Number(attempts.rows[0].count)>=5)throw new ServiceError(409,'This entry needs payment reconciliation before another attempt.');
     await this.checkPayment(row,signature,await this.chain.verify(this.payment(row),signature));return this.get(wallet,id);
   }
-  async start(wallet:string,id:string,rulesHash:string) {
+  async start(wallet:string,id:string,rulesHash:string,startKey:string) {
     const row=await transaction(this.pool,async db=>{
       const row=(await db.query('SELECT * FROM paid_entries WHERE id=$1 AND wallet=$2 FOR UPDATE',[id,wallet])).rows[0];if(!row)throw new ServiceError(404,'Paid entry not found.');
       if(row.manifest.rulesHash!==rulesHash)throw new ServiceError(409,'Update the app to this entry’s game rules, or cancel before starting for a refund.');
-      if(row.run_id)return row; // Restarting the request never creates a second attempt.
+      if(row.run_id){if(row.start_key!==startKey)throw new ServiceError(409,'This attempt was started by another request. Restore its existing saved run; it cannot start again.');return row;}
       if(row.status!=='ready')throw new ServiceError(409,'A finalized entry payment is required before starting.');
       if(!this.enabled)throw new ServiceError(503,'New runs are paused. This unstarted entry can be refunded.');
       const now=this.now();if(new Date(row.ready_until).getTime()<=now.getTime())throw new ServiceError(409,'The start window expired. Reconcile the entry to check its refund.');
-      return (await db.query("UPDATE paid_entries SET status='running',run_id=$2,run_started_at=$3,run_expires_at=$4,detail='Paid attempt started. Its original submission deadline applies after restart.' WHERE id=$1 RETURNING *",[id,randomUUID(),now,new Date(now.getTime()+(row.manifest.hardLimitSeconds+180)*1000)])).rows[0];
+      return (await db.query("UPDATE paid_entries SET status='running',run_id=$2,run_started_at=$3,run_expires_at=$4,start_key=$5,detail='Paid attempt started. Its original submission deadline applies after restart.' WHERE id=$1 RETURNING *",[id,randomUUID(),now,new Date(now.getTime()+(row.manifest.hardLimitSeconds+180)*1000),startKey])).rows[0];
     });return this.entry(row);
   }
   private async refund(db:PoolClient,row:Record<string,any>,detail:string) {

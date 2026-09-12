@@ -1,6 +1,6 @@
 # Devnet return worker
 
-Implemented backend foundation, 12 September 2026. The backend now connects entry quotes, finalized payments, explicit Start, pinned replay verification and outcome allocation. Native entry checkout, running-replay recovery and settlement screens remain to be connected; this is not yet a playable paid challenge. No live return has been sent. The current local API leaves the return worker disabled.
+Implemented backend foundation, 12 September 2026. The backend now connects entry quotes, finalized payments, explicit Start, pinned replay verification and outcome allocation. App checkout, running-replay recovery and settlement screens are now connected, but the hosted/native live paid flow remains unverified. No live return has been sent. The current local API leaves the return worker disabled.
 
 ## What is implemented
 
@@ -46,4 +46,4 @@ The original 32-test checkpoint included eight PostgreSQL return tests and six t
 
 `verification/return-worker-check.json` and `verification/return-worker-tests.txt` retain the checkpoint's scope and sources. The local API restarted with migration 004 and the authenticated status route. The dedicated development signing file passes the offline identity check. These tests do not establish a live devnet transfer, physical Phantom, paid-entry verification, player recovery or real-money readiness.
 
-The expanded suite now has 42 server tests, including payment recovery through pinned verification and one finalized synthetic return. See `verification/paid-entry-check.json`. Remaining: native checkout and input-log recovery; Android pending/finalized/refund receipts; operator review resolution; live devnet and physical Phantom evidence. Mainnet and economic release conditions remain unchanged.
+The expanded suite now has 42 server tests, including payment recovery through pinned verification and one finalized synthetic return. See `verification/paid-entry-check.json`. App checkout, input-log recovery and Android return receipts are connected in the next checkpoint. Remaining: operator review resolution; full native interaction, live devnet and physical Phantom evidence. Mainnet and economic release conditions remain unchanged.

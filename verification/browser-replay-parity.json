@@ -8,8 +8,8 @@
       "result": {
         "status": "won",
         "score": 12245,
-        "ticks": 322,
-        "seconds": 10.733333333333306,
+        "ticks": 321,
+        "seconds": 10.699999999999973,
         "battery": 100,
         "delivered": 1,
         "spotted": false

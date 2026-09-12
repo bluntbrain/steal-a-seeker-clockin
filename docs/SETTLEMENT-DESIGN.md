@@ -1,6 +1,6 @@
 # Devnet paid challenge implementation contract
 
-Partially implemented: the backend now connects reserved entry quotes, finalized payment recovery, one explicit Start, pinned replay outcomes, refunds and durable signed returns; see [paid-entry evidence](PAID-ENTRIES.md). Native checkout, paid-run recovery and receipt screens remain planned. This extends the complete-game plan; it does not enable mainnet money play. Daily leaderboards remain a separate, no-payout mode.
+Partially implemented: the backend now connects reserved entry quotes, finalized payment recovery, one explicit Start, pinned replay outcomes, refunds and durable signed returns; see [paid-entry evidence](PAID-ENTRIES.md). Native checkout, paid-run recovery and receipt screens are connected; full native interaction and live-chain evidence remain pending. This extends the complete-game plan; it does not enable mainnet money play. Daily leaderboards remain a separate, no-payout mode.
 
 ## Player contract
 

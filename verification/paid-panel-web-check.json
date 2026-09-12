@@ -1,0 +1,12 @@
+{
+  "passed": true,
+  "scope": "Browser preview, public terms and disabled payments; not native authenticated flow",
+  "checks": [
+    "public terms loaded",
+    "test currency and disabled entry status visible",
+    "acknowledgement cannot enable browser payment",
+    "game remains paused behind modal",
+    "campaign resumes after close",
+    "no page errors"
+  ]
+}
