@@ -1,6 +1,12 @@
 # Low-cost hosting without idle cold starts
 
-Checked 12 September 2026. Recommendation: **Railway Hobby for the devnet build**, with Serverless/app sleeping disabled on the API and database. No service has been deployed or purchased in this task.
+Deployed 13 September 2026 to the user’s newly authenticated Railway workspace. API and PostgreSQL are running with Serverless/app sleeping disabled. The comparison below was checked 12 September; current account billing remains visible in Railway, and usage is additional when it exceeds included credits.
+
+API: https://seeker-api-production-41b3.up.railway.app
+
+Project: https://railway.com/project/1a98618e-5079-4b16-a07a-b5fcdbfadef9
+
+This is **Solana devnet only**, with a dedicated TEST SKR mint and treasury. See [deployment runbook](RAILWAY-DEPLOYMENT.md) for configuration, updates and evidence.
 
 | Option | Current published baseline | Fit for this backend |
 |---|---|---|
@@ -16,7 +22,7 @@ No free offering here guarantees a continuously available API, database and trea
 
 Use existing `Dockerfile.api` and `railway.toml`. One replica initially. The API process already contains bounded replay workers, purchase reconciliation and a serialized return worker, so a separate paid worker service is unnecessary at this scale. PostgreSQL stays on private networking and persistent storage. Never expose its port publicly. Keep static game assets out of the API image; native app bundles them and web preview/static hosting can serve them separately.
 
-Set `DATABASE_URL`, `DEVNET_TEST_MINT`, `DEVNET_TREASURY`, `DEVNET_TOKEN_DECIMALS`, `DEVNET_RPC_URL`, `APP_IDENTITY_URI`, and `DEVNET_RETURNS_ENABLED=1`. The treasury signer must be provided as a private secret file readable by the service's `node` user, and `DEVNET_SIGNER_PATH` must point to that file. **Do not bake the key into Docker, Git, an asset URL, or the client.** Current loader is file-based; arranging that secret mount is part of deployment setup, not already completed here.
+Set `DATABASE_URL`, `DEVNET_TEST_MINT`, `DEVNET_TREASURY`, `DEVNET_TOKEN_DECIMALS`, `DEVNET_RPC_URL`, `APP_IDENTITY_URI`, and `DEVNET_RETURNS_ENABLED=1`. Railway uses the sealed `DEVNET_SIGNER_JSON` variable. Local operation can use a 0600 secret file via `DEVNET_SIGNER_PATH`; configure exactly one source. The signer address must match `DEVNET_TREASURY`. **Do not bake the key into Docker, Git, an asset URL, or the client.**
 
 The same treasury owner collects and sends the devnet token. Fund its token account and devnet SOL fee reserve before offering purchases. Starting without a usable signer leaves new v2 campaign wallet approvals unavailable; it does not fall back to unfunded promises. New paid entries remain disabled even if an old environment contains their former enable flag.
 

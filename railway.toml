@@ -3,6 +3,8 @@ builder = "DOCKERFILE"
 dockerfilePath = "Dockerfile.api"
 watchPatterns = ["server/**", "shared/**", "src/game/**", "Dockerfile.api", "railway.toml"]
 [deploy]
+sleepApplication = false
+numReplicas = 1
 healthcheckPath = "/health"
 healthcheckTimeout = 60
 restartPolicyType = "ON_FAILURE"

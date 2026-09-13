@@ -1,12 +1,21 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {createPublicKey,randomBytes,verify} from 'node:crypto';
+import {createPublicKey,generateKeyPairSync,randomBytes,verify} from 'node:crypto';
 import {address,generateKeyPairSigner,getAddressEncoder,getBase58Decoder,getCompiledTransactionMessageDecoder,getTransactionDecoder} from '@solana/kit';
 import {findAssociatedTokenPda} from '@solana-program/token';
-import {DevnetReturnChain} from './return-chain';
+import {DevnetReturnChain,loadReturnSignerJson} from './return-chain';
 import {DEVNET_GENESIS,TOKEN_PROGRAM,MEMO_PROGRAM} from './chain';
 import type {ReturnBinding,SignedReturn} from './returns';
 const b58=(b:Uint8Array)=>getBase58Decoder().decode(b),pub=()=>b58(randomBytes(32));
+test('sealed devnet signer validates bytes and treasury without leaking malformed input',async()=>{
+ const keys=generateKeyPairSync('ed25519'),secret=keys.privateKey.export({format:'der',type:'pkcs8'}).subarray(-32),publicBytes=keys.publicKey.export({format:'der',type:'spki'}).subarray(-32);
+ const json=JSON.stringify([...secret,...publicBytes]),expected=b58(publicBytes);
+ assert.equal((await loadReturnSignerJson(json,expected)).address,expected);
+ await assert.rejects(loadReturnSignerJson(json,pub()),/does not match/);
+ for(const input of ['PRIVATE-MARKER',JSON.stringify(['PRIVATE-MARKER']),JSON.stringify(Array(64).fill(256))]){
+  await assert.rejects(loadReturnSignerJson(input,expected),e=>e instanceof Error&&e.message==='Invalid dedicated devnet signer configuration.');
+ }
+});
 async function fixture(){
  const signer=await generateKeyPairSigner(),mint=pub(),wallet=pub(),source=pub();
  const [destination]=await findAssociatedTokenPda({owner:address(wallet),mint:address(mint),tokenProgram:address(TOKEN_PROGRAM)});

@@ -14,14 +14,14 @@ async function main(){
  const owner=run('solana',['address','--keypair',treasury]),mint=run('solana',['address','--keypair',mintKey]);
  const balance=await rpc<{value:number}>(url,'getBalance',[owner]);
  if(balance.value<10_000_000)throw new Error(`Fund ${owner} with at least 0.01 devnet SOL before provisioning. These are test assets only.`);
- const base=['--url',url,'--fee-payer',treasury,'--owner',treasury];
- const exists=await rpc<{value:unknown}>(url,'getAccountInfo',[mint]);
- if(!exists.value)console.log(run('spl-token',[...base,'create-token','--decimals','6',mintKey]));
+ const base=['--url',url,'--fee-payer',treasury,'--program-id',TOKEN_PROGRAM];
+ const exists=await rpc<{value:unknown}>(url,'getAccountInfo',[mint,{encoding:'base64',commitment:'confirmed'}]);
+ if(!exists.value)console.log(run('spl-token',[...base,'create-token','--mint-authority',owner,'--decimals','6',mintKey]));
  const [ata]=await findAssociatedTokenPda({owner:address(owner),mint:address(mint),tokenProgram:address(TOKEN_PROGRAM)});
- const account=await rpc<{value:unknown}>(url,'getAccountInfo',[ata]);if(!account.value)console.log(run('spl-token',[...base,'create-account',mint]));
- const tokens=await rpc<{value:{amount:string}}>(url,'getTokenAccountBalance',[ata]);if(BigInt(tokens.value.amount)<1000000000n)console.log(run('spl-token',[...base,'mint',mint,'100000']));
+ const account=await rpc<{value:unknown}>(url,'getAccountInfo',[ata,{encoding:'base64',commitment:'confirmed'}]);if(!account.value)console.log(run('spl-token',[...base,'create-account','--owner',owner,mint]));
+ const tokens=await rpc<{value:{amount:string}}>(url,'getTokenAccountBalance',[ata,{commitment:'confirmed'}]);if(BigInt(tokens.value.amount)<1000000000n)console.log(run('spl-token',[...base,'mint','--mint-authority',treasury,mint,'100000',ata]));
  const recipient=process.argv[2];
- if(recipient){address(recipient);console.log(run('spl-token',[...base,'transfer',mint,'200',recipient,'--fund-recipient','--allow-unfunded-recipient']));}
+ if(recipient){address(recipient);console.log(run('spl-token',[...base,'transfer','--owner',treasury,mint,'200',recipient,'--fund-recipient','--allow-unfunded-recipient']));}
  console.log(JSON.stringify({cluster:'solana:devnet',mint,treasury:owner,decimals:6,currency:'TEST SKR',realValue:false}));
 }
 main().catch(e=>{console.error(e instanceof Error?e.message:'Devnet setup failed');process.exitCode=1;});

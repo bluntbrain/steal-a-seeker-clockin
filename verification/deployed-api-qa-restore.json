@@ -1,0 +1,25 @@
+{
+  "checkedAt": "2026-09-13T15:13:41.926Z",
+  "base": "https://seeker-api-production-41b3.up.railway.app",
+  "wallet": "66sDfT7erH8vcFgvvmsVYSQfumRo49eSnt8NQedmMTTv",
+  "passed": 4,
+  "failed": 0,
+  "checks": [
+    "Pre-restart session remains valid",
+    "Campaign, 12 verified wins, cosmetics, progress and settled payout persist",
+    "New wallet login restores identical receipts and daily personal leaderboard",
+    "Finalized buyer token balance remains 105 TEST SKR: 200 funded - 100 campaign - 20 outfit + one 25 rebate"
+  ],
+  "beforeCapturedAt": "2026-09-13T15:12:53.348Z",
+  "limitations": [
+    "Restart tested after all payments and rebate had already settled, not during a pending broadcast or worker lease.",
+    "No destructive DB access, no mainnet transactions, no physical-device Phantom approval."
+  ],
+  "deployment": {
+    "before": "74450ee2 (prefix supplied by deployment agent)",
+    "after": "2e94b698-a6c2-4c56-9880-c620238499ee",
+    "verification": "Parent deployment agent reported new deployment SUCCESS before this verification."
+  },
+  "finalizedBuyerTokenBalance": "105000000",
+  "tokenDecimals": 6
+}

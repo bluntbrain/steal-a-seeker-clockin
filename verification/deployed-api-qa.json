@@ -1,0 +1,161 @@
+{
+  "startedAt": "2026-09-13T15:08:58.460Z",
+  "base": "https://seeker-api-production-41b3.up.railway.app",
+  "mode": "real-devnet-commerce",
+  "results": [
+    {
+      "name": "HTTPS health: database reachable, devnet cluster",
+      "status": "pass",
+      "milliseconds": 642
+    },
+    {
+      "name": "Catalog: six products, 100 TEST SKR campaign and cosmetic-only outfits",
+      "status": "pass",
+      "milliseconds": 694
+    },
+    {
+      "name": "Private routes require a signed session",
+      "status": "pass",
+      "milliseconds": 1834
+    },
+    {
+      "name": "Bad wallet and unknown fields are rejected",
+      "status": "pass",
+      "milliseconds": 545
+    },
+    {
+      "name": "Real Ed25519 wallet authentication and nonce replay rejection",
+      "status": "pass",
+      "milliseconds": 1705
+    },
+    {
+      "name": "Another wallet cannot use buyer signature or changed message",
+      "status": "pass",
+      "milliseconds": 693
+    },
+    {
+      "name": "Authenticated accounts stay wallet-isolated",
+      "status": "pass",
+      "milliseconds": 612
+    },
+    {
+      "name": "Daily manifest: current UTC date and pinned current rules",
+      "status": "pass",
+      "milliseconds": 570
+    },
+    {
+      "name": "Public leaderboards and invalid dates",
+      "status": "pass",
+      "milliseconds": 1036
+    },
+    {
+      "name": "Locked campaign, ranked entry, progress and cosmetics cannot be bypassed",
+      "status": "pass",
+      "milliseconds": 1413
+    },
+    {
+      "name": "Legacy paid-per-run feature stays disabled",
+      "status": "pass",
+      "milliseconds": 527
+    },
+    {
+      "name": "Server price and schema cannot be overridden",
+      "status": "pass",
+      "milliseconds": 979
+    },
+    {
+      "name": "Unknown wallet-owned resources do not leak data",
+      "status": "pass",
+      "milliseconds": 810
+    },
+    {
+      "name": "RPC is devnet; dedicated QA buyer has transaction fees",
+      "status": "pass",
+      "milliseconds": 343
+    },
+    {
+      "name": "Campaign quote, idempotency and cross-wallet access",
+      "status": "pass",
+      "milliseconds": 2429
+    },
+    {
+      "name": "Campaign approval reserves rebate and reuses payment lifetime",
+      "status": "pass",
+      "milliseconds": 2142
+    },
+    {
+      "name": "Real devnet campaign transfer and duplicate callback grant one entitlement",
+      "status": "pass",
+      "milliseconds": 16191
+    },
+    {
+      "name": "Owned campaign sync restores and preserves best progress",
+      "status": "pass",
+      "milliseconds": 1734
+    },
+    {
+      "name": "Real outfit payment without callback restores by reference and equips",
+      "status": "pass",
+      "milliseconds": 13559
+    },
+    {
+      "name": "Rebate cannot be claimed before all twelve verified levels",
+      "status": "pass",
+      "milliseconds": 272
+    },
+    {
+      "name": "Ranked ticket idempotency, stale rules, isolation and abandonment",
+      "status": "pass",
+      "milliseconds": 2509
+    },
+    {
+      "name": "Ranked worker rejects unfinished replay without leaderboard credit",
+      "status": "pass",
+      "milliseconds": 1723
+    },
+    {
+      "name": "Successful daily replay verifies server score and reaches personal leaderboard",
+      "status": "pass",
+      "milliseconds": 38557
+    },
+    {
+      "name": "All twelve actual replay fixtures verify once per level; repeat is idempotent",
+      "status": "pass",
+      "milliseconds": 71361
+    },
+    {
+      "name": "Completion rebate settles 25 TEST SKR once and returns stay wallet-isolated",
+      "status": "pass",
+      "milliseconds": 17052
+    },
+    {
+      "name": "Logout revokes the session",
+      "status": "pass",
+      "milliseconds": 716
+    }
+  ],
+  "limitations": [
+    "Automated signed-wallet and deterministic replay QA; not a physical-device Phantom approval or human playtest. Service restart recovery must be separately checked by operator."
+  ],
+  "publicTransactions": [
+    {
+      "kind": "campaign",
+      "signature": "5ag7ZTVhWWujS2FVx3cebBG78x3BXodqy8XPqUoeSbVMJxDcdNdLnXnyQGSW8zWsi6sdhEbaR2ojzYEPg6qzpcZu"
+    },
+    {
+      "kind": "night-courier",
+      "signature": "3VSx52mRQ7oiWP4nbHPEyZJLeqnpYhVu9TxdYyJEuNv2j5vcLaUUyTZbP8tYRRyaSXn9BCaAseUkoecHotjVq14W"
+    },
+    {
+      "kind": "completion-rebate",
+      "signature": "5tvEtYjAFUSVNWqmTxRDkEdfoUUS7aZ54zjR6aCP788U13Rvc7sQjzG4oKtzNR3HXKSfW18Jc4tFE7MjMNoMYJVn"
+    }
+  ],
+  "wallets": {
+    "buyer": "66sDfT7erH8vcFgvvmsVYSQfumRo49eSnt8NQedmMTTv",
+    "other": "7ddv8ArQCXbZ9ZWTUAarV4mj9WyEoBE6cv4vP2K3DS2S"
+  },
+  "finishedAt": "2026-09-13T15:11:59.135Z",
+  "passed": 26,
+  "failed": 0
+}

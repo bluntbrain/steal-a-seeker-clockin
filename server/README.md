@@ -70,3 +70,9 @@ Migration 003 adds immutable UTC daily manifests and wallet-bound run tickets. `
 ## Return worker
 
 Migration 004 adds reserved return liabilities and durable signed payout attempts. Authenticated `GET /returns/:id` reads only the owner’s allocation/receipt. Processing is disabled unless `DEVNET_RETURNS_ENABLED=1` and a private `DEVNET_SIGNER_PATH` are configured. Reservations and allocations are internal methods with no public write endpoint; the paid-entry service must authorize them from verified payment/run outcomes before this becomes a playable feature. No live payout is proven. See [the return-worker contract and tests](../docs/RETURN-SETTLEMENT.md). There are now 32 passing server tests; chain responses remain synthetic.
+
+## Deployed devnet service
+
+API: https://seeker-api-production-41b3.up.railway.app
+
+Railway runs this API plus its embedded workers and a private PostgreSQL service. Cloud signing uses sealed `DEVNET_SIGNER_JSON`; local signing uses `DEVNET_SIGNER_PATH` with a 0600 keypair file. Set only one. Both validate the configured treasury. See `docs/RAILWAY-DEPLOYMENT.md` and `scripts/qa-deployed-api.md`. Never run the database-truncating local commerce test suite against the hosted database.

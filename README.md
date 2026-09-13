@@ -10,7 +10,7 @@ Current work and remaining gates: [September 13 release plan](docs/HACKATHON-REL
 
 - [Browser preview](http://127.0.0.1:8787): local playtest credits, campaign, cosmetics and local daily records. Credits cannot authorize a server purchase or become real tokens.
 - [Signed judge APK](releases/steal-a-seeker-judge.apk): arm64 Android, separate judge package, offline campaign access. Visible JUDGE labels distinguish it from the connected build. It cannot grant server entitlements, returns or verified scores.
-- [Signed devnet APK](releases/steal-a-seeker-devnet.apk): normal campaign paywall and Mobile Wallet Adapter. The current artifact has no configured public API; real Phantom sign-in, purchase and restore remain unverified.
+- [Signed devnet APK](releases/steal-a-seeker-devnet.apk): normal campaign paywall and Mobile Wallet Adapter. The current artifact connects to the deployed Railway devnet API. Automated real-token purchase, restore and payout QA passed; a physical Phantom approval remains unverified.
 
 APKs are local, ignored artifacts rather than GitHub uploads. Their neighboring JSON files record SHA-256, source hashes and build settings. Both use a private distribution signature. Build instructions and signing backup requirements are in [RELEASE.md](docs/RELEASE.md).
 
@@ -61,3 +61,7 @@ For voluntary outside testing, use [PLAYTEST-PROTOCOL.md](docs/PLAYTEST-PROTOCOL
 ## Source layout
 
 `src/game`: deterministic maps/rules. `src/components/GameCanvas.tsx`: current 2D rendering. `src/commerce` and `src/wallet`: native accounts and MWA. `src/ranked`: daily runs. `src/progress`: local/cloud bests. `src/onboarding` and `src/telemetry`: coach and voluntary local reports. `server`: authentication, payments and replay workers. Client saves and telemetry never authorize money or ranks.
+
+## Live devnet backend
+
+API: https://seeker-api-production-41b3.up.railway.app — one API replica and private PostgreSQL, app sleep disabled. See [Railway runbook](docs/RAILWAY-DEPLOYMENT.md) for configuration and deployment commands. [Live QA evidence](verification/deployed-api-qa.json) records 26 passing groups, including real TEST SKR purchases, all 12 server-verified mission replays and one completion payout. The local backend suite now passes 53 tests.

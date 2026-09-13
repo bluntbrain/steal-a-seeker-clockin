@@ -7,7 +7,7 @@ import {createApp} from './app';
 import {RankedService} from './ranked-service';
 import {assertRulesCurrent} from './rules-version';
 import {ReturnService} from './returns';
-import {DevnetReturnChain,loadReturnSigner} from './return-chain';
+import {DevnetReturnChain,loadReturnSigner,loadReturnSignerJson} from './return-chain';
 import {PaidService} from './paid-service';
 async function main(){
  const mint=address(process.env.DEVNET_TEST_MINT||''),recipient=address(process.env.DEVNET_TREASURY||''),decimals=Number(process.env.DEVNET_TOKEN_DECIMALS||6);
@@ -18,8 +18,10 @@ async function main(){
  await assertRulesCurrent();const pool=database(process.env.DATABASE_URL||'postgresql://localhost/seeker_clockin_devnet');await migrate(pool);const service=new CommerceService(pool,chain,config),ranked=new RankedService(pool);
  const returnConfig={mint,treasury:recipient,source:destination,decimals},returns=new ReturnService(pool,undefined,returnConfig);
  if(process.env.DEVNET_RETURNS_ENABLED==='1'){
-  const path=process.env.DEVNET_SIGNER_PATH;if(!path)throw new Error('Set the dedicated devnet signer path before enabling return processing.');
-  const signer=await loadReturnSigner(path,recipient);
+  const path=process.env.DEVNET_SIGNER_PATH,json=process.env.DEVNET_SIGNER_JSON;
+  if(!path&&!json)throw new Error('Configure a dedicated devnet signer before enabling return processing.');
+  if(path&&json)throw new Error('Configure only one devnet signer source.');
+  const signer=json?await loadReturnSignerJson(json,recipient):await loadReturnSigner(path!,recipient);
   returns.chain=new DevnetReturnChain({...returnConfig,rpcUrl:process.env.DEVNET_RPC_URL||'https://api.devnet.solana.com'},signer);
  }
  service.campaignReturns=returns;

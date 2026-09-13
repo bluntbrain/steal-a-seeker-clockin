@@ -14,7 +14,17 @@ const statusResponse = z.object({context: z.object({slot: uint}), value: z.array
 export async function loadReturnSigner(path: string, expected: string) {
   const info = await stat(path);
   if (!info.isFile() || (info.mode & 0o077) !== 0) throw new Error('Devnet signer must be a private local file.');
-  const bytes = z.array(z.number().int().min(0).max(255)).length(64).parse(JSON.parse(await readFile(path, 'utf8')));
+  return loadReturnSignerJson(await readFile(path, 'utf8'), expected);
+}
+
+/** Railway sealed variable; never include input or parser errors in logs. */
+export async function loadReturnSignerJson(json: string, expected: string) {
+  let bytes: number[];
+  try {
+    bytes = z.array(z.number().int().min(0).max(255)).length(64).parse(JSON.parse(json));
+  } catch {
+    throw new Error('Invalid dedicated devnet signer configuration.');
+  }
   const signer = await createKeyPairSignerFromBytes(new Uint8Array(bytes));
   if (signer.address !== expected) throw new Error('Devnet signer does not match the configured treasury.');
   return signer;
