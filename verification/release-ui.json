@@ -1,0 +1,12 @@
+{
+  "passed": true,
+  "scope": "Actual browser inputs; completed-collection screen uses explicit fixture, not earned progress evidence",
+  "checks": [
+    "coach dismissal and replay",
+    "opt-in recording and one decoy/retry",
+    "export and delete",
+    "rotating local daily start",
+    "complete ending layout and collection"
+  ],
+  "dailyMission": "two-targets"
+}

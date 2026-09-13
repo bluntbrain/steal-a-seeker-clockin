@@ -149,6 +149,14 @@ test('leaderboard keeps top fifty rows and the signed-in player even when sixty 
  const board=await ranked.leaderboard(day,wallets[59]);assert.equal(board.entries.length,50);assert.deepEqual(board.entries.map(e=>e.wallet),wallets.slice(0,50));assert.equal(board.personal?.wallet,wallets[59]);assert.equal(board.personal?.rank,1);assert(board.entries.every(e=>e.rank===1));
 });
 
+test('leaderboard returns the nearest better rank outside the top fifty, while exact ties share rank',async()=>{
+ const base=await ranked.daily(),day='2025-01-02',manifest={...base,day};await pool.query('INSERT INTO daily_manifests(day,manifest) VALUES($1,$2)',[day,manifest]);
+ const people=Array.from({length:64},()=>pub());
+ for(const [i,wallet] of people.entries()){await pool.query('INSERT INTO wallets(address) VALUES($1)',[wallet]);await pool.query("INSERT INTO ranked_runs(id,wallet,day,request_key,manifest,status,issued_at,expires_at,result) VALUES($1,$2,$3,$4,$5,'verified',now(),now(),$6)",[randomUUID(),wallet,day,randomUUID(),manifest,{status:'won',score:20000-(i>=62?62:i),ticks:400,seconds:400/30,battery:100,delivered:1,spotted:false}]);}
+ const board=await ranked.leaderboard(day,people[63]);assert.equal(board.entries.length,50);assert.equal(board.personal?.rank,63);assert.equal(board.rival?.rank,62);assert.equal(board.rival?.wallet,people[61]);assert.equal(board.rival!.score-board.personal!.score,1);
+ assert.equal((await ranked.leaderboard(day,people[0])).rival,null);assert.equal((await ranked.leaderboard(day)).personal,null);
+});
+
 async function returnHarness(tokens=100_000_000n,lamports=100_000_000n,returnConfig?:{mint:string;treasury:string;source:string;decimals:number}){
  await pool.query('TRUNCATE return_allocations,return_attempts,return_reservations CASCADE');
  await pool.query("DELETE FROM transfer_receipts WHERE source_kind='paid_entry'");

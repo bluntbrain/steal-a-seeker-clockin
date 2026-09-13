@@ -1,0 +1,50 @@
+{
+  "passed": true,
+  "apkSha256": "2ca80f6d3dd01bdf984e975ac7d7aa5fcc563ba5d3b9cf31573217f95dacbbb8",
+  "device": "emulator-5554",
+  "physical": false,
+  "model": "sdk_gphone64_arm64",
+  "android": "16",
+  "package": "com.krane.stealaseeker.judge",
+  "checks": [
+    "installed signed judge APK, standalone launch",
+    "joystick swipe and decoy consumption",
+    "pause and performance readout",
+    "mute saved after process restart",
+    "background pauses gameplay",
+    "missions and four correctly sized shortcuts"
+  ],
+  "recentPerformance": [
+    "60 FPS \u00b7 p95 16.7ms \u00b7 186 slow frames"
+  ],
+  "shortcutBounds": {
+    "Shop / equip owned items": [
+      36,
+      2616,
+      325,
+      2748
+    ],
+    "Daily challenge / leaderboard": [
+      343,
+      2616,
+      631,
+      2748
+    ],
+    "Campaign rewards and leaderboard": [
+      649,
+      2616,
+      938,
+      2748
+    ],
+    "Settings / controls": [
+      956,
+      2616,
+      1244,
+      2748
+    ]
+  },
+  "limits": [
+    "No physical-device or audible-output claim for an emulator",
+    "No wallet transfer, 15-minute thermal run or full campaign completion claim"
+  ]
+}

@@ -1,3 +1,5 @@
+import {useRunTelemetry} from './telemetry/useRunTelemetry';
+import {useCoach} from './onboarding/useCoach';
 import {useTrial} from './commerce/TrialContext';
 import RewardsPanel from './campaign/RewardsPanel';
 import CampaignSubmission from './campaign/CampaignSubmission';
@@ -62,6 +64,8 @@ export function Game({rankTicket,paidPlay,dailyReturn,paidReturn,onRankStart,onR
  const game=useSharedValue(initialState(startMission)),input=useSharedValue(idleInput()),alpha=useSharedValue(0),clock=useSharedValue(0),accumulator=useSharedValue(0),suspended=useSharedValue(!!paidEntry||dailyReturn||paidReturn||homeFirst),saveClock=useSharedValue(0);
  const samples=useSharedValue<number[]>([]),reportClock=useSharedValue(0),hudClock=useSharedValue(0),frameTotal=useSharedValue(0),slowTotal=useSharedValue(0);
  const [hud,setHud]=useState<GameState>(()=>initialState(startMission)),[stats,setStats]=useState<Stats>(zeroStats),[paused,setPaused]=useState(!!paidEntry||dailyReturn||paidReturn||homeFirst),[details,setDetails]=useState(false),[mission,setMission]=useState<MissionId>(startMission);
+ useRunTelemetry(hud,paused,paidEntry?'paid':rankTicket?'daily':trial.active?'trial':'campaign',stats);
+ const coach=useCoach(hud,!timedRun);
  const level=getLevel(mission);
  const boardHeight=size*20/12;
  const progress=useProgress(),recorded=useRef(false),rankResolved=useRef(false);
@@ -165,10 +169,10 @@ export function Game({rankTicket,paidPlay,dailyReturn,paidReturn,onRankStart,onR
  const contextHint=relaySeconds>0?`Relay door open · ${relaySeconds}s`:pad?(pad.kind==='relay'?`Stop · ACT opens door for ${pad.duration??9}s`:'Stop · ACT switches circuits'):activeTake&&!hud.carrying?'Stop · hold TAKE':lureMessage|| (hud.alert>0?'Spotted! Break their line of sight.':alarmOn?`PHONE TRACKED · guards +${alarmSpeedPercent(hud)}%`:'');
  const alarmWash=useAnimatedStyle(()=>({opacity:game.value.securityAlarm&&game.value.status==='playing'&&!suspended.value&&!settings.reducedEffects?.025+.04*(.5+.5*Math.sin(clock.value*2.5)):0}));
  const alarmBorder=useAnimatedStyle(()=>({opacity:game.value.securityAlarm&&game.value.status==='playing'&&!suspended.value?(settings.reducedEffects?.35:.4+.25*(.5+.5*Math.sin(clock.value*2.5))):0}));
- return <SafeAreaView style={s.screen} edges={['top','bottom']}><StatusBar style="light"/><RewardsPanel onLegacy={()=>{setRewardsOpen(false);setPaidOpen(true);}} visible={rewardsOpen} onClose={()=>setRewardsOpen(false)}/><WalletPanel visible={walletOpen} onClose={()=>setWalletOpen(false)}/><Hideout visible={hideoutOpen} onStart={id=>{setHideoutOpen(false);restart(id);}} onClose={()=>setHideoutOpen(false)} onShop={()=>{setHideoutOpen(false);setWalletOpen(true);}} progress={progress.progress} syncStatus={progress.syncStatus} onSync={()=>void progress.retrySync()} onSettings={()=>{setHideoutOpen(false);setSettingsOpen(true);}} onDaily={()=>{setHideoutOpen(false);setDailyOpen(true);}} onPaid={()=>{setHideoutOpen(false);setRewardsOpen(true);}}/><SettingsPanel mission={mission} visible={settingsOpen} onClose={()=>setSettingsOpen(false)}/><DailyPanel visible={dailyOpen} onClose={()=>setDailyOpen(false)} onStart={ticket=>{setDailyOpen(false);onRankStart(ticket);}}/><PaidPanel visible={paidOpen} onClose={()=>setPaidOpen(false)} onStart={play=>{setPaidOpen(false);onPaidStart(play);}}/><View style={[s.shell,{width:Math.max(size+16,Math.min(width,460))}]}>
+ return <SafeAreaView style={s.screen} edges={['top','bottom']}><StatusBar style="light"/><RewardsPanel onLegacy={()=>{setRewardsOpen(false);setPaidOpen(true);}} visible={rewardsOpen} onClose={()=>setRewardsOpen(false)}/><WalletPanel visible={walletOpen} onClose={()=>setWalletOpen(false)}/><Hideout visible={hideoutOpen} onStart={id=>{setHideoutOpen(false);restart(id);}} onClose={()=>setHideoutOpen(false)} onShop={()=>{setHideoutOpen(false);setWalletOpen(true);}} progress={progress.progress} syncStatus={progress.syncStatus} onSync={()=>void progress.retrySync()} onSettings={()=>{setHideoutOpen(false);setSettingsOpen(true);}} onDaily={()=>{setHideoutOpen(false);setDailyOpen(true);}} onPaid={()=>{setHideoutOpen(false);setRewardsOpen(true);}}/><SettingsPanel onReplayTips={()=>{coach.replay();setSettingsOpen(false);setHideoutOpen(false);restart("practice");}} mission={mission} visible={settingsOpen} onClose={()=>setSettingsOpen(false)}/><DailyPanel visible={dailyOpen} onClose={()=>setDailyOpen(false)} onStart={ticket=>{setDailyOpen(false);onRankStart(ticket);}}/><PaidPanel visible={paidOpen} onClose={()=>setPaidOpen(false)} onStart={play=>{setPaidOpen(false);onPaidStart(play);}}/><View style={[s.shell,{width:Math.max(size+16,Math.min(width,460))}]}>
    <View testID="gameplay-topbar" style={s.header}>
     <Pressable accessibilityRole="button" accessibilityLabel={paidEntry?'Save and leave paid attempt':rankTicket?'Leave daily challenge':'Open missions'} onPress={()=>{if(timedRun)restart();else{pause(true);trial.active?trial.finish():setHideoutOpen(true);}}} style={s.iconButton}><Text style={s.iconText}>‹</Text></Pressable>
-    <Text style={s.levelName} numberOfLines={1}>{trial.active?'TRIAL':rankTicket?'DAILY':String(level.number).padStart(2,'0')} · {level.title}</Text>
+    <Text style={s.levelName} numberOfLines={1}>{process.env.EXPO_PUBLIC_JUDGE_PREVIEW==='1'?'JUDGE / '+String(level.number).padStart(2,'0'):trial.active?'TRIAL':rankTicket?'DAILY':String(level.number).padStart(2,'0')} · {level.title}</Text>
     {(level.targets?.length??1)>1&&<Text accessibilityLabel={`Phones delivered ${hud.delivered} of ${level.targets!.length}`} style={s.charge}>{hud.delivered}/{level.targets!.length}</Text>}
     <Text accessibilityLabel={paidEntry?'Submission time remaining':'Run time'} style={s.timer}>{time(paidEntry?submissionSeconds:hud.elapsed)}</Text>
     {hud.carrying&&<Text accessibilityLabel={`Phone charge ${hud.battery} percent`} style={s.charge}>{hud.battery}%</Text>}
@@ -178,7 +182,8 @@ export function Game({rankTicket,paidPlay,dailyReturn,paidReturn,onRankStart,onR
     <GameCanvas size={size} input={input} game={game} alpha={alpha} clock={clock} level={level} appearance={{...(timedRun?{}:account.account?.equipment),reducedEffects:settings.reducedEffects}}/>
     <View pointerEvents="none" style={StyleSheet.absoluteFill}><Text style={[s.mapLabel,{top:size/12*(level.exit.y+.23),left:size/12*level.exit.x,width:size/12*level.exit.w,color:'#d6f4e4'}]}>EXIT</Text></View>
 
-    {!!contextHint&&!paused&&hud.status==='playing'&&<View pointerEvents="none" testID="security-banner" accessibilityLiveRegion="polite" style={[s.contextToast,alarmOn&&{backgroundColor:'#3A171FEF'}]}><Text style={s.contextText} numberOfLines={2}>{contextHint}</Text></View>}
+    {!!(contextHint||coach.text)&&!paused&&hud.status==='playing'&&<View pointerEvents="none" testID="security-banner" accessibilityLiveRegion="polite" style={[s.contextToast,alarmOn&&{backgroundColor:'#3A171FEF'}]}><Text style={s.contextText} numberOfLines={2}>{contextHint||coach.text}</Text></View>}
+    {!!coach.text&&!paused&&<Pressable accessibilityRole="button" accessibilityLabel="Skip movement tips" onPress={coach.dismiss} style={{position:"absolute",bottom:5,right:5,padding:10,borderRadius:12,backgroundColor:"#142923EC"}}><Text style={s.contextText}>Skip tips ×</Text></Pressable>}
    </View>
    <View testID="game-controls" style={[s.controls,{width:Math.max(size,300)}]}>
     <View testID="power-controls" style={s.powerControls}>

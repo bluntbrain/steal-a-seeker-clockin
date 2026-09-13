@@ -1,8 +1,8 @@
 {
   "expo": {
-    "name": "Steal a Seeker · MVP",
+    "name": "Steal a Seeker",
     "slug": "steal-a-seeker-mvp",
-    "version": "0.2.0",
+    "version": "0.3.0",
     "orientation": "portrait",
     "userInterfaceStyle": "dark",
     "newArchEnabled": true,
@@ -11,7 +11,7 @@
     },
     "web": {
       "bundler": "metro",
-      "name": "Steal a Seeker · Night Shift"
+      "name": "Steal a Seeker \u00b7 Night Shift"
     },
     "assetBundlePatterns": [
       "assets/**/*"

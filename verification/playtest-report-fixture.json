@@ -1,0 +1,29 @@
+{
+  "version": 1,
+  "appVersion": "0.3.0",
+  "rulesHash": "e6068d907ee5faf43ceea3a5a1cbce54b3cf4328ad2186bdddc64dd0135e7148",
+  "platform": "web",
+  "exportedAt": "2026-09-13T10:05:11.327Z",
+  "summary": "Voluntary local playtest. No wallet addresses or input replay.",
+  "runs": [
+    {
+      "id": "1789293910043-hd9jbtxc",
+      "at": "2026-09-13T10:05:10.043Z",
+      "mission": "practice",
+      "mode": "campaign",
+      "outcome": "abandoned",
+      "seconds": 0.53,
+      "score": 0,
+      "dashes": 0,
+      "decoysUsed": 1,
+      "pickedUp": false,
+      "spotted": false,
+      "cell": {
+        "x": 2,
+        "y": 17
+      },
+      "fps": 0,
+      "p95": 0
+    }
+  ]
+}

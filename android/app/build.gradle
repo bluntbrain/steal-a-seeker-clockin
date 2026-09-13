@@ -81,6 +81,12 @@ def enableMinifyInReleaseBuilds = (findProperty('android.enableMinifyInReleaseBu
  */
 def jscFlavor = 'io.github.react-native-community:jsc-android:2026004.+'
 
+def releaseStore = System.getenv('SEEKER_KEYSTORE')
+def releaseSecretsPresent = releaseStore && System.getenv('SEEKER_STORE_PASSWORD') && System.getenv('SEEKER_KEY_ALIAS') && System.getenv('SEEKER_KEY_PASSWORD')
+def judgeBuild = (findProperty('seekerJudge') ?: 'false').toBoolean()
+if (gradle.startParameter.taskNames.any { it.toLowerCase().contains('release') } && !releaseSecretsPresent) {
+    throw new GradleException('Release signing is required. Use node scripts/build-release.cjs devnet or judge; see docs/RELEASE.md.')
+}
 android {
     ndkVersion rootProject.ext.ndkVersion
 
@@ -89,15 +95,24 @@ android {
 
     namespace 'com.krane.stealaseeker.mvp'
     defaultConfig {
-        applicationId 'com.krane.stealaseeker.mvp'
+        applicationId judgeBuild ? 'com.krane.stealaseeker.judge' : 'com.krane.stealaseeker.mvp'
+        manifestPlaceholders = [appLabel: judgeBuild ? 'Steal a Seeker Judge' : 'Steal a Seeker']
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 2
-        versionName "0.2.0"
+        versionCode 3
+        versionName "0.3.0"
 
         buildConfigField "String", "REACT_NATIVE_RELEASE_LEVEL", "\"${findProperty('reactNativeReleaseLevel') ?: 'stable'}\""
     }
     signingConfigs {
+        distribution {
+            if (releaseSecretsPresent) {
+                storeFile file(releaseStore)
+                storePassword System.getenv('SEEKER_STORE_PASSWORD')
+                keyAlias System.getenv('SEEKER_KEY_ALIAS')
+                keyPassword System.getenv('SEEKER_KEY_PASSWORD')
+            }
+        }
         debug {
             storeFile file('debug.keystore')
             storePassword 'android'
@@ -110,9 +125,7 @@ android {
             signingConfig signingConfigs.debug
         }
         release {
-            // Caution! In production, you need to generate your own keystore file.
-            // see https://reactnative.dev/docs/signed-apk-android.
-            signingConfig signingConfigs.debug
+            signingConfig signingConfigs.distribution
             def enableShrinkResources = findProperty('android.enableShrinkResourcesInReleaseBuilds') ?: 'false'
             shrinkResources enableShrinkResources.toBoolean()
             minifyEnabled enableMinifyInReleaseBuilds

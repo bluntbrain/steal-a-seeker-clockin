@@ -1,3 +1,5 @@
+> **13 September 2026:** Current selected sprint, signed APKs, onboarding, telemetry and daily updates are tracked in [HACKATHON-RELEASE-PLAN.md](HACKATHON-RELEASE-PLAN.md). Android testing has resumed; physical USB is not detected yet. Older counts and deferred-Android notes below are historical.
+
 # Implementation evidence
 
 > Current completion checklist: [REMAINING-WORK.md](REMAINING-WORK.md). This document retains historical plans/checkpoints; older 3D gameplay, missing-feature and test-count statements are superseded. The selected game is 2D; 3D is used for phone inspection only.

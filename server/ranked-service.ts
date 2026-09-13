@@ -1,6 +1,6 @@
 import {createHash,randomUUID} from 'node:crypto';
 import type {Pool} from 'pg';
-import {CAMPAIGN_IDS,getLevel,type MissionId} from '../src/game/level';
+import {getLevel} from '../src/game/level';
 import type {DailyManifest,RunTicket,Leaderboard,LeaderboardEntry} from '../shared/ranked';
 import rules from '../shared/rules-manifest.json';
 import {transaction} from './db';
@@ -9,7 +9,8 @@ import {replayInput} from './replay';
 import {verifyReplayInWorker,ReplayBusyError,ReplayInvalidError} from './replay-runner';
 const iso=(date:Date|string)=>new Date(date).toISOString();
 function ticket(row:Record<string,any>):RunTicket{return {id:row.id,wallet:row.wallet,status:row.status,manifest:row.manifest,issuedAt:iso(row.issued_at),expiresAt:iso(row.expires_at),result:row.result,detail:row.detail};}
-export function dailyMission(date:Date):MissionId{return CAMPAIGN_IDS[Math.floor(date.getTime()/86400000)%CAMPAIGN_IDS.length]!;}
+import {dailyMission} from '../shared/daily';
+export {dailyMission} from '../shared/daily';
 export class RankedService {
  private now:()=>Date;
  constructor(public pool:Pool,options:{now?:()=>Date}={}){this.now=options.now??(()=>new Date());}
@@ -72,8 +73,9 @@ export class RankedService {
    ORDER BY wallet,(result->>'score')::integer DESC,(result->>'ticks')::integer ASC,id
   ), ranked AS (SELECT *,rank() OVER(ORDER BY score DESC,ticks ASC) AS rank,row_number() OVER(ORDER BY score DESC,ticks ASC,wallet) AS position FROM best)
   SELECT ranked.*,wallets.equipment->>'frame' AS frame FROM ranked JOIN wallets ON wallets.address=ranked.wallet
-  WHERE position<=50 OR wallet=$2 ORDER BY rank,wallet LIMIT 51`,[day,wallet??'']);
+  WHERE position<=50 OR wallet=$2 OR position=(SELECT min(position) FROM ranked WHERE rank=(SELECT max(rank) FROM ranked WHERE rank<(SELECT rank FROM ranked WHERE wallet=$2))) ORDER BY rank,wallet LIMIT 52`,[day,wallet??'']);
   const entry=(r:Record<string,any>):LeaderboardEntry=>({wallet:r.wallet,rank:Number(r.rank),score:r.score,ticks:r.ticks,seconds:r.ticks/30,frame:r.frame==='profile-frame'?r.frame:null});
-  return {day,entries:rows.rows.filter(r=>Number(r.position)<=50).map(entry),personal:rows.rows.find(r=>r.wallet===wallet)?entry(rows.rows.find(r=>r.wallet===wallet)):null};
+  const mine=rows.rows.find(r=>r.wallet===wallet),better=mine?rows.rows.filter(r=>Number(r.rank)<Number(mine.rank)).sort((a,b)=>Number(b.rank)-Number(a.rank)||a.wallet.localeCompare(b.wallet))[0]:undefined;
+  return {day,rival:better?entry(better):null,entries:rows.rows.filter(r=>Number(r.position)<=50).map(entry),personal:rows.rows.find(r=>r.wallet===wallet)?entry(rows.rows.find(r=>r.wallet===wallet)):null};
  }
 }

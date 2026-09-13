@@ -1,6 +1,6 @@
 {
   "name": "steal-a-seeker-mvp",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "private": true,
   "main": "index.ts",
   "scripts": {
@@ -10,12 +10,14 @@
     "typecheck": "tsc --noEmit",
     "test": "tsx --test tests/*.test.ts",
     "export:web": "npm run rules:check && expo export --platform web && node scripts/build-sheet-preview.cjs && node scripts/build-paywall-preview.cjs && node scripts/copy-design.cjs",
-    "build:apk": "npm run rules:check && cd android && ./gradlew :app:cleanCreateBundleReleaseJsAndAssets :app:assembleRelease --no-daemon",
+    "build:apk": "node scripts/build-release.cjs devnet",
     "preview": "node scripts/preview.cjs",
     "server:dev": "tsx server/main.ts",
     "server:test": "tsx --test server/*.test.ts",
     "rules:generate": "tsx scripts/rules-manifest.ts",
-    "rules:check": "tsx scripts/rules-manifest.ts --check"
+    "rules:check": "tsx scripts/rules-manifest.ts --check",
+    "build:judge": "node scripts/build-release.cjs judge",
+    "signing:init": "node scripts/create-signing.cjs"
   },
   "dependencies": {
     "@fastify/rate-limit": "^11.2.0",

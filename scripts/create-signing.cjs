@@ -1,0 +1,7 @@
+const fs=require('fs'),os=require('os'),path=require('path'),crypto=require('crypto'),cp=require('child_process');
+const root=path.join(os.homedir(),'.config/steal-a-seeker'),config=path.join(root,'release-signing.json'),store=path.join(root,'distribution.jks');
+if(fs.existsSync(config)||fs.existsSync(store)){console.log('Existing release signing material kept. See docs/RELEASE.md.');process.exit(0);}
+fs.mkdirSync(root,{recursive:true,mode:0o700});const password=crypto.randomBytes(36).toString('base64url'),keytool=process.env.JAVA_HOME?path.join(process.env.JAVA_HOME,'bin/keytool'):'keytool';
+const result=cp.spawnSync(keytool,['-genkeypair','-keystore',store,'-alias','seeker-distribution','-storepass:env','SEEKER_NEW_SIGNING_PASSWORD','-keypass:env','SEEKER_NEW_SIGNING_PASSWORD','-keyalg','RSA','-keysize','3072','-validity','10000','-dname','CN=Steal a Seeker, OU=Android Distribution'],{env:{...process.env,SEEKER_NEW_SIGNING_PASSWORD:password},stdio:'pipe'});
+if(result.status!==0)throw Error('Key creation failed. Verify Java 17 and write access to the private configuration directory.');
+fs.chmodSync(store,0o600);fs.writeFileSync(config,JSON.stringify({storeFile:store,storePassword:password,keyAlias:'seeker-distribution',keyPassword:password}),{mode:0o600,flag:'wx'});console.log('Private signing material created outside the repository. Back it up securely before distributing updates.');

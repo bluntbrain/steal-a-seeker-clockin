@@ -1,3 +1,5 @@
+> **13 September 2026:** Current selected sprint, signed APKs, onboarding, telemetry and daily updates are tracked in [HACKATHON-RELEASE-PLAN.md](HACKATHON-RELEASE-PLAN.md). Android testing has resumed; physical USB is not detected yet. Older counts and deferred-Android notes below are historical.
+
 > **12 September 2026 — economy update:** See [PAYWALL-ECONOMY-V2.md](PAYWALL-ECONOMY-V2.md). The 100/25 test offer, cancellation trial, cosmetics review, campaign replay verification/rebate allocation, score-based board and audio are now implemented. Live devnet/Phantom and hosted deployment remain unverified. [Hosting comparison](BACKEND-HOSTING.md).
 
 # Steal a Seeker — remaining work
