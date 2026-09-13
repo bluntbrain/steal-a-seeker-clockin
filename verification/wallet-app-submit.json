@@ -1,0 +1,19 @@
+{
+  "checks": [
+    {
+      "currency": "SOL",
+      "wallet": "Ab4mBx1R1cSucdhNQa2YLPvAWWD1YNAo1sppRLNEQmS8",
+      "orderId": "81722c08-92b8-447f-ad65-356503228b6c",
+      "signature": "5doxq71rQnsLYjt88258sQNSW8RTCkiMvTu2E6g3xNCRKdy2xtr7of2vLgvXiZ8gVsRbUc6miQwMvZnnMnzaYubx",
+      "status": "fulfilled"
+    },
+    {
+      "currency": "SKR",
+      "wallet": "FW9zhZkjRp77n6KKALVNyA29jBo315P3hS22fy8NceCT",
+      "orderId": "b7cc73ab-3a0f-47d1-9d48-724b66eedc86",
+      "signature": "HikPk1wtJdzGavrKenLV3dVCFkJMvMjGPHXDooFCXPDxS5KeLfiNTjNEMsNXeTfp8cYpTdNkxWLVQS5DgXpgN7t",
+      "status": "fulfilled"
+    }
+  ],
+  "physicalPhantomApprovalTested": false
+}

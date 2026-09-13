@@ -1,4 +1,7 @@
 import {useMemo} from 'react';
+import type {Transaction,TransactionWithBlockhashLifetime} from '@solana/kit';
+import {submitPayment} from './submitPayment';
+import {DEVNET} from './config';
 import {useMobileWallet,useAuthorization,transact,type KitMobileWallet} from '@wallet-ui/react-native-kit';
 import {SolanaMobileWalletAdapterProtocolError} from '@solana-mobile/mobile-wallet-adapter-protocol';
 import {decodeSignIn} from './decodeSignIn';
@@ -42,13 +45,16 @@ export function useLoggedWallet(){
     return {account:result.account,...decoded};
    },()=>mobile.store.$selectedAccount.get(),(account,message)=>walletStep('mwa.sign-message',()=>wallet.signMessages({addresses:[account.addressBase64],payloads:[message]})),()=>walletLog('mwa.sign-in.message-fallback')),result=>{wireResult=result.sign_in_result;});
   };
-  const signAndSendTransactions:typeof mobile.signAndSendTransactions=async(transaction,minContextSlot)=>session('mwa.payment',async wallet=>{
-   const selected=await auth.authorizeSession(wallet);
-   if(selected.address!==mobile.account?.address)throw new Error('Wallet changed. Restore purchases before paying again.');
-   const signatures=await walletStep('mwa.sign-and-send',()=>wallet.signAndSendTransactions({transactions:Array.isArray(transaction)?transaction:[transaction],minContextSlot:Number(minContextSlot)}));
-   if(!signatures.length)throw new Error('Wallet returned no transaction signature. Restore purchases before paying again.');
-   return (Array.isArray(transaction)?signatures:signatures[0]) as Awaited<ReturnType<typeof mobile.signAndSendTransactions<typeof transaction>>>;
-  });
+  const signAndSendTransactions=async(transaction:Transaction&TransactionWithBlockhashLifetime,minContextSlot:bigint)=>{
+   const signed=await session('mwa.payment',async wallet=>{
+    const selected=await auth.authorizeSession(wallet);
+    if(selected.address!==mobile.account?.address)throw new Error('Wallet changed. Restore purchases before paying again.');
+    const transactions=await walletStep('mwa.sign-transactions',()=>wallet.signTransactions({transactions:[transaction]}));
+    if(transactions.length!==1)throw new Error('Wallet returned no signed payment. Restore purchases before paying again.');
+    walletLog('mwa.payment.signed',{accounts:transactions.length});return transactions[0]!;
+   });
+   return walletStep('payment.submit-and-confirm',()=>submitPayment(transaction,signed,{rpcUrl:DEVNET.url,minContextSlot,log:stage=>walletLog(stage)}));
+  };
   return {...mobile,connect,signIn,signAndSendTransactions,disconnect:()=>walletStep('mwa.disconnect',mobile.disconnect)};
  },[mobile,auth]);
 }

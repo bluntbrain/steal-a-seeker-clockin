@@ -2,13 +2,14 @@ import React,{useEffect,useRef,useState} from 'react';
 import {Linking,Share,Pressable,Text,View,useWindowDimensions} from 'react-native';
 import * as SecureStore from 'expo-secure-store';
 import {useLoggedWallet as useMobileWallet} from '../wallet/useLoggedWallet';
-import {walletFailure,walletReport} from '../wallet/diagnostics';
+import {walletFailure,walletReport,walletLog} from '../wallet/diagnostics';
 import {getBase58Decoder} from '@solana/kit';
 import {currencyLabel,usdLabel,type PaymentCurrency,type ProductPricing} from '../../shared/pricing';
 import {PRODUCTS,tokenAmount,type Order,type ProductId} from '../../shared/commerce';
 import {commerceApi} from './client';
 import {useAccount} from './account-context';
 import {paymentTransaction} from './payment';
+import {needsReconciliation,restoredCheckout} from './restoration';
 import {transactionLink} from '../wallet/config';
 import CourierArt from '../components/CourierArt';
 const pendingKey=(wallet:string)=>`seeker.order.devnet.${wallet}`;
@@ -19,18 +20,36 @@ export default function CommerceSection(){
  useEffect(()=>{alive.current=true;return()=>{alive.current=false;};},[]);
  useEffect(()=>{setOrder(undefined);setMessage('');},[wallet.account?.address]);
  async function action(run:()=>Promise<void>){if(busyLock.current)return;busyLock.current=true;setBusy(true);setMessage('');try{await run();}catch(e){walletFailure('commerce.action',e);if(alive.current)setMessage(e instanceof Error?e.message:'Could not finish. Restore purchases before paying again.');}finally{busyLock.current=false;if(alive.current)setBusy(false);}}
- async function restore(){const s=await session();const pending=(await commerceApi.orders(s.token)).filter(o=>o.status==='quoted'||o.status==='verifying');for(const o of pending.slice(0,5)){await commerceApi.reconcile(s.token,o.id);}const state=await commerceApi.me(s.token);if(current.current===s.wallet){await update(state);const saved=await SecureStore.getItemAsync(pendingKey(s.wallet));if(saved){const restored=await commerceApi.order(s.token,saved);if(current.current===s.wallet)setOrder(restored.status==='fulfilled'?undefined:restored);}setMessage('Purchases restored for this wallet.');}}
- async function quote(sku:ProductId){const s=await session();const prior=await SecureStore.getItemAsync(pendingKey(s.wallet));if(prior){const previous=await commerceApi.reconcile(s.token,prior);if(previous.status==='verifying'||previous.status==='needs_review'){setOrder(previous);throw new Error('An earlier payment is still being checked. Do not pay again.');}}
+ async function restore(){
+  const s=await session(),orders=await commerceApi.orders(s.token);let failed=false;
+  for(const o of orders.filter(o=>needsReconciliation(o)).slice(0,5)){try{await commerceApi.reconcile(s.token,o.id);}catch(e){failed=true;walletFailure('commerce.restore.reconcile',e);}}
+  const [state,latest]=await Promise.all([commerceApi.me(s.token),commerceApi.orders(s.token)]);
+  if(current.current!==s.wallet||!alive.current)return;
+  await update(state);const result=restoredCheckout(state,latest,await SecureStore.getItemAsync(pendingKey(s.wallet)));
+  if(current.current!==s.wallet||!alive.current)return;
+  setOrder(result.order);if(result.order){setCurrency(result.order.currency??'SKR');await SecureStore.setItemAsync(pendingKey(s.wallet),result.order.id);}else await SecureStore.deleteItemAsync(pendingKey(s.wallet));
+  walletLog('commerce.restore.result',{accounts:state.entitlements.length,connected:state.entitlements.includes('campaign'),cached:!!result.order});
+  setMessage(failed&&!state.entitlements.includes('campaign')?'Some payment checks are unavailable. Access is not confirmed yet; try Check payment again.':result.message);
+ }
+ async function quote(sku:ProductId){const s=await session();const prior=await SecureStore.getItemAsync(pendingKey(s.wallet));if(prior){const previous=await commerceApi.reconcile(s.token,prior);if(previous.status==='verifying'||previous.status==='needs_review'){setOrder(previous);setCurrency(previous.currency??'SKR');setMessage(previous.signature?'Your earlier payment is being confirmed. Tap Check payment.':'An earlier approval is unfinished. Tap Resume payment to continue it.');return;}}
   const next=await commerceApi.quote(s.token,sku,crypto.randomUUID(),currency);await SecureStore.setItemAsync(pendingKey(s.wallet),next.id);if(current.current===s.wallet){setOrder(next);setCurrency(next.currency??'SKR');setMessage('Review your purchase, then approve it in Phantom.');}}
  async function pay(){
   if(!order||order.status==='fulfilled'||order.status==='needs_review')return;
   const s=await session();if(s.wallet!==order.wallet||current.current!==s.wallet)throw new Error('Wallet changed. Restore purchases for the selected wallet.');
+  if(order.currency==='SOL'&&!order.payment){const balance=await wallet.client.rpc.getBalance(s.wallet as never).send();if(balance.value<BigInt(order.amount)+5000n)throw new Error(`Not enough devnet SOL. You need ${tokenAmount(order.amount,9)} SOL plus the network fee.`);}
   const prepared=await commerceApi.prepare(s.token,order.id);if(current.current!==s.wallet||!alive.current)return;setOrder(prepared);
   if(prepared.status==='fulfilled'){await update(await commerceApi.me(s.token));setMessage('This payment was already completed. Purchases restored.');return;}
   if(!prepared.payment)throw new Error(prepared.detail||'Quote expired. Request a new quote.');
   setMessage(`Approve the ${currencyLabel(prepared.currency??'SKR')} payment in Phantom.`);
   const signed=await wallet.signAndSendTransactions(paymentTransaction(prepared),BigInt(prepared.payment.contextSlot)),signature=getBase58Decoder().decode(signed);
-  const next=await commerceApi.attach(s.token,prepared.id,signature);if(current.current!==s.wallet||!alive.current)return;setOrder(next);setMessage(next.status==='fulfilled'?'Purchase verified.':next.detail||'Payment submitted. Restore purchases to check finality.');await update(await commerceApi.me(s.token));
+  walletLog('commerce.payment.signature',{bytes:signed.length});
+  let next=await commerceApi.attach(s.token,prepared.id,signature);if(current.current!==s.wallet||!alive.current)return;setOrder(next);setMessage('Confirming your purchase…');
+  for(let attempt=0;attempt<6&&next.status==='verifying';attempt++){
+   await new Promise(resolve=>setTimeout(resolve,3000));if(current.current!==s.wallet||!alive.current)return;
+   try{next=await commerceApi.reconcile(s.token,prepared.id);}catch(e){walletFailure('commerce.payment.confirmation',e);break;}
+   if(current.current!==s.wallet||!alive.current)return;setOrder(next);
+  }
+  setMessage(next.status==='fulfilled'?'Purchase verified. Campaign access is ready.':next.detail||'Payment submitted. Tap Check payment to check finality.');await update(await commerceApi.me(s.token));
  }
 
  const products=account?.entitlements.includes('campaign')?PRODUCTS.filter(p=>p.kind!=='access'):PRODUCTS.filter(p=>p.kind==='access');

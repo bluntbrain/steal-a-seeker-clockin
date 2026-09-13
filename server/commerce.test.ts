@@ -432,3 +432,21 @@ test('SOL campaign reserves TEST SKR reward and preserves quote across a restart
  const restarted=new CommerceService(pool,chain,config,feed),restored=await restarted.getOrder(user.wallet,sol.id);assert.equal(restored.currency,'SOL');assert.deepEqual(restored.pricing,sol.pricing);
  const sig=b58(randomBytes(64));transactions.set(sig,nativeTx(restored,sig));await priced.attach(user.wallet,sol.id,sig);assert.equal((await priced.getOrder(user.wallet,sol.id)).status,'fulfilled');
 });
+
+test('restore expires unpaid approvals and never resurrects a dropped callback signature',async()=>{
+ const user=await login(),o=await quote(user),prepared=await service.preparePayment(user.wallet,o.id),sig=b58(randomBytes(64));
+ await service.attach(user.wallet,o.id,sig);assert.equal((await service.getOrder(user.wallet,o.id)).status,'verifying');
+ await pool.query("UPDATE orders SET expires_at=now()-interval '1 minute' WHERE id=$1",[o.id]);
+ await service.reconcile(o.id);assert.equal((await service.getOrder(user.wallet,o.id)).status,'verifying','A live blockhash must remain locked');
+ chainHeight=Number(prepared.payment!.lastValidBlockHeight)+1;
+ chainUnavailable=true;try{await assert.rejects(service.reconcile(o.id));}finally{chainUnavailable=false;}
+ assert.equal((await service.getOrder(user.wallet,o.id)).status,'verifying','RPC failures must never release payment locks');
+ await service.reconcile(o.id);await service.reconcile(o.id);
+ const ended=await service.getOrder(user.wallet,o.id);assert.equal(ended.status,'quoted');assert.equal(ended.payment,undefined);assert.equal(ended.signature,null);
+ assert.equal((await pool.query('SELECT state FROM order_attempts WHERE signature=$1',[sig])).rows[0].state,'expired');
+ await service.check(prepared,sig,{state:'pending',detail:'Stale concurrent RPC response'});
+ assert.equal((await service.getOrder(user.wallet,o.id)).status,'quoted');
+ assert.notEqual((await quote(user)).id,o.id);
+ await service.check(ended,sig,{state:'needs_review',detail:'A late transfer requires review.'});
+ assert.equal((await service.getOrder(user.wallet,o.id)).status,'needs_review','Expired attempt history must not hide a late payment');
+});
