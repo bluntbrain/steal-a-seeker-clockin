@@ -1,5 +1,7 @@
 import {useMemo} from 'react';
 import {useMobileWallet,useAuthorization,transact,type KitMobileWallet} from '@wallet-ui/react-native-kit';
+import {SolanaMobileWalletAdapterProtocolError} from '@solana-mobile/mobile-wallet-adapter-protocol';
+import {normalizeNativeProtocolError} from './protocolError';
 import {signInWithFallback} from './signInFallback';
 import {walletLog,walletStep} from './diagnostics';
 
@@ -12,7 +14,7 @@ export function useLoggedWallet(){
    return new Proxy(wallet,{get(target,key){
     if(key==='authorize')return async(params:Parameters<KitMobileWallet['authorize']>[0])=>{
      walletLog('mwa.authorize.request',{cached:!!params.auth_token});
-     const result=await walletStep('mwa.authorize',()=>target.authorize(params));
+     const result=await walletStep('mwa.authorize',async()=>{try{return await target.authorize(params);}catch(error){throw normalizeNativeProtocolError(error,code=>new SolanaMobileWalletAdapterProtocolError(0,code,'Wallet authorization request failed.'));}});
      walletLog('mwa.authorize.response',{accounts:result.accounts.length,signInResult:!!result.sign_in_result});
      if(!result.accounts.length)throw new Error('No accounts returned by wallet.');
      return result;

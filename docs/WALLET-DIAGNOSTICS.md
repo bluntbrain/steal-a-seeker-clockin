@@ -13,7 +13,15 @@ Our purchase flow has three different actions:
 
 Confirmed gaps addressed: generic connection errors masked the actual failed phase; no detailed transport/auth/cache/API trace; payment did not explicitly reject an account change during reauthorization. Wallet UI also throws when an authorized wallet omits optional `sign_in_result`. We now fall back to `sign_messages` for the exact challenge only in that case, within the same MWA session. Declines and transport failures never trigger fallback. The server still verifies the signature, domain, nonce, expiry and wallet. No authentication bypass.
 
-**The cause of the user's specific Phantom round trip is not yet established. No USB device was available during this investigation. Automated backend tests do not prove physical Phantom integration.**
+## Device finding — September 14
+
+The device trace shows `/auth/challenge` returning HTTP 200, `mwa.sign-in.transport-ready`, then a cached authorization request failing immediately. Inside the session the error had native code `JSON_RPC_ERROR`; after the session ended it became protocol code `-1`. No fresh authorization request appeared.
+
+Installed MWA protocol 2.3.0's native request handler returns `invoke()` without awaiting it inside its try/catch. Asynchronous native rejections therefore reach the callback before conversion to `SolanaMobileWalletAdapterProtocolError`. Wallet UI's `instanceof` check cannot recognize them and skips its fresh-token retry. The app now normalizes only this native JSON-RPC error at the authorization boundary, using the SDK's own protocol-error class. Wallet UI can then perform its existing one-time retry without the cached token. No app data or purchases are erased. Other error codes, including declined signatures, retain their meaning.
+
+This establishes the missed retry, not the reason Phantom originally rejected that cached token. A fresh device approval is still needed to verify recovery. Automated backend tests do not prove physical Phantom integration.
+
+Further inspection also found protocol 2.3.0 already supplies a SIWS fallback for fresh `authorize` requests. The app fallback covers a missing result that reaches Wallet UI, including legacy cached reauthorization. Neither bypasses backend signature checks.
 
 ## Capture
 
@@ -47,6 +55,6 @@ Every step has a start ID, elapsed duration and matching success/failure; a wait
 
 ## Validation
 
-TypeScript and eight focused tests cover log privacy, bounded history, error propagation, SIWS fallback, cancellation, changed accounts and malformed signed messages. Physical handoff, sign-in, purchase and restore remain to be checked on the user's device.
+TypeScript and eleven focused tests cover log privacy, bounded history, error propagation, SIWS fallback, cancellation, changed accounts and malformed signed messages. The device has reached the MWA transport; successful fresh authorization, sign-in, purchase and restore remain to be checked after this fix.
 
 References: [MWA TypeScript API](https://docs.solanamobile.com/get-started/react-native/mobile-wallet-adapter), [MWA 2.0 optional sign-in and sign_messages fallback](https://solana-mobile.github.io/mobile-wallet-adapter/spec/spec.html).

@@ -15,11 +15,12 @@ if pid.returncode or not pid.stdout.strip():
 process = subprocess.Popen(command + ['logcat', '--pid=' + pid.stdout.split()[0], '-v', 'brief', 'ReactNativeJS:I', '*:S'], stdout=subprocess.PIPE, text=True)
 try:
     for line in process.stdout:
-        marker = '[SeekerWallet] '
+        marker = '[SeekerWallet]'
         if marker not in line:
             continue
         try:
-            entry = json.loads(line.split(marker, 1)[1].strip())
+            payload = line.split(marker, 1)[1]
+            entry = json.loads(payload[payload.index('{'):payload.rindex('}') + 1])
         except (ValueError, TypeError):
             continue
         if isinstance(entry, dict) and set(entry) == {'at', 'id', 'stage', 'details'}:
