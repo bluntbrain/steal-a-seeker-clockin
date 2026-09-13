@@ -30,3 +30,7 @@ design/visual-v2/economy/paywall/assets/
 # Private artifact build cache
 .submission-build/
 android/.kotlin/
+
+# Rebuilt native checkout preview
+design/checkout/preview.js
+design/checkout/assets/

@@ -1,3 +1,4 @@
+import type {PaymentCurrency,ProductPricing} from '../../shared/pricing';
 import type {AccountState,Order,ProductId,SignInChallenge} from '../../shared/commerce';
 import type {Progress} from '../progress/model';
 import {walletStep,walletLog} from '../wallet/diagnostics';
@@ -11,13 +12,15 @@ export async function api<T>(path:string,options:{token?:string;body?:unknown;me
 }
 export type Session={token:string;wallet:string;expiresAt:string};
 export const commerceApi={
+ pricing:(sku:ProductId)=>api<ProductPricing>(`/pricing/${sku}`),
+ cancel:(token:string,id:string)=>api<{ok:true}>(`/orders/${id}/cancel`,{token,body:{}}),
  challenge:(wallet:string)=>api<SignInChallenge>('/auth/challenge',{body:{wallet}}),
  signIn:(body:{id:string;wallet:string;signedMessage:string;signature:string})=>api<{token:string;expiresAt:string;account:AccountState}>('/auth/verify',{body}),
  me:(token:string)=>api<AccountState>('/me',{token}),
  orders:(token:string)=>api<Order[]>('/orders',{token}),
  order:(token:string,id:string)=>api<Order>(`/orders/${id}`,{token}),
  prepare:(token:string,id:string)=>api<Order>(`/orders/${id}/prepare`,{token,body:{}}),
- quote:(token:string,sku:ProductId,idempotencyKey:string)=>api<Order>('/orders',{token,body:{sku,idempotencyKey}}),
+ quote:(token:string,sku:ProductId,idempotencyKey:string,currency:PaymentCurrency='SKR')=>api<Order>('/orders',{token,body:{sku,idempotencyKey,currency}}),
  attach:(token:string,id:string,signature:string)=>api<Order>(`/orders/${id}/transaction`,{token,body:{signature}}),
  reconcile:(token:string,id:string)=>api<Order>(`/orders/${id}/reconcile`,{token,body:{}}),
  equip:(token:string,sku:ProductId)=>api<AccountState>('/me/equipment',{token,method:'PUT',body:{sku}}),

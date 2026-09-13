@@ -1,14 +1,15 @@
 import {z} from 'zod';
 import {getBase58Encoder} from '@solana/kit';
 import type {Order,PaymentAuthorization} from '../shared/commerce';
+export const SYSTEM_PROGRAM='11111111111111111111111111111111';
 export const TOKEN_PROGRAM='TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA';
 export const MEMO_PROGRAM='MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr';
 export const DEVNET_GENESIS='EtWTRABZaYq6iMfeYKouRu166VU2xqa1wcaWoxPkrZBG';
 export type Verification={state:'verified';instructionIndex:number;slot:number}|{state:'pending'|'invalid'|'needs_review';detail:string};
 export interface PaymentChain {verify(order:TransferBinding,signature:string):Promise<Verification>;find(reference:string,minContextSlot?:number):Promise<string[]>;ready():Promise<void>;lifetime():Promise<Omit<PaymentAuthorization,'id'>>;height(minContextSlot:number):Promise<number>}
 const tokenBalance=z.object({accountIndex:z.number().int(),mint:z.string(),owner:z.string().optional(),uiTokenAmount:z.object({amount:z.string().regex(/^\d+$/),decimals:z.number().int()})});
-const txSchema=z.object({slot:z.number().int().nonnegative(),blockTime:z.number().nullable(),meta:z.object({err:z.unknown().nullable(),preTokenBalances:z.array(tokenBalance),postTokenBalances:z.array(tokenBalance),loadedAddresses:z.object({writable:z.array(z.string()),readonly:z.array(z.string())}).optional()}),transaction:z.object({signatures:z.array(z.string()),message:z.object({header:z.object({numRequiredSignatures:z.number().int()}),accountKeys:z.array(z.string()),instructions:z.array(z.object({programIdIndex:z.number().int(),accounts:z.array(z.number().int()),data:z.string()}))})})});
-export type TransferBinding=Pick<Order,'wallet'|'source'|'mint'|'destination'|'recipient'|'tokenProgram'|'decimals'|'amount'|'reference'|'memo'|'createdAt'|'expiresAt'>;
+const txSchema=z.object({slot:z.number().int().nonnegative(),blockTime:z.number().nullable(),meta:z.object({err:z.unknown().nullable(),preTokenBalances:z.array(tokenBalance).default([]),postTokenBalances:z.array(tokenBalance).default([]),preBalances:z.array(z.number().int().nonnegative()).optional(),postBalances:z.array(z.number().int().nonnegative()).optional(),loadedAddresses:z.object({writable:z.array(z.string()),readonly:z.array(z.string())}).optional()}),transaction:z.object({signatures:z.array(z.string()),message:z.object({header:z.object({numRequiredSignatures:z.number().int()}),accountKeys:z.array(z.string()),instructions:z.array(z.object({programIdIndex:z.number().int(),accounts:z.array(z.number().int()),data:z.string()}))})})});
+export type TransferBinding=Pick<Order,'currency'|'wallet'|'source'|'mint'|'destination'|'recipient'|'tokenProgram'|'decimals'|'amount'|'reference'|'memo'|'createdAt'|'expiresAt'>;
 export function verifyPayment(order:TransferBinding,signature:string,value:unknown,checkQuoteWindow=true):Verification{
  if(value===null)return {state:'pending',detail:'Waiting for a finalized transaction.'};
  const parsed=txSchema.safeParse(value);if(!parsed.success)return {state:'pending',detail:'Finalized transaction data is incomplete; reconciliation must retry.'};
@@ -19,6 +20,23 @@ export function verifyPayment(order:TransferBinding,signature:string,value:unkno
  if(walletIndex<0||walletIndex>=message.header.numRequiredSignatures)return {state:'invalid',detail:'The buyer did not sign this transaction.'};
  const hasMemo=message.instructions.some(i=>{try{return keys[i.programIdIndex]===MEMO_PROGRAM&&Buffer.from(getBase58Encoder().encode(i.data)).toString('utf8')===order.memo;}catch{return false;}});
  if(!hasMemo)return {state:'invalid',detail:'Order memo is missing.'};
+ if(order.currency==='SOL'){
+  if(order.tokenProgram!==SYSTEM_PROGRAM||order.decimals!==9||order.source!==order.wallet||order.destination!==order.recipient||order.wallet===order.recipient)return {state:'invalid',detail:'Invalid native SOL payment binding.'};
+  for(let index=0;index<message.instructions.length;index++){
+   const i=message.instructions[index]!;if(keys[i.programIdIndex]!==SYSTEM_PROGRAM)continue;
+   let data:Uint8Array;try{data=new Uint8Array(getBase58Encoder().encode(i.data));}catch{continue;}
+   if(data.length!==12)continue;const view=new DataView(data.buffer,data.byteOffset,data.byteLength);
+   if(view.getUint32(0,true)!==2||view.getBigUint64(4,true)!==BigInt(order.amount))continue;
+   if(keys[i.accounts[0]!]!==order.wallet||keys[i.accounts[1]!]!==order.recipient||!i.accounts.slice(2).some(a=>keys[a]===order.reference))continue;
+   const recipientIndex=keys.indexOf(order.recipient),before=tx.meta.preBalances?.[recipientIndex],after=tx.meta.postBalances?.[recipientIndex];
+   if(before===undefined||after===undefined)return {state:'pending',detail:'Finalized SOL balances are missing.'};
+   if(!Number.isSafeInteger(before)||!Number.isSafeInteger(after))return {state:'needs_review',detail:'SOL balance exceeds verifier precision.'};
+   if(BigInt(after)-BigInt(before)<BigInt(order.amount))continue;
+   if(checkQuoteWindow&&(tx.blockTime===null||tx.blockTime*1000<new Date(order.createdAt).getTime()-30000||tx.blockTime*1000>new Date(order.expiresAt).getTime()))return {state:'needs_review',detail:'Payment found outside the quote window; review for fulfillment or refund.'};
+   return {state:'verified',instructionIndex:index,slot:tx.slot};
+  }
+  return {state:'invalid',detail:'No matching native SOL transfer for this order.'};
+ }
  for(let index=0;index<message.instructions.length;index++){
   const i=message.instructions[index]!;if(keys[i.programIdIndex]!==order.tokenProgram)continue;
   let data:Uint8Array;try{data=new Uint8Array(getBase58Encoder().encode(i.data));}catch{continue;}

@@ -12,3 +12,9 @@ test('resuming an approval compiles identical bytes, with only the buyer require
  const changed=paymentTransaction({...order,payment:{...order.payment!,blockhash:pub()}});assert.notDeepEqual(changed.messageBytes,first.messageBytes);
  assert.throws(()=>paymentTransaction({...order,payment:undefined}),/Prepare/);
 });
+
+test('native SOL payment compiles a System transfer with exact lamports and buyer signature',()=>{
+ const wallet=pub(),recipient=pub();const order:Order={id:'sol-fixture',wallet,sku:'campaign',status:'verifying',currency:'SOL',cluster:'solana:devnet',mint:'11111111111111111111111111111111',tokenProgram:'11111111111111111111111111111111',decimals:9,amount:'98800000',recipient,source:wallet,destination:recipient,reference:pub(),memo:'seeker-order:sol-fixture',createdAt:new Date().toISOString(),expiresAt:new Date(Date.now()+300000).toISOString(),signature:null,detail:null,payment:{id:'attempt',blockhash:pub(),lastValidBlockHeight:'250',contextSlot:'1000'}};
+ const tx=paymentTransaction(order);assert.deepEqual(Object.keys(tx.signatures),[wallet]);assert.deepEqual(tx.messageBytes,paymentTransaction(structuredClone(order)).messageBytes);
+ assert.notDeepEqual(tx.messageBytes,paymentTransaction({...order,amount:'98800001'}).messageBytes);
+});

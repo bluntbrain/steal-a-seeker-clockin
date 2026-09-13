@@ -403,3 +403,32 @@ test('abandoned campaign approvals release only after proven non-payment and a l
  assert.equal((await pool.query('SELECT state FROM return_reservations WHERE id=$1',[old])).rows[0].state,'released');
  const next=await commerce.createOrder(h.user.wallet,'campaign',randomUUID());await commerce.preparePayment(h.user.wallet,next.id);assert.notEqual((await pool.query('SELECT reservation_id FROM campaign_rebates WHERE wallet=$1',[h.user.wallet])).rows[0].reservation_id,old);
 });
+
+test('USD quotes bind method, reject currency replay, cancel only unprepared quotes, and fulfill native SOL',async()=>{
+ const {priceProduct}=await import('./pricing');
+ const rates={SKR:'0.0183675',SOL:'101.305',at:Date.now()},config={...service.config,usdPricing:true};
+ const priced=new CommerceService(pool,chain,config,{rates:async()=>rates}),api=await createApp(priced,ranked);
+ try{
+ const catalog=(await api.inject({method:'GET',url:'/catalog'})).json();assert.deepEqual(catalog.paymentCurrencies,['SKR','SOL']);assert.equal(catalog.products.find((p:any)=>p.id==='campaign').usdCents,1000);assert.equal(catalog.products.find((p:any)=>p.id==='campaign').price,undefined);
+ const user=await login(),key=randomUUID();
+ const first=await api.inject({method:'POST',url:'/orders',headers:user.headers,payload:{sku:'campaign',currency:'SKR',idempotencyKey:key}});assert.equal(first.statusCode,200,first.body);const skr=first.json<Order>();assert.equal(skr.amount,priceProduct('campaign','SKR',rates,6).amount);
+ const reused=await api.inject({method:'POST',url:'/orders',headers:user.headers,payload:{sku:'campaign',currency:'SOL',idempotencyKey:key}});assert.equal(reused.statusCode,409);
+ assert.equal((await api.inject({method:'POST',url:`/orders/${skr.id}/cancel`,headers:user.headers,payload:{}})).statusCode,200);
+ const sol=await priced.createOrder(user.wallet,'campaign',randomUUID(),'SOL');assert.equal(sol.currency,'SOL');assert.equal(sol.pricing!.usdCents>=1000,true);
+ const prepared=await priced.preparePayment(user.wallet,sol.id);await assert.rejects(priced.cancelQuote(user.wallet,sol.id),/already prepared/);
+ const sig=b58(randomBytes(64));const tx=nativeTx(prepared,sig);assert.equal(verifyPayment(prepared,sig,tx).state,'verified');
+ for(const change of [(v:any)=>{v.transaction.message.accountKeys[1]=pub();},(v:any)=>{v.transaction.message.accountKeys[2]=pub();},(v:any)=>{v.transaction.message.header.numRequiredSignatures=0;},(v:any)=>{v.meta.postBalances[1]=0;},(v:any)=>{v.transaction.message.instructions[0].data=b58(Buffer.alloc(12));},(v:any)=>{v.transaction.message.instructions.pop();}]){const bad=structuredClone(tx);change(bad);assert.equal(verifyPayment(prepared,sig,bad).state,'invalid');}
+ transactions.set(sig,tx);references.set(sol.reference,[sig]);await priced.reconcile(sol.id);assert.equal((await priced.getOrder(user.wallet,sol.id)).status,'fulfilled');assert.ok((await priced.me(user.wallet)).entitlements.includes('campaign'));
+ await assert.rejects(priced.createOrder(user.wallet,'campaign',randomUUID(),'SKR'),/already own/);
+ }finally{await api.close();}
+});
+function nativeTx(o:Order,sig:string){const data=Buffer.alloc(12);data.writeUInt32LE(2);data.writeBigUInt64LE(BigInt(o.amount),4);return {slot:42,blockTime:Math.floor(Date.now()/1000),transaction:{signatures:[sig],message:{header:{numRequiredSignatures:1},accountKeys:[o.wallet,o.recipient,o.reference,'11111111111111111111111111111111',MEMO_PROGRAM],instructions:[{programIdIndex:3,accounts:[0,1,2],data:b58(data)},{programIdIndex:4,accounts:[],data:b58(Buffer.from(o.memo))}]}},meta:{err:null,preBalances:[1000000000,0,0,0,0],postBalances:[1000000000-Number(o.amount)-5000,Number(o.amount),0,0,0]}};}
+
+test('SOL campaign reserves TEST SKR reward and preserves quote across a restart',async()=>{
+ const config={...service.config,campaignOffer:true,usdPricing:true},h=await returnHarness(1000_000_000n,100_000_000n,{mint:config.mint,treasury:config.recipient,source:config.destination,decimals:config.decimals});
+ const feed={rates:async()=>({SKR:'0.02',SOL:'100',at:Date.now()})};const priced=new CommerceService(pool,chain,config,feed);priced.campaignReturns=h.service;
+ const user=await login(),sol=await priced.createOrder(user.wallet,'campaign',randomUUID(),'SOL');await priced.preparePayment(user.wallet,sol.id);
+ const reserve=(await pool.query('SELECT r.* FROM campaign_rebates c JOIN return_reservations r ON r.id=c.reservation_id WHERE c.wallet=$1',[user.wallet])).rows[0];assert.equal(reserve.mint,config.mint);assert.equal(reserve.amount,'25000000');
+ const restarted=new CommerceService(pool,chain,config,feed),restored=await restarted.getOrder(user.wallet,sol.id);assert.equal(restored.currency,'SOL');assert.deepEqual(restored.pricing,sol.pricing);
+ const sig=b58(randomBytes(64));transactions.set(sig,nativeTx(restored,sig));await priced.attach(user.wallet,sol.id,sig);assert.equal((await priced.getOrder(user.wallet,sol.id)).status,'fulfilled');
+});
