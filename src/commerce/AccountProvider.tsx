@@ -1,6 +1,7 @@
 import React,{useCallback,useEffect,useRef,useState,type ReactNode} from 'react';
 import * as SecureStore from 'expo-secure-store';
-import {useMobileWallet} from '@wallet-ui/react-native-kit';
+import {useLoggedWallet as useMobileWallet} from '../wallet/useLoggedWallet';
+import {walletLog,walletStep} from '../wallet/diagnostics';
 import {fromUint8Array} from 'js-base64';
 import type {AccountState} from '../../shared/commerce';
 import {accountKey,sessionKey,readAccount} from './account-model';
@@ -48,7 +49,9 @@ export default function AccountProvider({children}:{children:ReactNode}){
     catch(e){if(!(e instanceof ApiError&&e.status===401))throw e;await SecureStore.deleteItemAsync(sessionKey(selected.address));}
    }
    if(!interactive)throw new Error('Sign in to sync this wallet. Your local progress is saved.');
+   walletLog('account.sign-in.required');
    const challenge=await commerceApi.challenge(selected.address),signed=await mobile.signIn(challenge.payload);
+   walletLog('account.sign-in.signature-returned',{bytes:signed.signature.length});
    if(signed.account.address!==selected.address||current.current!==selected.address)throw new Error('Wallet changed. Sign in again.');
    const result=await commerceApi.signIn({id:challenge.id,wallet:selected.address,signedMessage:fromUint8Array(signed.signedMessage),signature:fromUint8Array(signed.signature)});
    if(result.account.wallet!==selected.address)throw new Error('Account mismatch.');
@@ -56,7 +59,7 @@ export default function AccountProvider({children}:{children:ReactNode}){
    await SecureStore.setItemAsync(sessionKey(s.wallet),JSON.stringify(s));await update(result.account);return s;
   })();
   inflight.current={wallet:selected.address,promise};
-  try{return await promise;}finally{if(inflight.current?.promise===promise)inflight.current=undefined;}
+  try{return await walletStep('account.session',()=>promise);}finally{if(inflight.current?.promise===promise)inflight.current=undefined;}
  },[mobile,update]);
  const refresh=useCallback(async(interactive=true)=>{const s=await session(interactive),a=await commerceApi.me(s.token);if(a.wallet!==s.wallet)throw new Error('Account mismatch.');await update(a);return a;},[session,update]);
  // Account state from a previous wallet is never exposed during a render/effect gap.

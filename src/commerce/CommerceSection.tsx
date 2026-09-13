@@ -1,7 +1,8 @@
 import React,{useEffect,useRef,useState} from 'react';
-import {Linking,Pressable,Text,View,useWindowDimensions} from 'react-native';
+import {Linking,Share,Pressable,Text,View,useWindowDimensions} from 'react-native';
 import * as SecureStore from 'expo-secure-store';
-import {useMobileWallet} from '@wallet-ui/react-native-kit';
+import {useLoggedWallet as useMobileWallet} from '../wallet/useLoggedWallet';
+import {walletFailure,walletReport} from '../wallet/diagnostics';
 import {getBase58Decoder} from '@solana/kit';
 import {PRODUCTS,tokenAmount,type Order,type ProductId} from '../../shared/commerce';
 import {commerceApi} from './client';
@@ -15,7 +16,7 @@ export default function CommerceSection(){
  const wallet=useMobileWallet(),identity=useAccount(),{account,session,update}=identity,[order,setOrder]=useState<Order>(),[busy,setBusy]=useState(false),[message,setMessage]=useState('');const current=useRef(wallet.account?.address);current.current=wallet.account?.address;const alive=useRef(true),busyLock=useRef(false);
  useEffect(()=>{alive.current=true;return()=>{alive.current=false;};},[]);
  useEffect(()=>{setOrder(undefined);setMessage('');},[wallet.account?.address]);
- async function action(run:()=>Promise<void>){if(busyLock.current)return;busyLock.current=true;setBusy(true);setMessage('');try{await run();}catch(e){if(alive.current)setMessage(e instanceof Error?e.message:'Could not finish. Restore purchases before paying again.');}finally{busyLock.current=false;if(alive.current)setBusy(false);}}
+ async function action(run:()=>Promise<void>){if(busyLock.current)return;busyLock.current=true;setBusy(true);setMessage('');try{await run();}catch(e){walletFailure('commerce.action',e);if(alive.current)setMessage(e instanceof Error?e.message:'Could not finish. Restore purchases before paying again.');}finally{busyLock.current=false;if(alive.current)setBusy(false);}}
  async function restore(){const s=await session();const pending=(await commerceApi.orders(s.token)).filter(o=>o.status==='quoted'||o.status==='verifying');for(const o of pending.slice(0,5)){await commerceApi.reconcile(s.token,o.id);}const state=await commerceApi.me(s.token);if(current.current===s.wallet){await update(state);const saved=await SecureStore.getItemAsync(pendingKey(s.wallet));if(saved){const restored=await commerceApi.order(s.token,saved);if(current.current===s.wallet)setOrder(restored.status==='fulfilled'?undefined:restored);}setMessage('Purchases restored for this wallet.');}}
  async function quote(sku:ProductId){const s=await session();const prior=await SecureStore.getItemAsync(pendingKey(s.wallet));if(prior){const previous=await commerceApi.reconcile(s.token,prior);if(previous.status==='verifying'||previous.status==='needs_review'){setOrder(previous);throw new Error('An earlier payment is still being checked. Do not pay again.');}}
   const next=await commerceApi.quote(s.token,sku,crypto.randomUUID());await SecureStore.setItemAsync(pendingKey(s.wallet),next.id);if(current.current===s.wallet){setOrder(next);setMessage('Review your purchase, then approve it in Phantom.');}}
@@ -48,7 +49,7 @@ export default function CommerceSection(){
  {!!message&&<Text accessibilityLiveRegion="polite" numberOfLines={3} style={{color:'#D8EADB',fontSize:12,lineHeight:17}}>{message}</Text>}
  {button(mainLabel,primary,!!owned&&(product.kind==='access'||equipped))}
  <Text style={{color:'#8FAEA3',fontSize:10,lineHeight:14,textAlign:'center'}}>Test tokens only. Phantom shows the devnet SOL fee.</Text>
- <View style={{flexDirection:'row',justifyContent:'center',gap:18}}><Pressable disabled={busy} accessibilityRole="button" onPress={()=>action(restore)} style={{minHeight:44,justifyContent:'center'}}><Text style={{color:'#BED7CA',fontSize:12}}>Restore purchases</Text></Pressable>
+ <View style={{flexDirection:'row',justifyContent:'center',gap:18}}><Pressable disabled={busy} accessibilityRole="button" onLongPress={()=>void Share.share({message:walletReport()})} onPress={()=>action(restore)} style={{minHeight:44,justifyContent:'center'}}><Text style={{color:'#BED7CA',fontSize:12}}>Restore purchases</Text></Pressable>
  {order?.signature&&<Pressable accessibilityRole="link" onPress={()=>void Linking.openURL(transactionLink(order.signature!))} style={{minHeight:44,justifyContent:'center'}}><Text style={{color:'#BED7CA',fontSize:12}}>Receipt ↗</Text></Pressable>}
  {order&&!pending&&<Pressable disabled={busy} accessibilityRole="button" onPress={()=>{setOrder(undefined);setMessage('');}} style={{minHeight:44,justifyContent:'center'}}><Text style={{color:'#BED7CA',fontSize:12}}>Back</Text></Pressable>}</View>
  </View>;

@@ -1,12 +1,13 @@
 import type {AccountState,Order,ProductId,SignInChallenge} from '../../shared/commerce';
 import type {Progress} from '../progress/model';
+import {walletStep,walletLog} from '../wallet/diagnostics';
 import {Platform} from 'react-native';
 export class ApiError extends Error{constructor(public status:number,message:string){super(message);}}
 export const API_URL=process.env.EXPO_PUBLIC_API_URL||(Platform.OS==='web'?'/api':undefined);
 export async function api<T>(path:string,options:{token?:string;body?:unknown;method?:string}={}):Promise<T>{
  if(!API_URL)throw new ApiError(503,'The purchase service is not configured in this test build.');
  const controller=new AbortController(),timeout=setTimeout(()=>controller.abort(),15000);
- try{const response=await fetch(`${API_URL.replace(/\/$/,'')}${path}`,{method:options.method||(options.body?'POST':'GET'),headers:{'Content-Type':'application/json',...(options.token?{Authorization:`Bearer ${options.token}`}:{})},body:options.body?JSON.stringify(options.body):undefined,signal:controller.signal});const result=await response.json();if(!response.ok)throw new ApiError(response.status,result.error||'Service unavailable.');return result as T;}finally{clearTimeout(timeout);}
+ try{return await walletStep(`api.${path.replace(/\/orders\/[^/]+/, '/orders/:id')}`,async()=>{const response=await fetch(`${API_URL.replace(/\/$/,'')}${path}`,{method:options.method||(options.body?'POST':'GET'),headers:{'Content-Type':'application/json',...(options.token?{Authorization:`Bearer ${options.token}`}:{})},body:options.body?JSON.stringify(options.body):undefined,signal:controller.signal});walletLog('api.response',{status:response.status});const result=await response.json();if(!response.ok)throw new ApiError(response.status,result.error||'Service unavailable.');return result as T;});}finally{clearTimeout(timeout);}
 }
 export type Session={token:string;wallet:string;expiresAt:string};
 export const commerceApi={

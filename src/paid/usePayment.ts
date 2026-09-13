@@ -1,4 +1,4 @@
-import {useMobileWallet} from '@wallet-ui/react-native-kit';
+import {useLoggedWallet as useMobileWallet} from '../wallet/useLoggedWallet';
 import {getBase58Decoder} from '@solana/kit';
 import type {PaymentQuote} from '../../shared/commerce';
 import {paymentTransaction} from '../commerce/payment';
