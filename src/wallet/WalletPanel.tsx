@@ -1,42 +1,22 @@
 import React,{useEffect,useRef,useState} from 'react';
-import {Linking,Modal,Pressable,ScrollView,StyleSheet,Text,View} from 'react-native';
+import {Modal,Pressable,StyleSheet,Text,View,useWindowDimensions} from 'react-native';
+import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {useMobileWallet} from '@wallet-ui/react-native-kit';
-import {signature as parseSignature} from '@solana/kit';
-import {getAddMemoInstruction} from '@solana-program/memo';
-import {transactionLink} from './config';
 import CommerceSection from '../commerce/CommerceSection';
 export default function WalletPanel({visible,onClose}:{visible:boolean;onClose:()=>void}){
- const wallet=useMobileWallet();const [busy,setBusy]=useState(false),[message,setMessage]=useState(''),[balance,setBalance]=useState<string>(),[receipt,setReceipt]=useState<string>();const mounted=useRef(true),accountRef=useRef(wallet.account?.address);accountRef.current=wallet.account?.address;
+ const wallet=useMobileWallet(),insets=useSafeAreaInsets(),{height}=useWindowDimensions();
+ const [busy,setBusy]=useState(false),[message,setMessage]=useState(''),[balance,setBalance]=useState<string>();
+ const mounted=useRef(true),lock=useRef(false);
  useEffect(()=>{mounted.current=true;return()=>{mounted.current=false;};},[]);
- useEffect(()=>{setBalance(undefined);setReceipt(undefined);setMessage('');let cancelled=false;const address=wallet.account?.address;if(address&&visible)wallet.client.rpc.getBalance(address).send().then(r=>{if(!cancelled)setBalance((Number(r.value)/1e9).toFixed(5));}).catch(()=>{if(!cancelled)setMessage('Could not read devnet balance. Check your connection.');});return()=>{cancelled=true;};},[wallet.account?.address,visible]);
- async function act(action:()=>Promise<void>){if(busy)return;setBusy(true);setMessage('');try{await action();}catch(e){if(mounted.current)setMessage(e instanceof Error?e.message:'The wallet request did not finish. You can try again.');}finally{if(mounted.current)setBusy(false);}}
- async function sendTest(){
-  const address=wallet.account?.address;if(!address)throw new Error('Connect your wallet first.');
-  setMessage('Approve the devnet transaction in your wallet.');
-  const tx=await wallet.sendTransactions([getAddMemoInstruction({memo:'Steal a Seeker: devnet wallet connection test'})]);
-  if(!mounted.current||accountRef.current!==address)return;
-  setReceipt(tx);setMessage('Submitted on devnet. Waiting for finality…');
-  for(let n=0;n<30;n++){
-   const response=await wallet.client.rpc.getSignatureStatuses([parseSignature(tx)]).send();const status=response.value[0];
-   if(!mounted.current||accountRef.current!==address)return;
-   if(status?.err){setMessage('The test transaction failed on chain. Check its receipt.');return;}
-   if(status?.confirmationStatus==='finalized'){setMessage('Devnet transaction finalized. This was a connection test, not a purchase.');return;}
-   await new Promise(resolve=>setTimeout(resolve,1200));
-  }
-  setMessage('Still pending. Check the receipt before submitting another transaction.');
- }
- return <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}><View style={styles.backdrop}><ScrollView style={styles.card} contentContainerStyle={{padding:24,gap:16}}>
-  <Text style={styles.tag}>SOLANA DEVNET</Text><Text style={styles.title}>Your wallet</Text><Text style={styles.body}>Connect Phantom on this Android device. Testnet Mode must be enabled in Phantom. Use devnet SOL for fees and TEST SKR for shop purchases. These test tokens have no monetary value.</Text>
-  <View style={styles.account}><Text selectable style={styles.address}>{wallet.account?.address||'No wallet connected'}</Text><Text style={styles.body}>{balance===undefined?'':`${balance} devnet SOL`}</Text></View>
-  {!wallet.account?<Pressable accessibilityRole="button" disabled={busy} style={styles.primary} onPress={()=>act(async()=>{await wallet.connect();setMessage('Wallet connected on devnet.');})}><Text style={styles.primaryText}>{busy?'OPENING WALLET…':'CONNECT PHANTOM / WALLET'}</Text></Pressable>:<>
-   <Text style={styles.body}>Developer test: sign a small memo transaction. It costs a devnet network fee and does not buy campaign access.</Text>
-   <Pressable accessibilityRole="button" disabled={busy} style={styles.primary} onPress={()=>act(sendTest)}><Text style={styles.primaryText}>{busy?'WAITING…':'SEND DEVNET TEST'}</Text></Pressable>
-   <Pressable accessibilityRole="button" disabled={busy} onPress={()=>act(async()=>{await wallet.disconnect();setMessage('Disconnected.');})}><Text style={styles.link}>Disconnect wallet</Text></Pressable>
-  </>}
-  {!!message&&<Text accessibilityLiveRegion="polite" style={styles.body}>{message}</Text>}
-  {!!receipt&&<Pressable accessibilityRole="link" onPress={()=>Linking.openURL(transactionLink(receipt))}><Text style={styles.link}>View devnet transaction ↗</Text></Pressable>}
-  {wallet.account&&<CommerceSection/>}
-  <Pressable accessibilityRole="button" onPress={onClose} style={styles.close}><Text style={styles.link}>Back to game</Text></Pressable>
- </ScrollView></View></Modal>;
+ useEffect(()=>{setBalance(undefined);setMessage('');let cancelled=false;const address=wallet.account?.address;if(address&&visible)wallet.client.rpc.getBalance(address).send().then(r=>{if(!cancelled)setBalance((Number(r.value)/1e9).toFixed(3));}).catch(()=>{if(!cancelled)setBalance('Unavailable');});return()=>{cancelled=true;};},[wallet.account?.address,visible]);
+ async function act(action:()=>Promise<unknown>){if(lock.current)return;lock.current=true;setBusy(true);setMessage('');try{await action();}catch{if(mounted.current)setMessage('Wallet request cancelled or unavailable. Try again.');}finally{lock.current=false;if(mounted.current)setBusy(false);}}
+ const address=wallet.account?.address;
+ return <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}><View style={s.backdrop}>
+ <Pressable style={StyleSheet.absoluteFill} accessibilityRole="button" accessibilityLabel="Close wallet" onPress={onClose}/>
+ <View testID="wallet-sheet" accessibilityViewIsModal style={[s.card,{paddingBottom:Math.max(insets.bottom,12),paddingTop:height<700?10:16}]}>
+ <View style={s.handle}/><View style={s.header}><Text accessibilityRole="header" style={s.title}>{address?'Your wallet':'Connect your wallet'}</Text><Pressable accessibilityRole="button" accessibilityLabel="Close wallet" onPress={onClose} style={s.close}><Text style={s.closeText}>✕</Text></Pressable></View>
+ {address?<><View style={s.account}><View style={{flex:1,gap:3}}><Text selectable accessibilityLabel={`Connected wallet ${address}`} style={s.address}>{address.slice(0,4)}…{address.slice(-4)} <Text style={s.badge}> · DEVNET</Text></Text><Text style={s.caption}>{balance===undefined?'Checking fee balance…':balance==='Unavailable'?'Fee balance unavailable':`${balance} SOL for fees`}</Text></View><Pressable accessibilityRole="button" accessibilityLabel="Disconnect wallet" disabled={busy} onPress={()=>act(()=>wallet.disconnect())} style={s.disconnect}><Text style={s.caption}>{busy?'…':'Disconnect'}</Text></Pressable></View><CommerceSection/></>:<View style={{gap:14,paddingVertical:10}}><Text style={s.body}>Use Phantom on Solana Devnet. You’ll approve purchases in your wallet.</Text><Pressable accessibilityRole="button" disabled={busy} style={s.primary} onPress={()=>act(()=>wallet.connect())}><Text style={s.primaryText}>{busy?'Opening wallet…':'Connect wallet'}</Text></Pressable><Text style={s.caption}>TEST SKR and devnet SOL have no real value.</Text></View>}
+ {!!message&&<Text accessibilityLiveRegion="polite" style={s.error}>{message}</Text>}
+ </View></View></Modal>;
 }
-const styles=StyleSheet.create({backdrop:{flex:1,backgroundColor:'#081210e8',justifyContent:'center',padding:20},card:{flexGrow:0,maxHeight:'90%',backgroundColor:'#152724',borderRadius:24,borderWidth:1,borderColor:'#3c6257'},tag:{color:'#a8ecd7',fontSize:11,letterSpacing:2,fontWeight:'700'},title:{color:'#edf1e6',fontSize:30,fontWeight:'800'},body:{color:'#bacbc2',fontSize:14,lineHeight:22},account:{padding:14,backgroundColor:'#0e1d1b',borderRadius:12,gap:8},address:{color:'#d4eee2',fontSize:12,lineHeight:20},primary:{backgroundColor:'#bfe5d7',padding:17,borderRadius:12},primaryText:{color:'#152d24',textAlign:'center',fontSize:12,fontWeight:'800'},link:{color:'#b9e8d5',fontSize:14,textAlign:'center'},close:{padding:14}});
+const s=StyleSheet.create({backdrop:{flex:1,backgroundColor:'#050B10B8',justifyContent:'flex-end',alignItems:'center'},card:{width:'100%',maxWidth:460,backgroundColor:'#131D20',borderTopLeftRadius:28,borderTopRightRadius:28,paddingHorizontal:20,borderWidth:1,borderColor:'#35494B',gap:10},handle:{alignSelf:'center',width:34,height:3,borderRadius:2,backgroundColor:'#57716D'},header:{flexDirection:'row',alignItems:'center',justifyContent:'space-between'},title:{color:'#F0F6EC',fontSize:24,fontWeight:'800',letterSpacing:-.6},close:{width:44,height:44,alignItems:'center',justifyContent:'center'},closeText:{color:'#BFD6CE',fontSize:19},account:{flexDirection:'row',alignItems:'center',padding:12,borderRadius:14,backgroundColor:'#0B1417'},address:{color:'#E0F0E7',fontSize:14,fontWeight:'700'},badge:{fontSize:9,color:'#9BDDC4',letterSpacing:1},caption:{color:'#9FB9B2',fontSize:11,lineHeight:16},disconnect:{minHeight:44,paddingLeft:14,justifyContent:'center'},body:{color:'#BFD0C9',fontSize:14,lineHeight:21},primary:{minHeight:50,justifyContent:'center',backgroundColor:'#C4F7DC',borderRadius:15,padding:12},primaryText:{color:'#17352B',textAlign:'center',fontSize:14,fontWeight:'800'},error:{color:'#FFD0B1',fontSize:12,lineHeight:17,paddingBottom:8}});
