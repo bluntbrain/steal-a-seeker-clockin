@@ -25,3 +25,7 @@ The normal package previously used a debug signature. Android will refuse an in-
 An APK manifest records the source HEAD plus working-tree paths. For a final submission, commit the reviewed source and rebuild so the artifact corresponds to a clean source revision. ARMv7 and x86 are not included in these artifacts.
 
 Physical checks: install; launch without Metro; open missions; move with the right thumb and tap powers with the left; collect a phone; listen to alarm/decoy/escape; pause; background/foreground; relaunch and verify progress/settings; play all districts; perform a 15-minute thermal/performance run; then test Phantom devnet sign-in, cancellation, approved transfer, restore and verified rank against the deployed service. Record actual hardware and APK SHA-256. An emulator cannot substitute for these observations.
+
+## Approved launcher icon
+
+The courier chase artwork is the selected app icon. Expo references `assets/app-icon.png` and the padded `assets/app-icon-adaptive.png`. Native density and adaptive resources are checked in. Run `npm run icons:build` after replacing the approved source `assets/icon-concepts/05-courier-chase.png` or running Expo prebuild. The export preserves the composition inside Android’s adaptive viewport to avoid zooming into and clipping the phone.

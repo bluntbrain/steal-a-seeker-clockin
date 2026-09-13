@@ -3,11 +3,16 @@
     "name": "Steal a Seeker",
     "slug": "steal-a-seeker-mvp",
     "version": "0.3.0",
+    "icon": "./assets/app-icon.png",
     "orientation": "portrait",
     "userInterfaceStyle": "dark",
     "newArchEnabled": true,
     "android": {
-      "package": "com.krane.stealaseeker.mvp"
+      "package": "com.krane.stealaseeker.mvp",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/app-icon-adaptive.png",
+        "backgroundColor": "#08A899"
+      }
     },
     "web": {
       "bundler": "metro",

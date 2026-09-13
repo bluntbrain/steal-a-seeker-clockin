@@ -67,4 +67,4 @@ The local backend suite passes 53 tests. Provisioning fixes put SPL Token author
 
 Four additional checks passed after controlled redeploy `2e94b698-a6c2-4c56-9880-c620238499ee`: the old session and a fresh login restore the same purchases, 12 wins, outfit/progress, rank and settled return. Buyer balance remains exactly 105 TEST SKR (200 funded − 100 campaign − 20 outfit + 25 rebate), with no duplicate payout. This restart was after settlement, not during broadcast. Evidence: `verification/deployed-api-qa-restore.json`.
 
-Connected Android APK: `releases/steal-a-seeker-devnet.apk`, SHA-256 `5bd2616e04d1b43d7cdc7c1459ee0f9a3855207023ca6e86355e7568785f2e31`. Its distribution signature was verified and the live HTTPS API URL was confirmed inside the Android bundle. Installation/physical-wallet QA is still separate.
+Connected Android APK (rebuilt with the approved courier chase icon): `releases/steal-a-seeker-devnet.apk`, SHA-256 `77116425bce25a774c39852b63bddb33f1323ff6e3755d18c70f487fd65a86da`. Its distribution signature was verified and the live HTTPS API URL was confirmed inside the Android bundle. Installation/physical-wallet QA is still separate.

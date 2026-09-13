@@ -17,7 +17,8 @@
     "rules:generate": "tsx scripts/rules-manifest.ts",
     "rules:check": "tsx scripts/rules-manifest.ts --check",
     "build:judge": "node scripts/build-release.cjs judge",
-    "signing:init": "node scripts/create-signing.cjs"
+    "signing:init": "node scripts/create-signing.cjs",
+    "icons:build": "node scripts/build-app-icons.cjs"
   },
   "dependencies": {
     "@fastify/rate-limit": "^11.2.0",
