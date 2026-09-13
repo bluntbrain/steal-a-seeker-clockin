@@ -5,7 +5,8 @@ import {useMobileWallet} from '@wallet-ui/react-native-kit';
 import {walletLog,walletStep} from './diagnostics';
 import * as SecureStore from 'expo-secure-store';
 import {APP_IDENTITY,DEVNET} from './config';
-const key='seeker.mwa.devnet.v1';
+// Authorization is scoped to the app identity. Retain all purchase/progress caches.
+const key=`seeker.mwa.devnet.v2.${new URL(APP_IDENTITY.uri).hostname.replace(/[^a-zA-Z0-9._-]/g,'_')}`;
 const cache:WalletAuthorizationCache={
  async get(){return walletStep('cache.read',async()=>{const value=await SecureStore.getItemAsync(key);walletLog('cache.restored',{cached:!!value});if(!value)return undefined;try{return JSON.parse(value);}catch{walletLog('cache.invalid');await SecureStore.deleteItemAsync(key);return undefined;}});},
  async set(value){return walletStep('cache.write',async()=>{if(value)await SecureStore.setItemAsync(key,JSON.stringify(value));else await SecureStore.deleteItemAsync(key);});},

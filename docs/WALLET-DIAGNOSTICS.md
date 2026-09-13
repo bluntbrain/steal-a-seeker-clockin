@@ -58,3 +58,17 @@ Every step has a start ID, elapsed duration and matching success/failure; a wait
 TypeScript and eleven focused tests cover log privacy, bounded history, error propagation, SIWS fallback, cancellation, changed accounts and malformed signed messages. The device has reached the MWA transport; successful fresh authorization, sign-in, purchase and restore remain to be checked after this fix.
 
 References: [MWA TypeScript API](https://docs.solanamobile.com/get-started/react-native/mobile-wallet-adapter), [MWA 2.0 optional sign-in and sign_messages fallback](https://solana-mobile.github.io/mobile-wallet-adapter/spec/spec.html).
+
+## Signature decoding finding — September 14
+
+The device confirmed fresh authorization succeeds and returns `sign_in_result`. The next failure was HTTP 401 at `/auth/verify`, with diagnostics showing an 88-byte signature. MWA returns base64 strings; Wallet UI 4.3.0's `convertSignInResult` uses `stringToUint8Array`, which UTF-8 encodes those strings. An encoded 64-byte Ed25519 signature becomes 88 ASCII bytes.
+
+The app now captures the original authorization response and explicitly base64-decodes the signature and signed message. It checks the returned address and 64-byte signature length. Backend verification is unchanged. New tests use real Ed25519 signatures and the same SIWS verifier as the server; the old conversion fails and the corrected conversion succeeds. Tampered signatures and changed nonces still fail.
+
+## Branded identity domain
+
+Requested identity: `https://stealaseeker.bluntbrain.com`. Railway custom domain ID `5fa8140a-168e-4838-9bb5-4e5673fd9c63`, target port 8790 on the existing API. DNS CNAME `stealaseeker` → `hexu02ke.up.railway.app`. Set native `EXPO_PUBLIC_APP_IDENTITY_URI` and server `APP_IDENTITY_URI` together after DNS/HTTPS verification. Clear only the old MWA authorization on identity change; keep purchase/progress data. API traffic can retain the working Railway endpoint independently of the branded identity.
+
+Domain activation verified: CNAME and TXT ownership records resolve; HTTPS `/health` and `/app-icon.png` return 200. The deployed challenge now returns `stealaseeker.bluntbrain.com` and `https://stealaseeker.bluntbrain.com`. A fresh ephemeral test wallet signed that live challenge; decoding the base64 response through the app helper produced a 64-byte signature, `/auth/verify` returned 200, and the test session was logged out. This is an API/encoding check, not a claim of a successful physical Phantom approval.
+
+The matching APK (SHA256 `f6daba200b7017fcfcd3baa4a04aa38369433dfbc12070245d2f92c7118445ce`) was installed with `adb install -r` on Realme RMX5033 and launched. Client checks: 97 tests pass. Server checks: 53 tests pass. Identity-scoped authorization cache requests a new connection without deleting progress, purchases, or the wallet's keys.

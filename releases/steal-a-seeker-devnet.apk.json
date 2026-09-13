@@ -3,11 +3,11 @@
   "publicConfig": {
     "apiUrl": "https://seeker-api-production-41b3.up.railway.app",
     "cluster": "solana:devnet",
-    "identityUri": "https://github.com/bluntbrain"
+    "identityUri": "https://stealaseeker.bluntbrain.com"
   },
   "sourceFiles": {
     "src/NativeRecoveryProbe.tsx": "862176b1348602c8d998c50b84e26ef1c2ebe8397c4a5ab73448248404c8a09e",
-    "src/wallet/protocolError.ts": "335767c676c4e494a9d7b9e6ce74cefffabf6e8bf13e8fd0c9c9ef0d2c570956",
+    "src/wallet/decodeSignIn.ts": "e2a5607d52484256d995c1d200b39690db1fc2986b1c6417bb227e01bdaf13a9",
     "App.tsx": "c2df425b34c9b025ce47a8e82a2511d8f7164f4d96a957730fa4b50d3522dfec",
     "android/app/build.gradle": "03293c3c6a14ad0d7aa435ed0b59808d020ac1fd89ecf6cb5639782c0464fe54",
     "android/app/src/debug/AndroidManifest.xml": "fb1795032c764d975376e1612ab7022058eca2268a45efbe731a47a5d3ac0f60",
@@ -144,24 +144,28 @@
     "src/three/model-export.web.ts": "1b8ddcf1fc74c6927d18b6f10dc504ed9a6c2bfe07f8fddf7e4b10b123e0041e",
     "src/wallet/WalletPanel.tsx": "d9aa98f502dc9a0d351427395c9d20c7a3daf71b76f644c9412aafa67ba075fb",
     "src/wallet/WalletPanel.web.tsx": "fd097205ebf7e2b533cc74e07bce356f19e8a9463206ff54ac479e360ad85408",
-    "src/wallet/WalletProvider.tsx": "8e5759ce86fb1581aa0dcd75eee3b2ddc9cbe10702b1048264c3d5a32b5d23e9",
+    "src/wallet/WalletProvider.tsx": "03948cb3a105cd726a0970f788f46f97f9c877e3a9858df91f888aff5fad6571",
     "src/wallet/WalletProvider.web.tsx": "a21e00479a01d320a544217a6cd7ba6ed81b6da08e6e2f6a1a3868d5d4591a21",
-    "src/wallet/config.ts": "60ad40c38086ef01f4072dd4676f67d55cbcd4613e1bdda9788967f268976a3b",
+    "src/wallet/config.ts": "792800f74b7a9ff1fac69f8b43c174862594d74f3f30ec9042ec787bc49f190c",
     "src/wallet/diagnostics.ts": "48115d8c398bf9de8ca403fbe4e9481e7c03d002183016add7f1ac7051148455",
     "src/wallet/polyfill.ts": "35466a490e093275a91dca52a50fece1c72587d49b12c5d95509081ca63becca",
     "src/wallet/polyfill.web.ts": "cecf35f8e0b9c3918b711897abe02b25a4c0895995a8e5f3eadba617df5b157f",
+    "src/wallet/protocolError.ts": "335767c676c4e494a9d7b9e6ce74cefffabf6e8bf13e8fd0c9c9ef0d2c570956",
     "src/wallet/signInFallback.ts": "d483b760a4393f01fba79cd0db0735489303814c49bb08fe3a4545d095fe2944",
-    "src/wallet/useLoggedWallet.ts": "6e6635cb2cbbac101c136266fc2e8a608d9efd4c493b3245049135311e715596"
+    "src/wallet/useLoggedWallet.ts": "b683f95b0e1c9586250520590ae470e1028fc1ff4655584a7bdcee5c32a2e34c"
   },
-  "sha256": "7bc4e29e821965bd291a7c3859a3ac9df84a7ab32733cbfe4b7b23c260e6c156",
-  "bytes": 90522773,
-  "builtAt": "2026-09-13T20:02:01.217Z",
-  "head": "b2d0b9b7b1a4506101edd180d8cba2835d032880",
+  "sha256": "f6daba200b7017fcfcd3baa4a04aa38369433dfbc12070245d2f92c7118445ce",
+  "bytes": 90524113,
+  "builtAt": "2026-09-13T20:11:09.011Z",
+  "head": "07271065e62bdd4dd2778972ff6e435b5e669b87",
   "workingTree": [
     "M App.tsx",
     " M docs/WALLET-DIAGNOSTICS.md",
-    " M scripts/wallet-logcat.py",
-    " M src/wallet/diagnostics.ts",
+    " M scripts/build-release.cjs",
+    " M server/app.ts",
+    " M server/main.ts",
+    " M src/wallet/WalletProvider.tsx",
+    " M src/wallet/config.ts",
     " M src/wallet/useLoggedWallet.ts",
     "?? assets/icon-concepts/01-courier.png",
     "?? assets/icon-concepts/02-snatch.png",
@@ -170,9 +174,10 @@
     "?? assets/icon-concepts/README.md",
     "?? scripts/android-diagnostics/",
     "?? scripts/playtest-native-recovery.py",
+    "?? server/public/",
     "?? src/NativeRecoveryProbe.tsx",
-    "?? src/wallet/protocolError.ts",
-    "?? tests/wallet-native-error.test.ts"
+    "?? src/wallet/decodeSignIn.ts",
+    "?? tests/wallet-sign-in-encoding.test.ts"
   ],
   "architectures": [
     "arm64-v8a"

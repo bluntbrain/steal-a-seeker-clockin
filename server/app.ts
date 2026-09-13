@@ -1,3 +1,5 @@
+import {URL} from 'node:url';
+import {readFile} from 'node:fs/promises';
 import {CampaignService} from './campaign-service';
 import {CAMPAIGN_IDS,type MissionId} from '../src/game/level';
 import Fastify from 'fastify';
@@ -17,6 +19,8 @@ export async function createApp(service:CommerceService,ranked=new RankedService
  const app=Fastify({bodyLimit:16*1024,logger:{level:'warn',redact:['req.headers.authorization']}});await app.register(rateLimit,{max:180,timeWindow:'1 minute'});
  app.setErrorHandler((error,req,reply)=>{if(error instanceof ZodError)return reply.code(400).send({error:'Invalid request.'});if(error instanceof ServiceError)return reply.code(error.status).send({error:error.message});const e=error as {statusCode?:number};if(e.statusCode&&e.statusCode<500)return reply.code(e.statusCode).send({error:'Request could not be accepted.'});req.log.error({message:error instanceof Error?error.message:'Service error'},'Request failed');return reply.code(503).send({error:'Service temporarily unavailable. Your payment will be reconciled; do not pay again.'});});
  async function account(header:string|undefined){if(!header?.startsWith('Bearer '))throw new ServiceError(401,'Wallet sign-in required.');const token=header.slice(7);if(!/^[0-9a-f]{64}$/.test(token))throw new ServiceError(401,'Invalid session.');return {wallet:await service.authenticate(token),token};}
+ app.get('/',async(_req,reply)=>reply.type('text/html; charset=utf-8').send(`<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Steal a Seeker</title><link rel="icon" href="/app-icon.png"><style>body{margin:0;background:#101c20;color:#eff8ed;font:18px system-ui;min-height:100vh;display:grid;place-items:center}main{max-width:520px;padding:40px;text-align:center}img{width:120px;height:120px;border-radius:28px}h1{font-size:42px;line-height:1.05}p{color:#b4cec6;line-height:1.6}small{color:#87aa9e}</style><main><img src="/app-icon.png" alt="Steal a Seeker courier"><h1>Steal a Seeker</h1><p>A mobile stealth game by Bluntbrain. Sneak past guards, take the Seeker, and reach the exit.</p><p>Currently testing on Solana Devnet. Signing in proves ownership of your wallet; it does not authorize a payment.</p><small>TEST SKR and devnet SOL have no real monetary value.<br>Independent hackathon project.</small></main></html>`));
+ app.get('/app-icon.png',async(_req,reply)=>reply.type('image/png').header('Cache-Control','public, max-age=3600').send(await readFile(new URL('./public/app-icon.png',import.meta.url))));
  app.get('/health',async()=>{await service.pool.query('SELECT 1');return {ok:true,cluster:'solana:devnet'};});
  app.get('/catalog',async()=>({cluster:'solana:devnet',currency:'TEST SKR',disclaimer:'Test tokens have no monetary value.',products:PRODUCTS}));
  app.post('/auth/challenge',async req=>service.challenge(z.object({wallet}).strict().parse(req.body).wallet));
