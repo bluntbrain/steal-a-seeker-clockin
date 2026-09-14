@@ -13,3 +13,9 @@ test('changed price, method or product requires another explicit review',()=>{
 test('existing submitted, prepared and fulfilled orders never automatically pay again',()=>{
  for(const change of [{status:'fulfilled'},{status:'verifying'},{status:'needs_review'},{signature:'submitted'},{payment:{id:'prepared'}}]) assert.equal(matchesCheckoutPrice({...order,...change} as Order,'campaign',price),false);
 });
+
+test('a changed completion reward also requires review even when the payment is unchanged',()=>{
+ const offered={...order,campaignTerms:{version:'campaign-v2',rebate:25,missions:12}} as Order;
+ assert(matchesCheckoutPrice(offered,'campaign',price,25));
+ assert.equal(matchesCheckoutPrice(offered,'campaign',price,50),false);
+});

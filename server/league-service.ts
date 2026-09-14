@@ -10,7 +10,7 @@ import rules from '../shared/rules-manifest.json';
 const rankedSQL=`WITH scored AS (
  SELECT wallet,manifest->'contract'->>'id' AS contract,(result->>'ticks')::integer AS ticks,
  LEAST(10000,GREATEST(1,5000+round(GREATEST(0,1-(result->>'ticks')::numeric/((manifest->>'hardLimitSeconds')::numeric*30))*4000)+round((result->>'battery')::numeric*10)))::integer AS points
- FROM ranked_runs WHERE manifest->'contract'->>'week'=$1 AND status='verified' AND result->>'status'='won'
+ FROM ranked_runs WHERE manifest ? 'contract' AND manifest->'contract'->>'week'=$1 AND status='verified' AND result->>'status'='won'
 ), best AS (SELECT DISTINCT ON(wallet,contract) * FROM scored ORDER BY wallet,contract,points DESC,ticks ASC),
  totals AS (SELECT wallet,sum(points)::integer AS points,sum(ticks)::integer AS ticks,count(*)::integer AS cleared,jsonb_agg(jsonb_build_object('contract',contract,'points',points,'ticks',ticks) ORDER BY contract) AS best FROM best GROUP BY wallet)
  SELECT *,rank() OVER(ORDER BY points DESC,ticks ASC)::integer AS rank,row_number() OVER(ORDER BY points DESC,ticks ASC,wallet)::integer AS position FROM totals ORDER BY points DESC,ticks ASC,wallet`;
@@ -27,7 +27,7 @@ export class LeagueService{
   const eligible=await this.pool.query("SELECT week::text FROM league_weeks WHERE finalized_at IS NULL AND week+interval '7 days 15 minutes'<$1",[this.now()]);
   for(const {week} of eligible.rows)await transaction(this.pool,async db=>{
    await db.query('SELECT week FROM league_weeks WHERE week=$1 FOR UPDATE',[week]);
-   const busy=await db.query("SELECT 1 FROM ranked_runs WHERE manifest->'contract'->>'week'=$1 AND (status='verifying' OR (status='issued' AND expires_at>$2)) LIMIT 1",[week,this.now()]);if(busy.rowCount)return;
+   const busy=await db.query("SELECT 1 FROM ranked_runs WHERE manifest ? 'contract' AND manifest->'contract'->>'week'=$1 AND (status='verifying' OR (status='issued' AND expires_at>$2)) LIMIT 1",[week,this.now()]);if(busy.rowCount)return;
    const rows=(await db.query(rankedSQL,[week])).rows;
    for(const entry of rows){await db.query('INSERT INTO league_history(week,wallet,entry,participants) VALUES($1,$2,$3,$4) ON CONFLICT DO NOTHING',[week,entry.wallet,entry,rows.length]);if(entry.cleared===3)await db.query('INSERT INTO league_achievements(wallet,week) VALUES($1,$2) ON CONFLICT DO NOTHING',[entry.wallet,week]);}
    await db.query('UPDATE league_weeks SET finalized_at=$2 WHERE week=$1',[week,this.now()]);
@@ -37,7 +37,7 @@ export class LeagueService{
   const manifest=await this.manifest();await this.archive();const board=await this.board(manifest.week,wallet);
   if(wallet&&board.personal?.cleared===3)await this.pool.query('INSERT INTO league_achievements(wallet,week) VALUES($1,$2) ON CONFLICT DO NOTHING',[wallet,manifest.week]);
   const attempts:Record<string,number>={};let history:LeagueBoard[]=[],earned=false,domain:string|null=null,active=null;
-  if(wallet){const rows=await this.pool.query("SELECT manifest->'contract'->>'id' AS id,count(*)::integer AS n FROM ranked_runs WHERE wallet=$1 AND manifest->'contract'->>'week'=$2 GROUP BY 1",[wallet,manifest.week]);for(const r of rows.rows)attempts[r.id]=r.n;
+  if(wallet){const rows=await this.pool.query("SELECT manifest->'contract'->>'id' AS id,count(*)::integer AS n FROM ranked_runs WHERE manifest ? 'contract' AND wallet=$1 AND manifest->'contract'->>'week'=$2 GROUP BY 1",[wallet,manifest.week]);for(const r of rows.rows)attempts[r.id]=r.n;
    const past=await this.pool.query('SELECT week::text FROM league_history WHERE wallet=$1 ORDER BY week DESC LIMIT 20',[wallet]);history=await Promise.all(past.rows.map(r=>this.board(r.week,wallet,true)));
    earned=!!(await this.pool.query('SELECT 1 FROM league_achievements WHERE wallet=$1 LIMIT 1',[wallet])).rowCount;
    // Display only a recently verified owner-selected name; stale names fall back to wallet.

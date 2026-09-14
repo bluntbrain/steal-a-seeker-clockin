@@ -1,0 +1,11 @@
+{
+  "checkedAt": "2026-09-14T08:42:41.063Z",
+  "cluster": "solana:mainnet",
+  "treasury": "BNgBygzFkVLGw4ipkxXgt2kuNcME1YdAE2hK5s81ogdn",
+  "source": "9G7ibHnjuAdDVdqQCDZypMYLUvNq1GwUT8zsDvhGRWLt",
+  "skrAtomic": "75000000",
+  "solLamports": "10000000",
+  "signerMatchesTreasury": true,
+  "checks": "Configured genesis, mint, canonical treasury token account and finalized balances",
+  "transactionsSignedOrSent": 0
+}

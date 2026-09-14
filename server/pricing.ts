@@ -8,12 +8,14 @@ export function rateUnits(rate:string){
  if(value<=0n)throw new Error('Invalid market rate.');return value;
 }
 export type Rates={SKR:string;SOL:string;at:number};
-export function priceProduct(sku:ProductId,currency:PaymentCurrency,rates:Rates,skrDecimals:number,now=Date.now()):PriceSnapshot{
+export function priceProduct(sku:ProductId,currency:PaymentCurrency,rates:Rates,skrDecimals:number,now=Date.now(),divisor=1,campaignUsdCents?:number,shopPrices:Record<string,string>={}):PriceSnapshot{
  if(now-rates.at>60000||rates.at>now+5000)throw new Error('Market rate expired.');
+ if(!Number.isSafeInteger(divisor)||divisor<1||divisor>100)throw new Error('Unsupported test price divisor.');
  const product=PRODUCTS.find(p=>p.id===sku);if(!product)throw new Error('Unknown product.');
  const skrRate=rateUnits(rates.SKR),rate=rateUnits(rates[currency]);
- const target=sku==='campaign'?BigInt(CAMPAIGN_USD_CENTS)*SCALE/100n:BigInt(product.price)*skrRate;
- const decimals=currency==='SOL'?9:skrDecimals,scale=10n**BigInt(decimals),step=currency==='SOL'?100_000n:scale;
+ if(campaignUsdCents!==undefined&&(!Number.isSafeInteger(campaignUsdCents)||campaignUsdCents<1||campaignUsdCents>100000))throw new Error('Invalid pass price.');
+ const target=sku==='campaign'?BigInt(campaignUsdCents??CAMPAIGN_USD_CENTS/divisor)*SCALE/100n:(shopPrices[sku]?rateUnits(shopPrices[sku]!)*skrRate/SCALE:BigInt(product.price)*skrRate/BigInt(divisor));
+ const decimals=currency==='SOL'?9:skrDecimals,scale=10n**BigInt(decimals),step=currency==='SOL'?100_000n:scale/BigInt(Math.min(divisor,10**skrDecimals));
  const amount=ceil(target*scale,rate*step)*step;
  if(amount<=0n||amount>BigInt(Number.MAX_SAFE_INTEGER))throw new Error('Quote outside supported limits.');
  return {currency,amount:String(amount),decimals,usdCents:Number(ceil(amount*rate*100n,scale*SCALE)),rateUsd:rates[currency],quotedAt:new Date(rates.at).toISOString(),source:'Coinbase spot'};
@@ -33,4 +35,4 @@ export class CoinbasePriceFeed implements PriceFeed{
   try{return await this.pending;}finally{this.pending=undefined;}
  }
 }
-export async function productPricing(sku:ProductId,feed:PriceFeed,decimals:number):Promise<ProductPricing>{const rates=await feed.rates();return {sku,expiresAt:new Date(rates.at+60000).toISOString(),options:(['SKR','SOL'] as const).map(currency=>priceProduct(sku,currency,rates,decimals))};}
+export async function productPricing(sku:ProductId,feed:PriceFeed,decimals:number,divisor=1,campaignUsdCents?:number,shopPrices:Record<string,string>={}):Promise<ProductPricing>{const rates=await feed.rates();return {sku,expiresAt:new Date(rates.at+60000).toISOString(),options:(['SKR','SOL'] as const).map(currency=>priceProduct(sku,currency,rates,decimals,Date.now(),divisor,campaignUsdCents,shopPrices))};}

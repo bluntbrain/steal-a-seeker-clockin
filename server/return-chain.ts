@@ -1,3 +1,4 @@
+import {GENESIS} from '../shared/network';
 import {readFile, stat} from 'node:fs/promises';
 import {z} from 'zod';
 import {AccountRole, address, blockhash, appendTransactionMessageInstructions, createTransactionMessage, createKeyPairSignerFromBytes, getBase64Decoder, getBase64EncodedWireTransaction, getSignatureFromTransaction, pipe, setTransactionMessageFeePayerSigner, setTransactionMessageLifetimeUsingBlockhash, signTransactionMessageWithSigners, type KeyPairSigner, type Instruction} from '@solana/kit';
@@ -13,7 +14,7 @@ const statusResponse = z.object({context: z.object({slot: uint}), value: z.array
 
 export async function loadReturnSigner(path: string, expected: string) {
   const info = await stat(path);
-  if (!info.isFile() || (info.mode & 0o077) !== 0) throw new Error('Devnet signer must be a private local file.');
+  if (!info.isFile() || (info.mode & 0o077) !== 0) throw new Error('signer must be a private local file.');
   return loadReturnSignerJson(await readFile(path, 'utf8'), expected);
 }
 
@@ -23,10 +24,10 @@ export async function loadReturnSignerJson(json: string, expected: string) {
   try {
     bytes = z.array(z.number().int().min(0).max(255)).length(64).parse(JSON.parse(json));
   } catch {
-    throw new Error('Invalid dedicated devnet signer configuration.');
+    throw new Error('Invalid dedicated signer configuration.');
   }
   const signer = await createKeyPairSignerFromBytes(new Uint8Array(bytes));
-  if (signer.address !== expected) throw new Error('Devnet signer does not match the configured treasury.');
+  if (signer.address !== expected) throw new Error('signer does not match the configured treasury.');
   return signer;
 }
 
@@ -37,13 +38,13 @@ export class DevnetReturnChain implements ReturnChain {
     this.call = call ?? (<T>(method: string, params?: unknown[]) => rpc<T>(config.rpcUrl, method, params));
   }
   private async genesis() {
-    if (await this.call('getGenesisHash') !== DEVNET_GENESIS) throw new Error('Returns are restricted to devnet.');
+    if (await this.call('getGenesisHash') !== GENESIS[this.config.cluster??'solana:devnet']) throw new Error('Reward RPC network does not match this deployment.');
   }
   async available(minContextSlot = 0) {
     await this.genesis();
     const mint = account.parse(await this.call('getAccountInfo', [this.config.mint, {encoding: 'jsonParsed', commitment: 'finalized', minContextSlot}]));
     if (mint.context.slot < minContextSlot) throw new Error('RPC balance is older than the latest finalized return.');
-    if (!mint.value || mint.value.owner !== TOKEN_PROGRAM || mint.value.data.parsed.type !== 'mint' || mint.value.data.parsed.info.decimals !== this.config.decimals || mint.value.data.parsed.info.isInitialized !== true) throw new Error('Devnet return mint is not ready.');
+    if (!mint.value || mint.value.owner !== TOKEN_PROGRAM || mint.value.data.parsed.type !== 'mint' || mint.value.data.parsed.info.decimals !== this.config.decimals || mint.value.data.parsed.info.isInitialized !== true) throw new Error('return mint is not ready.');
     const source = account.parse(await this.call('getAccountInfo', [this.config.source, {encoding: 'jsonParsed', commitment: 'finalized', minContextSlot: mint.context.slot}]));
     if (source.context.slot < mint.context.slot) throw new Error('Treasury account context is stale.');
     const token = source.value?.data.parsed.info;
@@ -54,9 +55,10 @@ export class DevnetReturnChain implements ReturnChain {
     return {tokens: BigInt(amount.amount), lamports: BigInt(balance.value)};
   }
   async prepare(binding: ReturnBinding): Promise<SignedReturn> {
+    if ((binding.cluster??'solana:devnet')!==(this.config.cluster??'solana:devnet')) throw new Error('Reward belongs to a different network.');
     if (binding.treasury !== this.config.treasury || binding.source !== this.config.source || binding.mint !== this.config.mint || binding.decimals !== this.config.decimals) throw new Error('Return binding differs from signer configuration.');
     const available = await this.available();
-    if (available.tokens < BigInt(binding.amount) || available.lamports < RETURN_FEE_RESERVE) throw new Error('Treasury needs devnet token or fee funding.');
+    if (available.tokens < BigInt(binding.amount) || available.lamports < RETURN_FEE_RESERVE) throw new Error('Treasury needs token or fee funding.');
     const [destination] = await findAssociatedTokenPda({owner: address(binding.wallet), mint: address(binding.mint), tokenProgram: address(TOKEN_PROGRAM)});
     if (destination !== binding.destination) throw new Error('Return destination does not belong to the reserved wallet.');
     const lifetime = z.object({context: z.object({slot: uint}), value: z.object({blockhash: z.string(), lastValidBlockHeight: uint})}).parse(await this.call('getLatestBlockhash', [{commitment: 'finalized'}]));
@@ -68,7 +70,7 @@ export class DevnetReturnChain implements ReturnChain {
     const signed = await signTransactionMessageWithSigners(message), wire = getBase64EncodedWireTransaction(signed);
     const fee = z.object({value: uint.nullable()}).parse(await this.call('getFeeForMessage', [getBase64Decoder().decode(signed.messageBytes), {commitment: 'finalized', minContextSlot: lifetime.context.slot}]));
     const rent = uint.parse(await this.call('getMinimumBalanceForRentExemption', [165, {commitment: 'finalized'}]));
-    if (fee.value === null || fee.value > 10_000 || BigInt(rent) + BigInt(fee.value) * 8n > RETURN_FEE_RESERVE) throw new Error('Network costs exceed the reserved devnet fee budget.');
+    if (fee.value === null || fee.value > 10_000 || BigInt(rent) + BigInt(fee.value) * 8n > RETURN_FEE_RESERVE) throw new Error('Network costs exceed the reserved fee budget.');
     const simulation = z.object({value: z.object({err: z.unknown()})}).parse(await this.call('simulateTransaction', [wire, {encoding: 'base64', sigVerify: true, commitment: 'finalized', minContextSlot: lifetime.context.slot}]));
     if (simulation.value.err !== null) throw new Error('Return transaction preflight failed.');
     return {signature: getSignatureFromTransaction(signed), wire, blockhash: lifetime.value.blockhash, lastValidHeight: String(lifetime.value.lastValidBlockHeight), contextSlot: String(lifetime.context.slot)};

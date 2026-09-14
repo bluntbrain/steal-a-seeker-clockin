@@ -1,3 +1,4 @@
+import type {SolanaCluster} from '../shared/network';
 import {randomBytes, randomUUID} from 'node:crypto';
 import {address, getBase58Decoder} from '@solana/kit';
 import {findAssociatedTokenPda} from '@solana-program/token';
@@ -8,7 +9,7 @@ import {ServiceError} from './service';
 import type {ReturnStatus} from '../shared/returns';
 
 export const RETURN_FEE_RESERVE = 3_000_000n;
-export type ReturnConfig = {mint: string; treasury: string; source: string; decimals: number};
+export type ReturnConfig = {cluster?:SolanaCluster;mint: string; treasury: string; source: string; decimals: number};
 export type ReturnBinding = ReturnConfig & {id: string; wallet: string; destination: string; amount: string; reference: string; memo: string};
 export type SignedReturn = {signature: string; wire: string; blockhash: string; lastValidHeight: string; contextSlot: string};
 export type ReturnInspection = {state: 'settled'; slot: number} | {state: 'pending' | 'expired' | 'failed' | 'review'; detail: string};
@@ -46,11 +47,11 @@ export class ReturnService {
     // Read balance while holding the allocation lock, then subtract every
     // outstanding maximum return. Pending broadcasts still consume capacity.
     const settled = (await db.query("SELECT coalesce(max((a.receipt->>'slot')::bigint),0)::text AS slot FROM return_allocations a JOIN return_reservations r ON r.id=a.reservation_id WHERE r.treasury=$1 AND a.state='settled'", [this.config.treasury])).rows[0];
-    if (!this.chain) throw new ServiceError(503, 'Devnet return funding is unavailable.');
+    if (!this.chain) throw new ServiceError(503, 'Reward funding is unavailable.');
     const balance = await this.chain.available(Number(settled.slot));
     const held = (await db.query("SELECT coalesce(sum(CASE WHEN mint=$1 THEN amount ELSE 0 END),0)::text AS tokens,coalesce(sum(fee_lamports),0)::text AS fees FROM return_reservations WHERE treasury=$2 AND state='held'", [this.config.mint, this.config.treasury])).rows[0];
-    if (balance.tokens < BigInt(held.tokens) + amount || balance.lamports < BigInt(held.fees) + RETURN_FEE_RESERVE) throw new ServiceError(503, 'The devnet treasury cannot reserve this return and its network costs.');
-    const row = await db.query("INSERT INTO return_reservations(id,external_key,wallet,cluster,mint,token_program,decimals,treasury,source,destination,amount,fee_lamports) VALUES($1,$2,$3,'solana:devnet',$4,$5,$6,$7,$8,$9,$10,$11) RETURNING *", [randomUUID(), externalKey, wallet, this.config.mint, TOKEN_PROGRAM, this.config.decimals, this.config.treasury, this.config.source, destination, amount.toString(), RETURN_FEE_RESERVE.toString()]);
+    if (balance.tokens < BigInt(held.tokens) + amount || balance.lamports < BigInt(held.fees) + RETURN_FEE_RESERVE) throw new ServiceError(503, 'The treasury cannot reserve this return and its network costs.');
+    const row = await db.query("INSERT INTO return_reservations(id,external_key,wallet,cluster,mint,token_program,decimals,treasury,source,destination,amount,fee_lamports) VALUES($1,$2,$3,$12,$4,$5,$6,$7,$8,$9,$10,$11) RETURNING *", [randomUUID(), externalKey, wallet, this.config.mint, TOKEN_PROGRAM, this.config.decimals, this.config.treasury, this.config.source, destination, amount.toString(), RETURN_FEE_RESERVE.toString(),this.config.cluster??'solana:devnet']);
     return row.rows[0];
   }
 
@@ -89,17 +90,17 @@ export class ReturnService {
   async process() {
     const chain=this.chain;if(!chain)return false;
     const job = await transaction(this.pool, async db => {
-      const found = await db.query("SELECT a.*,r.wallet,r.mint,r.decimals,r.treasury,r.source,r.destination,r.amount FROM return_allocations a JOIN return_reservations r ON r.id=a.reservation_id WHERE a.state IN ('queued','pending') AND a.process_after<=now() AND (a.lease_until IS NULL OR a.lease_until<now()) ORDER BY a.created_at FOR UPDATE OF a SKIP LOCKED LIMIT 1");
+      const found = await db.query("SELECT a.*,r.cluster,r.wallet,r.mint,r.decimals,r.treasury,r.source,r.destination,r.amount FROM return_allocations a JOIN return_reservations r ON r.id=a.reservation_id WHERE a.state IN ('queued','pending') AND a.process_after<=now() AND (a.lease_until IS NULL OR a.lease_until<now()) ORDER BY a.created_at FOR UPDATE OF a SKIP LOCKED LIMIT 1");
       if (!found.rowCount) return null;
       const row = found.rows[0]; row.lease_token = randomUUID();
       await db.query("UPDATE return_allocations SET lease_until=now()+interval '90 seconds',lease_token=$2 WHERE id=$1", [row.id, row.lease_token]);
       return row;
     });
     if (!job) return false;
-    const binding: ReturnBinding = {id: job.id, wallet: job.wallet, mint: job.mint, decimals: job.decimals, treasury: job.treasury, source: job.source, destination: job.destination, amount: job.amount, reference: job.reference, memo: job.memo};
+    const binding: ReturnBinding = {cluster:job.cluster,id: job.id, wallet: job.wallet, mint: job.mint, decimals: job.decimals, treasury: job.treasury, source: job.source, destination: job.destination, amount: job.amount, reference: job.reference, memo: job.memo};
     const update = (state: string, detail: string) => this.pool.query("UPDATE return_allocations SET state=$3,detail=$4,lease_until=NULL,process_after=now()+interval '5 seconds' WHERE id=$1 AND lease_token=$2 AND state IN ('queued','pending')", [job.id, job.lease_token, state, detail]);
     try {
-      if (job.mint !== this.config.mint || job.treasury !== this.config.treasury || job.source !== this.config.source || job.decimals !== this.config.decimals) {
+      if (job.cluster!==(this.config.cluster??'solana:devnet') || job.mint !== this.config.mint || job.treasury !== this.config.treasury || job.source !== this.config.source || job.decimals !== this.config.decimals) {
         await update('review', 'Return configuration changed. Funds remain reserved for review.'); return true;
       }
       const row = await this.pool.query('SELECT * FROM return_attempts WHERE id=$1', [job.active_attempt]);
@@ -111,7 +112,7 @@ export class ReturnService {
             // A capacity reader may already have a pre-transfer balance. Keep
             // this liability held until that reader finishes its reservation.
             await db.query('SELECT pg_advisory_xact_lock(1936024940)');
-            const done = await db.query("UPDATE return_allocations SET state='settled',receipt=$3,detail='Return finalized on devnet.',lease_until=NULL WHERE id=$1 AND lease_token=$2 AND active_attempt=$4 RETURNING reservation_id", [job.id, job.lease_token, {signature: signed.signature, slot: result.slot, cluster: 'solana:devnet'}, attempt.id]);
+            const done = await db.query("UPDATE return_allocations SET state='settled',receipt=$3,detail='Return finalized on Solana.',lease_until=NULL WHERE id=$1 AND lease_token=$2 AND active_attempt=$4 RETURNING reservation_id", [job.id, job.lease_token, {signature: signed.signature, slot: result.slot, cluster: this.config.cluster??'solana:devnet'}, attempt.id]);
             if (!done.rowCount) return;
             await db.query("UPDATE return_attempts SET state='settled' WHERE id=$1", [attempt.id]);
             await db.query("UPDATE return_reservations SET state='settled' WHERE id=$1", [job.reservation_id]);

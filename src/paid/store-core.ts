@@ -1,3 +1,4 @@
+import {NETWORK_NAME} from '../wallet/config';
 import type {PaidEntry} from '../../shared/paid';
 import type {Replay} from '../../shared/replay';
 import {assertPaidRules,isReplayPrefix,replayTicks} from './recovery';
@@ -6,7 +7,7 @@ type Storage={read:(key:string)=>Promise<string|null>;write:(key:string,value:st
 export type SavedPaidRun={version:1;wallet:string;entryId:string;startKey:string;runId:string|null;rulesHash:string;expiresAt:string|null;replay:Replay};
 export function createPaidStore(storage:Storage){
  const queues=new Map<string,Promise<unknown>>();
- const key=(e:PaidEntry)=>`seeker.paid.devnet.${e.wallet}.${e.id}`;
+ const key=(e:PaidEntry)=>`seeker.paid.${NETWORK_NAME}.${e.wallet}.${e.id}`;
  async function serial<T>(e:PaidEntry,fn:()=>Promise<T>){const k=key(e),previous=queues.get(k)??Promise.resolve();const next=previous.catch(()=>{}).then(fn);queues.set(k,next);try{return await next;}finally{if(queues.get(k)===next)queues.delete(k);}}
  async function read(e:PaidEntry){
   const raw=await storage.read(key(e));if(!raw)return null;

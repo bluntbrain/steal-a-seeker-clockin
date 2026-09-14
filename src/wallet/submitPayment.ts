@@ -10,9 +10,9 @@ export async function submitPayment(original:Transaction&TransactionWithBlockhas
  class RpcFailure extends Error{constructor(message:string,public retryable:boolean){super(message);}}
  async function rpc(method:string,params:unknown[]){
   const response=await fetcher(options.rpcUrl,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({jsonrpc:'2.0',id:1,method,params}),signal:AbortSignal.timeout(12000)});
-  if(!response.ok)throw new RpcFailure('Devnet connection unavailable. Check payment before trying again.',response.status===429||response.status>=500);
+  if(!response.ok)throw new RpcFailure('Solana connection unavailable. Check payment before trying again.',response.status===429||response.status>=500);
   const body=await response.json() as {result:any;error?:{code:number;message?:string;data?:{logs?:string[]}}};
-  if(body.error){const e=body.error,detail=[e.message,...(e.data?.logs??[])].join(' ');throw new RpcFailure(/insufficient|insufficientfunds/i.test(detail)?'Not enough devnet funds for this payment and its network fee.':e.code===-32002?'Devnet rejected this transaction during preflight. No purchase has been confirmed.':'Devnet could not accept the payment. Check payment before trying again.',[-32004,-32005,-32016].includes(e.code));}
+  if(body.error){const e=body.error,detail=[e.message,...(e.data?.logs??[])].join(' ');throw new RpcFailure(/insufficient|insufficientfunds/i.test(detail)?'Not enough funds for this payment and its network fee.':e.code===-32002?'Solana rejected this transaction during preflight. No purchase has been confirmed.':'Solana could not accept the payment. Check payment before trying again.',[-32004,-32005,-32016].includes(e.code));}
   return body.result;
  }
  await wait(1000); // Allow the Android network to resume after Phantom closes.
@@ -24,7 +24,7 @@ export async function submitPayment(original:Transaction&TransactionWithBlockhas
  }
  for(let attempt=0;attempt<12;attempt++){
   try{const result=await rpc('getSignatureStatuses',[[signature],{searchTransactionHistory:true}]),status=result.value[0];
-   if(status?.err){log('payment.rpc.execution-failed');throw new RpcFailure('The transaction failed on devnet. No campaign purchase was completed.',false);}
+   if(status?.err){log('payment.rpc.execution-failed');throw new RpcFailure('The transaction failed on Solana. No campaign purchase was completed.',false);}
    if(status?.confirmationStatus==='confirmed'||status?.confirmationStatus==='finalized'){log('payment.rpc.confirmed');return bytes;}
    const height=await rpc('getBlockHeight',[{commitment:'confirmed',minContextSlot:Number(options.minContextSlot)}]);
    if(BigInt(height)>original.lifetimeConstraint.lastValidBlockHeight){log('payment.rpc.expired');break;}

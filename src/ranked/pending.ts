@@ -1,8 +1,9 @@
+import {NETWORK_NAME} from '../wallet/config';
 import type {Replay} from '../../shared/replay';
 import type {RunTicket} from '../../shared/ranked';
 import {readSave,writeSave} from '../progress/storage';
 export type PendingRun={wallet:string;id:string;rulesHash:string;replay:Replay};
-const key=(wallet:string)=>`seeker.ranked.pending.devnet.${wallet}`;
+const key=(wallet:string)=>`seeker.ranked.pending.${NETWORK_NAME}.${wallet}`;
 export async function savePending(ticket:RunTicket,replay:Replay){await writeSave(key(ticket.wallet),JSON.stringify({wallet:ticket.wallet,id:ticket.id,rulesHash:ticket.manifest.rulesHash,replay} satisfies PendingRun));}
 export async function readPending(wallet:string):Promise<PendingRun|null>{
  const raw=await readSave(key(wallet));if(!raw)return null;const p=JSON.parse(raw) as PendingRun;

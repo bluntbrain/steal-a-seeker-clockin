@@ -13,24 +13,24 @@ test('sealed devnet signer validates bytes and treasury without leaking malforme
  assert.equal((await loadReturnSignerJson(json,expected)).address,expected);
  await assert.rejects(loadReturnSignerJson(json,pub()),/does not match/);
  for(const input of ['PRIVATE-MARKER',JSON.stringify(['PRIVATE-MARKER']),JSON.stringify(Array(64).fill(256))]){
-  await assert.rejects(loadReturnSignerJson(input,expected),e=>e instanceof Error&&e.message==='Invalid dedicated devnet signer configuration.');
+  await assert.rejects(loadReturnSignerJson(input,expected),e=>e instanceof Error&&e.message==='Invalid dedicated signer configuration.');
  }
 });
-async function fixture(){
+async function fixture(cluster:'solana:devnet'|'solana:mainnet'='solana:devnet'){
  const signer=await generateKeyPairSigner(),mint=pub(),wallet=pub(),source=pub();
  const [destination]=await findAssociatedTokenPda({owner:address(wallet),mint:address(mint),tokenProgram:address(TOKEN_PROGRAM)});
- const binding:ReturnBinding={id:crypto.randomUUID(),mint,wallet,treasury:signer.address,source,destination,amount:'10000000',decimals:6,reference:pub(),memo:'seeker-return:test'};
+ const binding:ReturnBinding={cluster,id:crypto.randomUUID(),mint,wallet,treasury:signer.address,source,destination,amount:'10000000',decimals:6,reference:pub(),memo:'seeker-return:test'};
  const calls:{method:string;params:unknown[]}[]=[],overrides=new Map<string,unknown|(()=>unknown)>();
  let sentSignature='';
  const call=async<T>(method:string,params:unknown[]=[]):Promise<T>=>{
   calls.push({method,params});if(overrides.has(method)){const value=overrides.get(method);return (typeof value==='function'?(value as ()=>unknown)():value) as T;}
   const info=(type:string,info:unknown)=>({context:{slot:200},value:{owner:TOKEN_PROGRAM,data:{parsed:{type,info}}}});
-  const values:Record<string,unknown>={getGenesisHash:DEVNET_GENESIS,getBalance:{context:{slot:200},value:100000000},getLatestBlockhash:{context:{slot:200},value:{blockhash:pub(),lastValidBlockHeight:500}},getFeeForMessage:{context:{slot:200},value:5000},getMinimumBalanceForRentExemption:2039280,simulateTransaction:{context:{slot:200},value:{err:null}},getBlockHeight:100,getSignatureStatuses:{context:{slot:600},value:[null]},getFirstAvailableBlock:0,getSignaturesForAddress:[]};
+  const values:Record<string,unknown>={getGenesisHash:cluster==='solana:devnet'?DEVNET_GENESIS:'5eykt4UsFv8P8NJdTREpY1vzqKqZKvdpKuc147dw2N9d',getBalance:{context:{slot:200},value:100000000},getLatestBlockhash:{context:{slot:200},value:{blockhash:pub(),lastValidBlockHeight:500}},getFeeForMessage:{context:{slot:200},value:5000},getMinimumBalanceForRentExemption:2039280,simulateTransaction:{context:{slot:200},value:{err:null}},getBlockHeight:100,getSignatureStatuses:{context:{slot:600},value:[null]},getFirstAvailableBlock:0,getSignaturesForAddress:[]};
   if(method==='getAccountInfo')return (params[0]===mint?info('mint',{decimals:6,isInitialized:true}):info('account',{owner:signer.address,mint,state:'initialized',tokenAmount:{amount:'100000000',decimals:6}})) as T;
   if(method==='sendTransaction'){const tx=getTransactionDecoder().decode(Buffer.from(params[0] as string,'base64'));sentSignature=b58(new Uint8Array(tx.signatures[signer.address]!));return sentSignature as T;}
   if(!(method in values))throw new Error('Unexpected RPC '+method);return values[method] as T;
  };
- return {signer,binding,calls,overrides,chain:new DevnetReturnChain({mint,treasury:signer.address,source,decimals:6,rpcUrl:'https://unused.invalid'},signer,call)};
+ return {signer,binding,calls,overrides,chain:new DevnetReturnChain({cluster,mint,treasury:signer.address,source,decimals:6,rpcUrl:'https://unused.invalid'},signer,call)};
 }
 function finalized(binding:ReturnBinding,signed:SignedReturn){
  const tx=getTransactionDecoder().decode(Buffer.from(signed.wire,'base64')),message=getCompiledTransactionMessageDecoder().decode(tx.messageBytes),keys=message.staticAccounts;
@@ -50,7 +50,7 @@ test('return preparation creates a genuinely signed ATA/TransferChecked/memo tra
  await f.chain.broadcast(signed);const send=f.calls.find(c=>c.method==='sendTransaction')!;assert.equal(send.params[0],signed.wire);assert.equal((send.params[1] as any).skipPreflight,false);
 });
 test('return signer refuses other networks, mismatched destination and excessive or failed preflight costs',async()=>{
- const f=await fixture();f.overrides.set('getGenesisHash','mainnet');await assert.rejects(f.chain.prepare(f.binding),/restricted to devnet/);assert(!f.calls.some(c=>c.method==='sendTransaction'));
+ const f=await fixture();f.overrides.set('getGenesisHash','mainnet');await assert.rejects(f.chain.prepare(f.binding),/network does not match/);assert(!f.calls.some(c=>c.method==='sendTransaction'));
  f.overrides.delete('getGenesisHash');await assert.rejects(f.chain.prepare({...f.binding,destination:pub()}),/does not belong/);
  f.overrides.set('getFeeForMessage',{value:10001});await assert.rejects(f.chain.prepare(f.binding),/fee budget/);
  f.overrides.delete('getFeeForMessage');f.overrides.set('simulateTransaction',{value:{err:{InstructionError:[0,'Custom']}}});await assert.rejects(f.chain.prepare(f.binding),/preflight failed/);
@@ -81,4 +81,11 @@ test('stale balance and status changing during the expiry scan leave settlement 
  const f=await fixture();await assert.rejects(f.chain.available(201),/older than/);const signed=await f.chain.prepare(f.binding);f.overrides.set('getBlockHeight',501);
  let reads=0;f.overrides.set('getSignatureStatuses',()=>({context:{slot:600},value:++reads===1?[null]:[{slot:550,err:null,confirmationStatus:'finalized'}]}));
  await assert.rejects(f.chain.inspect(f.binding,signed),/changed during/);
+});
+
+test('Mainnet reward signing accepts only its configured genesis and Mainnet binding',async()=>{
+ const f=await fixture('solana:mainnet');
+ const signed=await f.chain.prepare(f.binding);assert.ok(signed.signature);assert(!f.calls.some(c=>c.method==='sendTransaction'));
+ await assert.rejects(f.chain.prepare({...f.binding,cluster:'solana:devnet'}),/different network/);
+ f.overrides.set('getGenesisHash',DEVNET_GENESIS);await assert.rejects(f.chain.broadcast(signed),/network does not match/);assert(!f.calls.some(c=>c.method==='sendTransaction'));
 });

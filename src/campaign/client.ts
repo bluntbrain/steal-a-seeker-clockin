@@ -1,3 +1,4 @@
+import {NETWORK_NAME} from '../wallet/config';
 import {api} from '../commerce/client';
 import type {CampaignSummary,CampaignRank} from '../../shared/economy';
 import type {Replay} from '../../shared/replay';
@@ -5,7 +6,7 @@ import type {MissionId} from '../game/level';
 import {readSave,writeSave} from '../progress/storage';
 import rules from '../../shared/rules-manifest.json';
 type Pending={mission:MissionId;rulesHash:string;replay:Replay};
-const key=(wallet:string)=>`seeker.campaign.outbox.${wallet}`;
+const key=(wallet:string)=>`seeker.campaign.outbox.${NETWORK_NAME}.${wallet}`;
 // Serialize local writes: a successful old upload must not erase a newer win.
 let writes=Promise.resolve();
 async function mutate(wallet:string,fn:(items:Pending[])=>Pending[]){const next=writes.catch(()=>{}).then(async()=>{const raw=await readSave(key(wallet));await writeSave(key(wallet),JSON.stringify(fn(raw?JSON.parse(raw):[])));});writes=next;await next;}

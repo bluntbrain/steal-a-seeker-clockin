@@ -11,8 +11,8 @@ export const PRODUCTS = [
 export type ProductId=typeof PRODUCTS[number]['id'];
 export type OrderStatus='quoted'|'verifying'|'fulfilled'|'needs_review';
 export type PaymentAuthorization={id:string;blockhash:string;lastValidBlockHeight:string;contextSlot:string};
-export type PaymentQuote={currency?:PaymentCurrency;pricing?:PriceSnapshot;id:string;wallet:string;cluster:'solana:devnet';mint:string;tokenProgram:string;decimals:number;amount:string;recipient:string;source:string;destination:string;reference:string;memo:string;createdAt:string;expiresAt:string;signature:string|null;detail:string|null;payment?:PaymentAuthorization};
+export type PaymentQuote={currency?:PaymentCurrency;pricing?:PriceSnapshot;id:string;wallet:string;cluster:'solana:devnet'|'solana:mainnet';mint:string;tokenProgram:string;decimals:number;amount:string;recipient:string;source:string;destination:string;reference:string;memo:string;createdAt:string;expiresAt:string;signature:string|null;detail:string|null;payment?:PaymentAuthorization};
 export type Order=PaymentQuote&{sku:ProductId;status:OrderStatus;campaignTerms?:CampaignTerms};
 export type AccountState={wallet:string;entitlements:ProductId[];equipment:Record<string,string>;progress:Record<string,unknown>};
-export type SignInChallenge={id:string;payload:{domain:string;address:string;statement:string;uri:string;version:'1';chainId:'solana:devnet';nonce:string;issuedAt:string;expirationTime:string}};
+export type SignInChallenge={id:string;payload:{domain:string;address:string;statement:string;uri:string;version:'1';chainId:'solana:devnet'|'solana:mainnet';nonce:string;issuedAt:string;expirationTime:string}};
 export function tokenAmount(amount:string,decimals:number){const n=BigInt(amount),scale=10n**BigInt(decimals);return `${n/scale}${n%scale?'.'+(n%scale).toString().padStart(decimals,'0').replace(/0+$/,''):''}`;}

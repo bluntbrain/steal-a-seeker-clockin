@@ -1,0 +1,51 @@
+[
+  {
+    "path": "/health",
+    "status": 200,
+    "ok": true,
+    "cluster": "solana:mainnet"
+  },
+  {
+    "path": "/pricing/campaign",
+    "status": 200,
+    "sku": "campaign",
+    "expiresAt": "2026-09-14T08:32:47.676Z",
+    "options": [
+      {
+        "currency": "SKR",
+        "amount": "57200000",
+        "decimals": 6,
+        "usdCents": 101,
+        "rateUsd": "0.017511",
+        "quotedAt": "2026-09-14T08:31:47.676Z",
+        "source": "Coinbase spot"
+      },
+      {
+        "currency": "SOL",
+        "amount": "9900000",
+        "decimals": 9,
+        "usdCents": 101,
+        "rateUsd": "101.42",
+        "quotedAt": "2026-09-14T08:31:47.676Z",
+        "source": "Coinbase spot"
+      }
+    ],
+    "campaignOffer": {
+      "usdCents": 100,
+      "rebateSkr": 25,
+      "missions": 12,
+      "cluster": "solana:mainnet"
+    }
+  },
+  {
+    "path": "/league",
+    "status": 200,
+    "week": "2026-09-14",
+    "contracts": 3,
+    "participants": 0
+  },
+  {
+    "check": "unlisted devnet treasury cannot authenticate on restricted mainnet service",
+    "status": 403
+  }
+]

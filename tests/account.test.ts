@@ -19,3 +19,7 @@ test('cloud restore preserves newer local bests and repeated merges do not add c
  assert.equal(mergeBests(merged,cloud),merged);
  assert.equal(mergeBests(merged,freshProgress()),merged);
 });
+
+test('a server-awarded Ghost Courier outfit survives account caching without a shop purchase',()=>{
+ const value=readAccount({wallet:'test-wallet',entitlements:['campaign'],equipment:{outfit:'ghost-courier'},progress:{}},'test-wallet');assert.equal(value?.equipment.outfit,'ghost-courier');
+});

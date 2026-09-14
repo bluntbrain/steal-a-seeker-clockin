@@ -1,7 +1,7 @@
 import {useMemo} from 'react';
 import type {Transaction,TransactionWithBlockhashLifetime} from '@solana/kit';
 import {submitPayment} from './submitPayment';
-import {DEVNET} from './config';
+import {CHAIN} from './config';
 import {useMobileWallet,useAuthorization,transact,type KitMobileWallet} from '@wallet-ui/react-native-kit';
 import {SolanaMobileWalletAdapterProtocolError} from '@solana-mobile/mobile-wallet-adapter-protocol';
 import {decodeSignIn} from './decodeSignIn';
@@ -53,7 +53,7 @@ export function useLoggedWallet(){
     if(transactions.length!==1)throw new Error('Wallet returned no signed payment. Restore purchases before paying again.');
     walletLog('mwa.payment.signed',{accounts:transactions.length});return transactions[0]!;
    });
-   return walletStep('payment.submit-and-confirm',()=>submitPayment(transaction,signed,{rpcUrl:DEVNET.url,minContextSlot,log:stage=>walletLog(stage)}));
+   return walletStep('payment.submit-and-confirm',()=>submitPayment(transaction,signed,{rpcUrl:CHAIN.url,minContextSlot,log:stage=>walletLog(stage)}));
   };
   return {...mobile,connect,signIn,signAndSendTransactions,disconnect:()=>walletStep('mwa.disconnect',mobile.disconnect)};
  },[mobile,auth]);

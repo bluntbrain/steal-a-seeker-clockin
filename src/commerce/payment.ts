@@ -1,8 +1,11 @@
+import {CHAIN,IS_MAINNET,MAINNET_SKR_MINT,MAINNET_TREASURY} from '../wallet/config';
 import {address,blockhash,AccountRole,appendTransactionMessageInstructions,compileTransaction,createTransactionMessage,pipe,setTransactionMessageFeePayer,setTransactionMessageLifetimeUsingBlockhash,type Instruction} from '@solana/kit';
 import {getTransferCheckedInstruction} from '@solana-program/token';
 import {getAddMemoInstruction} from '@solana-program/memo';
 import type {PaymentQuote} from '../../shared/commerce';
 export function paymentTransaction(order:PaymentQuote){
+ if(order.cluster!==CHAIN.id)throw new Error('Payment belongs to a different network. Nothing was signed.');
+ if(IS_MAINNET&&(order.recipient!==MAINNET_TREASURY||order.currency!=='SOL'&&order.mint!==MAINNET_SKR_MINT))throw new Error('Unexpected Mainnet payment recipient or token.');
  if(!order.payment)throw new Error('Prepare the payment before opening Phantom.');
  const native=order.currency==='SOL';
  const data=new Uint8Array(12);new DataView(data.buffer).setUint32(0,2,true);new DataView(data.buffer).setBigUint64(4,BigInt(order.amount),true);

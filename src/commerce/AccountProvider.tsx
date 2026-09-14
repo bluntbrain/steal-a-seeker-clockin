@@ -1,3 +1,4 @@
+import {CHAIN} from '../wallet/config';
 import React,{useCallback,useEffect,useRef,useState,type ReactNode} from 'react';
 import * as SecureStore from 'expo-secure-store';
 import {useLoggedWallet as useMobileWallet} from '../wallet/useLoggedWallet';
@@ -50,7 +51,7 @@ export default function AccountProvider({children}:{children:ReactNode}){
    }
    if(!interactive)throw new Error('Sign in to sync this wallet. Your local progress is saved.');
    walletLog('account.sign-in.required');
-   const challenge=await commerceApi.challenge(selected.address),signed=await mobile.signIn(challenge.payload);
+   const challenge=await commerceApi.challenge(selected.address);if(challenge.payload.chainId!==CHAIN.id)throw new Error('Sign-in service is on a different network.');const signed=await mobile.signIn(challenge.payload);
    walletLog('account.sign-in.signature-returned',{bytes:signed.signature.length});
    if(signed.account.address!==selected.address||current.current!==selected.address)throw new Error('Wallet changed. Sign in again.');
    const result=await commerceApi.signIn({id:challenge.id,wallet:selected.address,signedMessage:fromUint8Array(signed.signedMessage),signature:fromUint8Array(signed.signature)});

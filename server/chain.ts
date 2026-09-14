@@ -1,3 +1,4 @@
+import {GENESIS,type SolanaCluster} from '../shared/network';
 import {z} from 'zod';
 import {getBase58Encoder} from '@solana/kit';
 import type {Order,PaymentAuthorization} from '../shared/commerce';
@@ -55,9 +56,9 @@ export function verifyPayment(order:TransferBinding,signature:string,value:unkno
 }
 export async function rpc<T>(url:string,method:string,params:unknown[]=[]):Promise<T>{const response=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({jsonrpc:'2.0',id:1,method,params}),signal:AbortSignal.timeout(12000)});if(!response.ok)throw new Error(`RPC unavailable (${response.status})`);const body=await response.json() as {error?:{message:string};result:T};if(body.error)throw new Error('RPC request could not be completed.');return body.result;}
 export class DevnetChain implements PaymentChain{
- constructor(private config:{rpcUrl:string;mint:string;recipient:string;decimals:number;destination:string}){}
+ constructor(private config:{rpcUrl:string;mint:string;recipient:string;decimals:number;destination:string;cluster?:SolanaCluster}){}
  async ready(){
-  if(await rpc<string>(this.config.rpcUrl,'getGenesisHash')!==DEVNET_GENESIS)throw new Error('Payment service requires Solana devnet.');
+  if(await rpc<string>(this.config.rpcUrl,'getGenesisHash')!==GENESIS[this.config.cluster??'solana:devnet'])throw new Error('Payment RPC network does not match this deployment.');
   const result=await rpc<{value:{owner:string;data:{parsed:{type:string;info:{decimals:number}}}}|null}>(this.config.rpcUrl,'getAccountInfo',[this.config.mint,{encoding:'jsonParsed',commitment:'finalized'}]);
   if(!result.value||result.value.owner!==TOKEN_PROGRAM||result.value.data.parsed.type!=='mint'||result.value.data.parsed.info.decimals!==this.config.decimals)throw new Error('The configured devnet mint is not ready.');
   const account=await rpc<{value:{owner:string;data:{parsed:{info:{owner:string;mint:string;state:string}}}}|null}>(this.config.rpcUrl,'getAccountInfo',[this.config.destination,{encoding:'jsonParsed',commitment:'finalized'}]);

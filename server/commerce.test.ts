@@ -494,3 +494,18 @@ test('contract verification retries the same failed infrastructure job without s
  const t=await league.start(user.wallet,{contractId:c.id,rulesHash:manifest.rulesHash,requestKey:randomUUID()});clock=new Date(clock.getTime()+(solved.ticks/30+3)*1000);await r.submit(user.wallet,t.id,{rulesHash:t.manifest.rulesHash,replay:solved.replay});await pool.query("UPDATE ranked_runs SET status='error',detail='Simulated infrastructure outage' WHERE id=$1",[t.id]);
  const retry=await r.submit(user.wallet,t.id,{rulesHash:t.manifest.rulesHash,replay:solved.replay});assert.equal(retry.status,'verifying');assert.equal((await league.summary(user.wallet)).attempts[c.id],1);await r.process();assert.equal((await r.get(user.wallet,t.id)).result?.status,'won');
 });
+
+test('Mainnet test orders enforce allowlist, store Mainnet and use reduced prices with idempotent verification',async()=>{
+ const user=await login(),rates={SKR:'0.02',SOL:'100',at:Date.now()};
+ const main=new CommerceService(pool,chain,{...service.config,cluster:'solana:mainnet',priceDivisor:10,allowlist:[user.wallet],usdPricing:true,campaignOffer:false},{rates:async()=>rates});
+ await assert.rejects(main.challenge(pub()),/limited to/);
+ await assert.rejects(main.createOrder(pub(),'campaign',randomUUID(),'SOL'),/not enabled/);
+ const challenge=await main.challenge(user.wallet);assert.equal(challenge.payload.chainId,'solana:mainnet');assert.match(challenge.payload.statement,/Mainnet/);
+ const order=await main.createOrder(user.wallet,'campaign',randomUUID(),'SKR');assert.equal(order.cluster,'solana:mainnet');assert.equal(order.amount,'50000000');assert.equal(order.pricing?.usdCents,100);
+ const sig=b58(randomBytes(64));transactions.set(sig,paidTx(order,sig));
+ // Verification remains bound to the exact token/recipient/amount; only the deployment's cluster and price change.
+ const api=await createApp(main,ranked);
+ try{for(let i=0;i<2;i++){const r=await api.inject({method:'POST',url:`/orders/${order.id}/transaction`,headers:user.headers,payload:{signature:sig}});assert.equal(r.statusCode,200,r.body);assert.equal(r.json().status,'fulfilled');}
+ assert.equal(Number((await pool.query('SELECT count(*) FROM payment_receipts WHERE order_id=$1',[order.id])).rows[0].count),1);
+ }finally{await api.close();}
+});
