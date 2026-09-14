@@ -1,7 +1,7 @@
 {
   "mode": "mainnet",
   "publicConfig": {
-    "apiUrl": "https://seeker-mainnet-test-production.up.railway.app",
+    "apiUrl": "https://seeker-api-production-41b3.up.railway.app",
     "cluster": "solana:mainnet",
     "identityUri": "https://stealaseeker.bluntbrain.com"
   },
@@ -45,7 +45,7 @@
     "app.json": "01c695b65041eab520a72f1b65831d229134c84f7444a095cdce222058734829",
     "index.ts": "f6e6f4bd24d51b8ac28fb63cef38a91628dde7411bb40e03c4e347a0e0406142",
     "package-lock.json": "61c5b2850f3339b4872f350360019fc93b4b3ae0e6587407ffd128c266ff6813",
-    "package.json": "08d83cbd20978da09905838e5ded61048c4916c896a1cd085f7d2b9369a61526",
+    "package.json": "6e2fcd4998bfa08b622f2fd151681dcbfe40f13aebd2bf9853084e5b5332f574",
     "shared/commerce.ts": "dc2d379785caf1028f63535975ddc71d77ca613bcadc2e99d3a33beaf8d0fe96",
     "shared/contracts.ts": "1a8e3fd485dda1750dadb69951877305e2ab9e327d5acca96b9a7741c9169aef",
     "shared/daily.ts": "ca7d6fe1df2cd8164413e2fab8a06a63da55b0fbe6e2e3c3074e6c5ce7fbebe8",
@@ -74,7 +74,7 @@
     "src/commerce/CampaignGate.tsx": "722ef53cb1e4ff2960acceed245fe03f474effa3765e0897da9e48e387156fb4",
     "src/commerce/CampaignGate.web.tsx": "cd176c0368a27c30b489c7412f8474324ca5ee25e2ae53150eebeb6a545180c1",
     "src/commerce/CommerceSection.tsx": "0e65d053f6c643f9cdcb6074396d9f46fc70b93571da198d5dc3e86732f732bb",
-    "src/commerce/Paywall.tsx": "83c7da1bb8e1d1d8f0e9f9a1c7d5010650470687d23e59388e23e833155b797a",
+    "src/commerce/Paywall.tsx": "c1bac71a63cb611f2bf4f39c3f18ceba8941f5d1c5001ba2c2a9062062d6ef79",
     "src/commerce/TrialContext.tsx": "6969bf2847372ec8cdc3666844375062f2e2cd3fc90ad2362cdb9c78d87d65b1",
     "src/commerce/account-context.ts": "ef144b16f87eda4f2ef19be001b28cf4554bc78f03c77f01bf3134c97c06e255",
     "src/commerce/account-model.ts": "13ba054e1cd6c14971a7e7bae7d2da1a60c26fef68ea88af31fc8fd1d2ff8167",
@@ -174,23 +174,16 @@
     "src/wallet/submitPayment.ts": "885988e26898a75e6d5eb042745feee8b46515a77ee438e5dc93b6a715a4e565",
     "src/wallet/useLoggedWallet.ts": "ecaa00ccf8dfeed65f63b17366c43921874fe06da68decfde5ece364f8f35b69"
   },
-  "sha256": "2a02754b4425d581e110ffcb0d239d704f21b11d73c5e83317d2a1b2140c1aab",
-  "bytes": 90621490,
-  "builtAt": "2026-09-14T08:56:57.139Z",
-  "head": "e3b2bc4c66e7a4ef9c4807cdcb68257e6d5dcf00",
+  "sha256": "f13f38978c4d03b96ec175314e911cd31dc0d44d659dc2201990ea799bfeaa82",
+  "bytes": 90621522,
+  "builtAt": "2026-09-14T09:06:14.110Z",
+  "head": "c3f6ea8623050d023ba06707713193167b02f23b",
   "workingTree": [
     "M App.tsx",
-    " M docs/MAINNET-TESTING.md",
-    " M releases/steal-a-seeker-mainnet.apk.json",
-    " M server/main.ts",
-    " M server/network.ts",
-    " M server/service.ts",
-    " M shared/pricing.ts",
+    " M package.json",
+    " M scripts/build-release.cjs",
+    " M scripts/deploy-api.cjs",
     " M src/commerce/Paywall.tsx",
-    " M src/components/Hideout.tsx",
-    " M src/components/HideoutBalance.web.tsx",
-    " M src/ranked/WeeklyBoard.tsx",
-    " M tests/mainnet-config.test.ts",
     "?? assets/icon-concepts/01-courier.png",
     "?? assets/icon-concepts/02-snatch.png",
     "?? assets/icon-concepts/03-seeker-s.png",
@@ -199,10 +192,7 @@
     "?? docs/SEEKER-AUDIENCE-WEEKLY-LEAGUE.md",
     "?? scripts/android-diagnostics/",
     "?? scripts/playtest-native-recovery.py",
-    "?? src/NativeRecoveryProbe.tsx",
-    "?? verification/mainnet/mission-detail-360x640.png",
-    "?? verification/mainnet/mission-detail-360x797.png",
-    "?? verification/mainnet/test-pricing-check.json"
+    "?? src/NativeRecoveryProbe.tsx"
   ],
   "architectures": [
     "arm64-v8a"

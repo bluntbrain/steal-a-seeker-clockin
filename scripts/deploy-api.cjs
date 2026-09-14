@@ -15,7 +15,7 @@ try {
   }
   for (const name of ['Dockerfile.api', 'railway.toml', '.dockerignore']) fs.copyFileSync(path.join(root, name), path.join(stage, name));
   const result = cp.spawnSync('railway', ['up', stage, '--path-as-root', '--project', project,
-    '--environment', environment, '--service', service, '--detach', '-m', 'Deploy Steal a Seeker devnet API'], {
+    '--environment', environment, '--service', service, '--detach', '-m', 'Deploy Steal a Seeker API'], {
     cwd: root, stdio: 'inherit', env: {...process.env, RAILWAY_CALLER: 'skill:use-railway@1.2.0',
       RAILWAY_AGENT_SESSION: process.env.RAILWAY_AGENT_SESSION || crypto.randomUUID()}});
   process.exitCode = result.status ?? 1;

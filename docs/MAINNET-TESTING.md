@@ -4,18 +4,18 @@ Updated 14 September 2026. Mainnet transfers use real funds. This is a restricte
 
 ## Current deployment
 
-- Mainnet API: https://seeker-mainnet-test-production.up.railway.app
-- Railway service: `seeker-mainnet-test` (`a4563d7f-353d-408f-bfb7-fa597fd03632`).
+- Mainnet API: https://seeker-api-production-41b3.up.railway.app (also https://stealaseeker.bluntbrain.com)
+- Railway service: `seeker-api` (`fc20fdcd-565e-4d68-a37a-8f6893baf8b2`), now Mainnet only. The temporary `seeker-mainnet-test` service was removed after migration.
 - Database: `seeker_mainnet_test`, with its own login, inside the existing Postgres instance. No extra Postgres instance was created. The API service adds hosting usage.
 - Tester wallet: `GyftsRcgrvFWHGhhTvVTQMDGVU565UmmPvbhuZ3nYwgE`.
 - New treasury: `BNgBygzFkVLGw4ipkxXgt2kuNcME1YdAE2hK5s81ogdn`.
 - Real SKR mint: `SKRbvo6Gf7GondiT3BbTfuRDPqLWei4j2Qy2NPGZhW3`, 6 decimals, standard SPL Token program. Verified against https://solanamobile.com/skr and a Mainnet mint-account read.
-- The existing Devnet deployment/database/treasury remain separate. Mainnet does not inherit paid access, wallet sessions, campaign replay outboxes or ranked attempts from Devnet.
-- The Mainnet APK replaces the installed app, but network-scoped stored data is preserved. Use the Devnet APK to return to Devnet.
+- No Devnet API is running. Historical Devnet data remains in its old database; it was not imported into Mainnet. The active Mainnet database, treasury, purchases and sessions were preserved during service consolidation.
+- The Mainnet APK replaces the installed app and preserves stored data. Old Devnet APKs no longer have a live Devnet service.
 
 ## Change prices without rebuilding Android
 
-Open Railway → `seeker-mainnet-test` → Variables. Change the values below and apply/redeploy the service. New quotes and freshly opened paywalls read the backend settings. In-flight orders retain the price and reward terms shown when quoted; price changes never rewrite a signed or paid order.
+Open Railway → `seeker-api` → Variables. Change the values below and apply/redeploy the service. New quotes and freshly opened paywalls read the backend settings. In-flight orders retain the price and reward terms shown when quoted; price changes never rewrite a signed or paid order.
 
 | Variable | Current value | Meaning |
 | --- | --- | --- |
@@ -63,3 +63,9 @@ The weekly mission detail removes the repeated app/leaderboard headers, sizes th
 The browser's credits are local simulated currency from `seeker.browser-playtest.v1` (starting balance 250, adjusted by simulated purchases and rewards). They have no cash value and cannot be withdrawn. The balance is now labelled “demo credits” and only shown in Hideout; mission/ranking screens show BROWSER DEMO instead. Native Android displays the real network label, not this simulated balance.
 
 Follow-up build: SHA-256 `2a02754b4425d581e110ffcb0d239d704f21b11d73c5e83317d2a1b2140c1aab`. The test-pricing update passed 125 app/shared tests, 62 server tests and TypeScript checks; the mission preview and practice/ranked flows passed at 360×640 and 360×797. Mainnet deployment `7080f140-320e-43cb-a351-264750e67387` was verified healthy with `TEST_PRICING=true`.
+
+## One API service — 14 September consolidation
+
+Converted the original `seeker-api` service to Mainnet so its custom sign-in domain remains intact. Copied the active Mainnet database connection and treasury settings privately, checked equality without printing secrets, and cleared the old Devnet signer from the service. After checking both domains and installing the updated Android build, removed the temporary service. Postgres remains required; “one service” here means one API service plus its database. No database or wallet key file was deleted.
+
+`npm run build:apk` now selects Mainnet and defaults to the surviving API URL. The opening paywall says “Steal the phone. Escape the guards.” followed by the 12 heists and weekly leaderboard. The existing 25 SKR campaign offer is unchanged pending the builder’s answer about removing it for new purchases; weekly cash prizes are still not live.

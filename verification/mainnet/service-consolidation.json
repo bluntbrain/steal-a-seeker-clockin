@@ -1,0 +1,38 @@
+{
+  "checkedAt": "2026-09-14T09:08:56.220288+00:00",
+  "services": [
+    {
+      "id": "e1776324-8820-40ca-9c75-e2d3422c6497",
+      "name": "Postgres"
+    },
+    {
+      "id": "fc20fdcd-565e-4d68-a37a-8f6893baf8b2",
+      "name": "seeker-api"
+    }
+  ],
+  "checks": {
+    "https://seeker-api-production-41b3.up.railway.app": {
+      "ok": true,
+      "cluster": "solana:mainnet"
+    },
+    "https://stealaseeker.bluntbrain.com": {
+      "ok": true,
+      "cluster": "solana:mainnet"
+    }
+  },
+  "offer": {
+    "testPricing": true,
+    "usdCents": 10,
+    "rebateSkr": 25,
+    "missions": 12,
+    "cluster": "solana:mainnet"
+  },
+  "preserved": [
+    "Mainnet database",
+    "Mainnet treasury signer",
+    "test wallet allowlist",
+    "pricing",
+    "branded sign-in domain"
+  ],
+  "noRealPaymentSubmitted": true
+}

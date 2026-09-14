@@ -10,7 +10,7 @@
     "typecheck": "tsc --noEmit",
     "test": "tsx --test tests/*.test.ts",
     "export:web": "npm run rules:check && expo export --platform web && node scripts/build-sheet-preview.cjs && node scripts/build-paywall-preview.cjs && node scripts/copy-design.cjs",
-    "build:apk": "node scripts/build-release.cjs devnet",
+    "build:apk": "node scripts/build-release.cjs mainnet",
     "preview": "node scripts/preview.cjs",
     "server:dev": "tsx server/main.ts",
     "server:test": "tsx --test server/*.test.ts",
