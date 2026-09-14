@@ -78,4 +78,17 @@ Phone logs from 14 September showed `mwa.payment` blocked inside `mwa.authorize`
 
 The payment path now uses fresh authorization (no cached auth token), as in the supplied working SolScan example. This also avoids reusing an authorization token from an older hook closure after sign-in rotates it. All instrumented MWA sessions queue and wait for the app to be foreground before opening another wallet activity. The app still checks the authorized account and exact signed transaction before submission. Added sheet visibility diagnostics without logging addresses, tokens or signatures. Expired unsigned orders offer Get a new quote instead of a disabled payment button.
 
-Automated checks: 129 app/shared tests, 63 server tests, TypeScript, Android release build, and browser checkout at 360×640 and 360×797. Mainnet API was checked returning rebateSkr=0. The updated APK was installed after the phone reconnected. A live Phantom retry remains required before declaring the payment issue resolved.
+Automated checks: 129 app/shared tests, 63 server tests, TypeScript, Android release build, and browser checkout at 360×640 and 360×797. Mainnet API was checked returning rebateSkr=0. The updated APK was installed after the phone reconnected. The user confirmed that the Phantom approval screen opened. Logs show authorization succeeding in 6.826 seconds. A later signing attempt returned a signed transaction, but the app failed before its first RPC send. No receipt was confirmed; opening the approval screen does not verify the complete purchase flow.
+
+
+## Exact working reference port — feat/animations
+
+Cloned `https://github.com/bluntbrain/solscan-react-native`, branch `feat/animations`, commit `41fda56c54f807980d4beab2d7aebb982e9de32c`. Reference: `src/hooks/useWallet.ts`, sendSOL and executeSwap.
+
+The native payment path now uses the same `@solana-mobile/mobile-wallet-adapter-protocol-web3js` 2.2.5 and `@solana/web3.js` 1.98.4 API sequence: fresh authorization with cluster + app identity, `signTransactions`, close the MWA session, wait one second, serialize and `Connection.sendRawTransaction`, then `Connection.confirmTransaction`. Both SOL and SKR use this path. The app's login remains on its existing adapter.
+
+Our differences are deliberate: use the server-prepared order's exact blockhash, transfer and memo; verify the authorized buyer and unchanged message; keep preflight enabled; never replace a signed payment during transport retry; pass the same signature to backend receipt verification after uncertain submission/confirmation. No client callback alone unlocks the game. The treasury and price configuration are unchanged.
+
+Safe stage logs identify deserialize, authorization, signing, message validation, serialization, send attempts and confirmation without logging keys, authorization tokens, raw transactions or account addresses. Tests exercise SOL/SKR round trips using actual Web3.js transaction serialization, identical-byte retries, missing signatures, message mutation and failed confirmation. Physical-device purchase completion remains a separate check.
+
+Reference-port build: SHA-256 `cfa2265d95bf74b71d4c515656d767dbbf1e01994c20c72713b2024ca2b0f9e2`. Installed successfully on the connected Realme. 134 app/shared tests and TypeScript passed; all five Web3 payment tests passed again after the final byte-copy adjustment.

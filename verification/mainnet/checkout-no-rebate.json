@@ -18,5 +18,25 @@
   },
   "realPaymentConfirmed": false,
   "androidInstalled": true,
-  "androidSha256": "7b5427496c30ba6770c1fab6686a1082ad569a1d0af7fae7b9653b74c3e52976"
+  "androidSha256": "7b5427496c30ba6770c1fab6686a1082ad569a1d0af7fae7b9653b74c3e52976",
+  "approvalRetry": {
+    "userConfirmedApprovalScreen": true,
+    "authorizationDurationMs": 6826,
+    "signedTransactionReturned": true,
+    "submissionReached": false,
+    "observedNextFailure": "Immediate failure before first RPC send; specific error not captured by previous diagnostics"
+  },
+  "referencePort": {
+    "repository": "https://github.com/bluntbrain/solscan-react-native",
+    "branch": "feat/animations",
+    "commit": "41fda56c54f807980d4beab2d7aebb982e9de32c",
+    "paymentAdapter": "@solana-mobile/mobile-wallet-adapter-protocol-web3js@2.2.5",
+    "web3": "1.98.4",
+    "appTests": 134,
+    "typecheck": "passed",
+    "targetedPaymentTests": 5,
+    "physicalPurchaseConfirmed": false,
+    "installedOnRealme": true,
+    "apkSha256": "cfa2265d95bf74b71d4c515656d767dbbf1e01994c20c72713b2024ca2b0f9e2"
+  }
 }

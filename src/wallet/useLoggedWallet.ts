@@ -2,8 +2,11 @@ import {AppState} from 'react-native';
 import {exclusiveWalletSession,freshPaymentAuthorization} from './session-guard';
 import {useMemo} from 'react';
 import type {Transaction,TransactionWithBlockhashLifetime} from '@solana/kit';
-import {submitPayment} from './submitPayment';
-import {CHAIN} from './config';
+import {web3Payment} from './web3Payment';
+import {transact as web3Transact} from '@solana-mobile/mobile-wallet-adapter-protocol-web3js';
+import {PublicKey} from '@solana/web3.js';
+import {Buffer} from 'buffer';
+import {CHAIN,IS_MAINNET,APP_IDENTITY} from './config';
 import {useMobileWallet,useAuthorization,transact,type KitMobileWallet} from '@wallet-ui/react-native-kit';
 import {SolanaMobileWalletAdapterProtocolError} from '@solana-mobile/mobile-wallet-adapter-protocol';
 import {decodeSignIn} from './decodeSignIn';
@@ -51,14 +54,22 @@ export function useLoggedWallet(){
    },()=>mobile.store.$selectedAccount.get(),(account,message)=>walletStep('mwa.sign-message',()=>wallet.signMessages({addresses:[account.addressBase64],payloads:[message]})),()=>walletLog('mwa.sign-in.message-fallback')),result=>{wireResult=result.sign_in_result;});
   };
   const signAndSendTransactions=async(transaction:Transaction&TransactionWithBlockhashLifetime,minContextSlot:bigint)=>{
-   const signed=await session('mwa.payment',async wallet=>{
-    const selected=await auth.authorizeSession(wallet);
-    if(selected.address!==mobile.account?.address)throw new Error('Wallet changed. Restore purchases before paying again.');
-    const transactions=await walletStep('mwa.sign-transactions',()=>wallet.signTransactions({transactions:[transaction]}));
-    if(transactions.length!==1)throw new Error('Wallet returned no signed payment. Restore purchases before paying again.');
-    walletLog('mwa.payment.signed',{accounts:transactions.length});return transactions[0]!;
-   });
-   return walletStep('payment.submit-and-confirm',()=>submitPayment(transaction,signed,{rpcUrl:CHAIN.url,minContextSlot,log:stage=>walletLog(stage)}));
+   const expectedAccount=mobile.account?.address;
+   if(!expectedAccount)throw new Error('Connect your wallet before paying.');
+   return walletStep('payment.web3',()=>web3Payment(transaction,{rpcUrl:CHAIN.url,minContextSlot,log:stage=>walletLog(stage),sign:prepared=>exclusiveWalletSession(async()=>{
+    if(AppState.currentState!=='active')await walletStep('mwa.wait-for-foreground',()=>new Promise<void>((resolve,reject)=>{const subscription=AppState.addEventListener('change',state=>{if(state==='active'){clearTimeout(timer);subscription.remove();resolve();}});const timer=setTimeout(()=>{subscription.remove();reject(new Error('Return to Steal a Seeker, then try the payment again.'));},20000);}));
+    return walletStep('mwa.payment',()=>web3Transact(async wallet=>{
+     walletLog('mwa.payment.transport-ready');
+     walletLog('mwa.payment.fresh-authorization',{cached:false});
+     const authorization=await walletStep('mwa.authorize',()=>wallet.authorize({cluster:IS_MAINNET?'mainnet-beta':'devnet',identity:APP_IDENTITY}));
+     walletLog('mwa.authorize.response',{accounts:authorization.accounts.length});
+     if(!authorization.accounts.some(account=>new PublicKey(Buffer.from(account.address,'base64')).toBase58()===expectedAccount))throw new Error('Wallet changed. Restore purchases before paying again.');
+     const signed=await walletStep('mwa.sign-transactions',()=>wallet.signTransactions({transactions:[prepared]}));
+     if(signed.length!==1)throw new Error('Wallet returned no signed payment. Restore purchases before paying again.');
+     walletLog('mwa.payment.signed',{accounts:signed.length});
+     return signed[0]!;
+    }));
+   })}));
   };
   return {...mobile,connect,signIn,signAndSendTransactions,disconnect:()=>walletStep('mwa.disconnect',mobile.disconnect)};
  },[mobile,auth]);
