@@ -7,7 +7,6 @@
   },
   "sourceFiles": {
     "src/NativeRecoveryProbe.tsx": "862176b1348602c8d998c50b84e26ef1c2ebe8397c4a5ab73448248404c8a09e",
-    "src/wallet/web3Payment.ts": "485b6e994bfb23313582394e8c5ba379f383bb0dec9704f5a3d7caba70c62ec3",
     "App.tsx": "c2df425b34c9b025ce47a8e82a2511d8f7164f4d96a957730fa4b50d3522dfec",
     "android/app/build.gradle": "03293c3c6a14ad0d7aa435ed0b59808d020ac1fd89ecf6cb5639782c0464fe54",
     "android/app/src/debug/AndroidManifest.xml": "fb1795032c764d975376e1612ab7022058eca2268a45efbe731a47a5d3ac0f60",
@@ -174,20 +173,17 @@
     "src/wallet/session-guard.ts": "614407a59f0f4c49cf7f7d72889547f37f265ff27cdda58f38f424e99f0f4619",
     "src/wallet/signInFallback.ts": "d483b760a4393f01fba79cd0db0735489303814c49bb08fe3a4545d095fe2944",
     "src/wallet/submitPayment.ts": "885988e26898a75e6d5eb042745feee8b46515a77ee438e5dc93b6a715a4e565",
-    "src/wallet/useLoggedWallet.ts": "70b502867c695981d0e5180a916508d78aaf37c2d4a041a3688d52bc0014ba70"
+    "src/wallet/useLoggedWallet.ts": "2b66870e584102f879ba36703b07151dda558c0b770e9aede8137cdec6b6e70a",
+    "src/wallet/web3Payment.ts": "485b6e994bfb23313582394e8c5ba379f383bb0dec9704f5a3d7caba70c62ec3"
   },
-  "sha256": "cfa2265d95bf74b71d4c515656d767dbbf1e01994c20c72713b2024ca2b0f9e2",
-  "bytes": 90992514,
-  "builtAt": "2026-09-14T09:47:02.385Z",
-  "head": "8461fd29bd537cbcee5e359d8da95c5f120b5415",
+  "sha256": "f48f561bb0ada688404c1c5a1b50adddcad537d1f3ee882bbe86ff7fbd9cf63c",
+  "bytes": 90992726,
+  "builtAt": "2026-09-14T09:52:03.640Z",
+  "head": "28918a5206070bbb81a44604105e29270b987fba",
   "workingTree": [
     "M App.tsx",
     " M docs/MAINNET-TESTING.md",
-    " M package-lock.json",
-    " M package.json",
-    " M src/wallet/polyfill.ts",
     " M src/wallet/useLoggedWallet.ts",
-    " M verification/mainnet/checkout-no-rebate.json",
     "?? assets/icon-concepts/01-courier.png",
     "?? assets/icon-concepts/02-snatch.png",
     "?? assets/icon-concepts/03-seeker-s.png",
@@ -196,9 +192,7 @@
     "?? docs/SEEKER-AUDIENCE-WEEKLY-LEAGUE.md",
     "?? scripts/android-diagnostics/",
     "?? scripts/playtest-native-recovery.py",
-    "?? src/NativeRecoveryProbe.tsx",
-    "?? src/wallet/web3Payment.ts",
-    "?? tests/web3-payment.test.ts"
+    "?? src/NativeRecoveryProbe.tsx"
   ],
   "architectures": [
     "arm64-v8a"

@@ -14,6 +14,14 @@ import {normalizeNativeProtocolError} from './protocolError';
 import {signInWithFallback} from './signInFallback';
 import {walletLog,walletStep} from './diagnostics';
 
+async function waitForForeground(){
+ if(AppState.currentState==='active')return;
+ await walletStep('mwa.wait-for-foreground',()=>new Promise<void>((resolve,reject)=>{
+  const timer=setTimeout(()=>{subscription.remove();reject(new Error('Return to Steal a Seeker, then try again.'));},20000);
+  const subscription=AppState.addEventListener('change',state=>{if(state==='active'){clearTimeout(timer);subscription.remove();resolve();}});
+ }));
+}
+
 // Keep Wallet UI's account store, cached authorization and invalid-token retry.
 // Instrument the actual local MWA session, rather than guessing from app focus.
 export function useLoggedWallet(){
@@ -36,11 +44,15 @@ export function useLoggedWallet(){
   }
   async function session<T>(stage:string,run:(wallet:KitMobileWallet)=>Promise<T>,onAuthorization?:(result:AuthorizationResult)=>void):Promise<T>{
    return exclusiveWalletSession(async()=>{
-    if(AppState.currentState!=='active')await walletStep('mwa.wait-for-foreground',()=>new Promise<void>((resolve,reject)=>{const subscription=AppState.addEventListener('change',state=>{if(state==='active'){clearTimeout(timer);subscription.remove();resolve();}});const timer=setTimeout(()=>{subscription.remove();reject(new Error('Return to Steal a Seeker, then try the payment again.'));},20000);}));
-    return walletStep(stage,()=>transact(async wallet=>{
+    await waitForForeground();
+    const result=await walletStep(stage,()=>transact(async wallet=>{
     walletLog(`${stage}.transport-ready`);
     return run(observed(wallet,stage==='mwa.payment',onAuthorization));
-   }));});
+   }));
+    await waitForForeground();
+    await walletStep('mwa.android-network-resume',()=>new Promise<void>(resolve=>setTimeout(resolve,1000)));
+    return result;
+   });
   }
   const connect:typeof mobile.connect=()=>session('mwa.connect',wallet=>auth.authorizeSession(wallet));
   const signIn:typeof mobile.signIn=payload=>{
@@ -57,8 +69,8 @@ export function useLoggedWallet(){
    const expectedAccount=mobile.account?.address;
    if(!expectedAccount)throw new Error('Connect your wallet before paying.');
    return walletStep('payment.web3',()=>web3Payment(transaction,{rpcUrl:CHAIN.url,minContextSlot,log:stage=>walletLog(stage),sign:prepared=>exclusiveWalletSession(async()=>{
-    if(AppState.currentState!=='active')await walletStep('mwa.wait-for-foreground',()=>new Promise<void>((resolve,reject)=>{const subscription=AppState.addEventListener('change',state=>{if(state==='active'){clearTimeout(timer);subscription.remove();resolve();}});const timer=setTimeout(()=>{subscription.remove();reject(new Error('Return to Steal a Seeker, then try the payment again.'));},20000);}));
-    return walletStep('mwa.payment',()=>web3Transact(async wallet=>{
+    await waitForForeground();
+    const result=await walletStep('mwa.payment',()=>web3Transact(async wallet=>{
      walletLog('mwa.payment.transport-ready');
      walletLog('mwa.payment.fresh-authorization',{cached:false});
      const authorization=await walletStep('mwa.authorize',()=>wallet.authorize({cluster:IS_MAINNET?'mainnet-beta':'devnet',identity:APP_IDENTITY}));
@@ -69,6 +81,8 @@ export function useLoggedWallet(){
      walletLog('mwa.payment.signed',{accounts:signed.length});
      return signed[0]!;
     }));
+    await waitForForeground();
+    return result;
    })}));
   };
   return {...mobile,connect,signIn,signAndSendTransactions,disconnect:()=>walletStep('mwa.disconnect',mobile.disconnect)};

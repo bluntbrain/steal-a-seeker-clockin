@@ -37,6 +37,7 @@
     "targetedPaymentTests": 5,
     "physicalPurchaseConfirmed": false,
     "installedOnRealme": true,
-    "apkSha256": "cfa2265d95bf74b71d4c515656d767dbbf1e01994c20c72713b2024ca2b0f9e2"
+    "apkSha256": "f48f561bb0ada688404c1c5a1b50adddcad537d1f3ee882bbe86ff7fbd9cf63c",
+    "foregroundReturnDelayAdded": true
   }
 }

@@ -54,7 +54,7 @@ An exact-material scan of 1,617 reachable Git file versions found no Devnet trea
 
 Use Phantom's normal Mainnet mode. Check the app says **MAINNET · REAL MONEY**. Connect the allowed wallet, select SOL or SKR, review the reduced quote and approve in Phantom. Verify that access opens and Restore purchases works. Do not pay a second time while an earlier payment is being checked.
 
-The treasury needs SOL for fees and SKR for the reserved reward. Real buyer payment and the final campaign reward must be observed on chain before calling the complete Mainnet money flow tested. Automated tests use fixtures; they do not spend the user's funds.
+New passes have no campaign completion payout. Previously promised rewards retain their original terms and funding requirements. Real buyer payment, finalized receipt and access unlock must be observed before calling the Mainnet purchase flow tested. Automated tests use fixtures; they do not spend the user's funds.
 
 ## Larger mission detail — 14 September follow-up
 
@@ -92,3 +92,7 @@ Our differences are deliberate: use the server-prepared order's exact blockhash,
 Safe stage logs identify deserialize, authorization, signing, message validation, serialization, send attempts and confirmation without logging keys, authorization tokens, raw transactions or account addresses. Tests exercise SOL/SKR round trips using actual Web3.js transaction serialization, identical-byte retries, missing signatures, message mutation and failed confirmation. Physical-device purchase completion remains a separate check.
 
 Reference-port build: SHA-256 `cfa2265d95bf74b71d4c515656d767dbbf1e01994c20c72713b2024ca2b0f9e2`. Installed successfully on the connected Realme. 134 app/shared tests and TypeScript passed; all five Web3 payment tests passed again after the final byte-copy adjustment.
+
+The first device retry after this port exposed a separate login lifecycle failure: Phantom returned a valid sign-in result, but `/auth/verify` ran before `app.active` and failed immediately, repeatedly. MWA completion now waits for Android foreground and then one second before returning sign-in/connect results to callers. Payment signing also waits for foreground before its existing one-second send delay. No automatic payment approval was performed.
+
+Foreground-delay build installed successfully: SHA-256 `f48f561bb0ada688404c1c5a1b50adddcad537d1f3ee882bbe86ff7fbd9cf63c`. TypeScript and Android build passed.
