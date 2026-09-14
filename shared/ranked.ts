@@ -4,3 +4,5 @@ export type RunResult={status:'won'|'caught'|'timeout'|'incomplete';score:number
 export type RunTicket={id:string;wallet:string;status:'issued'|'verifying'|'verified'|'rejected'|'error'|'abandoned';manifest:DailyManifest;issuedAt:string;expiresAt:string;result:RunResult|null;detail:string|null};
 export type LeaderboardEntry={wallet:string;rank:number;score:number;ticks:number;seconds:number;frame:string|null};
 export type Leaderboard={day:string;entries:LeaderboardEntry[];personal:LeaderboardEntry|null;rival?:LeaderboardEntry|null};
+export type WeeklyEntry=LeaderboardEntry&{days:number};
+export type WeeklyLeaderboard={week:string;startsAt:string;endsAt:string;entries:WeeklyEntry[];personal:WeeklyEntry|null;rival:WeeklyEntry|null;participants:number};

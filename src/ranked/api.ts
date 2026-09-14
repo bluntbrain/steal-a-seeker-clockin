@@ -1,7 +1,8 @@
 import {api} from '../commerce/client';
-import type {DailyManifest,Leaderboard,RunTicket} from '../../shared/ranked';
+import type {DailyManifest,Leaderboard,RunTicket,WeeklyLeaderboard} from '../../shared/ranked';
 import type {Replay} from '../../shared/replay';
 export const rankedApi={
+ weekly:(token?:string)=>api<WeeklyLeaderboard>('/weekly/leaderboard',{token}),
  daily:()=>api<DailyManifest>('/daily'),
  leaderboard:(day:string,token?:string)=>api<Leaderboard>(`/daily/${encodeURIComponent(day)}/leaderboard`,{token}),
  current:(token:string)=>api<RunTicket|null>('/runs/current',{token}),

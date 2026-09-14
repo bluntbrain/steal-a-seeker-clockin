@@ -39,6 +39,7 @@ export async function createApp(service:CommerceService,ranked=new RankedService
  app.post('/orders/:id/reconcile',async req=>{const a=await account(req.headers.authorization),{id}=z.object({id:uuid}).parse(req.params);await service.getOrder(a.wallet,id);await service.reconcile(id);return service.getOrder(a.wallet,id);});
  app.put('/me/progress',async req=>service.syncProgress((await account(req.headers.authorization)).wallet,progressInput.parse(req.body)));
  app.put('/me/equipment',async req=>service.equip((await account(req.headers.authorization)).wallet,z.object({sku}).strict().parse(req.body).sku));
+ app.get('/weekly/leaderboard',async req=>ranked.weekly(req.headers.authorization?(await account(req.headers.authorization)).wallet:undefined));
  app.get('/daily',async()=>ranked.daily());
  const day=z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine(v=>{try{return new Date(`${v}T00:00:00Z`).toISOString().slice(0,10)===v;}catch{return false;}}),rulesHash=z.string().regex(/^[a-f0-9]{64}$/);
  app.get('/daily/:day/leaderboard',async req=>{const input=z.object({day}).parse(req.params),wallet=req.headers.authorization?(await account(req.headers.authorization)).wallet:undefined;return ranked.leaderboard(input.day,wallet);});

@@ -3,6 +3,8 @@ import type {Pool} from 'pg';
 import {getLevel} from '../src/game/level';
 import type {DailyManifest,RunTicket,Leaderboard,LeaderboardEntry} from '../shared/ranked';
 import rules from '../shared/rules-manifest.json';
+import {weekWindow} from '../shared/weekly';
+import type {WeeklyLeaderboard,WeeklyEntry} from '../shared/ranked';
 import {transaction} from './db';
 import {ServiceError} from './service';
 import {replayInput} from './replay';
@@ -64,6 +66,20 @@ export class RankedService {
     await this.pool.query("UPDATE ranked_runs SET status=$2,detail=$3,lease_until=NULL,verify_after=now()+interval '3 seconds',verify_attempts=verify_attempts-$4 WHERE id=$1 AND status='verifying' AND lease_token=$5",[run.id,invalid?'rejected':terminal?'error':'verifying',invalid?'The replay does not satisfy the game rules.':terminal?'Verification could not finish. Your replay is kept for support.':'Verification is waiting to retry.',busy?1:0,run.lease_token]);
    }
   }));return jobs.length;
+ }
+ async weekly(wallet?:string):Promise<WeeklyLeaderboard>{
+  const window=weekWindow(this.now());
+  const rows=await this.pool.query(`WITH daily_best AS (
+   SELECT DISTINCT ON (wallet,day) wallet,day,(result->>'score')::integer AS score,(result->>'ticks')::integer AS ticks
+   FROM ranked_runs WHERE day>=$1 AND day<$2 AND status='verified' AND result->>'status'='won'
+   ORDER BY wallet,day,(result->>'score')::integer DESC,(result->>'ticks')::integer ASC,id
+  ), totals AS (SELECT wallet,sum(score) AS score,sum(ticks) AS ticks,count(*) AS days FROM daily_best GROUP BY wallet),
+  ranked AS (SELECT *,rank() OVER(ORDER BY score DESC,ticks ASC) AS rank,row_number() OVER(ORDER BY score DESC,ticks ASC,wallet) AS position,count(*) OVER() AS participants FROM totals)
+  SELECT ranked.*,wallets.equipment->>'frame' AS frame FROM ranked JOIN wallets ON wallets.address=ranked.wallet
+  WHERE position<=50 OR wallet=$3 OR position=(SELECT min(position) FROM ranked WHERE rank=(SELECT max(rank) FROM ranked WHERE rank<(SELECT rank FROM ranked WHERE wallet=$3))) ORDER BY rank,wallet LIMIT 52`,[window.week,window.endsAt.slice(0,10),wallet??'']);
+  const entry=(r:Record<string,any>):WeeklyEntry=>({wallet:r.wallet,rank:Number(r.rank),score:Number(r.score),ticks:Number(r.ticks),seconds:Number(r.ticks)/30,days:Number(r.days),frame:r.frame==='profile-frame'?r.frame:null});
+  const mine=rows.rows.find(r=>r.wallet===wallet),better=mine?rows.rows.filter(r=>Number(r.rank)<Number(mine.rank)).sort((a,b)=>Number(b.rank)-Number(a.rank)||a.wallet.localeCompare(b.wallet))[0]:undefined;
+  return {...window,participants:Number(rows.rows[0]?.participants??0),entries:rows.rows.filter(r=>Number(r.position)<=50).map(entry),personal:mine?entry(mine):null,rival:better?entry(better):null};
  }
  async leaderboard(day:string,wallet?:string):Promise<Leaderboard>{
   const exists=await this.pool.query('SELECT 1 FROM daily_manifests WHERE day=$1',[day]);if(!exists.rowCount)throw new ServiceError(404,'Daily challenge not found.');

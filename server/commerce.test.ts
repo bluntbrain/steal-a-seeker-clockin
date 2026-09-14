@@ -450,3 +450,21 @@ test('restore expires unpaid approvals and never resurrects a dropped callback s
  await service.check(ended,sig,{state:'needs_review',detail:'A late transfer requires review.'});
  assert.equal((await service.getOrder(user.wallet,o.id)).status,'needs_review','Expired attempt history must not hide a late payment');
 });
+
+test('weekly board sums one best verified win per day, excludes other weeks and shares exact ties',async()=>{
+ const weeklyService=new RankedService(pool,{now:()=>new Date('2032-05-19T12:00:00Z')}),people=[pub(),pub(),pub()];
+ for(const w of people)await pool.query('INSERT INTO wallets(address) VALUES($1)',[w]);
+ const manifest=await weeklyService.daily();
+ async function add(w:string,day:string,score:number,ticks:number,status='verified',outcome='won'){
+  await pool.query('INSERT INTO daily_manifests(day,manifest) VALUES($1,$2) ON CONFLICT DO NOTHING',[day,{...manifest,day}]);
+  await pool.query('INSERT INTO ranked_runs(id,wallet,day,request_key,manifest,status,issued_at,expires_at,result) VALUES($1,$2,$3,$4,$5,$6,now(),now(),$7)',[randomUUID(),w,day,randomUUID(),{...manifest,day},status,{status:outcome,score,ticks}]);
+ }
+ await add(people[0]!, '2032-05-17',100,600);await add(people[0]!, '2032-05-17',100,300);await add(people[0]!, '2032-05-18',200,300);
+ await add(people[0]!, '2032-05-16',99999,1);await add(people[0]!, '2032-05-24',99999,1);
+ await add(people[0]!, '2032-05-19',99999,1,'verifying');await add(people[0]!, '2032-05-19',99999,1,'verified','caught');
+ await add(people[1]!, '2032-05-17',300,600);await add(people[2]!, '2032-05-17',300,900);
+ const board=await weeklyService.weekly(people[2]);assert.equal(board.week,'2032-05-17');assert.equal(board.participants,3);assert.equal(board.personal?.rank,3);assert.equal(board.rival?.rank,1);
+ const first=board.entries.find(r=>r.wallet===people[0]);assert.equal(first?.score,300);assert.equal(first?.ticks,600);assert.equal(first?.days,2);assert.equal(first?.rank,1);assert.equal(board.entries.find(r=>r.wallet===people[1])?.rank,1);
+ const empty=await new RankedService(pool,{now:()=>new Date('2032-06-01')}).weekly();assert.equal(empty.participants,0);assert.deepEqual(empty.entries,[]);
+ const response=await app.inject({method:'GET',url:'/weekly/leaderboard'});assert.equal(response.statusCode,200);assert.equal(response.json().personal,null);
+});
