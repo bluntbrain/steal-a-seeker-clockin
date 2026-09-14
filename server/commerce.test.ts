@@ -519,3 +519,20 @@ test('weekly pass without rebate prepares and fulfills without reward funding; e
  const sig=b58(randomBytes(64));transactions.set(sig,paidTx(order,sig));await weekly.attach(user.wallet,order.id,sig);assert((await weekly.me(user.wallet)).entitlements.includes('campaign'));
  assert.equal((await weekly.getOrder(priorUser.wallet,earlier.id)).campaignTerms?.rebate,25);
 });
+
+test('wallet-managed send with lost callback stays locked until finalized expiry, without waiting for quote expiry',async()=>{
+ const user=await login(),o=await quote(user),prepared=await service.preparePayment(user.wallet,o.id);
+ await service.reconcile(o.id);
+ assert.deepEqual((await service.getOrder(user.wallet,o.id)).payment,prepared.payment,'A live approval cannot be reissued');
+ chainHeight=Number(prepared.payment!.lastValidBlockHeight)+1;
+ chainUnavailable=true;try{await assert.rejects(service.reconcile(o.id));}finally{chainUnavailable=false;}
+ assert.deepEqual((await service.getOrder(user.wallet,o.id)).payment,prepared.payment);
+ await service.reconcile(o.id);
+ const cleared=await service.getOrder(user.wallet,o.id);
+ assert.equal(cleared.status,'quoted');assert.equal(cleared.payment,undefined);
+ assert.ok(new Date(cleared.expiresAt).getTime()>Date.now(),'Price quote remains valid');
+ const next=await service.preparePayment(user.wallet,o.id);assert.notEqual(next.payment!.id,prepared.payment!.id);
+ const sig=b58(randomBytes(64));transactions.set(sig,paidTx(next,sig));references.set(o.reference,[sig]);
+ await service.reconcile(o.id);assert.equal((await service.getOrder(user.wallet,o.id)).status,'fulfilled');
+ assert.deepEqual((await service.me(user.wallet)).entitlements,['campaign']);
+});

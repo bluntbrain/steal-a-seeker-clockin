@@ -64,7 +64,7 @@ export class CommerceService {
  });}
  async getOrder(wallet:string,id:string){const r=await this.pool.query('SELECT * FROM orders WHERE id=$1 AND wallet=$2',[id,wallet]);if(!r.rowCount)throw new ServiceError(404,'Order not found.');return orderFromRow(r.rows[0]);}
  async orders(wallet:string){return (await this.pool.query('SELECT * FROM orders WHERE wallet=$1 ORDER BY created_at DESC LIMIT 50',[wallet])).rows.map(orderFromRow);}
- async preparePayment(wallet:string,id:string):Promise<Order>{
+ async preparePayment(wallet:string,id:string,reconcileOnly=false):Promise<Order>{
   const observed=await this.getOrder(wallet,id);if(observed.status==='fulfilled')return observed;
   await this.chain.ready();
   const lifetime=await this.chain.lifetime(),height=await this.chain.height(Number(lifetime.contextSlot));
@@ -80,9 +80,9 @@ export class CommerceService {
    if(current.payment&&current.payment.id!==observed.payment?.id)return current;
    if(current.payment&&!expired)return current; // Same bytes, same signature on a resumed approval.
    if(current.status==='verifying'&&!current.payment)throw new ServiceError(409,'An earlier payment needs reconciliation.');
-   if(new Date(current.expiresAt).getTime()<=Date.now()){
+   if(reconcileOnly||new Date(current.expiresAt).getTime()<=Date.now()){
     await db.query("UPDATE order_attempts SET state='expired',detail='Approval expired; finalized reference scan found no completed payment.' WHERE order_id=$1 AND state='pending'",[id]);
-    const ended=await db.query("UPDATE orders SET status='quoted',payment_authorization=NULL,signature=NULL,detail='Quote and payment lifetime expired. No finalized payment was found; request a new quote.' WHERE id=$1 RETURNING *",[id]);return orderFromRow(ended.rows[0]);
+    const ended=await db.query("UPDATE orders SET status='quoted',payment_authorization=NULL,signature=NULL,detail='Wallet request expired. No finalized payment was found. You can try again.' WHERE id=$1 RETURNING *",[id]);return orderFromRow(ended.rows[0]);
    }
    if(current.campaignTerms){
     if(this.campaignReturns&&(this.campaignReturns.config.mint!==this.config.mint||this.campaignReturns.config.treasury!==this.config.recipient||this.campaignReturns.config.source!==this.config.destination||this.campaignReturns.config.decimals!==this.config.decimals))throw new ServiceError(503,'Campaign treasury configuration does not match this order.');
@@ -125,9 +125,9 @@ export class CommerceService {
  async reconcile(id:string){const r=await this.pool.query('SELECT * FROM orders WHERE id=$1',[id]);if(!r.rowCount)return;const order=orderFromRow(r.rows[0]);if(order.status==='fulfilled')return;
   const attempts=await this.pool.query("SELECT signature FROM order_attempts WHERE order_id=$1 AND state='pending'",[id]);const signatures=new Set<string>(attempts.rows.map(r=>r.signature));if(order.signature)signatures.add(order.signature);for(const sig of await this.chain.find(order.reference))signatures.add(sig);
   for(const sig of signatures)await this.check(order,sig);
-  // Restore must also settle abandoned approvals. Never generate a new payment
-  // here: only the expired-quote branch of preparePayment may be reached.
-  if(order.payment&&order.status!=='needs_review'&&new Date(order.expiresAt).getTime()<=Date.now())await this.preparePayment(order.wallet,id);
+  // Settle a lost wallet callback as soon as its blockhash expires, even if
+  // the price quote is still valid. Never generate a new approval on Restore.
+  if(order.payment&&order.status!=='needs_review')await this.preparePayment(order.wallet,id,true);
   await this.pool.query('UPDATE orders SET checked_at=now() WHERE id=$1',[id]);
  }
  async releaseUnpaidCampaignReservations(limit=4){

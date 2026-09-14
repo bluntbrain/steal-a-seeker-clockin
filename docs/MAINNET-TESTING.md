@@ -102,3 +102,7 @@ The next device attempt completed sign-in and signing, then explicitly logged `p
 Fixed-fee build installed on Realme: SHA-256 `bce2369ff36df385890ce17a6c6561f999fc1ac10c2c98501e44e22dd8eff81a`.
 
 The fixed-budget device retry still failed raw-byte equality, so fee injection alone was not established as the complete cause. Validation now decompiles both transactions and compares fee payer, signer count, original blockhash, every instruction's program/data/accounts/privileges. Equivalent compiled account-index ordering is accepted; changed transfers, memo, reference, budget, blockhash and lookup tables are rejected. Logs name every differing field without exposing addresses or transaction bytes. A test explicitly reorders compiled readonly accounts and remaps instruction indexes, then verifies that an altered transfer amount is still rejected. Nine targeted payment tests passed; TypeScript and the release build passed. Installed APK SHA-256: `28bb86f243b1367f76db63f3732202635a47412087c1856c15f02f8bfedd178f`.
+
+## Current payment flow
+
+The sign-only/local-send experiments above are superseded. See [PAYMENT-DEBUG.md](PAYMENT-DEBUG.md) for the active official MWA sign-and-send integration and latest verification.
