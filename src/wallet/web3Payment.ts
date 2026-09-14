@@ -1,6 +1,7 @@
 import {getTransactionEncoder,type Transaction,type TransactionWithBlockhashLifetime} from '@solana/kit';
 import {Connection,VersionedTransaction,SendTransactionError,TransactionExpiredBlockheightExceededError} from '@solana/web3.js';
 import {getBase58Decoder} from '@solana/kit';
+import {validatePayment} from './validatePayment';
 
 type PaymentConnection=Pick<Connection,'sendRawTransaction'|'confirmTransaction'>;
 type Options={rpcUrl:string;minContextSlot:bigint;sign:(transaction:VersionedTransaction)=>Promise<VersionedTransaction>;connection?:PaymentConnection;wait?:(ms:number)=>Promise<void>;log?:(stage:string)=>void};
@@ -11,13 +12,10 @@ export async function web3Payment(original:Transaction&TransactionWithBlockhashL
  const log=options.log??(()=>{}),wait=options.wait??(ms=>new Promise<void>(r=>setTimeout(r,ms)));
  log('payment.web3.deserialize');
  const transaction=VersionedTransaction.deserialize(Uint8Array.from(getTransactionEncoder().encode(original)));
- const message=transaction.message.serialize();
+ const expected=VersionedTransaction.deserialize(transaction.serialize());
  const signed=await options.sign(transaction);
  log('payment.web3.validate');
- const returnedMessage=signed.message.serialize();
- if(message.length!==returnedMessage.length||message.some((b,i)=>b!==returnedMessage[i])){
-  log('payment.web3.message-changed');throw new Error('Wallet changed the payment. Nothing was submitted.');
- }
+ validatePayment(expected,signed,log);
  const bytes=signed.signatures[0];
  if(signed.signatures.length!==1||!bytes||bytes.length!==64||bytes.every(b=>b===0)){
   log('payment.web3.signature-missing');throw new Error('Wallet did not return a signed payment. Nothing was submitted.');

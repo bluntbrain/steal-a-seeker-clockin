@@ -7,6 +7,7 @@
   },
   "sourceFiles": {
     "src/NativeRecoveryProbe.tsx": "862176b1348602c8d998c50b84e26ef1c2ebe8397c4a5ab73448248404c8a09e",
+    "src/wallet/validatePayment.ts": "6e28107b19b728a372949380e21b9f8df2af9e06ad32592b3dd55e9deeb0830d",
     "App.tsx": "c2df425b34c9b025ce47a8e82a2511d8f7164f4d96a957730fa4b50d3522dfec",
     "android/app/build.gradle": "03293c3c6a14ad0d7aa435ed0b59808d020ac1fd89ecf6cb5639782c0464fe54",
     "android/app/src/debug/AndroidManifest.xml": "fb1795032c764d975376e1612ab7022058eca2268a45efbe731a47a5d3ac0f60",
@@ -174,17 +175,15 @@
     "src/wallet/signInFallback.ts": "d483b760a4393f01fba79cd0db0735489303814c49bb08fe3a4545d095fe2944",
     "src/wallet/submitPayment.ts": "885988e26898a75e6d5eb042745feee8b46515a77ee438e5dc93b6a715a4e565",
     "src/wallet/useLoggedWallet.ts": "2b66870e584102f879ba36703b07151dda558c0b770e9aede8137cdec6b6e70a",
-    "src/wallet/web3Payment.ts": "485b6e994bfb23313582394e8c5ba379f383bb0dec9704f5a3d7caba70c62ec3"
+    "src/wallet/web3Payment.ts": "0f1b2245db4f909be909fcfca52ed281930fad8a1d559c5d6e86a636599df6eb"
   },
-  "sha256": "bce2369ff36df385890ce17a6c6561f999fc1ac10c2c98501e44e22dd8eff81a",
-  "bytes": 90993330,
-  "builtAt": "2026-09-14T09:58:15.882Z",
-  "head": "6c9967af5261ce9f79db7d7a6887019067fda402",
+  "sha256": "28bb86f243b1367f76db63f3732202635a47412087c1856c15f02f8bfedd178f",
+  "bytes": 90994346,
+  "builtAt": "2026-09-14T10:04:59.158Z",
+  "head": "19e396165620ae070e9305c8c1bc2cfb13c6f891",
   "workingTree": [
     "M App.tsx",
-    " M docs/MAINNET-TESTING.md",
-    " M src/commerce/CommerceSection.tsx",
-    " M src/commerce/payment.ts",
+    " M src/wallet/web3Payment.ts",
     " M tests/web3-payment.test.ts",
     "?? assets/icon-concepts/01-courier.png",
     "?? assets/icon-concepts/02-snatch.png",
@@ -194,7 +193,8 @@
     "?? docs/SEEKER-AUDIENCE-WEEKLY-LEAGUE.md",
     "?? scripts/android-diagnostics/",
     "?? scripts/playtest-native-recovery.py",
-    "?? src/NativeRecoveryProbe.tsx"
+    "?? src/NativeRecoveryProbe.tsx",
+    "?? src/wallet/validatePayment.ts"
   ],
   "architectures": [
     "arm64-v8a"

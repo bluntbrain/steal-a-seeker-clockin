@@ -44,3 +44,18 @@ test('prepared payments include a deterministic bounded fee budget so Phantom ne
  assert.equal((BigInt(units)*microLamports+999999n)/1000000n,1000n);
  assert.equal(instructions[2]!.programId.toBase58(),'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA');
 });
+test('an equivalent account-index reorder is accepted without relaxing amount or recipient checks',async()=>{
+ const {validatePayment}=await import('../src/wallet/validatePayment');
+ const {getTransactionEncoder}=await import('@solana/kit');
+ const f=fixture('SKR'),original=VersionedTransaction.deserialize(Uint8Array.from(getTransactionEncoder().encode(f.original))),signed=VersionedTransaction.deserialize(original.serialize());
+ const m=signed.message;assert.equal(m.version,0);if(m.version!==0)throw Error('fixture version');
+ const a=m.staticAccountKeys.length-1,b=a-1;
+ assert.ok(m.header.numReadonlyUnsignedAccounts>=2);
+ [m.staticAccountKeys[a],m.staticAccountKeys[b]]=[m.staticAccountKeys[b]!,m.staticAccountKeys[a]!];
+ const swap=(i:number)=>i===a?b:i===b?a:i;
+ for(const ix of m.compiledInstructions){ix.programIdIndex=swap(ix.programIdIndex);ix.accountKeyIndexes=ix.accountKeyIndexes.map(swap);}
+ assert.notDeepEqual(signed.message.serialize(),original.message.serialize());
+ assert.doesNotThrow(()=>validatePayment(original,signed));
+ m.compiledInstructions[2]!.data[1]=m.compiledInstructions[2]!.data[1]!^1;
+ assert.throws(()=>validatePayment(original,signed),/data-2/);
+});
