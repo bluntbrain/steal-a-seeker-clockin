@@ -1,0 +1,86 @@
+{
+  "checkedAt": "2026-09-14T08:54:52.857988+00:00",
+  "deployment": "7080f140-320e-43cb-a351-264750e67387",
+  "normalProfile": {
+    "GAME_PASS_USD_CENTS": 1000,
+    "SHOP_PRICE_DIVISOR": 1
+  },
+  "live": {
+    "/health": {
+      "ok": true,
+      "cluster": "solana:mainnet"
+    },
+    "/pricing/campaign": {
+      "sku": "campaign",
+      "expiresAt": "2026-09-14T08:55:53.860Z",
+      "options": [
+        {
+          "currency": "SKR",
+          "amount": "5680000",
+          "decimals": 6,
+          "usdCents": 11,
+          "rateUsd": "0.017625",
+          "quotedAt": "2026-09-14T08:54:53.860Z",
+          "source": "Coinbase spot"
+        },
+        {
+          "currency": "SOL",
+          "amount": "1000000",
+          "decimals": 9,
+          "usdCents": 11,
+          "rateUsd": "101.33",
+          "quotedAt": "2026-09-14T08:54:53.860Z",
+          "source": "Coinbase spot"
+        }
+      ],
+      "campaignOffer": {
+        "testPricing": true,
+        "usdCents": 10,
+        "rebateSkr": 25,
+        "missions": 12,
+        "cluster": "solana:mainnet"
+      }
+    },
+    "/pricing/night-courier": {
+      "sku": "night-courier",
+      "expiresAt": "2026-09-14T08:55:53.860Z",
+      "options": [
+        {
+          "currency": "SKR",
+          "amount": "100000",
+          "decimals": 6,
+          "usdCents": 1,
+          "rateUsd": "0.017625",
+          "quotedAt": "2026-09-14T08:54:53.860Z",
+          "source": "Coinbase spot"
+        },
+        {
+          "currency": "SOL",
+          "amount": "100000",
+          "decimals": 9,
+          "usdCents": 2,
+          "rateUsd": "101.33",
+          "quotedAt": "2026-09-14T08:54:53.860Z",
+          "source": "Coinbase spot"
+        }
+      ]
+    }
+  },
+  "qa": {
+    "appTests": 125,
+    "serverTests": 62,
+    "typecheck": "passed",
+    "webViewports": [
+      "360x640",
+      "360x797"
+    ],
+    "webFlows": [
+      "practice does not spend ranked chance",
+      "ranked start/exit consumes one chance",
+      "preview uses more than half screen height",
+      "bottom tabs remain in viewport",
+      "repeated header hidden in mission detail"
+    ],
+    "realPaymentSubmitted": false
+  }
+}

@@ -30,3 +30,15 @@ test('individual shop settings override the general discount',()=>{
  assert.equal(priceProduct('night-courier','SKR',{SKR:'0.02',SOL:'100',at:now},6,now,10,100,config.shopPrices).amount,'1500000');
  for(const json of ['{"campaign":1}','{"night-courier":-1}','{"unknown":2}','[]'])assert.throws(()=>networkConfig({SHOP_PRICES_SKR_JSON:json}),/Invalid/);
 });
+
+test('test pricing selects cheap quotes without overwriting the live profile or changing network',()=>{
+ const env={SOLANA_NETWORK:'mainnet',MAINNET_TEST_ENABLED:'1',MAINNET_TEST_WALLETS:'tester',GAME_PASS_USD_CENTS:'1000',SHOP_PRICE_DIVISOR:'1',SHOP_PRICES_SKR_JSON:'{"night-courier":"24"}'};
+ const cheap=networkConfig({...env,TEST_PRICING:'true'}),live=networkConfig({...env,TEST_PRICING:'false'}),now=Date.now(),rates={SKR:'0.02',SOL:'100',at:now};
+ assert.equal(cheap.cluster,live.cluster);assert.equal(cheap.cluster,'solana:mainnet');assert.deepEqual(cheap.allowlist,['tester']);assert.equal(cheap.campaignUsdCents,10);assert.equal(live.campaignUsdCents,1000);
+ for(const currency of ['SOL','SKR'] as const){assert.equal(priceProduct('campaign',currency,rates,6,now,cheap.priceDivisor,cheap.campaignUsdCents,cheap.shopPrices).usdCents,10);assert.equal(priceProduct('campaign',currency,rates,6,now,live.priceDivisor,live.campaignUsdCents,live.shopPrices).usdCents,1000);}
+ assert.equal(priceProduct('night-courier','SKR',rates,6,now,cheap.priceDivisor,cheap.campaignUsdCents,cheap.shopPrices).amount,'100000');
+ assert.equal(priceProduct('night-courier','SKR',rates,6,now,live.priceDivisor,live.campaignUsdCents,live.shopPrices).amount,'24000000');
+ assert.equal(networkConfig(env).testPricing,false);assert.equal(cheap.rebateSkr,live.rebateSkr);
+ assert.throws(()=>networkConfig({...env,TEST_PRICING:'yes'}),/must be true or false/);
+ assert.equal(networkConfig({...env,TEST_PRICING:'true',TEST_GAME_PASS_USD_CENTS:'1'}).campaignUsdCents,1);
+});

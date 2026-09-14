@@ -5,10 +5,15 @@ export function networkConfig(env:Record<string,string|undefined>){
  const name=env.SOLANA_NETWORK??'devnet';if(!['devnet','mainnet'].includes(name))throw new Error('Unsupported Solana network.');
  const integer=(key:string,fallback:number,min:number,max:number)=>{const n=Number(env[key]??fallback);if(!Number.isSafeInteger(n)||n<min||n>max)throw new Error('Invalid pricing setting: '+key);return n;};
  let shopPrices:Record<string,string>={};if(env.SHOP_PRICES_SKR_JSON){let parsed:unknown;try{parsed=JSON.parse(env.SHOP_PRICES_SKR_JSON);}catch{throw new Error('Invalid SHOP_PRICES_SKR_JSON');}if(!parsed||typeof parsed!=='object'||Array.isArray(parsed))throw new Error('Invalid shop prices');for(const [sku,value] of Object.entries(parsed)){if(!PRODUCTS.some(p=>p.id===sku&&p.kind!=='access')||!/^\d+(\.\d{1,6})?$/.test(String(value))||Number(value)<=0||Number(value)>100000)throw new Error('Invalid shop price: '+sku);shopPrices[sku]=String(value);}}
+ const testFlag=env.TEST_PRICING??'false';if(!['true','false'].includes(testFlag))throw new Error('TEST_PRICING must be true or false.');
+ const testPricing=testFlag==='true';
+ const livePriceDivisor=integer('SHOP_PRICE_DIVISOR',1,1,100),livePassCents=integer('GAME_PASS_USD_CENTS',1000,1,100000);
+ const testPassCents=integer('TEST_GAME_PASS_USD_CENTS',10,1,100);
+ if(testPricing){shopPrices=Object.fromEntries(PRODUCTS.filter(p=>p.kind!=='access').map(p=>[p.id,'0.1']));}
  const mainnet=name==='mainnet',cluster:SolanaCluster=mainnet?'solana:mainnet':'solana:devnet';
  const allowlist=(env.MAINNET_TEST_WALLETS??'').split(',').map(s=>s.trim()).filter(Boolean);
  if(mainnet&&(!allowlist.length||env.MAINNET_TEST_ENABLED!=='1'))throw new Error('Mainnet testing requires explicit enablement and tester wallets.');
- return {cluster,mainnet,allowlist,shopPrices,priceDivisor:integer('SHOP_PRICE_DIVISOR',1,1,100),campaignUsdCents:integer('GAME_PASS_USD_CENTS',1000,1,100000),rebateSkr:integer('CAMPAIGN_REBATE_SKR',25,1,10000),
+ return {cluster,mainnet,allowlist,testPricing,shopPrices,priceDivisor:testPricing?100:livePriceDivisor,campaignUsdCents:testPricing?testPassCents:livePassCents,rebateSkr:integer('CAMPAIGN_REBATE_SKR',25,1,10000),
   mint:mainnet?MAINNET_SKR_MINT:env.DEVNET_TEST_MINT??'',recipient:mainnet?env.MAINNET_TREASURY??'':env.DEVNET_TREASURY??'',
   decimals:mainnet?6:Number(env.DEVNET_TOKEN_DECIMALS??6),rpcUrl:mainnet?env.MAINNET_RPC_URL??'https://api.mainnet-beta.solana.com':env.DEVNET_RPC_URL??'https://api.devnet.solana.com',
   signerPath:mainnet?env.MAINNET_SIGNER_PATH:env.DEVNET_SIGNER_PATH,signerJson:mainnet?env.MAINNET_SIGNER_JSON:env.DEVNET_SIGNER_JSON,

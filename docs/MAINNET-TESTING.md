@@ -19,10 +19,16 @@ Open Railway → `seeker-mainnet-test` → Variables. Change the values below an
 
 | Variable | Current value | Meaning |
 | --- | --- | --- |
-| `GAME_PASS_USD_CENTS` | `100` | $1 pass. Use `1000` for $10 or `250` for $2.50. |
-| `SHOP_PRICE_DIVISOR` | `10` | Ten times cheaper than the base shop list. `1` restores base prices. |
-| `SHOP_PRICES_SKR_JSON` | unset | Optional per-item SKR overrides, e.g. `{"night-courier":"2","signal-runner":"3","escape-trail":"0.8","profile-frame":"0.5","rack-theme":"1.2"}`. These override the divisor for those items. |
-| `CAMPAIGN_REBATE_SKR` | `25` | Whole SKR rewarded once after all 12 campaign wins are verified. Funds must be reserved before taking payment. |
+| `TEST_PRICING` | `true` | Selects reduced prices. Set `false` and apply/redeploy to return to the live price profile below. It does not change the network or remove the tester allowlist. |
+| `TEST_GAME_PASS_USD_CENTS` | `10` | $0.10 test pass; accepts 1–100 cents. Used only when test pricing is true. |
+| `GAME_PASS_USD_CENTS` | `1000` | $10 normal pass. Preserved while testing; used when test pricing is false. |
+| `SHOP_PRICE_DIVISOR` | `1` | Normal shop prices. Used only when test pricing is false. |
+| `SHOP_PRICES_SKR_JSON` | unset | Optional normal per-item SKR overrides. Ignored while testing, then restored when the flag is false. |
+| `CAMPAIGN_REBATE_SKR` | `25` | Whole SKR rewarded once after all 12 campaign wins are verified. Funds must be reserved before taking payment. Unchanged by the pricing switch. |
+
+With test pricing on, every cosmetic costs **0.1 SKR**, with an equivalent SOL quote rounded up to the supported increment. Switching it off restores normal prices (e.g. Night Courier 20 SKR). All of these payments remain real Mainnet payments. A $0.10 target may display approximately $0.11 after token rounding and upward rounding to whole USD cents; network fees are additional.
+
+Change only `TEST_PRICING` for routine switching. No Android rebuild is needed. Existing orders, entitlements and their reward terms stay unchanged, so this switch neither removes paid access nor recharges existing buyers. It also does not activate weekly prize payouts.
 
 Both SOL and SKR quotes use live exchange rates and round up to supported payment increments. The exact amount is shown before wallet approval. Shop defaults remain in `shared/commerce.ts`; environment overrides take precedence. Mainnet test enablement and allowed wallets are separate from pricing.
 
@@ -36,7 +42,7 @@ Both are outside the repository, with file mode 0600 and parent directory mode 0
 
 An exact-material scan of 1,617 reachable Git file versions found no Devnet treasury key matches in compact JSON, base58, base64 or hex representations. This is evidence about the checked repository history, not proof against every possible leak elsewhere. Never paste either key into a ticket, message, screenshot or repository.
 
-## Verified on 14 September 2026
+## Initial verification on 14 September 2026
 
 - Dedicated Mainnet API and database are live, with network binding and all 12 migrations applied.
 - The deployed signer matches the new treasury. A read-only check through the deployed reward adapter confirmed 75 SKR and 0.01 SOL at finalized commitment, the expected Mainnet genesis, and the canonical token account. No transaction was signed or sent by that check. See `verification/mainnet/treasury-readiness.json`.
@@ -49,3 +55,11 @@ An exact-material scan of 1,617 reachable Git file versions found no Devnet trea
 Use Phantom's normal Mainnet mode. Check the app says **MAINNET · REAL MONEY**. Connect the allowed wallet, select SOL or SKR, review the reduced quote and approve in Phantom. Verify that access opens and Restore purchases works. Do not pay a second time while an earlier payment is being checked.
 
 The treasury needs SOL for fees and SKR for the reserved reward. Real buyer payment and the final campaign reward must be observed on chain before calling the complete Mainnet money flow tested. Automated tests use fixtures; they do not spend the user's funds.
+
+## Larger mission detail — 14 September follow-up
+
+The weekly mission detail removes the repeated app/leaderboard headers, sizes the actual map to the available space and shows the district illustration behind it. The full map remains visible. Practice and ranked actions stay above the bottom navigation. Ranked confirmation overlays the map rather than shrinking it. Five dots and a numeric count show remaining attempts.
+
+The browser's credits are local simulated currency from `seeker.browser-playtest.v1` (starting balance 250, adjusted by simulated purchases and rewards). They have no cash value and cannot be withdrawn. The balance is now labelled “demo credits” and only shown in Hideout; mission/ranking screens show BROWSER DEMO instead. Native Android displays the real network label, not this simulated balance.
+
+Follow-up build: SHA-256 `2a02754b4425d581e110ffcb0d239d704f21b11d73c5e83317d2a1b2140c1aab`. The test-pricing update passed 125 app/shared tests, 62 server tests and TypeScript checks; the mission preview and practice/ranked flows passed at 360×640 and 360×797. Mainnet deployment `7080f140-320e-43cb-a351-264750e67387` was verified healthy with `TEST_PRICING=true`.
