@@ -9,7 +9,7 @@ import {currencyLabel,usdLabel,type PaymentCurrency,type ProductPricing} from '.
 import {PRODUCTS,tokenAmount,type Order,type ProductId} from '../../shared/commerce';
 import {commerceApi} from './client';
 import {useAccount} from './account-context';
-import {paymentTransaction} from './payment';
+import {paymentTransaction,PAYMENT_NETWORK_FEE_LAMPORTS} from './payment';
 import {matchesCheckoutPrice} from './checkout-intent';
 import {needsReconciliation,restoredCheckout} from './restoration';
 import {transactionLink} from '../wallet/config';
@@ -40,7 +40,7 @@ export default function CommerceSection(){
   const order=orderToPay;
   if(!order||order.status==='fulfilled'||order.status==='needs_review')return;
   const s=await session();if(s.wallet!==order.wallet||current.current!==s.wallet)throw new Error('Wallet changed. Restore purchases for the selected wallet.');
-  if(order.currency==='SOL'&&!order.payment){const balance=await wallet.client.rpc.getBalance(s.wallet as never).send();if(balance.value<BigInt(order.amount)+5000n)throw new Error(`Not enough SOL. You need ${tokenAmount(order.amount,9)} SOL plus the network fee.`);}
+  if(order.currency==='SOL'&&!order.payment){const balance=await wallet.client.rpc.getBalance(s.wallet as never).send();if(balance.value<BigInt(order.amount)+PAYMENT_NETWORK_FEE_LAMPORTS)throw new Error(`Not enough SOL. You need ${tokenAmount(order.amount,9)} SOL plus the network fee.`);}
   const prepared=await commerceApi.prepare(s.token,order.id);if(current.current!==s.wallet||!alive.current)return;setOrder(prepared);
   if(prepared.status==='fulfilled'){await update(await commerceApi.me(s.token));setMessage('This payment was already completed. Purchases restored.');return;}
   if(!prepared.payment)throw new Error(prepared.detail||'Quote expired. Request a new quote.');

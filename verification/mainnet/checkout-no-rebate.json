@@ -34,10 +34,16 @@
     "web3": "1.98.4",
     "appTests": 134,
     "typecheck": "passed",
-    "targetedPaymentTests": 5,
+    "targetedPaymentTests": 8,
     "physicalPurchaseConfirmed": false,
     "installedOnRealme": true,
-    "apkSha256": "f48f561bb0ada688404c1c5a1b50adddcad537d1f3ee882bbe86ff7fbd9cf63c",
-    "foregroundReturnDelayAdded": true
+    "apkSha256": "bce2369ff36df385890ce17a6c6561f999fc1ac10c2c98501e44e22dd8eff81a",
+    "foregroundReturnDelayAdded": true,
+    "fixedFeeBudget": {
+      "computeUnits": 200000,
+      "microLamportsPerUnit": 5000,
+      "priorityFeeLamports": 1000
+    },
+    "signInVerifiedOnDevice": true
   }
 }

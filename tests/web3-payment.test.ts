@@ -31,3 +31,16 @@ test('confirmation failure is not represented as a successful payment',async()=>
  const f=fixture(),connection={sendRawTransaction:async(raw:any)=>getBase58Decoder().decode(VersionedTransaction.deserialize(raw).signatures[0]!),confirmTransaction:async()=>({value:{err:{InstructionError:[0,1]}}})} as unknown as Connection;
  await assert.rejects(web3Payment(f.original,{rpcUrl:'https://example.invalid',minContextSlot:1n,sign:f.sign,connection,wait:async()=>{}}),/failed on Solana/);
 });
+test('prepared payments include a deterministic bounded fee budget so Phantom need not mutate them',async()=>{
+ const {ComputeBudgetInstruction,ComputeBudgetProgram,TransactionMessage}=await import('@solana/web3.js');
+ const {getTransactionEncoder}=await import('@solana/kit');
+ const f=fixture('SKR'),tx=VersionedTransaction.deserialize(Uint8Array.from(getTransactionEncoder().encode(f.original))),instructions=TransactionMessage.decompile(tx.message).instructions;
+ assert.equal(instructions.length,4);
+ assert.ok(instructions[0]!.programId.equals(ComputeBudgetProgram.programId));
+ assert.ok(instructions[1]!.programId.equals(ComputeBudgetProgram.programId));
+ const {units}=ComputeBudgetInstruction.decodeSetComputeUnitLimit(instructions[0]!);
+ const {microLamports}=ComputeBudgetInstruction.decodeSetComputeUnitPrice(instructions[1]!);
+ assert.equal(units,200000);assert.equal(microLamports,5000n);
+ assert.equal((BigInt(units)*microLamports+999999n)/1000000n,1000n);
+ assert.equal(instructions[2]!.programId.toBase58(),'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA');
+});
