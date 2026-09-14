@@ -1,3 +1,5 @@
+import {AppState} from 'react-native';
+import {exclusiveWalletSession,freshPaymentAuthorization} from './session-guard';
 import {useMemo} from 'react';
 import type {Transaction,TransactionWithBlockhashLifetime} from '@solana/kit';
 import {submitPayment} from './submitPayment';
@@ -15,11 +17,12 @@ export function useLoggedWallet(){
  const mobile=useMobileWallet(),auth=useAuthorization(mobile);
  return useMemo(()=>{
   type AuthorizationResult=Awaited<ReturnType<KitMobileWallet['authorize']>>;
-  function observed(wallet:KitMobileWallet,onAuthorization?:(result:AuthorizationResult)=>void):KitMobileWallet{
+  function observed(wallet:KitMobileWallet,freshPayment:boolean,onAuthorization?:(result:AuthorizationResult)=>void):KitMobileWallet{
    return new Proxy(wallet,{get(target,key){
     if(key==='authorize')return async(params:Parameters<KitMobileWallet['authorize']>[0])=>{
-     walletLog('mwa.authorize.request',{cached:!!params.auth_token});
-     const result=await walletStep('mwa.authorize',async()=>{try{return await target.authorize(params);}catch(error){throw normalizeNativeProtocolError(error,code=>new SolanaMobileWalletAdapterProtocolError(0,code,'Wallet authorization request failed.'));}});
+     const request=freshPayment?freshPaymentAuthorization(params):params;
+     walletLog(freshPayment?'mwa.payment.fresh-authorization':'mwa.authorize.request',{cached:!freshPayment&&!!params.auth_token});
+     const result=await walletStep('mwa.authorize',async()=>{try{return await target.authorize(request);}catch(error){throw normalizeNativeProtocolError(error,code=>new SolanaMobileWalletAdapterProtocolError(0,code,'Wallet authorization request failed.'));}});
      walletLog('mwa.authorize.response',{accounts:result.accounts.length,signInResult:!!result.sign_in_result});
      if(!result.accounts.length)throw new Error('No accounts returned by wallet.');
      onAuthorization?.(result);
@@ -29,10 +32,12 @@ export function useLoggedWallet(){
    }});
   }
   async function session<T>(stage:string,run:(wallet:KitMobileWallet)=>Promise<T>,onAuthorization?:(result:AuthorizationResult)=>void):Promise<T>{
-   return walletStep(stage,()=>transact(async wallet=>{
+   return exclusiveWalletSession(async()=>{
+    if(AppState.currentState!=='active')await walletStep('mwa.wait-for-foreground',()=>new Promise<void>((resolve,reject)=>{const subscription=AppState.addEventListener('change',state=>{if(state==='active'){clearTimeout(timer);subscription.remove();resolve();}});const timer=setTimeout(()=>{subscription.remove();reject(new Error('Return to Steal a Seeker, then try the payment again.'));},20000);}));
+    return walletStep(stage,()=>transact(async wallet=>{
     walletLog(`${stage}.transport-ready`);
-    return run(observed(wallet,onAuthorization));
-   }));
+    return run(observed(wallet,stage==='mwa.payment',onAuthorization));
+   }));});
   }
   const connect:typeof mobile.connect=()=>session('mwa.connect',wallet=>auth.authorizeSession(wallet));
   const signIn:typeof mobile.signIn=payload=>{

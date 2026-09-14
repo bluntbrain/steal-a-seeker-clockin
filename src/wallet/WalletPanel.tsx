@@ -3,7 +3,7 @@ import React,{useEffect,useRef,useState} from 'react';
 import {Modal,Share,Pressable,StyleSheet,Text,View,useWindowDimensions} from 'react-native';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {useLoggedWallet as useMobileWallet} from './useLoggedWallet';
-import {walletErrorMessage,walletReport,walletStep} from './diagnostics';
+import {walletErrorMessage,walletReport,walletStep,walletLog} from './diagnostics';
 import CommerceSection from '../commerce/CommerceSection';
 export default function WalletPanel({visible,onClose,checkout=false}:{visible:boolean;onClose:()=>void;checkout?:boolean}){
  const wallet=useMobileWallet(),insets=useSafeAreaInsets(),{height}=useWindowDimensions();
@@ -12,6 +12,7 @@ export default function WalletPanel({visible,onClose,checkout=false}:{visible:bo
  useEffect(()=>{mounted.current=true;return()=>{mounted.current=false;};},[]);
  useEffect(()=>{setBalance(undefined);setMessage('');let cancelled=false;const address=wallet.account?.address;if(address&&visible)walletStep('rpc.fee-balance',()=>wallet.client.rpc.getBalance(address).send()).then(r=>{if(!cancelled)setBalance((Number(r.value)/1e9).toFixed(3));}).catch(()=>{if(!cancelled)setBalance('Unavailable');});return()=>{cancelled=true;};},[wallet.account?.address,visible]);
  async function act(action:()=>Promise<unknown>){if(lock.current)return;lock.current=true;setBusy(true);setMessage('');try{await action();}catch(e){if(mounted.current)setMessage(walletErrorMessage(e));}finally{lock.current=false;if(mounted.current)setBusy(false);}}
+ useEffect(()=>{walletLog(visible?'checkout.sheet.visible':'checkout.sheet.hidden',{connected:!!wallet.account?.address});},[visible,wallet.account?.address]);
  const autoOpened=useRef(false);
  useEffect(()=>{
   if(!visible){autoOpened.current=false;return;}

@@ -19,3 +19,8 @@ test('a changed completion reward also requires review even when the payment is 
  assert(matchesCheckoutPrice(offered,'campaign',price,25));
  assert.equal(matchesCheckoutPrice(offered,'campaign',price,50),false);
 });
+
+test('a pass with no rebate can continue at the price selected by the player',()=>{
+ const noReward={...order,campaignTerms:undefined};assert.equal(matchesCheckoutPrice(noReward,noReward.sku,noReward.pricing,0),true);
+ assert.equal(matchesCheckoutPrice({...noReward,campaignTerms:{version:'campaign-v2',rebate:25,missions:12}},noReward.sku,noReward.pricing,0),false);
+});

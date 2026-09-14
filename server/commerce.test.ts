@@ -509,3 +509,13 @@ test('Mainnet test orders enforce allowlist, store Mainnet and use reduced price
  assert.equal(Number((await pool.query('SELECT count(*) FROM payment_receipts WHERE order_id=$1',[order.id])).rows[0].count),1);
  }finally{await api.close();}
 });
+
+test('weekly pass without rebate prepares and fulfills without reward funding; existing rebate terms remain intact',async()=>{
+ const user=await login(),priorUser=await login(),old=new CommerceService(pool,chain,{...service.config,campaignOffer:true,rebateSkr:25});
+ const earlier=await old.createOrder(priorUser.wallet,'campaign',randomUUID());assert.equal(earlier.campaignTerms?.rebate,25);
+ const weekly=new CommerceService(pool,chain,{...service.config,campaignOffer:true,rebateSkr:0});
+ const order=await weekly.createOrder(user.wallet,'campaign',randomUUID());assert.equal(order.campaignTerms,undefined);
+ const prepared=await weekly.preparePayment(user.wallet,order.id);assert(prepared.payment);assert.equal(Number((await pool.query('SELECT count(*) FROM campaign_rebates WHERE wallet=$1',[user.wallet])).rows[0].count),0);
+ const sig=b58(randomBytes(64));transactions.set(sig,paidTx(order,sig));await weekly.attach(user.wallet,order.id,sig);assert((await weekly.me(user.wallet)).entitlements.includes('campaign'));
+ assert.equal((await weekly.getOrder(priorUser.wallet,earlier.id)).campaignTerms?.rebate,25);
+});

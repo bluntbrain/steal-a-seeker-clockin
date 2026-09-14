@@ -43,4 +43,4 @@ export async function walletStep<T>(stage:string,run:()=>Promise<T>):Promise<T>{
  try{const result=await run();walletLog(`${stage}.ok.${id}`,{durationMs:Date.now()-start});return result;}
  catch(e){walletFailure(`${stage}.${id}`,e);throw e;}finally{clearTimeout(waiting);}
 }
-export function walletReport(){return `Steal a Seeker · devnet wallet diagnostics v1\n${entries.map(e=>JSON.stringify(e)).join('\n')}`;}
+export function walletReport(){return `Steal a Seeker · wallet diagnostics v2\n${entries.map(e=>JSON.stringify(e)).join('\n')}`;}

@@ -24,7 +24,7 @@ Open Railway → `seeker-api` → Variables. Change the values below and apply/r
 | `GAME_PASS_USD_CENTS` | `1000` | $10 normal pass. Preserved while testing; used when test pricing is false. |
 | `SHOP_PRICE_DIVISOR` | `1` | Normal shop prices. Used only when test pricing is false. |
 | `SHOP_PRICES_SKR_JSON` | unset | Optional normal per-item SKR overrides. Ignored while testing, then restored when the flag is false. |
-| `CAMPAIGN_REBATE_SKR` | `25` | Whole SKR rewarded once after all 12 campaign wins are verified. Funds must be reserved before taking payment. Unchanged by the pricing switch. |
+| `CAMPAIGN_REBATE_SKR` | `0` | No completion rebate for new passes. Earlier orders retain their snapshotted terms and payout handling. |
 
 With test pricing on, every cosmetic costs **0.1 SKR**, with an equivalent SOL quote rounded up to the supported increment. Switching it off restores normal prices (e.g. Night Courier 20 SKR). All of these payments remain real Mainnet payments. A $0.10 target may display approximately $0.11 after token rounding and upward rounding to whole USD cents; network fees are additional.
 
@@ -69,3 +69,13 @@ Follow-up build: SHA-256 `2a02754b4425d581e110ffcb0d239d704f21b11d73c5e83317d2a1
 Converted the original `seeker-api` service to Mainnet so its custom sign-in domain remains intact. Copied the active Mainnet database connection and treasury settings privately, checked equality without printing secrets, and cleared the old Devnet signer from the service. After checking both domains and installing the updated Android build, removed the temporary service. Postgres remains required; “one service” here means one API service plus its database. No database or wallet key file was deleted.
 
 `npm run build:apk` now selects Mainnet and defaults to the surviving API URL. The opening paywall says “Steal the phone. Escape the guards.” followed by the 12 heists and weekly leaderboard. The existing 25 SKR campaign offer is unchanged pending the builder’s answer about removing it for new purchases; weekly cash prizes are still not live.
+
+## Campaign rebate retired; Phantom checkout investigation
+
+New purchases and the browser demo no longer advertise or include a 25 SKR completion rebate. New real orders have no campaign reward terms and require no reward reservation. The existing settlement code remains for earlier promised rewards. This does not enable weekly cash prizes.
+
+Phone logs from 14 September showed `mwa.payment` blocked inside `mwa.authorize` for roughly 141 seconds, followed by timeout and a broken MWA socket. No successful payment signing was in the retained log. A read-only database check showed two expired unsigned quotes for the test wallet and zero purchase receipts. This identifies the failed stage, not definitive proof of the wallet-side cause.
+
+The payment path now uses fresh authorization (no cached auth token), as in the supplied working SolScan example. This also avoids reusing an authorization token from an older hook closure after sign-in rotates it. All instrumented MWA sessions queue and wait for the app to be foreground before opening another wallet activity. The app still checks the authorized account and exact signed transaction before submission. Added sheet visibility diagnostics without logging addresses, tokens or signatures. Expired unsigned orders offer Get a new quote instead of a disabled payment button.
+
+Automated checks: 129 app/shared tests, 63 server tests, TypeScript, Android release build, and browser checkout at 360×640 and 360×797. Mainnet API was checked returning rebateSkr=0. The updated APK was installed after the phone reconnected. A live Phantom retry remains required before declaring the payment issue resolved.

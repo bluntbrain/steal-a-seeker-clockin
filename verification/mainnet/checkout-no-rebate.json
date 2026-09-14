@@ -1,0 +1,22 @@
+{
+  "checkedAt": "2026-09-14T09:26:30.309451+00:00",
+  "offer": {
+    "testPricing": true,
+    "usdCents": 10,
+    "rebateSkr": 0,
+    "missions": 12,
+    "cluster": "solana:mainnet"
+  },
+  "observedFailure": "MWA authorization timeout before payment-signing success",
+  "databaseObservation": {
+    "expiredUnsignedQuotes": 2,
+    "completedPurchaseReceipts": 0
+  },
+  "tests": {
+    "app": 129,
+    "server": 63
+  },
+  "realPaymentConfirmed": false,
+  "androidInstalled": true,
+  "androidSha256": "7b5427496c30ba6770c1fab6686a1082ad569a1d0af7fae7b9653b74c3e52976"
+}

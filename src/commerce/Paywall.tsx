@@ -11,7 +11,7 @@ type Props={local:boolean;stage:'offer'|'review'|'cancelled';trialAvailable:bool
 export default function Paywall({local,stage,trialAvailable,busy,message,onBuy,onCancel,onTrial,onBack}:Props){
  const [offer,setOffer]=useState<ProductPricing['campaignOffer']>(),[offerError,setOfferError]=useState(''),[refreshOffer,setRefreshOffer]=useState(0);
  useEffect(()=>{if(local)return;let active=true;setOfferError('');void commerceApi.pricing('campaign').then(p=>{if(!p.campaignOffer)throw new Error('Update required');if(active)setOffer(p.campaignOffer);}).catch(()=>{if(active)setOfferError('Could not load the pass price. Tap below to retry.');});return()=>{active=false;};},[local,refreshOffer]);
- const passPrice=offer?usdLabel(offer.usdCents):'…',rebate=local?CAMPAIGN_OFFER.rebate:offer?.rebateSkr;
+ const passPrice=offer?usdLabel(offer.usdCents):'…',rebate=local?0:offer?.rebateSkr;
  const priceLoading=!local&&!offer&&!offerError;
  const {height,fontScale}=useWindowDimensions();
  const compact=height<720, cancelled=stage==='cancelled', review=stage==='review';
@@ -32,7 +32,7 @@ export default function Paywall({local,stage,trialAvailable,busy,message,onBuy,o
    {cancelled?<View style={s.trialCard}><Text style={s.trialTitle}>{trialAvailable?'1 attempt. No payment required.':local?'Campaign pass · '+CAMPAIGN_OFFER.price+' '+currency:`Game pass · ${passPrice}`}</Text><Text style={s.detail}>{trialAvailable?'Practice only: no saved progress, rank or rebate. Leaving or restarting ends the attempt.':'All 12 missions and unlimited retries. Buy once to keep playing.'}</Text></View>:<>
     <View style={s.benefits}>{[['12','missions'],['∞','campaign retries'],['Weekly','competition']].map(([value,label],i)=><View key={label} style={[s.benefit,i>0&&s.benefitBorder]}><Text style={[s.stat,{fontSize:compact?18:22}]}>{value}</Text><Text style={s.statLabel}>{label}</Text></View>)}</View>
     <View style={[s.pass,{padding:compact?13:17}]}><View style={s.passName}><Text style={s.passTitle}>Game pass</Text><Text style={s.passNote}>Pay once. No subscription.</Text></View><View style={s.priceBlock}><Text style={[s.price,{fontSize:compact?30:36}]}>{local?CAMPAIGN_OFFER.price:passPrice}</Text><Text style={s.currency}>{local?currency:'PAY IN SKR OR SOL'}</Text></View></View>
-    {(local||offer)&&<View style={s.rebate}><Text style={s.rebateIcon}>↳</Text><View style={{flex:1}}><Text style={s.rebateTitle}>Clear all 12. Earn {rebate} {currency}.</Text><Text style={s.detail}>{local?`Pay ${CAMPAIGN_OFFER.price}; earn ${CAMPAIGN_OFFER.rebate} back once.`:`One ${SKR_LABEL} reward after all 12 wins are verified, whether you pay in SKR or SOL.`}</Text></View></View>}
+    {(rebate??0)>0&&<View style={s.rebate}><Text style={s.rebateIcon}>↳</Text><View style={{flex:1}}><Text style={s.rebateTitle}>Clear all 12. Earn {rebate} {currency}.</Text><Text style={s.detail}>{local?`Pay ${CAMPAIGN_OFFER.price}; earn ${CAMPAIGN_OFFER.rebate} back once.`:`One ${SKR_LABEL} reward after all 12 wins are verified, whether you pay in SKR or SOL.`}</Text></View></View>}
    </>}
    {!!(message||offerError)&&<Text accessibilityLiveRegion="polite" style={s.error}>{message||offerError}</Text>}
    <View style={s.checkout}>
