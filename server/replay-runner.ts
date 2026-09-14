@@ -1,15 +1,15 @@
 import {Worker} from 'node:worker_threads';
 import {URL} from 'node:url';
-import type {MissionId} from '../src/game/level';
+import type {MissionId,LevelDefinition} from '../src/game/level';
 import {replayInput,type ReplayResult} from './replay';
 let active=0;
 export class ReplayBusyError extends Error{}
 export class ReplayInvalidError extends Error{}
 // Verification runs outside the API event loop and cannot monopolize it with
 // repeated pathfinding. Ranked jobs select an immutable rules bundle.
-export function verifyReplayInWorker(mission:MissionId,input:unknown,options:{timeoutMs?:number;rulesHash?:string}={}):Promise<ReplayResult>{
+export function verifyReplayInWorker(mission:MissionId,input:unknown,options:{timeoutMs?:number;rulesHash?:string;definition?:LevelDefinition}={}):Promise<ReplayResult>{
  if(active>=2)return Promise.reject(new ReplayBusyError('Verification capacity is busy. Try again shortly.'));
- const replay=replayInput.parse(input),worker=new Worker(new URL('./replay-worker.mjs',import.meta.url),{workerData:{mission,replay,rulesHash:options.rulesHash},resourceLimits:{maxOldGenerationSizeMb:128}});active++;
+ const replay=replayInput.parse(input),worker=new Worker(new URL('./replay-worker.mjs',import.meta.url),{workerData:{mission,replay,rulesHash:options.rulesHash,definition:options.definition},resourceLimits:{maxOldGenerationSizeMb:128}});active++;
  return new Promise((resolve,reject)=>{
   let settled=false;
   const finish=(result?:ReplayResult,error?:Error)=>{if(settled)return;settled=true;clearTimeout(timer);void worker.terminate().then(()=>{active--;if(error)reject(error);else resolve(result!);},()=>{active--;reject(new Error('Replay worker shutdown failed.'));});};

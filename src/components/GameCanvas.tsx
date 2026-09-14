@@ -39,7 +39,7 @@ export default memo(function GameCanvas({size,input,game,alpha,clock,level,appea
  const carryTransforms=useMemo(()=>[Skia.RSXform(.48/phoneFrame.height,0,0,0)],[]);
  const sprite=useImage(require('../../assets/courier.png'));
  const reduced=!!appearance.reducedEffects;
- const costumeMatrix=useMemo(()=>appearance.outfit==='night-courier'?[.38,0,0,0,0,0,.43,0,0,.015,0,0,.49,0,.018,0,0,0,1.5,-.5]:cleanAlpha,[appearance.outfit]);
+ const costumeMatrix=useMemo(()=>appearance.outfit==='ghost-courier'?[.7,0,0,0,.06,0,.72,0,0,.02,0,0,1,0,.12,0,0,0,1.5,-.5]:appearance.outfit==='night-courier'?[.38,0,0,0,0,0,.43,0,0,.015,0,0,.49,0,.018,0,0,0,1.5,-.5]:cleanAlpha,[appearance.outfit]);
  const x=useDerivedValue(()=>game.value.px+(game.value.x-game.value.px)*alpha.value);
  const y=useDerivedValue(()=>game.value.py+(game.value.y-game.value.py)*alpha.value);
  const frame=useDerivedValue(()=>{const s=game.value;return s.facing+(Math.hypot(s.vx,s.vy)>.1 && Math.floor(s.walked*3.5)%2===1?4:0);});

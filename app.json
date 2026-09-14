@@ -16,7 +16,7 @@
     },
     "web": {
       "bundler": "metro",
-      "name": "Steal a Seeker \u00b7 Night Shift"
+      "name": "Steal a Seeker · Night Shift"
     },
     "assetBundlePatterns": [
       "assets/**/*"
@@ -28,7 +28,8 @@
       "expo-audio",
       "expo-asset",
       "expo-secure-store",
-      "expo-sqlite"
+      "expo-sqlite",
+      "expo-sharing"
     ]
   }
 }

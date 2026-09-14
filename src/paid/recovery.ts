@@ -1,7 +1,7 @@
 import type {PaidEntry} from '../../shared/paid';
 import type {Replay} from '../../shared/replay';
 import rules from '../../shared/rules-manifest.json';
-import {getLevel,type MissionId} from '../game/level';
+import {getLevel,type LevelDefinition,type MissionId} from '../game/level';
 import {initialState,step} from '../game/simulation';
 
 export function assertPaidRules(entry:PaidEntry){
@@ -21,9 +21,9 @@ export function replayTicks(replay:Replay,limit:number){
 export function isReplayPrefix(a:Replay,b:Replay){
  return a.chunks.length<=b.chunks.length&&a.chunks.every((c,i)=>{const n=b.chunks[i];return !!n&&c.x===n.x&&c.y===n.y&&c.buttons===n.buttons&&(i===a.chunks.length-1?c.ticks<=n.ticks:c.ticks===n.ticks);});
 }
-export function restorePaidState(mission:MissionId,replay:Replay){
+export function restorePaidState(mission:MissionId,replay:Replay,definition?:LevelDefinition){
  'worklet';
- const state=initialState(mission);let dash=0,tool=0;
+ const state=initialState(mission,definition);let dash=0,tool=0;
  for(const c of replay.chunks)for(let n=0;n<c.ticks;n++){
   if(state.status!=='playing')throw new Error('Saved run continues after its result.');
   if(c.buttons&2)dash++;if(c.buttons&4)tool++;

@@ -2,9 +2,9 @@ import {findPath,walkableSegment} from './navigation';
 import { LEVEL, getLevel, GUARD_TUNING, type MissionId, type LevelDefinition, type Point, alarmSpeed, SECURITY } from './level';
 
 export type Guard = {x:number;y:number;px:number;py:number;angle:number;target:number;wait:number;exposure:number;seesPlayer:boolean;range:number;halfAngle:number;spotSeconds:number;clock:number;kind:'patrol'|'scanner'|'warden';mode:'patrol'|'investigate'|'search'|'return';path:Point[];pathIndex:number;searchLeft:number;searchAngle:number;lastSeen:Point;active:boolean;lureId:number;lureAttemptId:number;lureRetryAt:number;nextReport:number;nextChase:number;};
-export function makeGuards(mission:MissionId):Guard[]{
+export function makeGuards(mission:MissionId,override?:LevelDefinition):Guard[]{
  'worklet';
- return getLevel(mission).patrols.map(({route,range,halfAngle,spotSeconds,kind,sweep,activePower})=>({x:route[0]!.x,y:route[0]!.y,px:route[0]!.x,py:route[0]!.y,angle:sweep?sweep.angle:Math.atan2(route[1]!.y-route[0]!.y,route[1]!.x-route[0]!.x),target:1,wait:0,exposure:0,seesPlayer:false,range,halfAngle,spotSeconds,clock:0,active:activePower===undefined||activePower===0,kind:kind??'patrol',lureId:0,lureAttemptId:0,lureRetryAt:0,nextReport:0,nextChase:0,mode:'patrol',path:[],pathIndex:0,searchLeft:0,searchAngle:0,lastSeen:{...route[0]!}}));
+ return (override??getLevel(mission)).patrols.map(({route,range,halfAngle,spotSeconds,kind,sweep,activePower})=>({x:route[0]!.x,y:route[0]!.y,px:route[0]!.x,py:route[0]!.y,angle:sweep?sweep.angle:Math.atan2(route[1]!.y-route[0]!.y,route[1]!.x-route[0]!.x),target:1,wait:0,exposure:0,seesPlayer:false,range,halfAngle,spotSeconds,clock:0,active:activePower===undefined||activePower===0,kind:kind??'patrol',lureId:0,lureAttemptId:0,lureRetryAt:0,nextReport:0,nextChase:0,mode:'patrol',path:[],pathIndex:0,searchLeft:0,searchAngle:0,lastSeen:{...route[0]!}}));
 }
 // Slab intersection returns the nearest wall/crate along a ray. Shared by detection
 // and cone rendering, so the highlighted floor agrees with what a guard can see.

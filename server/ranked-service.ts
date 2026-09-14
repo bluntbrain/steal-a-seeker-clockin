@@ -42,7 +42,7 @@ export class RankedService {
   return transaction(this.pool,async db=>{
    const row=await db.query('SELECT * FROM ranked_runs WHERE id=$1 AND wallet=$2 FOR UPDATE',[id,wallet]);if(!row.rowCount)throw new ServiceError(404,'Run not found.');const run=row.rows[0];
    if(input.rulesHash!==run.manifest.rulesHash)throw new ServiceError(409,'Replay rules do not match this ticket.');
-   if(run.replay_hash){if(run.replay_hash!==hash)throw new ServiceError(409,'This ticket already contains a different replay.');return ticket(run);}
+   if(run.replay_hash){if(run.replay_hash!==hash)throw new ServiceError(409,'This ticket already contains a different replay.');if(run.status==='error'&&run.manifest.contract){const week=await db.query('SELECT finalized_at FROM league_weeks WHERE week=$1 FOR UPDATE',[run.manifest.contract.week]);if(week.rows[0]?.finalized_at||now.getTime()>Date.parse(run.manifest.endsAt)+15*60000)throw new ServiceError(409,'This week is closed; its result can no longer change.');const other=await db.query("SELECT 1 FROM ranked_runs WHERE wallet=$1 AND id<>$2 AND status IN ('issued','verifying')",[wallet,id]);if(other.rowCount)throw new ServiceError(409,'Finish the other active attempt before retrying this verification.');const retry=await db.query("UPDATE ranked_runs SET status='verifying',verify_attempts=0,verify_after=now(),lease_until=NULL,detail='Retrying the same saved replay.' WHERE id=$1 RETURNING *",[id]);return ticket(retry.rows[0]);}return ticket(run);}
    if(run.status!=='issued')throw new ServiceError(409,'This ticket is no longer open.');
    if(new Date(run.expires_at).getTime()<=now.getTime())throw new ServiceError(409,'The submission window has expired.');
    if(ticks>run.manifest.hardLimitSeconds*30||ticks/30>(now.getTime()-new Date(run.issued_at).getTime())/1000+2)throw new ServiceError(400,'Replay duration exceeds the ticket allowance.');
@@ -56,7 +56,7 @@ export class RankedService {
   });
   await Promise.all(jobs.map(async run=>{
    try{
-    const result=await verifyReplayInWorker(run.manifest.mission,run.replay,{rulesHash:run.manifest.rulesHash});
+    const result=await verifyReplayInWorker(run.manifest.mission,run.replay,{rulesHash:run.manifest.rulesHash,definition:run.manifest.contract?.level});
     const status=result.status==='incomplete'?'rejected':'verified',detail=status==='rejected'?'The replay ends before the run finishes.':result.status==='won'?'Verified extraction.':'Verified attempt. Extract successfully to place on the leaderboard.';
     await this.pool.query("UPDATE ranked_runs SET status=$2,result=$3,detail=$4,lease_until=NULL WHERE id=$1 AND status='verifying' AND lease_token=$5",[run.id,status,result,detail,run.lease_token]);
    }catch(e){

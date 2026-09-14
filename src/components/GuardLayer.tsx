@@ -1,13 +1,13 @@
 import React from 'react';
 import {Circle,Group,Oval,Path,DashPathEffect,RoundedRect,Skia} from '@shopify/react-native-skia';
 import {useDerivedValue,type SharedValue} from 'react-native-reanimated';
-import {getLevel} from '../game/level';
+import {stateLevel} from '../game/simulation';
 import {sightDistance} from '../game/guards';
 import type {GameState} from '../game/simulation';
 type Props={game:SharedValue<GameState>;alpha:SharedValue<number>;index:number};
 export default function GuardLayer({game,alpha,index}:Props){
  const pose=useDerivedValue(()=>{const g=game.value.guards[index];return g?[{translateX:g.px+(g.x-g.px)*alpha.value},{translateY:g.py+(g.y-g.py)*alpha.value},{rotate:g.angle}]:[];});
- const kind=getLevel(game.value.mission).patrols[index]?.kind;
+ const kind=stateLevel(game.value).patrols[index]?.kind;
  const visible=useDerivedValue(()=>game.value.guards[index]?1:0);
  const color=useDerivedValue(()=>game.value.guards[index]?.seesPlayer?'#ff8169':'#dba961');
  const opacity=useDerivedValue(()=>game.value.guards[index]?.active?.14+(game.value.guards[index]?.exposure??0)*.25:0);
@@ -18,7 +18,7 @@ export default function GuardLayer({game,alpha,index}:Props){
   const x=g.px+(g.x-g.px)*alpha.value,y=g.py+(g.y-g.py)*alpha.value;p.moveTo(x,y);
   for(let i=0;i<=32;i++){
    const a=g.angle-g.halfAngle+2*g.halfAngle*i/32,dx=Math.cos(a),dy=Math.sin(a);
-   const d=sightDistance(x,y,dx,dy,g.range,{...getLevel(game.value.mission),blockers:game.value.blockers});p.lineTo(x+dx*d,y+dy*d);
+   const d=sightDistance(x,y,dx,dy,g.range,{...stateLevel(game.value),blockers:game.value.blockers});p.lineTo(x+dx*d,y+dy*d);
   }
   p.close();return p;
  });
