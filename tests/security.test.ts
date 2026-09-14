@@ -25,7 +25,7 @@ test('guards seeing the courier and fixed scanners ignore a noise lure',()=>{
  const scan=getLevel('sweep-window'),ss=makeGuards(scan.mission);updateGuards(ss,-100,-100,1/30,scan,{x:6.6,y:8,kind:'decoy',id:1,ttl:6});assert.equal(ss[0]!.lureId,0);
 });
 test('blocked throws are explained and the landing preview matches the real beacon',()=>{
- const s=initialState('false-footsteps');Object.assign(s,{x:4,y:14,facing:3});const before=s.decoysLeft;step(s,{...idleInput(),tool:1});assert.equal(s.decoysLeft,before);assert.equal(s.decoyFeedback,'blocked');assert.match(decoyMessage(s),/no decoy was spent/);
+ const s=initialState('false-footsteps');Object.assign(s,{x:4,y:14,facing:3});const before=s.decoysLeft;step(s,{...idleInput(),tool:1});assert.equal(s.decoysLeft,before);assert.equal(s.decoyFeedback,'blocked');assert.match(decoyMessage(s),/no distraction was used/);
  const a=initialState('cone-lesson'),landing=decoyLanding(a,idleInput());step(a,{...idleInput(),tool:1});assert.equal(a.decoy.x,landing.x);assert.equal(a.decoy.y,landing.y);assert.equal(a.decoy.ttl,SECURITY.decoySeconds);assert.equal(a.decoysLeft,1);
 });
 test('a guard on a valid narrow patrol lane can path to a decoy beside cover',()=>{

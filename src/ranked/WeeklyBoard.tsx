@@ -1,3 +1,4 @@
+import {playerCopy} from '../game/playerCopy';
 import React,{useEffect,useRef,useState} from 'react';
 import {Image,Pressable,ScrollView,StyleSheet,Text,TextInput,View,useWindowDimensions} from 'react-native';
 import {weekWindow,weeklyResetLabel} from '../../shared/weekly';
@@ -35,7 +36,7 @@ export default function WeeklyBoard({state,onStart,showStandings=true,onDetailCh
     <View pointerEvents="none" testID="weekly-map-preview" style={{width:previewSize,height:previewSize/0.6,overflow:'hidden',borderRadius:10,borderWidth:1,borderColor:'#5B7770'}}>{stageSize.height>0&&<MissionPreview key={contract.id} mission={contract.level.mission} definition={contract.level} size={previewSize}/>}</View>
     {confirm&&<View accessibilityLiveRegion="polite" style={s.confirmOverlay}><Text style={s.white}>Use 1 chance?</Text><Text style={s.body}>Losing or leaving uses it too.</Text><Pressable accessibilityRole="button" accessibilityLabel="Cancel ranked start" onPress={()=>setConfirm(false)} style={{paddingVertical:8}}><Text style={s.kicker}>NOT YET</Text></Pressable></View>}
    </View>
-   <Text style={[s.body,{textAlign:'center'}]}>{contract.objective.replace('on this contract','here')}</Text>
+   <Text style={[s.body,{textAlign:'center'}]}>{playerCopy(contract.objective).replace('on this contract','here')}</Text>
    <View style={s.chanceRow}><View style={{flexDirection:'row',gap:5}}>{Array.from({length:5},(_,i)=><View key={i} style={[s.chanceDot,{backgroundColor:i<chances?'#CAE6DA':'#2D403A'}]}/>)}</View><Text style={s.muted}>{data?.authenticated?`${chances}/5 chances`:'Sign in for ranked play'} · practice is free</Text></View>
    <View style={s.detailActions}><View style={{flex:1}}>{button('Practice',()=>start(contract,true))}</View><View style={{flex:1}}>{button(confirm?'Start · use 1 chance':'Play for score',()=>confirm?start(contract,false):setConfirm(true),true,chances===0||!!data?.active)}</View></View>
   </>:<>
