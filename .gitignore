@@ -34,3 +34,9 @@ android/.kotlin/
 # Rebuilt native checkout preview
 design/checkout/preview.js
 design/checkout/assets/
+
+# Rebuilt leaderboard review fixtures
+design/visual-v2/leaderboard-v2/preview.js
+design/visual-v2/leaderboard-v2/preview.html
+design/visual-v2/leaderboard-v2/screen-reference.png
+design/visual-v2/leaderboard-v2/assets/

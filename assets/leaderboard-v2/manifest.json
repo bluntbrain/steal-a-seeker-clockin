@@ -1,0 +1,26 @@
+{
+  "model": "gpt-image-2.5-flare",
+  "method": "OpenAI Image API via bundled imagegen CLI",
+  "source": "output/imagegen/leaderboard-v2/podium-source.png",
+  "crop": [
+    0,
+    180,
+    1536,
+    795
+  ],
+  "runtime": {
+    "podium.webp": [
+      1200,
+      480
+    ],
+    "courier-avatar.png": [
+      128,
+      128
+    ]
+  },
+  "sampleScoresInReferenceOnly": true,
+  "sha256": {
+    "courier-avatar.png": "6b4315483127b4f32c6b2db24b7fdd3159692cd292de89094ab36937979e95d2",
+    "podium.webp": "4426b5226308f7935629a8dc5298fa54ba47ace17f931fe9c2d455888face411"
+  }
+}
