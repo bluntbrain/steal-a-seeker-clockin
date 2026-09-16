@@ -1,4 +1,40 @@
-export type CourierCardData={week:string;rank:number|null;points:number;cleared:number;ticks:number;domain:string|null;wallet:string;final:boolean;local:boolean;earned:boolean};
+import background from '../../assets/courier-card-v2/background.embedded.json';
+export const CARD_WIDTH=1080,CARD_HEIGHT=1620,CARD_RATIO=CARD_HEIGHT/CARD_WIDTH;
+export const CARD_BACKGROUND=background.uri;
+export type CourierCardData={week:string;rank:number|null;participants?:number;points:number;cleared:number;ticks:number;domain:string|null;wallet:string;final:boolean;local:boolean;earned:boolean};
+export type CardText={key:string;text:string;x:number;y:number;width:number;size:number;color:string;weight:'400'|'700'|'900';align?:'left'|'center';spacing?:number};
 const esc=(s:string)=>s.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&apos;'}[c]!));
+const natural=(n:number)=>Number.isFinite(n)?Math.max(0,Math.floor(n)):0;
+const count=(n:number)=>natural(n).toString().replace(/\B(?=(\d{3})+(?!\d))/g,',');
 export const shortWallet=(s:string)=>s==='browser-playtest'?'Browser practice':`${s.slice(0,5)}…${s.slice(-5)}`;
-export function cardSvg(d:CourierCardData){const name=esc(d.domain||shortWallet(d.wallet)),title=d.earned?'GHOST COURIER':'COURIER RECORD';return `<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1350" viewBox="0 0 1080 1350"><defs><linearGradient id="bg" x2="1" y2="1"><stop stop-color="#172d2d"/><stop offset="1" stop-color="#111323"/></linearGradient><linearGradient id="phone" x2="1" y2="1"><stop stop-color="#d7f9d0"/><stop offset="1" stop-color="#9295f0"/></linearGradient></defs><rect width="1080" height="1350" fill="#0b1118"/><rect x="30" y="30" width="1020" height="1290" rx="48" fill="url(#bg)" stroke="#61847e" stroke-width="2"/><g opacity=".12" stroke="#cdf7dd" stroke-width="2">${[0,1,2,3,4,5].map(i=>`<path d="M${-400+i*240} 1050L${500+i*240} 150"/>`).join('')}</g><g font-family="Arial,sans-serif"><text x="84" y="117" fill="#cce7dc" font-size="27" font-weight="700" letter-spacing="5">STEAL A SEEKER</text><text x="84" y="170" fill="#94aaa9" font-size="24">${d.local?'LOCAL TEST · NOT A VERIFIED RANK':d.final?'FINAL WEEKLY RESULT':'LIVE STANDING · RANK CAN CHANGE'}</text><text x="84" y="276" fill="#eaf5ed" font-size="58" font-weight="800">${title}</text><rect x="810" y="240" width="112" height="184" rx="22" fill="#111d25" stroke="#d5f5e1" stroke-width="6" transform="rotate(16 866 332)"/><path d="M839 373l72-99v85l-72 41z" fill="url(#phone)" transform="rotate(16 866 332)"/><text x="84" y="365" fill="#c8e5d9" font-size="${name.length>26?32:44}" font-weight="700" ${name.length>34?'textLength="900" lengthAdjust="spacingAndGlyphs"':''}>${name}</text><text x="84" y="413" fill="#93aaa6" font-size="24">${esc(shortWallet(d.wallet))}${d.domain?(d.local?' · example name':' · .skr ownership checked'):''}</text><text x="84" y="655" fill="#d9f1c8" font-size="190" font-weight="800">${d.local?'TEST':d.rank?'#'+d.rank:'—'}</text><text x="84" y="723" fill="#afc8bf" font-size="30">${d.local?'Practice record':d.rank?'Weekly league rank':'Complete a ranked contract to place'}</text><path d="M84 777H996" stroke="#4a6460"/><text x="84" y="868" fill="#e9f4ea" font-size="56" font-weight="700">${d.points.toLocaleString()}</text><text x="84" y="915" fill="#94b0a5" font-size="27">POINTS / 30,000</text><text x="690" y="868" fill="#e9f4ea" font-size="56" font-weight="700">${d.cleared} / 3</text><text x="690" y="915" fill="#94b0a5" font-size="27">CONTRACTS</text><rect x="84" y="982" width="912" height="118" rx="22" fill="#cfe6e4"/><text x="118" y="1030" fill="#183632" font-size="25" font-weight="700">${d.earned?'EARNED THROUGH PLAY · NEVER SOLD':'THREE CONTRACTS · FIVE RANKED ATTEMPTS EACH'}</text><text x="118" y="1073" fill="#39574f" font-size="25">${(d.ticks/30).toFixed(2)}s total · Week of ${d.week}</text><text x="84" y="1191" fill="#a9c4b9" font-size="26">Same maps. Same tools. Your best escape.</text><text x="84" y="1250" fill="#758e89" font-size="23">stealaseeker.bluntbrain.com · Devnet test season</text></g></svg>`;}
+export function cardTime(ticks:number){const h=Math.round(natural(ticks)*100/30),m=Math.floor(h/6000),s=Math.floor(h/100)%60;return `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}.${String(h%100).padStart(2,'0')}`;}
+export function cardWeek(week:string){
+ if(!/^\d{4}-\d{2}-\d{2}$/.test(week))return 'WEEK UNAVAILABLE';
+ const start=new Date(week+'T00:00:00Z');if(!Number.isFinite(start.getTime())||start.toISOString().slice(0,10)!==week)return 'WEEK UNAVAILABLE';
+ const end=new Date(start.getTime()+6*86400000),month=['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
+ const a=`${start.getUTCDate()} ${month[start.getUTCMonth()]}`,b=`${end.getUTCDate()} ${month[end.getUTCMonth()]} ${end.getUTCFullYear()}`;
+ return start.getUTCFullYear()!==end.getUTCFullYear()?`${a} ${start.getUTCFullYear()} – ${b} · UTC`:start.getUTCMonth()!==end.getUTCMonth()?`${a} – ${b} · UTC`:`${start.getUTCDate()}–${b} · UTC`;
+}
+export const cardFileName=(d:CourierCardData)=>`seeker-${/^\d{4}-\d{2}-\d{2}$/.test(d.week)?d.week:'weekly'}.png`;
+/** Shared layout keeps native preview, browser preview and exported PNG values identical. */
+export function cardLayout(d:CourierCardData):CardText[]{
+ const blocks:CardText[]=[],put=(key:string,text:string,x:number,y:number,width:number,size:number,color='#CFE6E4',weight:CardText['weight']='700',align:CardText['align']='left',spacing=0)=>blocks.push({key,text,x,y,width,size,color,weight,align,spacing});
+ const name=d.domain||shortWallet(d.wallet),cleared=Math.min(3,natural(d.cleared)),placed=d.rank!==null&&natural(d.rank)>0,rank=d.local?'TEST':placed?'#'+count(d.rank!):'—',earned=d.earned&&cleared===3;
+ put('brand','STEAL A SEEKER',76,122,928,26,'#AECAC3','700','left',5);
+ put('name',name,76,173,928,Math.max(22,Math.min(62,928/(Math.max(1,name.length)*.62))),'#E2F2EB','900');
+ put('identity',d.local?(d.domain?'EXAMPLE NAME · NOT VERIFIED':'BROWSER PRACTICE'):d.domain?shortWallet(d.wallet)+' · .skr linked':'SOLANA WALLET',76,261,452,21,'#9EBEB3','400');
+ put('status',d.local?'LOCAL TEST':d.final?'FINAL RESULT':'LIVE STANDING',76,365,435,24,'#B8E5D9','700','left',2);
+ put('rank',rank,70,437,440,Math.max(64,Math.min(180,440/(rank.length*.68))),'#C3EAE1','900');
+ put('rank-label',d.local?'NOT A LIVE RANK':placed?'WEEKLY RANK':'NOT YET RANKED',80,657,390,26,'#C0E0D5','700','left',2);
+ const participants=natural(d.participants??0);put('participants',d.local?'Local results only':placed&&participants>=d.rank!?`of ${count(participants)} ranked couriers`:placed?'Verified scored runs':'Finish a scored mission',80,706,395,22,'#91ADA3','400');
+ put('record',earned?(d.local?'GHOST COURIER · TEST':'GHOST COURIER'):'COURIER RECORD',76,1141,928,29,'#CAE7DE','700','center',4);
+ const xs=[76,393,710],width=294,values=[count(d.points),`${cleared} / 3`,cleared?cardTime(d.ticks):'—'],labels=['TOTAL POINTS','MISSIONS CLEARED','TOTAL TIME'];
+ values.forEach((v,i)=>{put('stat-'+i,v,xs[i]!,1222,width,Math.min(62,width/(v.length*.62)),'#D6F0E7','900','center');put('label-'+i,labels[i]!,xs[i]!,1300,width,21,'#9EBCB2','700','center',1.5);});
+ put('meaning','Best completed run per mission',76,1355,928,21,'#819F94','400','center');
+ put('week',cardWeek(d.week),76,1410,928,25,'#C2DCD2','700','center',1);
+ put('qualifier',d.local?'Browser test · not a verified league result':d.final?'Final weekly result':placed?'Live snapshot · rank can change':'Complete a scored mission to join this week',76,1453,928,23,'#9BB7AD','400','center');
+ put('site','stealaseeker.bluntbrain.com',76,1487,928,21,'#A5C5B9','400','center',2);
+ return blocks;
+}
+export function cardDescription(d:CourierCardData){return cardLayout(d).map(b=>b.text).join('. ');}
+export function cardSvg(d:CourierCardData){return `<svg xmlns="http://www.w3.org/2000/svg" width="${CARD_WIDTH}" height="${CARD_HEIGHT}" viewBox="0 0 ${CARD_WIDTH} ${CARD_HEIGHT}"><image href="${CARD_BACKGROUND}" width="${CARD_WIDTH}" height="${CARD_HEIGHT}"/><g font-family="Arial,sans-serif">${cardLayout(d).map(b=>`<text x="${b.align==='center'?b.x+b.width/2:b.x}" y="${b.y}" dominant-baseline="text-before-edge" text-anchor="${b.align==='center'?'middle':'start'}" font-size="${b.size}" font-weight="${b.weight}" letter-spacing="${b.spacing??0}" fill="${b.color}">${esc(b.text)}</text>`).join('')}</g></svg>`;}

@@ -1,0 +1,16 @@
+{
+  "model": "gpt-image-2.5-flare",
+  "method": "OpenAI Image API via bundled imagegen CLI",
+  "source": "output/imagegen/courier-card-v2/background.png",
+  "dimensions": [
+    1024,
+    1536
+  ],
+  "runtime": "assets/courier-card-v2/background.webp",
+  "sha256": "5613690a4620db91c025e785388d485b2a19293d70b1f255622164230adac08b",
+  "dataInArtwork": false,
+  "exportDimensions": [
+    1080,
+    1620
+  ]
+}
