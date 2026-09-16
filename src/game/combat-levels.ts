@@ -262,6 +262,18 @@ function applyDenseLayout(l:LevelDefinition,n:number){
   guards.push({combatRole:role,route:[at,target],speed:role==='heavy'||role==='warden'?1.05:role==='sentry'?1.2:1.45,range:role==='sentry'?5.7:role==='warden'?5.5:4.8,halfAngle:Math.PI/3.5,spotSeconds:.3,pauseSeconds:.3,investigates:true,...(role==='warden'?{kind:'warden' as const}:{}),...(reserve?{reserveAfter:2.2+reserves++*2.2}:{})});
  }
  l.blockers=boxes;l.patrols=guards;l.phone=phones[0]!;l.targets=phones.length>1?phones:undefined;
+ // Campaign balance pass: preserve the cover and combat rules. Delayed waves
+ // keep their spacing instead of sending multiple reinforcements together.
+ const waveTimes=n===3?[3.5,5.7]:n===5?[4,7]:n===7?[4,6.2,8.4]:null;
+ if(waveTimes){let wave=0;for(const guard of l.patrols)if(guard.reserveAfter!==undefined)guard.reserveAfter=waveTimes[wave++]!;}
+ // Keep the upper sentry off the Heavy's approach crossing.
+ if(n===10)l.patrols[0]!.route=[{x:1.5,y:3.5},{x:1.5,y:1.5}];
+ // Stop the right sentry one tile before the middle crossing covered by the
+ // left sentry and scout. The upper phone aisle remains guarded.
+ if(n===11)l.patrols[1]!.route=[{x:9.5,y:4.5},{x:9.5,y:6.5}];
+ // The Heavy patrols across the middle aisle instead of sharing the lower
+ // vertical lane with the scout in the opposite direction.
+ if(n===12)l.patrols[4]!.route=[{x:4.5,y:10.5},{x:6.5,y:10.5}];
  l.exitWindow=n===10?{period:8,openSeconds:3,phase:0}:undefined;
  l.targetSeconds=n===8?100:n>=9?80:65;l.hardLimitSeconds=n===8?180:n>=9?150:120;
 }

@@ -469,6 +469,17 @@ test('weekly board sums one best verified win per day, excludes other weeks and 
  const response=await app.inject({method:'GET',url:'/weekly/leaderboard'});assert.equal(response.statusCode,200);assert.equal(response.json().personal,null);
 });
 
+test('weekly manifests are frozen across deployments and engine metadata is attached only to new weeks',async()=>{
+ const {LeagueService}=await import('./league-service'),{weekWindow}=await import('../shared/weekly'),engine=(await import('../shared/weekly-engine.json')).default;
+ let clock=new Date('2040-01-02T12:00:00Z');const league=new LeagueService(pool,new RankedService(pool,{now:()=>clock}),()=>clock);
+ const first=await league.manifest();assert.equal(first.engineHash,engine.engineHash);
+ const frozen={...first,rulesHash:'historical-rules'};delete frozen.engineHash;
+ await pool.query('UPDATE league_weeks SET manifest=$2 WHERE week=$1',[first.week,frozen]);
+ const reads=await Promise.all([league.manifest(),league.manifest(),league.manifest()]);for(const r of reads)assert.deepEqual(r,frozen);
+ clock=new Date(Date.parse(first.endsAt)+1);const next=await league.manifest();assert.equal(next.week,weekWindow(clock).week);assert.notEqual(next.week,first.week);assert.equal(next.engineHash,engine.engineHash);assert.notEqual(next.contracts[0]!.id,first.contracts[0]!.id);
+ assert.deepEqual((await pool.query('SELECT manifest FROM league_weeks WHERE week=$1',[first.week])).rows[0].manifest,frozen);
+});
+
 test('weekly contracts enforce five atomic starts, idempotency, ownership and independent contract budgets',async()=>{
  const {LeagueService}=await import('./league-service');let clock=new Date('2034-04-03T12:00:00Z');const r=new RankedService(pool,{now:()=>clock}),league=new LeagueService(pool,r,()=>clock),manifest=await league.manifest(),c=manifest.contracts[0]!,user=await campaignOwner(),unowned=await login();
  const input={contractId:c.id,rulesHash:manifest.rulesHash,requestKey:randomUUID()};await assert.rejects(league.start(unowned.wallet,input),/Campaign access/);

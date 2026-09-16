@@ -4,6 +4,8 @@ A solo Android stealth game for Clock In. Sneak past robot patrols, recover a vi
 
 The current game uses **2D Skia** in React Native on Android and React Native Web in the browser. The game is not a WebView. 3D is used only to inspect collected phones. Earlier 3D experiments and their reports are historical.
 
+Latest balance results: [September 17 comparison](docs/CAMPAIGN-BALANCE-RETEST-V5.md). Weekly maps: [current architecture and automation plan](docs/WEEKLY-MAP-AUTOMATION.md).
+
 Current work and remaining gates: [September 13 release plan](docs/HACKATHON-RELEASE-PLAN.md). Submission materials: [judge guide](submission/JUDGE-GUIDE.md), [pitch deck](submission/steal-a-seeker-pitch.pptx), [demo script](submission/DEMO-SCRIPT.md).
 
 ## Try the game

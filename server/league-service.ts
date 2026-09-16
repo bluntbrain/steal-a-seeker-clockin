@@ -7,6 +7,7 @@ import {makeCombatContracts,CONTRACT_ATTEMPTS,type Contract} from '../shared/con
 import {weekWindow} from '../shared/weekly';
 import {practiceTicket,type LeagueBoard,type LeagueEntry,type LeagueSummary} from '../shared/league';
 import rules from '../shared/rules-manifest.json';
+import engine from '../shared/weekly-engine.json';
 const rankedSQL=`WITH scored AS (
  SELECT wallet,manifest->'contract'->>'id' AS contract,(result->>'ticks')::integer AS ticks,
  CASE WHEN manifest->'contract'->'level'->'combat'->>'version'='2' THEN
@@ -18,7 +19,7 @@ const rankedSQL=`WITH scored AS (
  SELECT *,rank() OVER(ORDER BY points DESC,ticks ASC)::integer AS rank,row_number() OVER(ORDER BY points DESC,ticks ASC,wallet)::integer AS position FROM totals ORDER BY points DESC,ticks ASC,wallet`;
 export class LeagueService{
  constructor(public pool:Pool,public ranked:RankedService,private now=()=>new Date()){}
- async manifest(){const window=weekWindow(this.now()),manifest={...window,rulesHash:rules.rulesHash,contracts:makeCombatContracts(this.now())};await this.pool.query('INSERT INTO league_weeks(week,manifest) VALUES($1,$2) ON CONFLICT DO NOTHING',[window.week,manifest]);return (await this.pool.query('SELECT manifest FROM league_weeks WHERE week=$1',[window.week])).rows[0].manifest as typeof manifest;}
+ async manifest(){const window=weekWindow(this.now()),manifest={...window,rulesHash:rules.rulesHash,engineHash:engine.engineHash,contracts:makeCombatContracts(this.now())};await this.pool.query('INSERT INTO league_weeks(week,manifest) VALUES($1,$2) ON CONFLICT DO NOTHING',[window.week,manifest]);return (await this.pool.query('SELECT manifest FROM league_weeks WHERE week=$1',[window.week])).rows[0].manifest as Omit<typeof manifest,'engineHash'>&{engineHash?:string};}
  private async rows(week:string):Promise<LeagueEntry[]>{return (await this.pool.query(rankedSQL,[week])).rows;}
  async board(week:string,wallet?:string,final=false):Promise<LeagueBoard>{
   const rows=final?(await this.pool.query('SELECT entry FROM league_history WHERE week=$1 ORDER BY (entry->>\'position\')::integer',[week])).rows.map(r=>r.entry as LeagueEntry):await this.rows(week),personal=rows.find(r=>r.wallet===wallet)??null;

@@ -1,3 +1,5 @@
+> **17 September 2026:** Targeted balance retest: [CAMPAIGN-BALANCE-RETEST-V5.md](CAMPAIGN-BALANCE-RETEST-V5.md). All 12 maps have verified escapes; 1,296 trials, 153 app tests and 66 backend tests pass. Level 7 and late-game difficulty remain unresolved for basic play. Weekly compatibility now separates the engine from campaign map data; see [WEEKLY-MAP-AUTOMATION.md](WEEKLY-MAP-AUTOMATION.md) for implemented behavior versus the proposed map bank.
+
 > **13 September 2026:** Current selected sprint, signed APKs, onboarding, telemetry and daily updates are tracked in [HACKATHON-RELEASE-PLAN.md](HACKATHON-RELEASE-PLAN.md). Android testing has resumed; physical USB is not detected yet. Older counts and deferred-Android notes below are historical.
 
 # Implementation evidence

@@ -2,10 +2,12 @@ import {readFile,writeFile,mkdir} from 'node:fs/promises';
 import {createHash} from 'node:crypto';
 import {fileURLToPath,URL} from 'node:url';
 import {build} from 'esbuild';
-import {currentRules,assertRulesCurrent} from '../server/rules-version';
+import {currentRules,assertRulesCurrent,currentWeeklyEngine} from '../server/rules-version';
 import {checkRuleBundle} from '../server/rule-bundle';
 async function main(){
- if(process.argv.includes('--check')){await assertRulesCurrent();console.log('Rules manifest matches simulation source.');return;}
+ const engine=await currentWeeklyEngine(),engineFile=new URL('../shared/weekly-engine.json',import.meta.url);
+ if(process.argv.includes('--check')){await assertRulesCurrent();if(JSON.stringify(JSON.parse(await readFile(engineFile,'utf8')))!==JSON.stringify(engine))throw Error('Weekly engine fingerprint is stale. Run rules:generate.');console.log('Rules manifest and weekly engine match simulation source.');return;}
+ await writeFile(engineFile,JSON.stringify(engine)+'\n');
  const rules=await currentRules(),directory=new URL('../server/rule-bundles/',import.meta.url),registryFile=new URL('registry.json',directory),out=new URL(`${rules.rulesHash}.mjs`,directory);
  await mkdir(directory,{recursive:true});
  let registry:Record<string,string>={};try{registry=JSON.parse(await readFile(registryFile,'utf8'));}catch(e){if((e as NodeJS.ErrnoException).code!=='ENOENT')throw e;}
