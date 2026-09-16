@@ -1,3 +1,4 @@
+import {solveCombat} from './qa-combat';
 import {makeContracts,type Contract} from '../shared/contracts';
 import {initialState,idleInput,targetPhone,inExit} from '../src/game/simulation';
 import {findPath} from '../src/game/navigation';
@@ -5,6 +6,7 @@ import {recordStep} from '../src/game/recording';
 import type {ReplayChunk} from '../shared/replay';
 import {writeFileSync,mkdirSync} from 'node:fs';
 export function solveContract(c:Contract){
+ if(c.level.combat){const solved=solveCombat(c.level);return solved?{...solved,contract:c.id,delay:0}:null;}
  for(let strategy=0;strategy<4;strategy++)for(let delay=0;delay<600;delay+=30){
   const s=initialState(c.level.mission,c.level),chunks:ReplayChunk[]=[];
   const tick=(x=0,y=0,interact=false,dash=s.dashSeen,tool=s.toolSeen)=>recordStep(s,{...idleInput(),x,y,interact,dash,tool},chunks);

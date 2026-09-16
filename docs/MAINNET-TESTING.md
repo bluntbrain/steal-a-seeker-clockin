@@ -1,13 +1,13 @@
 # Mainnet test setup
 
-Updated 14 September 2026. Mainnet transfers use real funds. This is a restricted test, not a public launch.
+Updated 16 September 2026. Mainnet transfers use real funds. Any wallet may test the current build; reduced pricing is still enabled.
 
 ## Current deployment
 
 - Mainnet API: https://seeker-api-production-41b3.up.railway.app (also https://stealaseeker.bluntbrain.com)
 - Railway service: `seeker-api` (`fc20fdcd-565e-4d68-a37a-8f6893baf8b2`), now Mainnet only. The temporary `seeker-mainnet-test` service was removed after migration.
 - Database: `seeker_mainnet_test`, with its own login, inside the existing Postgres instance. No extra Postgres instance was created. The API service adds hosting usage.
-- Tester wallet: `GyftsRcgrvFWHGhhTvVTQMDGVU565UmmPvbhuZ3nYwgE`.
+- Wallet access: unrestricted when `MAINNET_ALLOW_ALL_WALLETS=true`. Each wallet still signs its own login and payment.
 - New treasury: `BNgBygzFkVLGw4ipkxXgt2kuNcME1YdAE2hK5s81ogdn`.
 - Real SKR mint: `SKRbvo6Gf7GondiT3BbTfuRDPqLWei4j2Qy2NPGZhW3`, 6 decimals, standard SPL Token program. Verified against https://solanamobile.com/skr and a Mainnet mint-account read.
 - No Devnet API is running. Historical Devnet data remains in its old database; it was not imported into Mainnet. The active Mainnet database, treasury, purchases and sessions were preserved during service consolidation.
@@ -19,7 +19,8 @@ Open Railway → `seeker-api` → Variables. Change the values below and apply/r
 
 | Variable | Current value | Meaning |
 | --- | --- | --- |
-| `TEST_PRICING` | `true` | Selects reduced prices. Set `false` and apply/redeploy to return to the live price profile below. It does not change the network or remove the tester allowlist. |
+| `MAINNET_ALLOW_ALL_WALLETS` | `true` | Allows any wallet to sign in and buy. Set `false` to restrict access to `MAINNET_TEST_WALLETS`. Does not bypass signatures, payment verification or ownership checks. |
+| `TEST_PRICING` | `true` | Selects reduced prices. Set `false` and apply/redeploy to return to the live price profile below. It does not change the network or wallet-access setting. |
 | `TEST_GAME_PASS_USD_CENTS` | `10` | $0.10 test pass; accepts 1–100 cents. Used only when test pricing is true. |
 | `GAME_PASS_USD_CENTS` | `1000` | $10 normal pass. Preserved while testing; used when test pricing is false. |
 | `SHOP_PRICE_DIVISOR` | `1` | Normal shop prices. Used only when test pricing is false. |
@@ -52,7 +53,7 @@ An exact-material scan of 1,617 reachable Git file versions found no Devnet trea
 
 ## What is still a hands-on check
 
-Use Phantom's normal Mainnet mode. Check the app says **MAINNET · REAL MONEY**. Connect the allowed wallet, select SOL or SKR, review the reduced quote and approve in Phantom. Verify that access opens and Restore purchases works. Do not pay a second time while an earlier payment is being checked.
+Use Phantom's normal Mainnet mode. Check the app says **MAINNET · REAL MONEY**. Connect your chosen wallet, select SOL or SKR, review the reduced quote and approve in Phantom. Verify that access opens and Restore purchases works. Do not pay a second time while an earlier payment is being checked.
 
 New passes have no campaign completion payout. Previously promised rewards retain their original terms and funding requirements. Real buyer payment, finalized receipt and access unlock must be observed before calling the Mainnet purchase flow tested. Automated tests use fixtures; they do not spend the user's funds.
 
@@ -106,3 +107,9 @@ The fixed-budget device retry still failed raw-byte equality, so fee injection a
 ## Current payment flow
 
 The sign-only/local-send experiments above are superseded. See [PAYMENT-DEBUG.md](PAYMENT-DEBUG.md) for the active official MWA sign-and-send integration and latest verification.
+
+## All-wallet testing — 16 September 2026
+
+Deployed `f06b5dbf-2af3-4715-850b-a959d348246c` to the existing `seeker-api` service with `MAINNET_ALLOW_ALL_WALLETS=true`. `TEST_PRICING=true` and the 10-cent pass target remain active. No Android rebuild is required.
+
+Live verification used two newly generated, unfunded wallets: signed login and campaign quotes succeeded for SOL and SKR, invalid login signatures returned 401, and both unpaid quotes were cancelled and read back before logout. No payment transaction was signed or broadcast. Local checks passed seven configuration tests plus the restricted-access and unrestricted-access commerce integration tests. Actual Phantom payment approval remains a user test.

@@ -1,8 +1,10 @@
+import {freshCombat,stepCombat,type CombatState,type CombatCommand} from './combat';
 import { LEVEL, getLevel, TUNING, SECURITY, type Box, type MissionId, type LevelDefinition, type GateSpec } from './level';
 import {intersectsBox,blockedBy} from './geometry';
 import { makeGuards, updateGuards, type Guard } from './guards';
-export type Input = { x: number; y: number; interact: boolean; dash: number;tool?:number };
+export type Input = {command?:CombatCommand; x: number; y: number; interact: boolean; dash: number;tool?:number };
 export type GameState = {
+  combat:CombatState|null;
   x: number; y: number; px: number; py: number; vx: number; vy: number;
   facing: number; walked: number; carrying: boolean; battery: number;
   pickup: number; extraction: number; elapsed: number; ticks: number;
@@ -15,7 +17,7 @@ export function gateWantsClosed(g:GateSpec,elapsed:number,power:number,timers:nu
 export function initialState(mission:MissionId='practice',definition?:LevelDefinition): GameState {
   'worklet';
   const level=definition??getLevel(mission);
-  return { definition,x: level.spawn.x, y: level.spawn.y, px: level.spawn.x, py: level.spawn.y,
+  return { combat:level.combat?freshCombat():null,definition,x: level.spawn.x, y: level.spawn.y, px: level.spawn.x, py: level.spawn.y,
     vx: 0, vy: 0, facing: 2, walked: 0, carrying: false, battery: 100,
     pickup: 0, extraction: 0, elapsed: 0, ticks: 0, dashLeft: 0, cooldown: 0,
     dashX: 0, dashY: -1, dashSeen: 0, status: 'playing', dashes: 0, score: 0, bumps: 0,
@@ -62,6 +64,7 @@ function move(s: GameState,dx: number,dy: number) {
 export function step(s: GameState,input: Input,dt=TUNING.step) {
   'worklet';
   if(s.status!=='playing')return;
+  if(s.combat){stepCombat(s,input,dt);return;}
   s.px=s.x;s.py=s.y;s.elapsed+=dt;s.ticks++;s.relayTimers=s.relayTimers.map(t=>Math.max(0,t-dt));updateGates(s);if(!input.interact)s.interactSeen=false;
   if(s.securityAlarm)s.alarmSeconds+=dt;s.decoyFeedbackLeft=Math.max(0,s.decoyFeedbackLeft-dt);
   s.cooldown=Math.max(0,s.cooldown-dt);s.decoy.ttl=Math.max(0,s.decoy.ttl-dt);let noise:({x:number;y:number;kind?:'decoy'|'dash';id?:number;ttl?:number})|undefined;

@@ -4,6 +4,14 @@ import {MAINNET_SKR_MINT,GENESIS} from '../shared/network';
 import {priceProduct} from '../server/pricing';
 import {paymentTransaction} from '../src/commerce/payment';
 import type {Order} from '../shared/commerce';
+test('all-wallet Mainnet access is explicit and independent of pricing',()=>{
+ const env={SOLANA_NETWORK:'mainnet',MAINNET_TEST_ENABLED:'1',MAINNET_ALLOW_ALL_WALLETS:'true',TEST_PRICING:'true'};
+ const config=networkConfig(env);assert.equal(config.allowAllWallets,true);assert.deepEqual(config.allowlist,[]);assert.equal(config.campaignUsdCents,10);
+ assert.equal(networkConfig({...env,TEST_PRICING:'false'}).allowAllWallets,true);
+ assert.throws(()=>networkConfig({...env,MAINNET_TEST_ENABLED:'0'}),/explicit enablement/);
+ assert.throws(()=>networkConfig({...env,MAINNET_ALLOW_ALL_WALLETS:'false'}),/tester wallets/);
+ assert.throws(()=>networkConfig({...env,MAINNET_ALLOW_ALL_WALLETS:'yes'}),/must be true or false/);
+});
 test('Mainnet requires explicit enablement and tester allowlist; devnet remains the default',()=>{
  assert.equal(networkConfig({}).cluster,'solana:devnet');
  assert.throws(()=>networkConfig({SOLANA_NETWORK:'mainnet'}),/explicit enablement/);

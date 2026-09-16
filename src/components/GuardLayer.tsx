@@ -8,10 +8,14 @@ type Props={game:SharedValue<GameState>;alpha:SharedValue<number>;index:number};
 export default function GuardLayer({game,alpha,index}:Props){
  const pose=useDerivedValue(()=>{const g=game.value.guards[index];return g?[{translateX:g.px+(g.x-g.px)*alpha.value},{translateY:g.py+(g.y-g.py)*alpha.value},{rotate:g.angle}]:[];});
  const kind=stateLevel(game.value).patrols[index]?.kind;
- const visible=useDerivedValue(()=>game.value.guards[index]?1:0);
+ const visible=useDerivedValue(()=>{const g=game.value.guards[index];return !g?0:game.value.combat?g.hp<=0?.18:g.active?1:0:1;});
+ const role=game.value.guards[index]?.combatRole;
+ const armor=role==='heavy'||role==='warden';
+ const aim=useDerivedValue(()=>{const p=Skia.Path.Make(),g=game.value.guards[index];if(!game.value.combat||!g?.active||g.hp<=0||g.gunPhase!=='aim')return p;const d=sightDistance(g.x,g.y,Math.cos(g.shotAngle),Math.sin(g.shotAngle),g.range,{...stateLevel(game.value),blockers:game.value.blockers});p.moveTo(g.x,g.y);p.lineTo(g.x+Math.cos(g.shotAngle)*d,g.y+Math.sin(g.shotAngle)*d);return p;});
  const color=useDerivedValue(()=>game.value.guards[index]?.seesPlayer?'#ff8169':'#dba961');
- const opacity=useDerivedValue(()=>game.value.guards[index]?.active?.14+(game.value.guards[index]?.exposure??0)*.25:0);
- const width=useDerivedValue(()=>(game.value.guards[index]?.exposure??0)*.9);
+ const opacity=useDerivedValue(()=>game.value.combat&&role==='drone'?0:game.value.guards[index]?.active?.14+(game.value.guards[index]?.exposure??0)*.25:0);
+ const width=useDerivedValue(()=>game.value.combat?(game.value.guards[index]?.hp??0)/(game.value.guards[index]?.maxHp??1)*.9:(game.value.guards[index]?.exposure??0)*.9);
+ const hitFlash=useDerivedValue(()=>Math.min(1,(game.value.guards[index]?.flash??0)*5));
  const bar=useDerivedValue(()=>{const g=game.value.guards[index];return [{translateX:(g?.x??0)-.45},{translateY:(g?.y??0)-.72}];});
  const cone=useDerivedValue(()=>{
   const p=Skia.Path.Make(),g=game.value.guards[index];if(!g)return p;
@@ -27,7 +31,7 @@ export default function GuardLayer({game,alpha,index}:Props){
  return <Group opacity={visible}>
   <Path path={lurePath} color="#CFE6E4" style="stroke" strokeWidth={.035} opacity={.65}><DashPathEffect intervals={[.12,.12]}/></Path><Path path={cone} color={color} opacity={opacity}/>
   <Path path={cone} color={color} opacity={opacity} style="stroke" strokeWidth={.025}/>
-  <Group transform={pose}>
+  <Path path={aim} color="#FF886F" style="stroke" strokeWidth={.045}><DashPathEffect intervals={[.13,.08]}/></Path><Group transform={pose}>
    <Oval x={-.42} y={-.39} width={.84} height={.84} color="#06080B" opacity={.65}/>
    {kind==='scanner'?<>
     <RoundedRect x={-.14} y={-.45} width={.28} height={.15} r={.065} color="#A7C9CC"/>
@@ -40,14 +44,14 @@ export default function GuardLayer({game,alpha,index}:Props){
    </>:<>
     <RoundedRect x={-.28} y={-.39} width={.47} height={.19} r={.075} color="#11151C"/>
     <RoundedRect x={-.28} y={.2} width={.47} height={.19} r={.075} color="#11151C"/>
-    {kind==='warden'&&<>
+    {(kind==='warden'||armor)&&<>
      <RoundedRect x={-.16} y={-.55} width={.48} height={.23} r={.08} color="#9DAAAF"/>
      <RoundedRect x={-.16} y={.32} width={.48} height={.23} r={.08} color="#9DAAAF"/>
      <RoundedRect x={.15} y={-.56} width={.21} height={.22} r={.07} color="#333E47"/>
      <RoundedRect x={.15} y={.34} width={.21} height={.22} r={.07} color="#333E47"/>
     </>}
     <RoundedRect x={-.29} y={-.29} width={.6} height={.58} r={.12} color="#87969D"/>
-    <RoundedRect x={-.28} y={-.3} width={.52} height={.58} r={.1} color="#DBE0DF"/>
+    <RoundedRect x={-.28} y={-.3} width={.52} height={.58} r={.1} color={role==='sentry'?'#C9A579':armor?'#7D919A':'#DBE0DF'}/>
     <RoundedRect x={-.21} y={-.23} width={.26} height={.46} r={.07} color="#EDF0EB"/>
     <RoundedRect x={.04} y={-.23} width={.28} height={.46} r={.08} color="#111B20"/>
     <RoundedRect x={.16} y={-.15} width={.08} height={.1} r={.035} color={color}/>
@@ -55,10 +59,12 @@ export default function GuardLayer({game,alpha,index}:Props){
     <RoundedRect x={-.16} y={-.06} width={.13} height={.12} r={.025} color="#AACFCC"/>
     {kind!=='warden'&&<Circle cx={-.32} cy={0} r={.05} color={color}/>}
    </>}
+   {!!game.value.combat&&<RoundedRect x={.28} y={-.08} width={.42} height={.16} r={.03} color="#829D9F"/>}
+   <Circle cx={0} cy={0} r={.43} color="#F2FFDA" opacity={hitFlash}/>
   </Group>
   <Group transform={bar}><Circle cx={.45} cy={-.18} r={.13} color="#CFE6E4" opacity={listening}/><Circle cx={.45} cy={-.18} r={.065} color="#243F48" opacity={listening}/>
    <RoundedRect x={0} y={0} width={.9} height={.10} r={.04} color="#152023"/>
-   <RoundedRect x={0} y={0} width={width} height={.10} r={.04} color="#ff8169"/>
+   <RoundedRect x={0} y={0} width={width} height={.10} r={.04} color={game.value.combat?'#BAE8CD':'#ff8169'}/>
   </Group>
  </Group>;
 }

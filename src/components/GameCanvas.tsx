@@ -9,6 +9,7 @@ import {editionIndex} from '../game/collection';
 import phoneAtlas from '../../assets/world-v3/phones.frames.json';
 import frames from '../../assets/courier.frames.json';
 import GuardLayer from './GuardLayer';
+import CombatLayer from './CombatLayer';
 type Props={size:number;input:SharedValue<Input>;game:SharedValue<GameState>;alpha:SharedValue<number>;clock:SharedValue<number>;level:LevelDefinition;appearance?:{outfit?:string;trail?:string;reducedEffects?:boolean}};
 const cleanAlpha=[1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,1.5,-.5];
 function GateLayer({game,level,index}:Pick<Props,'game'|'level'>&{index:number}){const b=level.gates![index]!.box,color=useDerivedValue(()=>game.value.closedGates[index]?'#edb768':'#99dfc4'),opacity=useDerivedValue(()=>game.value.closedGates[index]?.85:.2);return <RoundedRect x={b.x} y={b.y} width={b.w} height={b.h} r={.04} color={color} opacity={opacity}/>;}
@@ -78,7 +79,7 @@ export default memo(function GameCanvas({size,input,game,alpha,clock,level,appea
    </Group>
    {level.patrols.map((_,index)=><GuardLayer key={index} game={game} alpha={alpha} index={index}/>)}
    {level.switches?.map((_,index)=><SwitchLayer key={index} game={game} level={level} index={index}/>)}
-   <DecoyLayer game={game} input={input} reduced={reduced}/>
+   {!level.combat&&<DecoyLayer game={game} input={input} reduced={reduced}/>}
    <Group transform={escapeTransform} opacity={escapeOpacity}>
     <RoundedRect x={-.9} y={-.045} width={.7} height={.09} r={.045} color="#CFE6E4"/>
     <Circle cx={-1.05} cy={0} r={.045} color="#CFE6E4"/>
@@ -93,6 +94,7 @@ export default memo(function GameCanvas({size,input,game,alpha,clock,level,appea
    <Oval rect={shadow} color="#070c0d" opacity={.7}/>
    {sprite && <Atlas image={sprite} sprites={sprites} transforms={transforms}><ColorMatrix matrix={costumeMatrix}/></Atlas>}
    {!!appearance.outfit&&<Group transform={trimTransform}><RoundedRect x={-.15} y={-.03} width={.3} height={.07} r={.02} color={trim}/></Group>}
+   {!!level.combat&&<CombatLayer game={game}/>}
    <Group transform={carriedTransform} opacity={carry}>
     <Atlas image={phones} sprites={phoneSprites} transforms={carryTransforms}/>
    </Group>

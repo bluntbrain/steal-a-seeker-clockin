@@ -1,0 +1,169 @@
+{
+  "status": "won",
+  "hp": 100,
+  "ticks": 501,
+  "metrics": {
+    "fps": 30.001500075003754,
+    "p95": 33.400000000001455,
+    "frames": 490,
+    "slow": 490
+  },
+  "errors": [],
+  "replay": {
+    "version": 2,
+    "chunks": [
+      {
+        "x": 0,
+        "y": 0,
+        "buttons": 0,
+        "ticks": 1,
+        "command": {
+          "seq": 1,
+          "kind": "move",
+          "target": -1,
+          "x": 2.13,
+          "y": 15.33
+        }
+      },
+      {
+        "x": 0,
+        "y": 0,
+        "buttons": 0,
+        "ticks": 19
+      },
+      {
+        "x": 0,
+        "y": 0,
+        "buttons": 0,
+        "ticks": 1,
+        "command": {
+          "seq": 2,
+          "kind": "move",
+          "target": -1,
+          "x": 2.13,
+          "y": 12.23
+        }
+      },
+      {
+        "x": 0,
+        "y": 0,
+        "buttons": 0,
+        "ticks": 26
+      },
+      {
+        "x": 0,
+        "y": 0,
+        "buttons": 0,
+        "ticks": 1,
+        "command": {
+          "seq": 3,
+          "kind": "attack",
+          "target": 0,
+          "x": 3,
+          "y": 11
+        }
+      },
+      {
+        "x": 0,
+        "y": 0,
+        "buttons": 0,
+        "ticks": 2
+      },
+      {
+        "x": 0,
+        "y": 0,
+        "buttons": 0,
+        "ticks": 1,
+        "command": {
+          "seq": 4,
+          "kind": "move",
+          "target": -1,
+          "x": 6.83,
+          "y": 10.73
+        }
+      },
+      {
+        "x": 0,
+        "y": 0,
+        "buttons": 0,
+        "ticks": 94
+      },
+      {
+        "x": 0,
+        "y": 0,
+        "buttons": 0,
+        "ticks": 1,
+        "command": {
+          "seq": 5,
+          "kind": "move",
+          "target": -1,
+          "x": 6.83,
+          "y": 14.93
+        }
+      },
+      {
+        "x": 0,
+        "y": 0,
+        "buttons": 0,
+        "ticks": 38
+      },
+      {
+        "x": 0,
+        "y": 0,
+        "buttons": 0,
+        "ticks": 1,
+        "command": {
+          "seq": 6,
+          "kind": "attack",
+          "target": 1,
+          "x": 8.851507575950823,
+          "y": 10.148492424049177
+        }
+      },
+      {
+        "x": 0,
+        "y": 0,
+        "buttons": 0,
+        "ticks": 31
+      },
+      {
+        "x": 0,
+        "y": 0,
+        "buttons": 0,
+        "ticks": 1,
+        "command": {
+          "seq": 7,
+          "kind": "phone",
+          "target": 0,
+          "x": 9.8,
+          "y": 3.4
+        }
+      },
+      {
+        "x": 0,
+        "y": 0,
+        "buttons": 0,
+        "ticks": 109
+      },
+      {
+        "x": 0,
+        "y": 0,
+        "buttons": 0,
+        "ticks": 1,
+        "command": {
+          "seq": 8,
+          "kind": "exit",
+          "target": 0,
+          "x": 9.8,
+          "y": 18.1
+        }
+      },
+      {
+        "x": 0,
+        "y": 0,
+        "buttons": 0,
+        "ticks": 174
+      }
+    ]
+  }
+}

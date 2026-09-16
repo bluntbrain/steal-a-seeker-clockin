@@ -1,0 +1,35 @@
+{
+  "deployment": "ec46b72e-bdf3-42a8-939a-266aac1bbc56",
+  "health": {
+    "ok": true,
+    "cluster": "solana:mainnet"
+  },
+  "week": "2026-09-14",
+  "rulesHash": "3bae27a30502b0316354c9206c1ccf5520ac142b345de200774fb7c9eeabc9d0",
+  "contracts": [
+    {
+      "id": "2026-09-14:0:combat-v2",
+      "combat": {
+        "version": 2
+      },
+      "modifier": "Blackout"
+    },
+    {
+      "id": "2026-09-14:1:combat-v2",
+      "combat": {
+        "version": 2
+      },
+      "modifier": "Double haul"
+    },
+    {
+      "id": "2026-09-14:2:combat-v2",
+      "combat": {
+        "version": 2
+      },
+      "modifier": "Exit window"
+    }
+  ],
+  "participants": 0,
+  "priceCents": 10,
+  "testPricing": true
+}

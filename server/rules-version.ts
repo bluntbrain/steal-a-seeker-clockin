@@ -3,7 +3,7 @@ import {URL} from 'node:url';
 import {createHash} from 'node:crypto';
 import {CAMPAIGN_IDS,getLevel} from '../src/game/level';
 import {checkRuleBundle} from './rule-bundle';
-export const RULE_FILES=['src/game/level.ts','src/game/simulation.ts','src/game/guards.ts','src/game/geometry.ts','src/game/navigation.ts','shared/replay.ts','server/replay.ts'];
+export const RULE_FILES=['src/game/level.ts','src/game/combat.ts','src/game/combat-levels.ts','src/game/simulation.ts','src/game/guards.ts','src/game/geometry.ts','src/game/navigation.ts','shared/replay.ts','server/replay.ts'];
 export async function currentRules(){
  const hash=createHash('sha256');
  for(const file of RULE_FILES){hash.update(file+'\0');hash.update((await readFile(new URL(`../${file}`,import.meta.url),'utf8')).replace(/\r\n/g,'\n'));hash.update('\0');}

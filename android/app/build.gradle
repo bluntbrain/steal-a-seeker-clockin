@@ -83,6 +83,7 @@ def jscFlavor = 'io.github.react-native-community:jsc-android:2026004.+'
 
 def releaseStore = System.getenv('SEEKER_KEYSTORE')
 def releaseSecretsPresent = releaseStore && System.getenv('SEEKER_STORE_PASSWORD') && System.getenv('SEEKER_KEY_ALIAS') && System.getenv('SEEKER_KEY_PASSWORD')
+def diagnosticBuild = (findProperty('seekerDiagnostic') ?: 'false').toBoolean()
 def judgeBuild = (findProperty('seekerJudge') ?: 'false').toBoolean()
 if (gradle.startParameter.taskNames.any { it.toLowerCase().contains('release') } && !releaseSecretsPresent) {
     throw new GradleException('Release signing is required. Use node scripts/build-release.cjs devnet or judge; see docs/RELEASE.md.')
@@ -95,8 +96,8 @@ android {
 
     namespace 'com.krane.stealaseeker.mvp'
     defaultConfig {
-        applicationId judgeBuild ? 'com.krane.stealaseeker.judge' : 'com.krane.stealaseeker.mvp'
-        manifestPlaceholders = [appLabel: judgeBuild ? 'Steal a Seeker Judge' : 'Steal a Seeker']
+        applicationId diagnosticBuild ? 'com.krane.stealaseeker.qa' : judgeBuild ? 'com.krane.stealaseeker.judge' : 'com.krane.stealaseeker.mvp'
+        manifestPlaceholders = [appLabel: diagnosticBuild ? 'Seeker QA — No Payments' : judgeBuild ? 'Steal a Seeker Judge' : 'Steal a Seeker']
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 3

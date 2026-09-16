@@ -8,7 +8,7 @@ export function mergeBests(local:Progress,remote:Progress):Progress{
  for(const id of CAMPAIGN_IDS){const next=remote.missions[id];if(!next)continue;const old=missions[id];missions[id]=old?{stars:Math.max(old.stars,next.stars),seconds:Math.min(old.seconds,next.seconds),score:Math.max(old.score,next.score),battery:Math.max(old.battery,next.battery),completions:Math.max(old.completions,next.completions)}:{...next};}
  const result:Progress={version:1,missions};return JSON.stringify(result)===JSON.stringify(local)?local:result;
 }
-export function starsFor(s:GameState){return s.status==='won'?1+Number(s.battery>=40)+Number(!s.spotted&&s.elapsed<=getLevel(s.mission).targetSeconds):0;}
+export function starsFor(s:GameState){return s.status==='won'?s.combat?1+Number(s.combat.hp>=60)+Number(s.elapsed<=(s.definition??getLevel(s.mission)).targetSeconds):1+Number(s.battery>=40)+Number(!s.spotted&&s.elapsed<=getLevel(s.mission).targetSeconds):0;}
 export function recordWin(progress:Progress,s:GameState):Progress{
  if(s.status!=='won'||!CAMPAIGN_IDS.includes(s.mission))return progress;
  const old=progress.missions[s.mission];

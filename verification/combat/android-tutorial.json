@@ -1,0 +1,16 @@
+{
+  "device": "emulator-5554",
+  "package": "com.krane.stealaseeker.judge",
+  "steps": [
+    "Tap here to move",
+    "Tap behind the crate",
+    "Tap the robot to shoot",
+    "Tap here. Watch for the red aim line.",
+    "Red line? Tap away!",
+    "Tap the guard. Stop to shoot.",
+    "Tap the Seeker to take it",
+    "Alarm! Tap the exit"
+  ],
+  "completed": true,
+  "walletTested": false
+}

@@ -1,5 +1,5 @@
 import type {MissionId} from '../game/level';
-export type PlaytestRun={id:string;at:string;mission:MissionId;mode:'campaign'|'daily'|'paid'|'trial';outcome:'won'|'caught'|'timeout'|'abandoned';seconds:number;score:number;dashes:number;decoysUsed:number;pickedUp:boolean;spotted:boolean;cell:{x:number;y:number};fps:number;p95:number};
+export type PlaytestRun={id:string;at:string;mission:MissionId;mode:'campaign'|'daily'|'paid'|'trial';outcome:'won'|'caught'|'timeout'|'abandoned';seconds:number;score:number;dashes:number;decoysUsed:number;pickedUp:boolean;spotted:boolean;cell:{x:number;y:number};fps:number;p95:number;combat?:{hp:number;shots:number;kills:number;damageTaken:number;pathReplans:number}};
 export type PlaytestLog={version:1;enabled:boolean;runs:PlaytestRun[]};
 export const emptyLog=():PlaytestLog=>({version:1,enabled:false,runs:[]});
 export function appendRun(log:PlaytestLog,run:PlaytestRun):PlaytestLog{

@@ -510,6 +510,18 @@ test('Mainnet test orders enforce allowlist, store Mainnet and use reduced price
  }finally{await api.close();}
 });
 
+test('all-wallet Mainnet access accepts new wallets and both currencies while retaining signature verification',async()=>{
+ const main=new CommerceService(pool,chain,{...service.config,cluster:'solana:mainnet',allowlist:[],allowAllWallets:true,testPricing:true,campaignUsdCents:10,usdPricing:true,campaignOffer:false},{rates:async()=>({SKR:'0.02',SOL:'100',at:Date.now()})});
+ for(const currency of ['SKR','SOL'] as const){
+  const keys=generateKeyPairSync('ed25519'),wallet=b58(keys.publicKey.export({type:'spki',format:'der'}).subarray(-32));
+  const challenge=await main.challenge(wallet),message=createSignInMessage(challenge.payload);
+  const input={id:challenge.id,wallet,signedMessage:Buffer.from(message).toString('base64'),signature:Buffer.alloc(64).toString('base64')};
+  await assert.rejects(main.signIn(input),/signature does not match/);
+  const session=await main.signIn({...input,signature:sign(null,message,keys.privateKey).toString('base64')});assert.equal(session.account.wallet,wallet);
+  const order=await main.createOrder(wallet,'campaign',randomUUID(),currency);assert.equal(order.cluster,'solana:mainnet');assert.equal(order.currency,currency);assert.equal(order.pricing?.usdCents,10);assert.equal(order.status,'quoted');
+ }
+});
+
 test('weekly pass without rebate prepares and fulfills without reward funding; existing rebate terms remain intact',async()=>{
  const user=await login(),priorUser=await login(),old=new CommerceService(pool,chain,{...service.config,campaignOffer:true,rebateSkr:25});
  const earlier=await old.createOrder(priorUser.wallet,'campaign',randomUUID());assert.equal(earlier.campaignTerms?.rebate,25);

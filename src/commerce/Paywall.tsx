@@ -1,14 +1,15 @@
+import PaywallVideo from './PaywallVideo';
 import {IS_MAINNET,NETWORK_LABEL,SKR_LABEL} from '../wallet/config';
 import React,{useEffect,useState} from 'react';
 import {commerceApi} from './client';
 import type {ProductPricing} from '../../shared/pricing';
-import {ImageBackground,Pressable,ScrollView,StyleSheet,Text,View,useWindowDimensions} from 'react-native';
+import {Pressable,ScrollView,StyleSheet,Text,View,useWindowDimensions} from 'react-native';
 import {usdLabel} from '../../shared/pricing';
 import {CAMPAIGN_OFFER} from '../../shared/economy';
 
-type Props={local:boolean;stage:'offer'|'review'|'cancelled';trialAvailable:boolean;busy?:boolean;message?:string;onBuy:()=>void;onCancel:()=>void;onTrial:()=>void;onBack:()=>void};
+type Props={mediaActive?:boolean;local:boolean;stage:'offer'|'review'|'cancelled';trialAvailable:boolean;busy?:boolean;message?:string;onBuy:()=>void;onCancel:()=>void;onTrial:()=>void;onBack:()=>void};
 
-export default function Paywall({local,stage,trialAvailable,busy,message,onBuy,onCancel,onTrial,onBack}:Props){
+export default function Paywall({mediaActive=true,local,stage,trialAvailable,busy,message,onBuy,onCancel,onTrial,onBack}:Props){
  const [offer,setOffer]=useState<ProductPricing['campaignOffer']>(),[offerError,setOfferError]=useState(''),[refreshOffer,setRefreshOffer]=useState(0);
  useEffect(()=>{if(local)return;let active=true;setOfferError('');void commerceApi.pricing('campaign').then(p=>{if(!p.campaignOffer)throw new Error('Update required');if(active)setOffer(p.campaignOffer);}).catch(()=>{if(active)setOfferError('Could not load the pass price. Tap below to retry.');});return()=>{active=false;};},[local,refreshOffer]);
  const passPrice=offer?usdLabel(offer.usdCents):'…',rebate=local?0:offer?.rebateSkr;
@@ -21,15 +22,16 @@ export default function Paywall({local,stage,trialAvailable,busy,message,onBuy,o
  const needsScroll=height<500||fontScale>1.2;
  const primaryLabel=cancelled?(trialAvailable?'Play free trial':'Back to campaign'):review?(local?`Confirm campaign · ${CAMPAIGN_OFFER.price} ${currency}`:'Review payment method'):local?`Buy campaign · ${CAMPAIGN_OFFER.price} playtest credits`:`Continue · ${passPrice} in SKR or SOL`;
  const body=<View style={[s.card,needsScroll&&{minHeight:700}]}>
-  <ImageBackground accessible accessibilityLabel="Game illustration: the courier escapes a guarded vault with a mint phone" source={require('../../assets/paywall-v3/courier-heist.png')} resizeMode={compact?'contain':'cover'} imageStyle={{width:'100%',height:'100%'}} style={[s.art,{maxHeight:cancelled?360:310,...(compact&&message?{display:'none' as const}:{})}]}>
-   <View style={s.topline}><Text style={s.brand}>STEAL A SEEKER</Text><View style={s.testBadge}><Text style={s.testLabel}>{local?'LOCAL TEST':NETWORK_LABEL}</Text></View></View>
-   <View style={s.artCaption}><Text style={s.captionText}>THE GAME PASS</Text></View>
-  </ImageBackground>
+  <View style={[s.art,{maxHeight:cancelled?360:310,...(compact&&message?{display:'none' as const}:{})}]}>
+   <PaywallVideo active={mediaActive&&!(compact&&!!message)}/>
+   <View pointerEvents="none" style={s.topline}><Text style={s.brand}>STEAL A SEEKER</Text><View style={s.testBadge}><Text style={s.testLabel}>{local?'LOCAL TEST':NETWORK_LABEL}</Text></View></View>
+   <View pointerEvents="none" style={s.artCaption}><Text style={s.captionText}>CONCEPT TRAILER</Text></View>
+  </View>
   <View style={[s.content,{paddingHorizontal:compact?20:24,gap:compact?8:15,paddingTop:compact?12:20}]}>
    <View><Text accessibilityRole="header" style={[s.title,{fontSize:compact?30:39,lineHeight:compact?32:41}]}>{cancelled?(trialAvailable?'One run.\nSee if you like it.':'Ready for\nanother heist?'):review?'Ready for\nyour first heist?':'Steal the phone.\nEscape the guards.'}</Text>
     <Text style={[s.subtitle,{marginTop:compact?5:8}]}>{cancelled?(trialAvailable?'Try the first mission before you buy.':'Your free attempt is used. The full campaign is still here.'):review?'Check your pass. Then start the first mission.':'Play 12 heists. Then climb the weekly leaderboard.'}</Text>
    </View>
-   {cancelled?<View style={s.trialCard}><Text style={s.trialTitle}>{trialAvailable?'1 attempt. No payment required.':local?'Campaign pass · '+CAMPAIGN_OFFER.price+' '+currency:`Game pass · ${passPrice}`}</Text><Text style={s.detail}>{trialAvailable?'Practice only: no saved progress, rank or rebate. Leaving or restarting ends the attempt.':'All 12 missions and unlimited retries. Buy once to keep playing.'}</Text></View>:<>
+   {cancelled?<View style={s.trialCard}><Text style={s.trialTitle}>{trialAvailable?'1 training heist. No payment required.':local?'Campaign pass · '+CAMPAIGN_OFFER.price+' '+currency:`Game pass · ${passPrice}`}</Text><Text style={s.detail}>{trialAvailable?'Guided play with checkpoint retries. Training does not affect your rank.':'All 12 missions and unlimited retries. Buy once to keep playing.'}</Text></View>:<>
     <View style={s.benefits}>{[['12','missions'],['∞','campaign retries'],['Weekly','competition']].map(([value,label],i)=><View key={label} style={[s.benefit,i>0&&s.benefitBorder]}><Text style={[s.stat,{fontSize:compact?18:22}]}>{value}</Text><Text style={s.statLabel}>{label}</Text></View>)}</View>
     <View style={[s.pass,{padding:compact?13:17}]}><View style={s.passName}><Text style={s.passTitle}>Game pass</Text><Text style={s.passNote}>Pay once. No subscription.</Text></View><View style={s.priceBlock}><Text style={[s.price,{fontSize:compact?30:36}]}>{local?CAMPAIGN_OFFER.price:passPrice}</Text><Text style={s.currency}>{local?currency:'PAY IN SKR OR SOL'}</Text></View></View>
     {(rebate??0)>0&&<View style={s.rebate}><Text style={s.rebateIcon}>↳</Text><View style={{flex:1}}><Text style={s.rebateTitle}>Clear all 12. Earn {rebate} {currency}.</Text><Text style={s.detail}>{local?`Pay ${CAMPAIGN_OFFER.price}; earn ${CAMPAIGN_OFFER.rebate} back once.`:`One ${SKR_LABEL} reward after all 12 wins are verified, whether you pay in SKR or SOL.`}</Text></View></View>}
@@ -37,7 +39,7 @@ export default function Paywall({local,stage,trialAvailable,busy,message,onBuy,o
    {!!(message||offerError)&&<Text accessibilityLiveRegion="polite" style={s.error}>{message||offerError}</Text>}
    <View style={s.checkout}>
     <Text style={s.fineprint}>{local?'Browser credits only. No real money or wallet payments.':IS_MAINNET?`${offer?.testPricing?'Reduced test price. ':''}Real SOL or SKR will leave your wallet. Review the amount and network fee in Phantom.`:'Devnet test tokens only. USD is a market reference. Exact token amount and network fee shown before approval.'} Outfits sold separately.</Text>
-    <Pressable accessibilityRole="button" accessibilityLabel={primaryLabel} accessibilityState={{disabled:!!busy,busy:!!busy}} disabled={busy||(!cancelled&&priceLoading)} onPress={cancelled?(trialAvailable?onTrial:onBack):!local&&!offer?()=>setRefreshOffer(n=>n+1):onBuy} style={({pressed})=>[s.primary,pressed&&{backgroundColor:'#9AE5C0',transform:[{scale:.985}]},busy&&{opacity:.55}]}><Text style={s.primaryText}>{busy?'Please wait…':cancelled?(trialAvailable?'Play one free run':'Back to campaign'):priceLoading?'Loading price…':!local&&!offer?'Retry loading price':review?(local?`Confirm · ${CAMPAIGN_OFFER.price} ${currency}`:'Choose SKR or SOL'):local?`Unlock game · ${CAMPAIGN_OFFER.price} credits`:`Continue · ${passPrice} in SKR or SOL`}</Text><Text style={s.arrow}>{busy?'…':'→'}</Text></Pressable>
+    <Pressable accessibilityRole="button" accessibilityLabel={primaryLabel} accessibilityState={{disabled:!!busy,busy:!!busy}} disabled={busy||(!cancelled&&priceLoading)} onPress={cancelled?(trialAvailable?onTrial:onBack):!local&&!offer?()=>setRefreshOffer(n=>n+1):onBuy} style={({pressed})=>[s.primary,pressed&&{backgroundColor:'#9AE5C0',transform:[{scale:.985}]},busy&&{opacity:.55}]}><Text style={s.primaryText}>{busy?'Please wait…':cancelled?(trialAvailable?'Play training heist':'Back to campaign'):priceLoading?'Loading price…':!local&&!offer?'Retry loading price':review?(local?`Confirm · ${CAMPAIGN_OFFER.price} ${currency}`:'Choose SKR or SOL'):local?`Unlock game · ${CAMPAIGN_OFFER.price} credits`:`Continue · ${passPrice} in SKR or SOL`}</Text><Text style={s.arrow}>{busy?'…':'→'}</Text></Pressable>
     <Pressable accessibilityRole="button" accessibilityLabel={cancelled?'Back to campaign offer':review?'Cancel payment':'Not now'} onPress={cancelled?onBack:onCancel} disabled={busy} style={s.secondaryButton}><Text style={s.secondary}>{cancelled?'Back to campaign offer':review?'Cancel payment':'Not now'}</Text></Pressable>
    </View>
   </View>

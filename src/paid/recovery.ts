@@ -24,10 +24,11 @@ export function isReplayPrefix(a:Replay,b:Replay){
 export function restorePaidState(mission:MissionId,replay:Replay,definition?:LevelDefinition){
  'worklet';
  const state=initialState(mission,definition);let dash=0,tool=0;
+ if(!!state.combat!==(replay.version===2))throw new Error('Saved run uses different controls.');
  for(const c of replay.chunks)for(let n=0;n<c.ticks;n++){
   if(state.status!=='playing')throw new Error('Saved run continues after its result.');
   if(c.buttons&2)dash++;if(c.buttons&4)tool++;
-  step(state,{x:c.x/127,y:c.y/127,interact:!!(c.buttons&1),dash,tool});
+  step(state,{x:c.x/127,y:c.y/127,interact:!!(c.buttons&1),dash,tool,command:c.command});
  }
  return state;
 }

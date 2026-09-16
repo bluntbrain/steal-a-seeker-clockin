@@ -29,7 +29,8 @@
       "expo-asset",
       "expo-secure-store",
       "expo-sqlite",
-      "expo-sharing"
+      "expo-sharing",
+      "expo-video"
     ]
   }
 }

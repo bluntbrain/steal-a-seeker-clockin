@@ -1,4 +1,5 @@
 import type {LevelDefinition,Box,GuardSpec,MissionId} from '../src/game/level';
+import {combatLevel} from '../src/game/combat-levels';
 import {weekWindow} from './weekly';
 export type Contract={id:string;week:string;slot:number;name:string;district:string;modifier:string;objective:string;level:LevelDefinition};
 export const CONTRACT_ATTEMPTS=5;
@@ -24,8 +25,21 @@ export function makeContracts(date=new Date()):Contract[]{
   return {id,week,slot,name,district,modifier,objective,level};
  });
 }
-export function contractPoints(result:{status:string;score:number;ticks:number;battery?:number},level:LevelDefinition){
+/** A new manifest is frozen when its week opens. Never rewrite an active competition. */
+export function makeCombatContracts(date=new Date()):Contract[]{
+ return makeContracts(date).map(c=>{
+  const level=combatLevel((['practice','sweep-window','power-trade'] as MissionId[])[c.slot]!);
+  // Weekly seeded geometry and phone placement come from the weekly generator.
+  const patrols=c.level.patrols.map((p,i)=>({...p,combatRole:i===0?'sentry' as const:'scout' as const,range:4.5,halfAngle:Math.PI/3.2}));
+  const door={x:12-c.level.spawn.x,y:c.level.spawn.y};
+  const reserve={...patrols[1]!,route:[door,{x:door.x,y:door.y>.5?door.y-.4:door.y+.4}],combatRole:'scout' as const,reserveAfter:2};
+  const objective=c.modifier==='Blackout'?'Short guard sight. Take the Seeker and escape.':c.modifier==='Double haul'?'Bring back both phones. Your health must last.':'Take the Seeker. The exit opens for 4 seconds every 8 seconds.';
+  return {...c,id:`${c.id}:combat-v2`,objective,level:{...level,...c.level,id:`combat-v2:${c.id}`,combat:{version:2},patrols:[...patrols,reserve].map(p=>({...p,range:c.modifier==='Blackout'?3:4.5})),decoys:0,briefing:objective,hardLimitSeconds:c.modifier==='Double haul'?300:240}};
+ });
+}
+export function contractPoints(result:{status:string;score:number;ticks:number;battery?:number;hp?:number},level:LevelDefinition){
  if(result.status!=='won')return 0;
+ if(level.combat)return Math.max(1,Math.min(10000,5000+Math.floor(3000*Math.max(0,level.hardLimitSeconds*30-result.ticks)/(level.hardLimitSeconds*30))+20*Math.max(0,Math.min(100,result.hp??result.battery??0))));
  // Each contract has the same 10,000 point ceiling, regardless of target count.
  return Math.max(1,Math.min(10000,5000+Math.round(Math.max(0,1-result.ticks/(level.hardLimitSeconds*30))*4000)+Math.round((result.battery??0)*10)));
 }

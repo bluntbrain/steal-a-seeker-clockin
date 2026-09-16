@@ -6,7 +6,7 @@ import type {PlaytestRun} from './model';
 type Capture={id:string;at:string;state:GameState;fps:number;p95:number;ended:boolean};
 export function useRunTelemetry(state:GameState,paused:boolean,mode:PlaytestRun['mode'],stats:{fps:number;p95:number}){
  const {log}=usePlaytestLog(),capture=useRef<Capture|null>(null),modeRef=useRef(mode);modeRef.current=mode;
- function finish(c:Capture,outcome:PlaytestRun['outcome']){if(c.ended)return;c.ended=true;const s=c.state;recordRun({id:c.id,at:c.at,mission:s.mission,mode:modeRef.current,outcome,seconds:Number(s.elapsed.toFixed(2)),score:s.score,dashes:s.dashes,decoysUsed:Math.max(0,(getLevel(s.mission).decoys??0)-s.decoysLeft),pickedUp:s.securityAlarm,spotted:s.spotted,cell:{x:Math.floor(s.x),y:Math.floor(s.y)},fps:Math.round(c.fps),p95:Number(c.p95.toFixed(1))});}
+ function finish(c:Capture,outcome:PlaytestRun['outcome']){if(c.ended)return;c.ended=true;const s=c.state;recordRun({id:c.id,at:c.at,mission:s.mission,mode:modeRef.current,outcome,seconds:Number(s.elapsed.toFixed(2)),score:s.score,dashes:s.dashes,decoysUsed:s.combat?0:Math.max(0,(getLevel(s.mission).decoys??0)-s.decoysLeft),pickedUp:s.securityAlarm,spotted:s.spotted,cell:{x:Math.floor(s.x),y:Math.floor(s.y)},fps:Math.round(c.fps),p95:Number(c.p95.toFixed(1)),...(s.combat?{combat:{hp:s.combat.hp,shots:s.combat.shots,kills:s.combat.kills,damageTaken:s.combat.damageTaken,pathReplans:s.combat.repath}}:{})});}
  useEffect(()=>{
   if(!log.enabled){capture.current=null;return;}
   let c=capture.current;

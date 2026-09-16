@@ -3,20 +3,22 @@ import type {Pool} from 'pg';
 import {transaction} from './db';
 import {ServiceError} from './service';
 import {RankedService} from './ranked-service';
-import {makeContracts,CONTRACT_ATTEMPTS,type Contract} from '../shared/contracts';
+import {makeCombatContracts,CONTRACT_ATTEMPTS,type Contract} from '../shared/contracts';
 import {weekWindow} from '../shared/weekly';
 import {practiceTicket,type LeagueBoard,type LeagueEntry,type LeagueSummary} from '../shared/league';
 import rules from '../shared/rules-manifest.json';
 const rankedSQL=`WITH scored AS (
  SELECT wallet,manifest->'contract'->>'id' AS contract,(result->>'ticks')::integer AS ticks,
- LEAST(10000,GREATEST(1,5000+round(GREATEST(0,1-(result->>'ticks')::numeric/((manifest->>'hardLimitSeconds')::numeric*30))*4000)+round((result->>'battery')::numeric*10)))::integer AS points
+ CASE WHEN manifest->'contract'->'level'->'combat'->>'version'='2' THEN
+ LEAST(10000,GREATEST(1,5000+floor(GREATEST(0,1-(result->>'ticks')::numeric/((manifest->>'hardLimitSeconds')::numeric*30))*3000)+LEAST(100,GREATEST(0,COALESCE((result->>'hp')::numeric,(result->>'battery')::numeric,0)))*20))
+ ELSE LEAST(10000,GREATEST(1,5000+round(GREATEST(0,1-(result->>'ticks')::numeric/((manifest->>'hardLimitSeconds')::numeric*30))*4000)+round((result->>'battery')::numeric*10))) END::integer AS points
  FROM ranked_runs WHERE manifest ? 'contract' AND manifest->'contract'->>'week'=$1 AND status='verified' AND result->>'status'='won'
 ), best AS (SELECT DISTINCT ON(wallet,contract) * FROM scored ORDER BY wallet,contract,points DESC,ticks ASC),
  totals AS (SELECT wallet,sum(points)::integer AS points,sum(ticks)::integer AS ticks,count(*)::integer AS cleared,jsonb_agg(jsonb_build_object('contract',contract,'points',points,'ticks',ticks) ORDER BY contract) AS best FROM best GROUP BY wallet)
  SELECT *,rank() OVER(ORDER BY points DESC,ticks ASC)::integer AS rank,row_number() OVER(ORDER BY points DESC,ticks ASC,wallet)::integer AS position FROM totals ORDER BY points DESC,ticks ASC,wallet`;
 export class LeagueService{
  constructor(public pool:Pool,public ranked:RankedService,private now=()=>new Date()){}
- async manifest(){const window=weekWindow(this.now()),manifest={...window,rulesHash:rules.rulesHash,contracts:makeContracts(this.now())};await this.pool.query('INSERT INTO league_weeks(week,manifest) VALUES($1,$2) ON CONFLICT DO NOTHING',[window.week,manifest]);return (await this.pool.query('SELECT manifest FROM league_weeks WHERE week=$1',[window.week])).rows[0].manifest as typeof manifest;}
+ async manifest(){const window=weekWindow(this.now()),manifest={...window,rulesHash:rules.rulesHash,contracts:makeCombatContracts(this.now())};await this.pool.query('INSERT INTO league_weeks(week,manifest) VALUES($1,$2) ON CONFLICT DO NOTHING',[window.week,manifest]);return (await this.pool.query('SELECT manifest FROM league_weeks WHERE week=$1',[window.week])).rows[0].manifest as typeof manifest;}
  private async rows(week:string):Promise<LeagueEntry[]>{return (await this.pool.query(rankedSQL,[week])).rows;}
  async board(week:string,wallet?:string,final=false):Promise<LeagueBoard>{
   const rows=final?(await this.pool.query('SELECT entry FROM league_history WHERE week=$1 ORDER BY (entry->>\'position\')::integer',[week])).rows.map(r=>r.entry as LeagueEntry):await this.rows(week),personal=rows.find(r=>r.wallet===wallet)??null;
@@ -50,6 +52,8 @@ export class LeagueService{
   const manifest=await this.manifest(),contract=manifest.contracts.find(c=>c.id===input.contractId);if(!contract||manifest.rulesHash!==input.rulesHash)throw new ServiceError(409,'Contract or rules changed. Refresh the league.');
   return transaction(this.pool,async db=>{
    await db.query('SELECT address FROM wallets WHERE address=$1 FOR UPDATE',[wallet]);
+   const lockedWeek=(await db.query('SELECT manifest FROM league_weeks WHERE week=$1 FOR UPDATE',[manifest.week])).rows[0]?.manifest;
+   if(lockedWeek?.rulesHash!==manifest.rulesHash||!lockedWeek.contracts.some((c:Contract)=>c.id===contract.id))throw new ServiceError(409,'Weekly missions changed. Refresh before starting.');
    const prior=await db.query('SELECT id,manifest FROM ranked_runs WHERE wallet=$1 AND request_key=$2',[wallet,input.requestKey]);if(prior.rowCount){if(prior.rows[0].manifest.contract?.id!==contract.id)throw new ServiceError(409,'Request key belongs to another contract.');return this.ranked.get(wallet,prior.rows[0].id);}
    if(!(await db.query("SELECT 1 FROM entitlements WHERE wallet=$1 AND sku='campaign'",[wallet])).rowCount)throw new ServiceError(403,'Campaign access is required for ranked contracts.');
    await db.query("UPDATE ranked_runs SET status='rejected',detail='Ranked attempt expired.' WHERE wallet=$1 AND status='issued' AND expires_at<=$2",[wallet,this.now()]);
