@@ -22,7 +22,9 @@
     "mission_one_starts_tutorial": true,
     "return_to_map": true,
     "typecheck": true,
-    "web_export": true
+    "web_export": true,
+    "android_release_build": true
   },
-  "physical_android_test": "not run; device not connected"
+  "physical_android_test": "not run; device not connected",
+  "apk_sha256": "20f9399227943cd0ece6440f0dec35361c788ebe3484b736d2dc6b2f624cac5d"
 }

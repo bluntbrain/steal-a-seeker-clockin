@@ -25,6 +25,6 @@ Reference: `../assets/seeker/12-missions.jpg` in the Clock In workspace. Impleme
 - Browser testing used the local preview and demo credits. No real payment was made.
 - Screenshots are in `verification/district-map/`.
 
-Android: the first release build timed out in AAPT2 while crunching an existing district image. Retried with optional PNG crunching disabled and two workers for this build only. See the build receipt for the resulting artifact. No physical device was connected, so installation and on-device visual verification remain pending.
+Android: the first release build timed out in AAPT2 while crunching an existing district image. Retried with optional PNG crunching disabled and two workers for this build only. The retry passed. The signed arm64 APK is `releases/steal-a-seeker-mainnet.apk`, SHA-256 `20f9399227943cd0ece6440f0dec35361c788ebe3484b736d2dc6b2f624cac5d`. Its release receipt matches all four changed UI source files. No physical device was connected, so installation and on-device visual verification remain pending.
 
 This change does not modify combat rules, payment flows or backend storage.
