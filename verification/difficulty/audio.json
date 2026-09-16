@@ -1,0 +1,74 @@
+[
+  {
+    "file": "shot-a.wav",
+    "seconds": 0.55,
+    "peakDb": -6.0,
+    "rmsDb": -25.23
+  },
+  {
+    "file": "shot-b.wav",
+    "seconds": 0.55,
+    "peakDb": -6.0,
+    "rmsDb": -27.46
+  },
+  {
+    "file": "enemy-a.wav",
+    "seconds": 0.65,
+    "peakDb": -6.0,
+    "rmsDb": -26.79
+  },
+  {
+    "file": "enemy-b.wav",
+    "seconds": 0.65,
+    "peakDb": -6.0,
+    "rmsDb": -21.8
+  },
+  {
+    "file": "hit.wav",
+    "seconds": 0.5,
+    "peakDb": -6.0,
+    "rmsDb": -29.61
+  },
+  {
+    "file": "damage.wav",
+    "seconds": 0.65,
+    "peakDb": -6.0,
+    "rmsDb": -24.96
+  },
+  {
+    "file": "knockout.wav",
+    "seconds": 0.9,
+    "peakDb": -6.0,
+    "rmsDb": -21.41
+  },
+  {
+    "file": "aim.wav",
+    "seconds": 0.55,
+    "peakDb": -6.0,
+    "rmsDb": -14.94
+  },
+  {
+    "file": "pickup.wav",
+    "seconds": 1.2,
+    "peakDb": -6.0,
+    "rmsDb": -37.55
+  },
+  {
+    "file": "escape.wav",
+    "seconds": 1.8,
+    "peakDb": -6.0,
+    "rmsDb": -19.72
+  },
+  {
+    "file": "caught.wav",
+    "seconds": 1.2,
+    "peakDb": -6.0,
+    "rmsDb": -22.77
+  },
+  {
+    "file": "alarm.wav",
+    "seconds": 4.0,
+    "peakDb": -6.0,
+    "rmsDb": -19.64
+  }
+]

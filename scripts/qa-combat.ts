@@ -1,3 +1,4 @@
+import {solveTactical} from './qa-tactical';
 import {writeFileSync,mkdirSync} from 'node:fs';
 import {CAMPAIGN_IDS,type LevelDefinition,type Point} from '../src/game/level';
 import {combatLevel} from '../src/game/combat-levels';
@@ -31,7 +32,7 @@ export function solveCombat(level:LevelDefinition){
   }
   if(s.status==='won')return {strategy,ticks:s.ticks,hp:s.combat!.hp,kills:s.combat!.kills,score:s.score,replay:{version:2 as const,chunks}};
  }
- return null;
+ return solveTactical(level);
 }
 if(process.argv[1]?.endsWith('qa-combat.ts')){
  const results=[...CAMPAIGN_IDS.map(combatLevel),...makeCombatContracts().map(c=>c.level)].map(level=>{const win=solveCombat(level);if(win){const r=verifyReplay(level.mission,win.replay,level);if(r.status!=='won'||r.score!==win.score)throw Error('Replay mismatch');}console.log(level.title,win?`${win.ticks/30}s · ${win.hp} HP · ${win.kills} KOs`:'NO WIN FOUND');return {id:level.id,win};});

@@ -30,11 +30,11 @@ export function makeCombatContracts(date=new Date()):Contract[]{
  return makeContracts(date).map(c=>{
   const level=combatLevel((['practice','sweep-window','power-trade'] as MissionId[])[c.slot]!);
   // Weekly seeded geometry and phone placement come from the weekly generator.
-  const patrols=c.level.patrols.map((p,i)=>({...p,combatRole:i===0?'sentry' as const:'scout' as const,range:4.5,halfAngle:Math.PI/3.2}));
+  const patrols=c.level.patrols.map((p,i)=>({...p,combatRole:i===0?'sentry' as const:'scout' as const,speed:i===0?1.2:1.45,range:4.5,halfAngle:Math.PI/3.2}));
   const door={x:12-c.level.spawn.x,y:c.level.spawn.y};
   const reserve={...patrols[1]!,route:[door,{x:door.x,y:door.y>.5?door.y-.4:door.y+.4}],combatRole:'scout' as const,reserveAfter:2};
   const objective=c.modifier==='Blackout'?'Short guard sight. Take the Seeker and escape.':c.modifier==='Double haul'?'Bring back both phones. Your health must last.':'Take the Seeker. The exit opens for 4 seconds every 8 seconds.';
-  return {...c,id:`${c.id}:combat-v2`,objective,level:{...level,...c.level,id:`combat-v2:${c.id}`,combat:{version:2},patrols:[...patrols,reserve].map(p=>({...p,range:c.modifier==='Blackout'?3:4.5})),decoys:0,briefing:objective,hardLimitSeconds:c.modifier==='Double haul'?300:240}};
+  return {...c,id:`${c.id}:combat-v2`,objective,level:{...level,...c.level,id:`combat-v2:${c.id}`,combat:{version:2,revision:3},gates:c.level.gates,switches:c.level.switches,patrols:[...patrols,reserve,{...reserve,reserveAfter:4.2}].map(p=>({...p,range:c.modifier==='Blackout'?3:4.5})),decoys:0,briefing:objective,hardLimitSeconds:c.modifier==='Double haul'?150:120}};
  });
 }
 export function contractPoints(result:{status:string;score:number;ticks:number;battery?:number;hp?:number},level:LevelDefinition){

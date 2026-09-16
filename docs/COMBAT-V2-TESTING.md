@@ -1,5 +1,7 @@
 # Combat v2 — testable build
 
+Historical first combat release. Current difficulty, sound and verification: [Combat revision 3](COMBAT-V3-REFERENCE-AND-PLAN.md).
+
 16 September 2026. This is the implemented first version. The research document contains broader design targets; this file records actual scope and evidence.
 
 ## What changed

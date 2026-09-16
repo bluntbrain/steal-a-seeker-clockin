@@ -21,3 +21,17 @@ test('recorded combat replay verifies exactly and rejects forged inputs',()=>{co
 test('full tutorial uses real aim, dodge, shots, two-way navigation and extraction',async()=>{const {GUIDE_STEPS,guideDone}=await import('../src/onboarding/combat-guide');const s=initialState('practice',combatLevel('practice'));for(let i=0;i<GUIDE_STEPS.length;i++){const p=GUIDE_STEPS[i]!;tick(s,1,order(s,p.x,p.y,i+1));let budget=500;while(!guideDone(i,s)&&s.status==='playing'&&budget--)tick(s);assert(guideDone(i,s),`Tutorial stuck at ${i}`);if(i===3)assert.equal(s.guards[1]!.gunPhase,'aim');}assert.equal(s.status,'won');assert(s.combat!.aimEvents>0);assert.equal(s.combat!.kills,2);});
 test('all authored combat missions have honest input replays; local restore equals server result',async()=>{const {solveCombat}=await import('../scripts/qa-combat');const {restorePaidState}=await import('../src/paid/recovery');for(const id of CAMPAIGN_IDS){const l=combatLevel(id),win=solveCombat(l);assert(win,`${id} unsolved`);const r=verifyReplay(id,win.replay,l),restored=restorePaidState(id,win.replay,l);assert.equal(r.status,'won');assert.equal(restored.status,r.status);assert.equal(restored.score,r.score);assert.equal(restored.combat!.hp,r.hp);}});
 test('52 weekly combat rotations are deterministic, connected and distinguish health from speed',async()=>{const {makeCombatContracts,contractPoints}=await import('../shared/contracts');for(let week=0;week<52;week++){const date=new Date(Date.UTC(2026,8,14+week*7)),cs=makeCombatContracts(date);assert.deepEqual(cs,makeCombatContracts(date));for(const c of cs){assert(c.id.endsWith(':combat-v2'));assert.equal(c.level.combat?.version,2);assert.equal(c.level.decoys,0);for(const target of c.level.targets??[c.level.phone])assert(findPath(c.level.spawn,target,c.level).length);const good={status:'won',score:0,ticks:600,hp:100};assert(contractPoints(good,c.level)>contractPoints({...good,hp:80},c.level));assert(contractPoints(good,c.level)>contractPoints({...good,ticks:630},c.level));}}});
+
+test('tactical guards react to being shot and rear ambush damage is decided when fired',()=>{
+ const l=arena();l.id='combat-v2:cone-lesson';l.number=2;l.patrols[0]={...l.patrols[0]!,combatRole:'scout',route:[{x:4,y:10},{x:5,y:10}],speed:0};
+ const s=initialState(l.mission,l);tick(s,15,order(s,4,10,1));assert.equal(s.guards[0]!.hp,0,'A clean rear opening drops one scout');assert.equal(s.combat!.shots,1);
+ l.patrols[0]!.combatRole='heavy';const h=initialState(l.mission,l);tick(h,10,order(h,4,10,1));assert(h.guards[0]!.hp<150);assert.equal(h.guards[0]!.gunPhase,'aim','Surviving armor returns fire');
+});
+test('tactical alarm doubles pursuit speed while preserving a readable aim window',()=>{
+ const l=arena();l.id='combat-v2:cone-lesson';l.number=2;l.patrols[0]={...l.patrols[0]!,combatRole:'scout',route:[{x:8,y:5},{x:8,y:6}],speed:1.45};
+ const a=initialState(l.mission,l),b=initialState(l.mission,l);b.securityAlarm=true;tick(a,10);tick(b,10);
+ const travel=(s:GameState)=>Math.hypot(s.guards[0]!.x-8,s.guards[0]!.y-5);assert(travel(b)>travel(a)*1.8);assert.equal(b.combat!.hp,100);
+});
+test('repeated phone taps do not restart the tactical pickup hold',()=>{
+ const l=arena();l.id='combat-v2:cone-lesson';l.number=2;l.patrols=[];l.spawn={...l.phone};const s=initialState(l.mission,l);for(let i=1;i<=20;i++)tick(s,1,order(s,l.phone.x,l.phone.y,i));assert(s.carrying);
+});
