@@ -1,0 +1,20 @@
+{
+  "checkedAt": "2026-09-16T19:23:44.274717+00:00",
+  "service": "seeker-api",
+  "deploymentId": "c8f09ec6-9193-4977-9e17-0244b218087c",
+  "deploymentStatus": "SUCCESS",
+  "health": {
+    "ok": true,
+    "cluster": "solana:mainnet"
+  },
+  "rulesHash": "7108fe741bc7efd4a4785b29ebeff81b5ab6eede8e4b2dc3274e3aaac9a5912d",
+  "apk": {
+    "sha256": "a450cfef307a5f9b2db8f7f325f923cbcdb6c4cc3ac1169fce89e167e78ae22a",
+    "bytes": 116050901,
+    "builtAt": "2026-09-16T19:20:11.568Z"
+  },
+  "clientTests": 150,
+  "serverTests": 65,
+  "physicalDeviceTested": false,
+  "notes": "Existing API service. No variables or database migrations changed. Weekly manifests retained."
+}

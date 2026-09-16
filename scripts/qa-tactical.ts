@@ -16,7 +16,7 @@ function options(s:GameState,seq:number){
  return out;
 }
 function advance(source:GameState,cmd:CombatCommand,ticks:number){const s=JSON.parse(JSON.stringify(source)) as GameState;for(let f=0;f<ticks&&s.status==='playing';f++)step(s,{...idleInput(),command:f===0?cmd:undefined});return s;}
-function value(s:GameState,style=0){const c=s.combat!;return s.status==='won'?1e6:s.status!=='playing'?-1e6:c.hp*([14,22,10,18][style]??14)+c.kills*([90,160,170,55][style]??90)+s.delivered*1300+Number(s.carrying)*800+s.power*150-distance(s)*18-s.elapsed*.6;}
+function value(s:GameState,style=0){const c=s.combat!;return s.status==='won'?1e6:s.status!=='playing'?-1e6:c.hp*([14,22,10,18][style]??14)+c.kills*([90,160,170,55][style]??90)+s.delivered*1300+Number(s.carrying)*800+s.power*650-distance(s)*18-s.elapsed*.6;}
 // Receding-horizon tap bot. It only emits legal commands, never edits the simulation.
 function attempt(l:LevelDefinition,style:number){
  const s=initialState(l.mission,l),chunks:ReplayChunk[]=[];let seq=0;

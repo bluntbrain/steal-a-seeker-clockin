@@ -1,0 +1,162 @@
+[
+  {
+    "mission": "practice",
+    "title": "First Pickup",
+    "beforeBlockedPercent": 4,
+    "blockedPercent": 21.9,
+    "solidPieces": 5,
+    "routes": [
+      {
+        "out": 17.4,
+        "back": 17.7
+      }
+    ]
+  },
+  {
+    "mission": "cone-lesson",
+    "title": "Blind Corner",
+    "beforeBlockedPercent": 11,
+    "blockedPercent": 31.1,
+    "solidPieces": 8,
+    "routes": [
+      {
+        "out": 23.3,
+        "back": 23.4
+      }
+    ]
+  },
+  {
+    "mission": "battery-dash",
+    "title": "Crossfire",
+    "beforeBlockedPercent": 12.8,
+    "blockedPercent": 31.1,
+    "solidPieces": 10,
+    "routes": [
+      {
+        "out": 18.2,
+        "back": 19.3
+      }
+    ]
+  },
+  {
+    "mission": "crossing-signals",
+    "title": "Loading Lockdown",
+    "beforeBlockedPercent": 10.2,
+    "blockedPercent": 34.4,
+    "solidPieces": 9,
+    "routes": [
+      {
+        "out": 26.4,
+        "back": 21.2
+      }
+    ]
+  },
+  {
+    "mission": "sweep-window",
+    "title": "Skybridge",
+    "beforeBlockedPercent": 12.6,
+    "blockedPercent": 30,
+    "solidPieces": 7,
+    "routes": [
+      {
+        "out": 19.1,
+        "back": 16
+      }
+    ]
+  },
+  {
+    "mission": "narrow-crossing",
+    "title": "Heavy Watch",
+    "beforeBlockedPercent": 12.6,
+    "blockedPercent": 27.8,
+    "solidPieces": 8,
+    "routes": [
+      {
+        "out": 22.6,
+        "back": 18.4
+      }
+    ]
+  },
+  {
+    "mission": "false-footsteps",
+    "title": "Split Route",
+    "beforeBlockedPercent": 11.9,
+    "blockedPercent": 26.7,
+    "solidPieces": 7,
+    "routes": [
+      {
+        "out": 23.3,
+        "back": 17.1
+      }
+    ]
+  },
+  {
+    "mission": "warden-gate",
+    "title": "Twin Relay",
+    "beforeBlockedPercent": 15.4,
+    "blockedPercent": 33.3,
+    "solidPieces": 10,
+    "routes": [
+      {
+        "out": 24.5,
+        "back": 25.5
+      },
+      {
+        "out": 24.6,
+        "back": 23.8
+      }
+    ]
+  },
+  {
+    "mission": "power-trade",
+    "title": "Dark Circuit",
+    "beforeBlockedPercent": 10.2,
+    "blockedPercent": 30,
+    "solidPieces": 8,
+    "routes": [
+      {
+        "out": 23.1,
+        "back": 16
+      }
+    ]
+  },
+  {
+    "mission": "two-targets",
+    "title": "Vault Window",
+    "beforeBlockedPercent": 11.7,
+    "blockedPercent": 28.9,
+    "solidPieces": 9,
+    "routes": [
+      {
+        "out": 17.4,
+        "back": 20.9
+      }
+    ]
+  },
+  {
+    "mission": "silent-circuit",
+    "title": "Security Grid",
+    "beforeBlockedPercent": 13.3,
+    "blockedPercent": 33.3,
+    "solidPieces": 10,
+    "routes": [
+      {
+        "out": 18.4,
+        "back": 19.5
+      }
+    ]
+  },
+  {
+    "mission": "last-vault",
+    "title": "Last Seeker",
+    "beforeBlockedPercent": 11.1,
+    "blockedPercent": 26.7,
+    "solidPieces": 10,
+    "routes": [
+      {
+        "out": 17.8,
+        "back": 18.4
+      }
+    ]
+  }
+]

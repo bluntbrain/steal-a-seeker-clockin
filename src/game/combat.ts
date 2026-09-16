@@ -10,7 +10,7 @@ export type CombatState={version:2;hp:number;commandSeen:number;order:CombatComm
 export const COMBAT={damage:25,range:4,shotTicks:12,bulletSpeed:16,maxProjectiles:48,playerHP:100,damageGrace:6};
 export function freshCombat():CombatState{'worklet';return {version:2,hp:100,commandSeen:0,order:null,path:[],pathIndex:0,cooldown:0,invulnerable:0,shots:0,enemyShots:0,kills:0,damageTaken:0,aimEvents:0,hitEvents:0,feedback:'none',feedbackLeft:0,projectiles:[],nextShot:1,noise:{x:0,y:0},noiseLeft:0,flash:0,repath:0};}
 export function enemyStats(role:EnemyRole,hard=false){'worklet';if(hard)return role==='drone'?{hp:25,aim:0,damage:0,burst:0,recover:90}:role==='scout'?{hp:50,aim:21,damage:25,burst:2,recover:25}:role==='sentry'?{hp:75,aim:18,damage:20,burst:3,recover:30}:role==='heavy'?{hp:150,aim:30,damage:22,burst:3,recover:36}:{hp:200,aim:27,damage:25,burst:5,recover:33};return role==='drone'?{hp:25,aim:0,damage:0,burst:0,recover:90}:role==='scout'?{hp:50,aim:27,damage:20,burst:1,recover:33}:role==='sentry'?{hp:75,aim:24,damage:15,burst:2,recover:33}:role==='heavy'?{hp:150,aim:36,damage:10,burst:3,recover:42}:{hp:200,aim:42,damage:15,burst:3,recover:42};}
-export function tacticalCombat(l:LevelDefinition){'worklet';return l.combat?.revision===3&&l.id!=='combat-v2:practice';}
+export function tacticalCombat(l:LevelDefinition){'worklet';return (l.combat?.revision??0)>=3&&l.id!=='combat-v2:practice';}
 function clearOrder(c:CombatState){'worklet';c.order=null;c.path=[];c.pathIndex=0;}
 export function combatTap(s:GameState,x:number,y:number,seq:number):CombatCommand{
  'worklet';const level=s.definition!,radius=.85;let target=-1,best=radius;
