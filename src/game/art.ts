@@ -1,9 +1,10 @@
-import { createPicture, Skia, type SkCanvas } from '@shopify/react-native-skia';
+import { createPicture, Skia, type SkCanvas, type SkImage } from '@shopify/react-native-skia';
 import { LEVEL,type LevelDefinition } from './level';
 import {districtFor} from './environment';
+import {drawWallPanels} from '../art/walls';
 const palette={ floor:'#20292c', line:'#293337', mint:'#cfe6e4', edge:'#465054' };
 // Code-native environment art is recorded once, not recreated on each animation frame.
-export function makeWarehouse(drawFloor=true,level:LevelDefinition=LEVEL){
+export function makeWarehouse(drawFloor=true,level:LevelDefinition=LEVEL,wallTexture?:SkImage|null){
   return createPicture((c:SkCanvas)=>{
     const district=districtFor(level.number),rooftop=district==='rooftops',power=district==='powerworks';
     const p=Skia.Paint();p.setAntiAlias(true);
@@ -68,6 +69,14 @@ export function makeWarehouse(drawFloor=true,level:LevelDefinition=LEVEL){
         continue;
       }
       if(b.kind==='wall'){
+        if(index>=4&&wallTexture){
+          round(b.x+.06,b.y+.14,b.w,b.h,.07,'#070D11A8');
+          round(b.x,b.y,b.w,b.h,.065,'#172329');
+          rect(b.x+.04,b.y+b.h-.16,b.w-.08,.12,'#243239');
+          line(b.x+.08,b.y+b.h-.13,b.x+b.w-.08,b.y+b.h-.13,'#41565B',.025);
+          drawWallPanels(c,wallTexture,b);
+          continue;
+        }
         if(rooftop){
           // City depth occupies the existing boundary collider. Inner rail marks its edge.
           rect(b.x,b.y,b.w,b.h,'#0B1729');

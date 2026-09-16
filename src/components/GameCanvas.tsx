@@ -29,8 +29,9 @@ function DecoyLayer({game,input,reduced}:{game:SharedValue<GameState>;input:Shar
 }
 function SwitchLayer({game,level,index}:Pick<Props,'game'|'level'>&{index:number}){const p=level.switches![index]!,color=useDerivedValue(()=>(p.kind==='power'?game.value.power===1:(game.value.relayTimers[p.channel??0]??0)>0)?'#a8ecd7':'#edb768');return <RoundedRect x={p.x-.4} y={p.y-.4} width={.8} height={.8} r={.06} color={color}/>;}
 export default memo(function GameCanvas({size,input,game,alpha,clock,level,appearance={}}:Props){
- const world=useMemo(()=>makeWarehouse(false,level),[level]),fallbackWorld=useMemo(()=>makeWarehouse(true,level),[level]);
  const district=districtFor(level.number),environment=environmentFor(level);
+ const wallTexture=useImage(district==='rooftops'?require('../../assets/walls-v5/rooftop-cap.jpg'):district==='powerworks'?require('../../assets/walls-v5/vault-cap.jpg'):require('../../assets/walls-v5/warehouse-cap.jpg'));
+ const world=useMemo(()=>makeWarehouse(false,level,wallTexture),[level,wallTexture]),fallbackWorld=useMemo(()=>makeWarehouse(true,level,wallTexture),[level,wallTexture]);
  const floor=useImage(district==='rooftops'?require('../../assets/world-v4/rooftop-floor.png'):district==='powerworks'?require('../../assets/world-v4/powerworks-floor.png'):require('../../assets/world-v3/floor.png'));
  const phones=useImage(require('../../assets/world-v3/phones.png'));
  const phoneIndex=editionIndex(level.mission),phoneFrame=phoneAtlas.frames[phoneIndex]!;
