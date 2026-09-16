@@ -59,7 +59,6 @@ export default function GuardLayer({game,alpha,index}:Props){
     <RoundedRect x={-.16} y={-.06} width={.13} height={.12} r={.025} color="#AACFCC"/>
     {kind!=='warden'&&<Circle cx={-.32} cy={0} r={.05} color={color}/>}
    </>}
-   {!!game.value.combat&&<RoundedRect x={.28} y={-.08} width={.42} height={.16} r={.03} color="#829D9F"/>}
    <Circle cx={0} cy={0} r={.43} color="#F2FFDA" opacity={hitFlash}/>
   </Group>
   <Group transform={bar}><Circle cx={.45} cy={-.18} r={.13} color="#CFE6E4" opacity={listening}/><Circle cx={.45} cy={-.18} r={.065} color="#243F48" opacity={listening}/>
