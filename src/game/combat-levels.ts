@@ -315,5 +315,20 @@ export function combatLevel(mission:MissionId):LevelDefinition{
  // The guided room keeps its scripted combat positions; new cover frames that route.
  if(n===1){level.blockers.push(cover(.65,.65,3.3,7.7,'wall'),cover(5,.65,2.5,3.5,'wall'),cover(8.6,15.6,2.75,.9,'crate'),cover(.8,9.1,1,1.5,'wall'),cover(8.8,12.8,2.5,.85,'wall'),cover(4.2,5,1.15,3,'wall'));level.patrols[2]!.route=[{x:4.4,y:2},{x:4.4,y:3}];}
  if(n>1){level.gates=undefined;level.switches=undefined;applyDenseLayout(level,n);}
+ // Free campaign pacing: a generous opening, then gradually narrower margins.
+ // This changes authored campaign data only. Frozen weekly maps keep their rules.
+ if(n>=2){
+  let reserve=0;
+  for(const guard of level.patrols){
+   guard.speed*=n<=4?.52:n<=8?.68:.78;
+   guard.range*=n<=5?.60:n<=8?.72:.78;
+   guard.pauseSeconds=n<=4?.85:n<=8?.65:.5;
+   if(n<=5&&guard.combatRole==='sentry')guard.combatRole='scout';
+   if(guard.reserveAfter!==undefined)guard.reserveAfter=(n<=4?12:n<=8?9:7)+(reserve++)*4;
+  }
+  if(n===4){let sentries=0;for(const guard of level.patrols)if(guard.combatRole==='sentry'&&sentries++>0)guard.combatRole='scout';}
+  level.hardLimitSeconds+=n<=4?60:30;
+  if(n===10)level.exitWindow={period:8,openSeconds:5,phase:0};
+ }
  return level;
 }

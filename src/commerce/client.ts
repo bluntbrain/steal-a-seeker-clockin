@@ -12,6 +12,8 @@ export async function api<T>(path:string,options:{token?:string;body?:unknown;me
 }
 export type Session={token:string;wallet:string;expiresAt:string};
 export const commerceApi={
+ unequip:(token:string,slot:'outfit'|'trail'|'frame'|'rack')=>api<AccountState>('/me/unequip',{token,body:{slot}}),
+ redeem:(token:string,sku:string)=>api<AccountState>('/credits/redeem',{token,body:{sku}}),
  pricing:(sku:ProductId)=>api<ProductPricing>(`/pricing/${sku}`),
  cancel:(token:string,id:string)=>api<{ok:true}>(`/orders/${id}/cancel`,{token,body:{}}),
  challenge:(wallet:string)=>api<SignInChallenge>('/auth/challenge',{body:{wallet}}),

@@ -15,7 +15,7 @@ async function main(){
  const mint=address(network.mint),recipient=address(network.recipient),decimals=network.decimals;
  if(!Number.isInteger(decimals)||decimals<0||decimals>9)throw new Error('Invalid mint decimals.');
  const [destination]=await findAssociatedTokenPda({owner:recipient,mint,tokenProgram:address(TOKEN_PROGRAM)});
- const config={testPricing:network.testPricing,cluster:network.cluster,shopPrices:network.shopPrices,priceDivisor:network.priceDivisor,campaignUsdCents:network.campaignUsdCents,rebateSkr:network.rebateSkr,allowlist:network.allowlist,allowAllWallets:network.allowAllWallets,mint,recipient,decimals,destination,campaignOffer:true,usdPricing:true,identityUri:process.env.APP_IDENTITY_URI||'https://stealaseeker.bluntbrain.com'};
+ const config={passSkr:network.passSkr,testPricing:network.testPricing,cluster:network.cluster,shopPrices:network.shopPrices,priceDivisor:network.priceDivisor,campaignUsdCents:network.campaignUsdCents,rebateSkr:network.rebateSkr,allowlist:network.allowlist,allowAllWallets:network.allowAllWallets,mint,recipient,decimals,destination,campaignOffer:true,usdPricing:true,identityUri:process.env.APP_IDENTITY_URI||'https://stealaseeker.bluntbrain.com'};
  const chain=new DevnetChain({...config,rpcUrl:network.rpcUrl});
  await assertRulesCurrent();const pool=database(process.env.DATABASE_URL||'postgresql://localhost/seeker_clockin_devnet');await migrate(pool);await bindDatabaseNetwork(pool,network.cluster);const service=new CommerceService(pool,chain,config),ranked=new RankedService(pool);
  const returnConfig={cluster:network.cluster,mint,treasury:recipient,source:destination,decimals},returns=new ReturnService(pool,undefined,returnConfig);

@@ -13,5 +13,5 @@ export function readAccount(value:unknown,wallet:string):AccountState|undefined{
  for(const p of PRODUCTS)if(a.entitlements.includes(p.id)&&a.equipment[p.kind]===p.id)equipment[p.kind]=p.id;
  // The authenticated server grants this outfit through league achievements, not the shop.
  if(a.equipment.outfit==='ghost-courier')equipment.outfit='ghost-courier';
- return {wallet,entitlements:[...new Set(a.entitlements)],equipment,progress:a.progress};
+ return {wallet,credits:Number.isSafeInteger(a.credits)&&a.credits!>=0?a.credits:0,creditStars:a.creditStars??{},entitlements:[...new Set(a.entitlements)],equipment,progress:a.progress};
 }

@@ -1,3 +1,4 @@
+import {importGuestInventory} from '../campaign/client';
 import {CHAIN} from '../wallet/config';
 import React,{useCallback,useEffect,useRef,useState,type ReactNode} from 'react';
 import * as SecureStore from 'expo-secure-store';
@@ -19,6 +20,13 @@ export default function AccountProvider({children}:{children:ReactNode}){
   await SecureStore.setItemAsync(accountKey(clean.wallet),JSON.stringify(clean));
   if(active.current&&current.current===clean.wallet)setState(clean);
  },[]);
+ const syncingGuest=useRef(new Set<string>());
+ const syncGuest=useCallback((s:Session)=>{
+  if(syncingGuest.current.has(s.wallet)||current.current!==s.wallet)return;
+  syncingGuest.current.add(s.wallet);
+  // Replay verification is background work, never part of the payment approval path.
+  void importGuestInventory(s.wallet,s.token).then(()=>commerceApi.me(s.token)).then(update).catch(()=>{syncingGuest.current.delete(s.wallet);walletLog('credits.guest-sync.pending');});
+ },[update]);
  useEffect(()=>{
   let cancelled=false;setState(undefined);setNotice('');setLoading(true);
   if(!wallet){setLoading(false);return;}
@@ -46,7 +54,7 @@ export default function AccountProvider({children}:{children:ReactNode}){
    const raw=await SecureStore.getItemAsync(sessionKey(selected.address));let saved:Session|undefined;
    if(raw){try{saved=JSON.parse(raw);}catch{await SecureStore.deleteItemAsync(sessionKey(selected.address));}}
    if(saved?.wallet===selected.address&&new Date(saved.expiresAt).getTime()>Date.now()){
-    try{const a=await commerceApi.me(saved.token);if(a.wallet!==selected.address)throw new Error('Account mismatch.');await update(a);return saved;}
+    try{const a=await commerceApi.me(saved.token);if(a.wallet!==selected.address)throw new Error('Account mismatch.');await update(a);if(interactive)syncGuest(saved);return saved;}
     catch(e){if(!(e instanceof ApiError&&e.status===401))throw e;await SecureStore.deleteItemAsync(sessionKey(selected.address));}
    }
    if(!interactive)throw new Error('Sign in to sync this wallet. Your local progress is saved.');
@@ -57,11 +65,11 @@ export default function AccountProvider({children}:{children:ReactNode}){
    const result=await commerceApi.signIn({id:challenge.id,wallet:selected.address,signedMessage:fromUint8Array(signed.signedMessage),signature:fromUint8Array(signed.signature)});
    if(result.account.wallet!==selected.address)throw new Error('Account mismatch.');
    const s={token:result.token,wallet:selected.address,expiresAt:result.expiresAt};
-   await SecureStore.setItemAsync(sessionKey(s.wallet),JSON.stringify(s));await update(result.account);return s;
+   await SecureStore.setItemAsync(sessionKey(s.wallet),JSON.stringify(s));await update(result.account);syncGuest(s);return s;
   })();
   inflight.current={wallet:selected.address,promise};
   try{return await walletStep('account.session',()=>promise);}finally{if(inflight.current?.promise===promise)inflight.current=undefined;}
- },[mobile,update]);
+ },[mobile,update,syncGuest]);
  const refresh=useCallback(async(interactive=true)=>{const s=await session(interactive),a=await commerceApi.me(s.token);if(a.wallet!==s.wallet)throw new Error('Account mismatch.');await update(a);return a;},[session,update]);
  // Account state from a previous wallet is never exposed during a render/effect gap.
  return <AccountContext.Provider value={{wallet,account:state?.wallet===wallet?state:undefined,loading,preview:false,notice,session,update,refresh}}>{children}</AccountContext.Provider>;

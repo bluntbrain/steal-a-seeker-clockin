@@ -1,3 +1,6 @@
+import {useEconomy} from '../commerce/EconomyProvider';
+import type {ProductId} from '../../shared/commerce';
+import PaywallVideo from '../commerce/PaywallVideo';
 import {IS_MAINNET,NETWORK_LABEL} from './config';
 import React,{useEffect,useRef,useState} from 'react';
 import {Modal,Share,Pressable,StyleSheet,Text,View,useWindowDimensions} from 'react-native';
@@ -5,8 +8,8 @@ import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {useLoggedWallet as useMobileWallet} from './useLoggedWallet';
 import {walletErrorMessage,walletReport,walletStep,walletLog} from './diagnostics';
 import CommerceSection from '../commerce/CommerceSection';
-export default function WalletPanel({visible,onClose,checkout=false}:{visible:boolean;onClose:()=>void;checkout?:boolean}){
- const wallet=useMobileWallet(),insets=useSafeAreaInsets(),{height}=useWindowDimensions();
+export default function WalletPanel({visible,onClose,checkout=false,sku='campaign',fullScreen=false}:{visible:boolean;onClose:()=>void;checkout?:boolean;sku?:ProductId;fullScreen?:boolean;onDemoComplete?:(credits:number)=>Promise<void>}){
+ const economy=useEconomy(),wallet=useMobileWallet(),insets=useSafeAreaInsets(),{height}=useWindowDimensions();
  const [busy,setBusy]=useState(false),[message,setMessage]=useState(''),[balance,setBalance]=useState<string>();
  const mounted=useRef(true),lock=useRef(false);
  useEffect(()=>{mounted.current=true;return()=>{mounted.current=false;};},[]);
@@ -20,11 +23,12 @@ export default function WalletPanel({visible,onClose,checkout=false}:{visible:bo
   if(checkout&&!wallet.account?.address&&!autoOpened.current){autoOpened.current=true;void act(()=>wallet.connect());}
  },[visible,checkout,wallet.account?.address]);
  const address=wallet.account?.address;
- return <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}><View style={s.backdrop}>
+ return <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}><View style={[s.backdrop,fullScreen&&{backgroundColor:'#0C1012',justifyContent:'flex-start',paddingTop:insets.top+8,paddingBottom:insets.bottom+8}]}>
  <Pressable style={StyleSheet.absoluteFill} accessibilityRole="button" accessibilityLabel="Close wallet" onPress={onClose}/>
- <View testID="wallet-sheet" accessibilityViewIsModal style={[s.card,{paddingBottom:Math.max(insets.bottom,12),paddingTop:height<700?10:16}]}>
- <Pressable accessibilityRole="button" accessibilityLabel="Share wallet diagnostic log" onLongPress={()=>void Share.share({message:walletReport()})}><View style={s.handle}/></Pressable><View style={s.header}><Text accessibilityRole="header" style={s.title}>{checkout?'Unlock the game':address?'Your wallet':'Connect your wallet'}</Text><Pressable accessibilityRole="button" accessibilityLabel="Close wallet" onPress={onClose} style={s.close}><Text style={s.closeText}>✕</Text></Pressable></View>
- {address?<><View style={s.account}><View style={{flex:1,gap:3}}><Text selectable accessibilityLabel={`Connected wallet ${address}`} style={s.address}>{address.slice(0,4)}…{address.slice(-4)} <Text style={s.badge}> · {NETWORK_LABEL}</Text></Text><Text style={s.caption}>{balance===undefined?'Checking fee balance…':balance==='Unavailable'?'Fee balance unavailable':`${balance} SOL for fees`}</Text></View><Pressable accessibilityRole="button" accessibilityLabel="Disconnect wallet" disabled={busy} onPress={()=>act(()=>wallet.disconnect())} style={s.disconnect}><Text style={s.caption}>{busy?'…':'Disconnect'}</Text></Pressable></View><CommerceSection/></>:<View style={{gap:14,paddingVertical:10}}><Text style={s.body}>{IS_MAINNET?'Use Phantom on Mainnet. Purchases spend real SOL or SKR.':'Use Phantom on Solana Devnet. You’ll approve purchases in your wallet.'}</Text><Pressable accessibilityRole="button" disabled={busy} style={s.primary} onPress={()=>act(()=>wallet.connect())}><Text style={s.primaryText}>{busy?'Opening wallet…':'Connect wallet'}</Text></Pressable><Text style={s.caption}>{IS_MAINNET?'Mainnet test · real funds · reduced prices':'TEST SKR and devnet SOL have no real value.'}</Text></View>}
+ <View testID="wallet-sheet" accessibilityViewIsModal style={[s.card,fullScreen&&{borderWidth:0,borderRadius:0,backgroundColor:'#0C1012',flex:1},{paddingBottom:Math.max(insets.bottom,12),paddingTop:height<700?10:16}]}>
+ <Pressable accessibilityRole="button" accessibilityLabel="Share wallet diagnostic log" onLongPress={()=>void Share.share({message:walletReport()})}>{!fullScreen&&<View style={s.handle}/>} </Pressable><View style={s.header}><Text accessibilityRole="header" style={s.title}>{checkout?sku==='campaign'?'Game Pass':'Add credits':address?'Your wallet':'Connect your wallet'}</Text><Text accessibilityLabel={`${economy.balance} credits`} style={{fontSize:11,color:'#CFE6E4'}}>◈ {economy.balance.toLocaleString()}</Text><Pressable accessibilityRole="button" accessibilityLabel="Close wallet" onPress={onClose} style={s.close}><Text style={s.closeText}>✕</Text></Pressable></View>
+ {checkout&&sku==='campaign'&&!address&&<View style={{height:Math.min(190,height*.23),overflow:'hidden',borderRadius:18}}><PaywallVideo active={visible}/></View>}
+ {address?<><View style={s.account}><View style={{flex:1,gap:3}}><Text selectable accessibilityLabel={`Connected wallet ${address}`} style={s.address}>{address.slice(0,4)}…{address.slice(-4)} <Text style={s.badge}> · {NETWORK_LABEL}</Text></Text><Text style={s.caption}>{balance===undefined?'Checking fee balance…':balance==='Unavailable'?'Fee balance unavailable':`${balance} SOL for fees`}</Text></View><Pressable accessibilityRole="button" accessibilityLabel="Disconnect wallet" disabled={busy} onPress={()=>act(()=>wallet.disconnect())} style={s.disconnect}><Text style={s.caption}>{busy?'…':'Disconnect'}</Text></Pressable></View><CommerceSection sku={sku} onComplete={onClose}/></>:<View style={{gap:14,paddingVertical:10}}><Text style={s.body}>{IS_MAINNET?'Use Phantom on Mainnet. Purchases spend real SOL or SKR.':'Use Phantom on Solana Devnet. You’ll approve purchases in your wallet.'}</Text><Pressable accessibilityRole="button" disabled={busy} style={s.primary} onPress={()=>act(()=>wallet.connect())}><Text style={s.primaryText}>{busy?'Opening wallet…':'Connect wallet'}</Text></Pressable><Text style={s.caption}>{IS_MAINNET?'Your wallet shows the exact amount before you approve.':'TEST SKR and devnet SOL have no real value.'}</Text></View>}
  {!!message&&<View><Text accessibilityLiveRegion="polite" style={s.error}>{message}</Text><Pressable accessibilityRole="button" style={{minHeight:44,justifyContent:'center'}} onPress={()=>void Share.share({message:walletReport()})}><Text style={s.caption}>Share diagnostic log</Text></Pressable></View>}
  </View></View></Modal>;
 }

@@ -72,9 +72,10 @@ test('payment verifier rejects wrong buyer, token, amount, destination, referenc
  assert.equal(verifyPayment(order,sig,{...good,blockTime:Math.floor(new Date(order.expiresAt).getTime()/1000)+60}).state,'needs_review');
 });
 
-test('campaign progress sync requires access, preserves best records and isolates wallets',async()=>{
+test('free campaign progress sync preserves best records and isolates wallets',async()=>{
  const user=await login(),other=await login(),payload={version:1,missions:{practice:{stars:2,seconds:25,score:11500,battery:60,completions:2}}};
- assert.equal((await app.inject({method:'PUT',url:'/me/progress',headers:user.headers,payload})).statusCode,403);
+ assert.equal((await app.inject({method:'PUT',url:'/me/progress',headers:user.headers,payload})).statusCode,200);
+ assert.equal((await service.me(user.wallet)).credits,0,'Unverified progress cannot grant credits');
  const order=await quote(user),sig=b58(randomBytes(64));transactions.set(sig,paidTx(order,sig));await service.attach(user.wallet,order.id,sig);
  const result=await app.inject({method:'PUT',url:'/me/progress',headers:user.headers,payload});assert.equal(result.statusCode,200,result.body);assert.deepEqual(result.json().progress,payload);
  const better={version:1,missions:{practice:{stars:3,seconds:20,score:12000,battery:80,completions:3}}};
@@ -376,7 +377,7 @@ test('campaign v2 reserves before approval, verifies all missions and settles on
  // A fabricated cloud save never authorizes the rebate.
  await commerce.syncProgress(h.user.wallet,{version:1,missions:Object.fromEntries(CAMPAIGN_IDS.map(id=>[id,{stars:3,seconds:1,score:99999,battery:100,completions:1}]))});
  await assert.rejects(campaign.claim(h.user.wallet),/12 missions/);
- await assert.rejects(campaign.submit(h.other.wallet,'practice',rules.rulesHash,fixtureReplay().replay),/pass required/);
+ await campaign.submit(h.other.wallet,'practice',rules.rulesHash,fixtureReplay().replay); // Free campaign requires no pass.
  await assert.rejects(campaign.submit(h.user.wallet,'practice',rules.rulesHash,{version:1,chunks:[{ticks:1,x:0,y:0,buttons:0}]}),/extraction/);
  for(const mission of CAMPAIGN_IDS){const {state,replay}=fixtureReplay(mission);assert.equal(state.status,'won',mission);await campaign.submit(h.user.wallet,mission,rules.rulesHash,replay);}
  await campaign.submit(h.user.wallet,'practice',rules.rulesHash,fixtureReplay().replay);assert.equal((await campaign.summary(h.user.wallet)).runs.length,12);
@@ -482,7 +483,7 @@ test('weekly manifests are frozen across deployments and engine metadata is atta
 
 test('weekly contracts enforce five atomic starts, idempotency, ownership and independent contract budgets',async()=>{
  const {LeagueService}=await import('./league-service');let clock=new Date('2034-04-03T12:00:00Z');const r=new RankedService(pool,{now:()=>clock}),league=new LeagueService(pool,r,()=>clock),manifest=await league.manifest(),c=manifest.contracts[0]!,user=await campaignOwner(),unowned=await login();
- const input={contractId:c.id,rulesHash:manifest.rulesHash,requestKey:randomUUID()};await assert.rejects(league.start(unowned.wallet,input),/Campaign access/);
+ const input={contractId:c.id,rulesHash:manifest.rulesHash,requestKey:randomUUID()};await assert.rejects(league.start(unowned.wallet,input),/Game Pass/);
  const [one,two]=await Promise.all([league.start(user.wallet,input),league.start(user.wallet,input)]);assert.equal(one.id,two.id);assert.equal((await league.summary(user.wallet)).attempts[c.id],1);
  await r.abandon(user.wallet,one.id);
  for(let i=0;i<3;i++){const t=await league.start(user.wallet,{...input,requestKey:randomUUID()});await r.abandon(user.wallet,t.id);}
@@ -558,4 +559,32 @@ test('wallet-managed send with lost callback stays locked until finalized expiry
  const sig=b58(randomBytes(64));transactions.set(sig,paidTx(next,sig));references.set(o.reference,[sig]);
  await service.reconcile(o.id);assert.equal((await service.getOrder(user.wallet,o.id)).status,'fulfilled');
  assert.deepEqual((await service.me(user.wallet)).entitlements,['campaign']);
+});
+
+test('credit packs grant once per finalized order, remain repeatable, and never grant pass access',async()=>{
+ const u=await login(),o=await quote(u,'credits-500'),sig=b58(randomBytes(64));
+ assert.equal((await service.me(u.wallet)).credits,0);
+ transactions.set(sig,paidTx(o,sig));await Promise.all([service.attach(u.wallet,o.id,sig),service.attach(u.wallet,o.id,sig)]);
+ assert.equal((await service.me(u.wallet)).credits,500);assert.deepEqual((await service.me(u.wallet)).entitlements,[]);
+ await service.reconcile(o.id);assert.equal((await service.me(u.wallet)).credits,500);
+ const second=await quote(u,'credits-500');assert.notEqual(second.id,o.id);const sig2=b58(randomBytes(64));transactions.set(sig2,paidTx(second,sig2));await service.attach(u.wallet,second.id,sig2);assert.equal((await service.me(u.wallet)).credits,1000);
+ assert.equal((await pool.query('SELECT count(*) FROM credit_ledger WHERE wallet=$1',[u.wallet])).rows[0].count,'2');
+});
+test('credit redemption is atomic, idempotent, wallet-bound and cannot overspend',async()=>{
+ const u=await login(),other=await login(),o=await quote(u,'credits-500'),sig=b58(randomBytes(64));transactions.set(sig,paidTx(o,sig));await service.attach(u.wallet,o.id,sig);
+ await Promise.all([service.redeem(u.wallet,'night-courier'),service.redeem(u.wallet,'night-courier')]);
+ const a=await service.me(u.wallet);assert.equal(a.credits,200);assert.deepEqual(a.entitlements,['night-courier']);assert.equal(a.equipment.outfit,'night-courier');
+ const removed=await app.inject({method:'POST',url:'/me/unequip',headers:u.headers,payload:{slot:'outfit'}});assert.equal(removed.statusCode,200);assert.equal(removed.json().equipment.outfit,undefined);assert.equal(removed.json().credits,200);assert.deepEqual(removed.json().entitlements,['night-courier']);await service.equip(u.wallet,'night-courier');
+ assert.equal((await app.inject({method:'POST',url:'/me/unequip',headers:u.headers,payload:{slot:'access'}})).statusCode,400);
+ await assert.rejects(service.redeem(u.wallet,'signal-runner'),/Not enough/);assert.equal((await service.me(u.wallet)).credits,200);
+ await assert.rejects(service.redeem(other.wallet,'night-courier'),/Not enough/);await assert.rejects(service.redeem(u.wallet,'campaign'),/Unknown/);
+ const races=await Promise.allSettled([service.redeem(u.wallet,'escape-trail'),service.redeem(u.wallet,'profile-frame')]);assert.equal(races.filter(r=>r.status==='fulfilled').length,1);assert((await service.me(u.wallet)).credits!>=0);
+});
+test('free campaign grants verified credits once; forged progress and invalid replays grant none',async()=>{
+ const {CampaignService}=await import('./campaign-service'),rules=(await import('../shared/rules-manifest.json')).default;
+ const u=await login(),campaign=new CampaignService(pool,new ReturnService(pool,undefined,{mint:service.config.mint,treasury:service.config.recipient,source:service.config.destination,decimals:6}));
+ await service.syncProgress(u.wallet,{version:1,missions:{practice:{stars:3,seconds:1,score:99999,battery:100,completions:999}}});assert.equal((await service.me(u.wallet)).credits,0);
+ await assert.rejects(campaign.submit(u.wallet,'practice',rules.rulesHash,{version:1,chunks:[{ticks:1,x:0,y:0,buttons:0}]}),/extraction/);
+ const replay=fixtureReplay().replay;await Promise.all([campaign.submit(u.wallet,'practice',rules.rulesHash,replay),campaign.submit(u.wallet,'practice',rules.rulesHash,replay)]);
+ const balance=(await service.me(u.wallet)).credits!;assert(balance>=100&&balance<=150);await campaign.submit(u.wallet,'practice',rules.rulesHash,replay);assert.equal((await service.me(u.wallet)).credits,balance);assert(!(await service.me(u.wallet)).entitlements.includes('campaign'));
 });

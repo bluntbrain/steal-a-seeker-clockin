@@ -9,7 +9,7 @@ export function useProgress(){
  const account=useAccount(),KEY=progressKey(account.wallet),accountRef=useRef(account);accountRef.current=account;
  const [syncStatus,setSyncStatus]=useState(''),[syncRequest,setSyncRequest]=useState(0);
  const [progress,setProgress]=useState(freshProgress),[ready,setReady]=useState(false),[error,setError]=useState('');const latest=useRef(progress),writes=useRef(Promise.resolve()),loaded=useRef(false),active=useRef(true);
- const load=useCallback(async()=>{try{const saved=parseProgress(await readSave(KEY));if(active.current){latest.current=saved;setProgress(saved);loaded.current=true;setError('');}}catch{if(active.current)setError('Could not load progress. Save kept. Tap to retry loading.');}finally{if(active.current)setReady(true);}},[KEY]);
+ const load=useCallback(async()=>{try{let saved=parseProgress(await readSave(KEY));if(account.wallet){const guest=parseProgress(await readSave(progressKey()));saved=mergeBests(saved,guest);await writeSave(KEY,JSON.stringify(saved));}if(active.current){latest.current=saved;setProgress(saved);loaded.current=true;setError('');}}catch{if(active.current)setError('Could not load progress. Save kept. Tap to retry loading.');}finally{if(active.current)setReady(true);}},[KEY]);
  useEffect(()=>{active.current=true;void load();return()=>{active.current=false;};},[load]);
  const persist=useCallback((value:typeof progress)=>{writes.current=writes.current.then(()=>writeSave(KEY,JSON.stringify(value))).then(()=>{if(active.current)setError('');}).catch(()=>{if(active.current)setError('Progress is in memory. Saving failed. Tap to retry.');});return writes.current;},[KEY]);
  useEffect(()=>{
@@ -18,7 +18,7 @@ export function useProgress(){
   catch{setSyncStatus('Could not read the cloud save. Local progress is kept.');}
  },[ready,account.account?.progress,persist]);
  useEffect(()=>{
-  if(!ready||!loaded.current||account.preview||!account.wallet||!account.account?.entitlements.includes('campaign'))return;
+  if(!ready||!loaded.current||account.preview||!account.wallet||!account.account)return;
   let cancelled=false;
   const timer=setTimeout(()=>{void(async()=>{
    try{const a=accountRef.current,s=await a.session(false);if(cancelled||s.wallet!==a.wallet)return;

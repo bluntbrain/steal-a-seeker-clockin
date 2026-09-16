@@ -95,7 +95,7 @@ export default memo(function GameCanvas({size,input,game,alpha,clock,level,appea
    <Oval rect={shadow} color="#070c0d" opacity={.7}/>
    {sprite && <Atlas image={sprite} sprites={sprites} transforms={transforms}><ColorMatrix matrix={costumeMatrix}/></Atlas>}
    {!!appearance.outfit&&<Group transform={trimTransform}><RoundedRect x={-.15} y={-.03} width={.3} height={.07} r={.02} color={trim}/></Group>}
-   {!!level.combat&&<CombatLayer game={game}/>}
+   {!!level.combat&&<CombatLayer game={game} alpha={alpha} input={input}/>}
    <Group transform={carriedTransform} opacity={carry}>
     <Atlas image={phones} sprites={phoneSprites} transforms={carryTransforms}/>
    </Group>

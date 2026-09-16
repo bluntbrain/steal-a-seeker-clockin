@@ -1,69 +1,60 @@
 # Steal a Seeker
 
-A solo Android stealth game for Clock In. Sneak past robot patrols, recover a virtual Seeker phone and reach the exit after the alarm raises the guards' speed.
+A solo Android stealth-action game for Clock In. Tap to move, use cover, defeat robot guards, recover a virtual Seeker and escape after the alarm.
 
-The current game uses **2D Skia** in React Native on Android and React Native Web in the browser. The game is not a WebView. 3D is used only to inspect collected phones. Earlier 3D experiments and their reports are historical.
+The game uses **2D Skia in React Native** on Android and React Native Web in the browser. It is not a WebView. Phone inspection is separate from gameplay.
 
-Latest balance results: [September 17 comparison](docs/CAMPAIGN-BALANCE-RETEST-V5.md). Weekly maps: [current architecture and automation plan](docs/WEEKLY-MAP-AUTOMATION.md).
+## Current product — 17 September 2026
 
-Current work and remaining gates: [September 13 release plan](docs/HACKATHON-RELEASE-PLAN.md). Submission materials: [judge guide](submission/JUDGE-GUIDE.md), [pitch deck](submission/steal-a-seeker-pitch.pptx), [demo script](submission/DEMO-SCRIPT.md).
+- All 12 campaign missions are free. No wallet is needed to start. The first mission teaches movement, cover, shooting and extraction.
+- First clears earn 100 credits; each extra star earns another 25. Up to 1,800 campaign credits. Identical repeats do not grant credits again.
+- Hideout is the store and collection: Outfits, Gear and Collection. Cosmetics use credits; packs can be bought with SKR or SOL. Bought items never improve weekly performance.
+- Leaderboard rankings and practice are free. A one-time Game Pass unlocks ranked attempts: three missions per week, five attempts each. No buying extra attempts. Best complete runs count; faster runs break score ties.
+- Live pass targets: **500 SKR or $10 worth of SOL**. These are different payment options, not an exchange-rate claim. The existing Mainnet service has **TEST_PRICING=true**: 1 SKR or a $0.10 SOL target, with rounding and network fees shown at checkout.
+- Weekly token prizes are **not active**. New passes do not include the old 25 SKR campaign rebate. Earlier reserved purchase terms remain recoverable.
 
-## Try the game
+See [the current design, research, pricing and QA plan](docs/FREE-CAMPAIGN-STORE-V3.md). It supersedes older campaign-paywall and token-wardrobe proposals. [Weekly map architecture](docs/WEEKLY-MAP-AUTOMATION.md) explains backend manifests and engine compatibility.
 
-- [Browser preview](http://127.0.0.1:8787): local playtest credits, campaign, cosmetics and local daily records. Credits cannot authorize a server purchase or become real tokens.
-- [Signed judge APK](releases/steal-a-seeker-judge.apk): arm64 Android, separate judge package, offline campaign access. Visible JUDGE labels distinguish it from the connected build. It cannot grant server entitlements, returns or verified scores.
-- [Signed devnet APK](releases/steal-a-seeker-devnet.apk): normal campaign paywall and Mobile Wallet Adapter. The current artifact connects to the deployed Railway devnet API. Automated real-token purchase, restore and payout QA passed; a physical Phantom approval remains unverified.
+## Try it
 
-APKs are local, ignored artifacts rather than GitHub uploads. Their neighboring JSON files record SHA-256, source hashes and build settings. Both use a private distribution signature. Build instructions and signing backup requirements are in [RELEASE.md](docs/RELEASE.md).
+- [Browser preview](http://127.0.0.1:8787/?build=free-campaign-store): local demo credits, purchases and weekly results. No real token transfers.
+- [Design and QA review](http://127.0.0.1:8787/design/free-store/index.html): generated reference and actual implemented screens.
+- [Mainnet APK](releases/steal-a-seeker-mainnet.apk): signed arm64 Android build. Phantom approval is required for real purchases; campaign play is free.
 
-## Current experience
-
-Twelve missions span Warehouse, Rooftops and Powerworks/Vault. There are patrols, scanners, timed gates, decoys, a Warden, circuits, relays and two-phone deliveries. First-mission tips teach movement and pickup. Complete the campaign to reveal the collection ending; revisit the map for stars or play a daily challenge.
-
-Drag the **right** joystick. Powers sit on the **left**. Stop beside a phone and hold TAKE. ACT operates nearby switches. Stay inside EXIT for one second. DASH spends 20 charge while carrying. DECOY throws in your facing direction; mobile guards in range investigate the landing ring once they lose sight of you. Scanners ignore it. Cover blocks sight, and a blocked throw does not spend a decoy.
-
-Browser keys: WASD/arrows, E to take/activate, Space to dash, Q for decoy, Esc to pause, R to restart. Level 11 help is in Settings during that mission. Settings also provides persistent audio, haptic and reduced-effects controls, tutorial replay and optional local playtest recording/export/delete.
-
-Native daily runs use wallet-bound tickets, pinned rules and server replay verification. One complete best run per wallet ranks by score then exact ticks; ties share rank. The app shows your best and the gap to the nearest better rank. Browser practice uses the same UTC mission rotation with local results only. No token rewards in the daily mode.
-
-## Economy and connected service
-
-[The test offer](docs/PAYWALL-ECONOMY-V2.md) is 100 TEST SKR for campaign access and unlimited normal retries, a one-attempt cancellation trial, optional cosmetics and a 25 TEST SKR completion rebate under the stored purchase terms. TEST SKR has no monetary value. No NFT or mainnet investment return is promised. A virtual phone does not entitle the player to a physical Seeker.
-
-The server handles signed sessions, finalized transfer checks, entitlement restore, progress and durable payout reconciliation. See [server setup](server/README.md). Public HTTPS hosting, a funded test mint/treasury and physical Phantom verification remain required. The separate legacy paid-entry mode stays outside the current campaign offer.
+APK files are ignored local artifacts. Adjacent JSON receipts record source hashes, build configuration and APK SHA-256. Older judge/devnet APKs and reports are historical. Signing credentials stay outside the repository; see [release instructions](docs/RELEASE.md).
 
 ## Run and build
 
-Node 22+, Java 17 and Android SDK 36 are required. Dependencies are pinned. Configure ANDROID_HOME or ignored android/local.properties.
+Node 22+, Java 17 and Android SDK 36. Configure ANDROID_HOME or ignored android/local.properties.
 
 ```sh
 npm ci
 npm run typecheck
 npm test
+npm run server:test
 npm run export:web
 npm run preview
-# Android; signing files are created outside the repository.
-npm run signing:init
-npm run build:judge
 npm run build:apk
 ```
 
-`npm start` runs Metro; `npm run android` runs a development Android build. Static preview uses port 8787. Set `EXPO_PUBLIC_API_URL` explicitly when building a connected native artifact. Release scripts ignore `.env`, force diagnostic flags off and check the pinned rules. They do not provision or deploy a service.
+Server tests require the dedicated local `seeker_clockin_test` PostgreSQL database and truncate only that database. Never point them at production. `npm start` runs Metro; `npm run android` runs a development Android build. Static preview uses port 8787. Release builds ignore `.env`, force diagnostics off and verify frozen rules.
 
-## Verification and limits
+## Connected service
 
-September 13: 83 game/client tests and 52 backend tests pass. All 12 authored simulation routes pass. Backend tests use the dedicated `seeker_clockin_test` PostgreSQL database and synthetic chain responses; they do not prove a real token payment.
+[Mainnet API](https://seeker-api-production-41b3.up.railway.app/health): one existing Railway API service with embedded workers and private PostgreSQL, app sleep disabled. No replacement service was created. [Server documentation](server/README.md) covers credits, payments and recovery.
 
-Current browser UI checks cover 320×568, 390×844 and 430×932 controls, onboarding, optional reports, the daily rotation and collection-ending layout. The ending layout test uses an explicit fixture. Current actual-pointer routes cleared missions 1–3, but failed the tested timing phases in Crossing Signals. Full current browser campaign proof remains open; earlier all-12 reports are not substituted for it.
+Authenticated credits use a PostgreSQL ledger. Verified campaign replays and finalized payment receipts grant credits idempotently. Redemptions atomically debit and grant ownership. Raw progress saves cannot authorize money, credits or rank. Guest campaign progress survives wallet connection; only valid queued replays can produce wallet credits.
 
-The Android 16 arm64 emulator checks standalone judge launch, movement/decoy, pause, backgrounding, settings persistence and native layout. Performance readouts measure callback cadence, not GPU presentation; emulator measurements are not phone benchmarks. Physical device, audible audio/haptics, 15-minute thermal run, full touch campaign and Phantom transactions remain pending.
+## Verification and remaining work
 
-For voluntary outside testing, use [PLAYTEST-PROTOCOL.md](docs/PLAYTEST-PROTOCOL.md). Real-player retention and PMF have not been established. The [privacy/support draft](submission/PRIVACY-AND-SUPPORT.md) needs operational details before store publication.
+17 September: TypeScript passes, **164 game/client tests** and **69 backend tests** pass. The 1,296-trial balance audit found a winning reference through all 12 missions and completed the campaign unlock/save chain. The first five rooms are more forgiving; basic controllers still struggle with 11–12. Bot results do not establish human difficulty or retention.
+
+Browser QA completed the first mission through visible tutorial taps, earned 150 credits, continued to mission two, and verified free practice, pass gating, credit-pack cancellation/purchase, cosmetic debit/equip/unequip and persistence. Hideout and packs fit at 360×640 and 390×844. Evidence: [QA report](verification/free-store-ui/README.md).
+
+The updated APK builds. This revision still needs physical Android frame-pacing, sound/haptics, touch and real Phantom purchase verification. Weekly funded prize settlement and campaign-only health upgrades are not included. Do not advertise token winnings before settlement is implemented and funded.
 
 ## Source layout
 
-`src/game`: deterministic maps/rules. `src/components/GameCanvas.tsx`: current 2D rendering. `src/commerce` and `src/wallet`: native accounts and MWA. `src/ranked`: daily runs. `src/progress`: local/cloud bests. `src/onboarding` and `src/telemetry`: coach and voluntary local reports. `server`: authentication, payments and replay workers. Client saves and telemetry never authorize money or ranks.
+`src/game`: deterministic maps/rules. `src/components`: Skia rendering and screens. `src/commerce`: accounts, credit store and checkout. `src/wallet`: MWA. `src/league` and `src/ranked`: weekly manifests and ranks. `src/progress`: local/cloud bests. `server`: authentication, finalized payments, credit ledger and replay workers. `shared/store.ts`: pack quantities, prices and cosmetic costs.
 
-## Live devnet backend
-
-API: https://seeker-api-production-41b3.up.railway.app — one API replica and private PostgreSQL, app sleep disabled. See [Railway runbook](docs/RAILWAY-DEPLOYMENT.md) for configuration and deployment commands. [Live QA evidence](verification/deployed-api-qa.json) records 26 passing groups, including real TEST SKR purchases, all 12 server-verified mission replays and one completion payout. The local backend suite now passes 53 tests.
+Submission drafts: [judge guide](submission/JUDGE-GUIDE.md), [pitch](submission/steal-a-seeker-pitch.pptx), [demo script](submission/DEMO-SCRIPT.md). Refresh their older economy copy before submitting. [Playtest protocol](docs/PLAYTEST-PROTOCOL.md) and [privacy/support draft](submission/PRIVACY-AND-SUPPORT.md) remain useful preparation.

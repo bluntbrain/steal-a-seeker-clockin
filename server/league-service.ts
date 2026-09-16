@@ -56,7 +56,7 @@ export class LeagueService{
    const lockedWeek=(await db.query('SELECT manifest FROM league_weeks WHERE week=$1 FOR UPDATE',[manifest.week])).rows[0]?.manifest;
    if(lockedWeek?.rulesHash!==manifest.rulesHash||!lockedWeek.contracts.some((c:Contract)=>c.id===contract.id))throw new ServiceError(409,'Weekly missions changed. Refresh before starting.');
    const prior=await db.query('SELECT id,manifest FROM ranked_runs WHERE wallet=$1 AND request_key=$2',[wallet,input.requestKey]);if(prior.rowCount){if(prior.rows[0].manifest.contract?.id!==contract.id)throw new ServiceError(409,'Request key belongs to another contract.');return this.ranked.get(wallet,prior.rows[0].id);}
-   if(!(await db.query("SELECT 1 FROM entitlements WHERE wallet=$1 AND sku='campaign'",[wallet])).rowCount)throw new ServiceError(403,'Campaign access is required for ranked contracts.');
+   if(!(await db.query("SELECT 1 FROM entitlements WHERE wallet=$1 AND sku='campaign'",[wallet])).rowCount)throw new ServiceError(403,'Game Pass required for ranked weekly play. Practice is free.');
    await db.query("UPDATE ranked_runs SET status='rejected',detail='Ranked attempt expired.' WHERE wallet=$1 AND status='issued' AND expires_at<=$2",[wallet,this.now()]);
    if((await db.query("SELECT 1 FROM ranked_runs WHERE wallet=$1 AND status IN ('issued','verifying')",[wallet])).rowCount)throw new ServiceError(409,'Finish or close your previous ranked attempt first.');
    const used=(await db.query("SELECT count(*)::integer AS n FROM ranked_runs WHERE wallet=$1 AND manifest->'contract'->>'id'=$2",[wallet,contract.id])).rows[0].n;if(used>=CONTRACT_ATTEMPTS)throw new ServiceError(409,'All five ranked attempts used. Practice is still unlimited.');
