@@ -1,0 +1,28 @@
+[
+  {
+    "name": "step-a",
+    "prompt": "One single light sneaker footstep onto a dry concrete floor. Soft rubber sole landing, a short firm heel tap and tiny sandy scuff. Close dry foley for a small agile courier in a stealth game. Immediate attack and short natural decay. Only one step, no repeated walking, no music, no voice, no background ambience, no echo.",
+    "provider": "ElevenLabs",
+    "model": "eleven_text_to_sound_v2",
+    "file": "step-a.wav",
+    "duration": 0.24,
+    "sampleRate": 32000,
+    "channels": 1,
+    "peakDb": -6,
+    "onsetSeconds": 0.6228,
+    "sha256": "0463b6aaa9bd31091da8d376b3a06445c60b0cb9893b82ffebefcd78757b1b31"
+  },
+  {
+    "name": "step-b",
+    "prompt": "One single alternate sneaker footstep onto a dry concrete floor. Slightly softer rounded sole thump with a crisp light toe scuff. Close dry foley for a small agile courier in a stealth game. Immediate attack and short natural decay. Only one step, no repeated walking, no music, no voice, no background ambience, no echo.",
+    "provider": "ElevenLabs",
+    "model": "eleven_text_to_sound_v2",
+    "file": "step-b.wav",
+    "duration": 0.24,
+    "sampleRate": 32000,
+    "channels": 1,
+    "peakDb": -6,
+    "onsetSeconds": 0.825,
+    "sha256": "5a4eddd48991153a402791aec91a5af02795e4a7fe5c97343cd74d3922b5048b"
+  }
+]

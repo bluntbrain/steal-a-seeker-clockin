@@ -7,6 +7,7 @@ import {combatTap} from './game/combat';
 import {useCombatGuide} from './onboarding/useCombatGuide';
 import {GUIDE_STEPS,guideAllows} from './onboarding/combat-guide';
 import {useCombatAudio} from './audio/useCombatAudio';
+import {useFootstepAudio} from './audio/useFootstepAudio';
 import {contractPoints} from '../shared/contracts';
 import {useRunTelemetry} from './telemetry/useRunTelemetry';
 import {useCoach} from './onboarding/useCoach';
@@ -86,6 +87,7 @@ export function Game({rankTicket,paidPlay,dailyReturn,paidReturn,onRankStart,onR
  useEffect(()=>{guideWaiting.value=guide.active&&guide.waiting;guideStage.value=guide.active?guide.stage:-1;if(guide.active&&guide.waiting&&!guide.checkpoint.current)guide.checkpoint.current=JSON.parse(JSON.stringify(game.value));},[guide.active,guide.waiting,guide.stage]);
  useEffect(()=>{if(guide.active&&(hud.status==='caught'||hud.status==='timeout')&&guide.checkpoint.current){const saved=JSON.parse(JSON.stringify(guide.checkpoint.current));game.value=saved;setHud(saved);recording.value=[];setCompletedReplay(undefined);guide.retry();}},[hud.status,guide.active]);
  useCombatAudio(hud,settings.sound&&!paused&&!hideoutOpen&&!walletOpen,settings.volume);
+ useFootstepAudio(hud,settings.sound&&!paused&&!hideoutOpen&&!walletOpen&&!mapOpen&&!settingsOpen&&!dailyOpen&&!paidOpen&&!rewardsOpen&&!(guide.active&&guide.waiting),settings.volume);
  const level=useMemo(()=>rankTicket?.manifest.contract?.level??(combatMode?combatLevel(mission):getLevel(mission)),[rankTicket?.manifest.contract?.level,combatMode,mission]);
  const boardHeight=size*20/12;
  const progress=useProgress(),recorded=useRef(false),rankResolved=useRef(false);
