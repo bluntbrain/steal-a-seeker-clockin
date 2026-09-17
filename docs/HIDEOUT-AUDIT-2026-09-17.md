@@ -43,3 +43,9 @@ Four purchasable outfits cost 1,800 credits altogether. No outfit changes damage
 Open `/design/costumes-v4/index.html` in the local game preview for individual downloadable PNGs. `/design/courier-card-v2/index.html` is the preserved preview URL; the page now renders v3 cards, with selectors for all six outfits and native/web renderers. Its numbers are explicitly sample data.
 
 The signed Mainnet APK built successfully: `releases/steal-a-seeker-mainnet.apk`, SHA256 `1efe79ace06afd1d0437e9f4b1bdd9bf73f999623713efd87471371681ea4069`. Verified the native card layout on web and downloaded a 1080×1620 sample PNG; stats stayed unchanged when switching outfits. No browser errors were recorded on the card review page.
+
+## Direction correction
+
+The initial v4 render mapping incorrectly assumed north=0. The simulation actually uses south=0, west=1, north=2, east=3 and starts at north=2. Corrected the atlas mapping so spawn and upward motion show the backpack, downward motion shows the face, and left/right keep their corresponding profiles. No simulation or scoring rules changed.
+
+Added a regression that checks every campaign spawn and actual movement in all four directions with both tap and stick controls; 25 focused costume, combat and simulation tests pass. Browser QA confirms upward/back and downward/front poses. Refreshed web export and signed Android APK (current SHA256: `0b7ea5a4f1aad6a7205be61b6bf9bd18365a6cf23b4fce11cab51ad1f86552b2`).

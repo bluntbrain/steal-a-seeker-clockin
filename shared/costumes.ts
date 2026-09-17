@@ -9,5 +9,5 @@ export const COSTUMES = [
 ] as const;
 export type CostumeId=typeof COSTUMES[number]['id'];
 export const costumeFor=(id?:string)=>COSTUMES.find(c=>c.id===id)??COSTUMES[0];
-/** Logical headings: north, west, south, east. Sheet: front, left, back, right. */
-export function costumeFrame(facing:number,walking:boolean){'worklet';return ([2,1,0,3][facing]??0)+(walking?4:0);}
+/** Simulation: south=0, west=1, north=2, east=3. Sheet: front, left, back, right. */
+export function costumeFrame(facing:number,walking:boolean){'worklet';return ([0,1,2,3][facing]??2)+(walking?4:0);}
