@@ -1,34 +1,31 @@
-# Steal a Seeker — review guide
+# Steal a Seeker — current review guide
 
-An Android stealth game for short runs. Recover virtual Seeker phones, avoid robot patrols, and escape after the theft alarm raises the guards' speed. The campaign has 12 missions across Warehouse, Rooftops and Powerworks/Vault.
+A solo Android stealth-action game. Tap to move, use cover, tap robots to shoot, collect a virtual Seeker and escape the alarm. Twelve free campaign missions span Warehouse, Rooftops and Powerworks. Gameplay uses React Native and 2D Skia, not a WebView.
 
-## Review artifacts
+## Build and source
 
-- Protected-signature arm64 Android APK: `../releases/steal-a-seeker-judge.apk` (offline gameplay review).
-- Devnet integration build: `../releases/steal-a-seeker-devnet.apk` (service configuration still required).
-- Build provenance/checksums sit beside each APK. Build steps: `../docs/RELEASE.md`.
-- Source: https://github.com/bluntbrain/steal-a-seeker-clockin (private). The owner must grant the organizer's confirmed GitHub reviewer identities access before submission. Do not make the repository public without instruction.
-- Pitch: `steal-a-seeker-pitch.pptx`.
-- Demo recording plan: `DEMO-SCRIPT.md`. A final physical-device + devnet-wallet demo remains a release gate.
+- Current signed build: 0.3.4 / versionCode 7, package com.bluntbrain.stealaseeker.
+- APK: ../releases/steal-a-seeker-mainnet.apk. The local APK is ignored; provide it separately through the submission portal. Its adjacent JSON records hashes/configuration.
+- [Build and signing instructions](../docs/RELEASE.md). Reviewers need the APK and source, never the private release key.
+- Source: https://github.com/bluntbrain/steal-a-seeker-clockin (private). Grant the organizer's confirmed reviewer identities access before submission.
+- [Current tutorial audit](../docs/TUTORIAL-AUDIT-2026-09-17.md).
 
 ## First run
 
-Install the judge APK alongside any existing MVP. It opens Missions. Tap Continue for Quiet Pickup. Drag the RIGHT joystick. Stop beside the glowing phone and hold TAKE on the LEFT. The alarm makes mobile guards faster and updates them with your position. Break sight behind cover. A decoy lures nearby mobile guards to its landing ring after they lose sight of you. DASH spends 20 phone charge. Stay in the mint EXIT for one second.
+Open Missions and Continue. No wallet or payment is required. The first room teaches movement, cover, shooting, dodging an aim line, phone collection and extraction through guided taps. Settings or the pause screen can replay the tutorial. Mission completion unlocks the next room and awards non-transferable credits. Three stars on a first clear earns 60 credits; repeat clears do not farm the same reward. Use credits in Hideout for outfits or the cosmetic escape trail. Phone collection/inspection is separate from gameplay.
 
-The first mission gives dismissible tips; Settings can replay them. Completing missions unlocks the next. Inspect recovered phones in Hideout. After mission 12, view the completed collection, improve stars, or try the daily challenge.
+## Weekly league and commerce
 
-Level 11 requires relays: lower-left relay → left door → middle room → right relay → upper-right door → phone. Reopen those relays on the return route and leave at the lower-left exit. Stop moving before ACT. Each opening lasts nine seconds. Full help is in Settings during that mission.
+Three shared missions are available per week. Practice is unlimited. A Game Pass unlocks five ranked attempts per mission; no extra attempts can be bought. The best complete run per mission contributes to rank. Server verification replays inputs and applies the issued manifest; it does not prove a human played them. Bought cosmetics do not improve ranked performance.
 
-## What to distinguish
+The native app uses Solana Mobile Wallet Adapter for authentication/signing, plus a backend that verifies finalized payments, grants entitlements/credit packs and stores ledger entries idempotently. Purchases are Mainnet and require the user's wallet approval. The existing service currently has TEST_PRICING enabled; inspect the actual quote and network fee before approving. Browser purchases and results are local demo state and transfer no tokens.
 
-Browser commerce uses local playtest credits. The native game uses Mobile Wallet Adapter and a backend for signed sessions, devnet payment verification, entitlements and payout reconciliation. TEST SKR is a test asset with no monetary value. No mainnet purchase, investment return, NFT, or outside-player traction is claimed.
+Weekly token prizes are not active. The old campaign 25 SKR rebate is not included in new purchases. Do not advertise a payout, investment return or live store approval. The App NFT mint identifies the publisher listing; it is not a player collectible.
 
-Daily runs use a standard loadout, UTC daily rotation and server replay verification. The best complete run per wallet ranks by score, then exact simulation ticks; exact ties share rank. Replay verification checks the submitted simulation, not whether a human played it. Browser daily results stay local.
+## Publishing status and final submission
 
-The judge build bypasses only the local campaign gate through a compile-time flag. It cannot authorize purchases, settlement or ranked runs at the server. For online review, use the normal devnet build and a funded test wallet after the service is ready.
+The Mainnet App NFT is minted for com.bluntbrain.stealaseeker. An App NFT mint is not APK release approval. Upload the current APK and complete the release review in the publishing portal.
 
-## Submission gates
+Refresh the existing pitch and demo script before submission: their earlier economy/control descriptions are historical. Record the current physical-device tutorial and MWA flow, then provide the functional APK, accessible repository, three-minute demo and presentation before the official deadline. The builder must check eligibility declarations and the final submission agreement.
 
-Confirm portal deadline and judge GitHub identities with the organizer. Submit APK, accessible repository, a demo of no more than three minutes and pitch before the deadline. Final agreement locks edits; the builder must review it. Physical installation and the full devnet wallet round trip need recorded evidence. Winners must publish within the stated 30-day window. Eligibility, funding and KYC declarations belong to the builder.
-
-The editable deck source is `build-pitch.mjs`. It uses the supplied local presentation runtime and original project assets. The deck includes a development-status slide; update that slide only after new evidence exists. The submitted app/build is reproducible independently of this optional presentation tooling.
+Physical install and cold launch pass for 0.3.4. The phone was locked during the latest audit, so a full physical touch/audio/Phantom walkthrough remains unverified. See the tutorial report for the exact automated and browser checks completed.

@@ -1,6 +1,6 @@
 # Android release
 
-The current submission plan, build instructions, signing locations, public URLs and review status are maintained in [PUBLISHING-0.3.3.md](PUBLISHING-0.3.3.md).
+The current submission plan, build instructions, signing locations, public URLs and review status are maintained in [PUBLISHING-0.3.4.md](PUBLISHING-0.3.4.md).
 
 The game uses Mainnet for native purchases. The browser is a local preview and does not transfer funds. Free campaign access does not require a payment. The Game Pass unlocks weekly ranked play; weekly token prizes are not active.
 

@@ -43,3 +43,12 @@ design/visual-v2/leaderboard-v2/assets/
 
 # Rebuilt Courier Card review bundle
 design/visual-v2/courier-card-v2/preview.js
+
+# Never commit signing backups, credential configs or treasury key files
+release-signing.json
+credentials.env
+*.p12
+*.pfx
+*signing-backup*.zip
+mainnet-treasury.json
+devnet-treasury.json

@@ -7,7 +7,7 @@ The game uses **2D Skia in React Native** on Android and React Native Web in the
 ## Current product — 17 September 2026
 
 - All 12 campaign missions are free. No wallet is needed to start. The first mission teaches movement, cover, shooting and extraction.
-- First clears earn 100 credits; each extra star earns another 25. Up to 1,800 campaign credits. Identical repeats do not grant credits again.
+- First clears earn 50 credits; each extra star earns another 5. Up to 720 campaign credits. Identical repeats do not grant credits again.
 - Hideout is the store and collection: Outfits, Gear and Collection. Cosmetics use credits; packs can be bought with SKR or SOL. Bought items never improve weekly performance.
 - Leaderboard rankings and practice are free. A one-time Game Pass unlocks ranked attempts: three missions per week, five attempts each. No buying extra attempts. Best complete runs count; faster runs break score ties.
 - Live pass targets: **500 SKR or $10 worth of SOL**. These are different payment options, not an exchange-rate claim. The existing Mainnet service has **TEST_PRICING=true**: 1 SKR or a $0.10 SOL target, with rounding and network fees shown at checkout.
@@ -47,14 +47,16 @@ Authenticated credits use a PostgreSQL ledger. Verified campaign replays and fin
 
 ## Verification and remaining work
 
-17 September: TypeScript passes, **164 game/client tests** and **69 backend tests** pass. The 1,296-trial balance audit found a winning reference through all 12 missions and completed the campaign unlock/save chain. The first five rooms are more forgiving; basic controllers still struggle with 11–12. Bot results do not establish human difficulty or retention.
+17 September: TypeScript passes, **189 game/client tests** pass in the latest tutorial audit; **73 backend tests** passed in the preceding pricing verification. The 1,296-trial balance audit found a winning reference through all 12 missions and completed the campaign unlock/save chain. The first five rooms are more forgiving; basic controllers still struggle with 11–12. Bot results do not establish human difficulty or retention.
 
-Browser QA completed the first mission through visible tutorial taps, earned 150 credits, continued to mission two, and verified free practice, pass gating, credit-pack cancellation/purchase, cosmetic debit/equip/unequip and persistence. Hideout and packs fit at 360×640 and 390×844. Evidence: [QA report](verification/free-store-ui/README.md).
+The latest browser tutorial check reached the win screen with 60 credits and continued to mission two. Earlier store QA covered free practice, pass gating, credit-pack cancellation/purchase, cosmetic debit/equip/unequip and persistence, with Hideout and packs at 360×640 and 390×844. That historical evidence is in the [store QA report](verification/free-store-ui/README.md); current tutorial evidence is in the [tutorial audit](docs/TUTORIAL-AUDIT-2026-09-17.md).
 
 The updated APK builds. This revision still needs physical Android frame-pacing, sound/haptics, touch and real Phantom purchase verification. Weekly funded prize settlement and campaign-only health upgrades are not included. Do not advertise token winnings before settlement is implemented and funded.
 
 ## Source layout
 
-`src/game`: deterministic maps/rules. `src/components`: Skia rendering and screens. `src/commerce`: accounts, credit store and checkout. `src/wallet`: MWA. `src/league` and `src/ranked`: weekly manifests and ranks. `src/progress`: local/cloud bests. `server`: authentication, finalized payments, credit ledger and replay workers. `shared/store.ts`: pack quantities, prices and cosmetic costs.
+`src/game`: deterministic maps/rules. `src/components`: Skia rendering and screens. `src/commerce`: accounts, credit store and checkout. `src/wallet`: MWA. `src/league` and `src/ranked`: weekly manifests and ranks. `src/progress`: local/cloud bests. `server`: authentication, finalized payments, credit ledger and replay workers. `shared/store.ts`: pack quantities and defaults. Backend price overrides are documented in [PRICING.md](docs/PRICING.md).
+
+Current [tutorial audit](docs/TUTORIAL-AUDIT-2026-09-17.md), [repository/deployment audit](docs/REPO-CLEANUP-AUDIT.md), and [reviewer guide](submission/JUDGE-GUIDE.md).
 
 Submission drafts: [judge guide](submission/JUDGE-GUIDE.md), [pitch](submission/steal-a-seeker-pitch.pptx), [demo script](submission/DEMO-SCRIPT.md). Refresh their older economy copy before submitting. [Playtest protocol](docs/PLAYTEST-PROTOCOL.md) and [privacy/support draft](submission/PRIVACY-AND-SUPPORT.md) remain useful preparation.

@@ -1,0 +1,14 @@
+{
+  "version": "0.3.4",
+  "versionCode": 7,
+  "package": "com.bluntbrain.stealaseeker",
+  "apkSha256": "b9a76e8a1c7bc9247c98f16e29e4d2bce833996958b8577a23012523d2290a13",
+  "appNft": "39YPwP5Um3Bs9sNXTfthGesCPGMqXxjytc3hEkwA5RYZ",
+  "installedOn": "Realme RMX5033",
+  "coldLaunch": "passed",
+  "physicalTouchTest": "unverified_phone_locked",
+  "browserTutorial": "won_next_mission_opened",
+  "gameClientTests": 189,
+  "emailSent": false,
+  "storeReleaseSubmitted": false
+}
