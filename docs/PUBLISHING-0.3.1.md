@@ -55,7 +55,7 @@ Optional Game Pass and credit purchases use SOL or SKR through Solana Mobile Wal
 
 Early access: weekly token prizes are not active. Buying a Game Pass unlocks ranked play and does not promise winnings or a financial return. This independent game is not affiliated with or endorsed by Solana Mobile.
 
-Contact / support: hello@kraneapps.com (pending operator confirmation).
+Contact / support: hello@kraneapps.com. Public pages identify the user-provided Krane Apps brand without asserting a registered legal entity or jurisdiction.
 
 ## Verified state before final submission
 
@@ -63,7 +63,7 @@ Contact / support: hello@kraneapps.com (pending operator confirmation).
 - Server verifies ranked replays; five attempts per contract.
 - Cash-prize payout programme is not enabled; the listing must not advertise active prizes.
 - No physical Android device was attached during this release preparation. Latest binary needs an on-device smoke test before describing it as physically verified.
-- Public prices and legal operator are pending the owner's reply.
+- Existing test prices remain active. Public pages are live under the Krane Apps publisher brand; no registered entity or jurisdiction is asserted.
 - Submission is not the same as store approval. The portal's final upload/mint flow needs publisher-wallet signatures and possibly storage funding, which the owner must approve.
 
 ## Sources checked 17 September 2026
@@ -73,3 +73,9 @@ Contact / support: hello@kraneapps.com (pending operator confirmation).
 - https://docs.solanamobile.com/dapp-store/publisher-policy
 
 Solana Mobile currently describes app review as 3–5 business days and asks publishers to retain both their Android signing key and publisher wallet access for future updates. Check the portal's actual upload estimate rather than treating its rough SOL guidance as a fixed fee.
+
+## Live publisher handoff
+
+Website deployed successfully on 17 September 2026, Railway deployment `791f6c21-9e52-4d1c-beda-6113d661f3ae`. Homepage, Privacy, Terms, Support and Delete Account returned HTTP 200 over HTTPS; API health remained Mainnet. Existing test prices were unchanged.
+
+The app listing has been saved at https://publish.solanamobile.com/dapp/com.krane.stealaseeker.mvp, with icon, banner, four screenshots, English and both policy URLs. It remains a draft: no live version or release in review. The overview shows **Mint App**. The owner must complete the App NFT transaction (portal estimate about 0.02 SOL plus upload costs) in the connected publisher wallet before release upload is available. No wallet transaction was approved by the agent.

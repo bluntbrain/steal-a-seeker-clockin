@@ -19,7 +19,7 @@
     "app": 184,
     "backend": 71
   },
-  "status": "Prepared; legal identity, pricing and final portal steps pending.",
+  "status": "Signed APK prepared. Website live, listing saved. App mint requires owner wallet approval before release upload.",
   "apkSignatureVerified": true,
   "releaseKeyOutsideGit": true
 }

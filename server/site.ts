@@ -4,7 +4,7 @@ import {URL} from 'node:url';
 
 const updated='17 September 2026';
 const contact='hello@kraneapps.com';
-// Confirm the operator before deploying these pages.
+// User-provided publisher brand and support contact; no registered entity or jurisdiction is asserted.
 export const OPERATOR='Krane Apps';
 const email=(subject:string)=>`mailto:${contact}?subject=${encodeURIComponent(subject)}`;
 const nav='<a href="/">Game</a><a href="/support">Support</a><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/delete-account">Delete account</a>';
