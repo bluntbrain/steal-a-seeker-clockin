@@ -1,0 +1,32 @@
+{
+  "createdAt": "2026-09-17T12:52:11.688707+00:00",
+  "tool": "OpenAI image API via bundled image_gen.py CLI",
+  "model": "gpt-image-2",
+  "quality": "high",
+  "size": "1200x1200",
+  "prompt": "output/imagegen/editors-choice/escape-prompt.txt",
+  "references": [
+    "assets/costumes-v4/default.png",
+    "assets/app-icon.png",
+    "assets/world-v3/district-warehouse.png"
+  ],
+  "files": [
+    {
+      "path": "publishing/editors-choice/steal-a-seeker-featured-1200x1200.png",
+      "bytes": 2198026,
+      "sha256": "95526b3a3e78c9ccd3202c10e54689df5dc9b9ebfa71c5826e2ca1cb1cfeb56d"
+    },
+    {
+      "path": "publishing/editors-choice/steal-a-seeker-featured-1200x1200.jpg",
+      "bytes": 433266,
+      "sha256": "4c7dabbbc16195fb78db78cc162ae297de51895eb5f97f65b21f2e239ae441d3"
+    }
+  ],
+  "checks": [
+    "Exact 1200x1200 RGB output",
+    "Full size and 240px preview inspected",
+    "Courier identity, mint phone, guard and cover match references",
+    "No cropped head, phone or feet; no embedded text"
+  ],
+  "uploadedToPortal": false
+}
