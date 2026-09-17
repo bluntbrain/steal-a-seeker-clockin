@@ -55,3 +55,5 @@ API: https://seeker-api-production-41b3.up.railway.app
 Identity: https://stealaseeker.bluntbrain.com
 
 Health checks prove database/API availability, not payout funding. This release passed 69 backend tests and deployed successfully. Live read-only pricing/catalog checks confirmed test prices and the new credit products. Current physical Phantom payment approval/transfer remains a separate device check.
+
+Pricing controls: [PRICING.md](../docs/PRICING.md). Game Pass, credit-pack purchase prices, and outfit/trail credit costs are configurable on the backend.

@@ -1,3 +1,4 @@
+import {storePricingConfig} from './store-config';
 import {PRODUCTS} from '../shared/commerce';
 import {MAINNET_SKR_MINT,type SolanaCluster} from '../shared/network';
 import type {Pool} from 'pg';
@@ -16,7 +17,7 @@ export function networkConfig(env:Record<string,string|undefined>){
  if(!['true','false'].includes(openFlag))throw new Error('MAINNET_ALLOW_ALL_WALLETS must be true or false.');
  const allowAllWallets=openFlag==='true';
  if(mainnet&&(!allowAllWallets&&!allowlist.length||env.MAINNET_TEST_ENABLED!=='1'))throw new Error('Mainnet testing requires explicit enablement and tester wallets or all-wallet access.');
- return {passSkr:testPricing?integer('TEST_GAME_PASS_SKR',1,1,500):integer('GAME_PASS_SKR',500,1,100000),cluster,mainnet,allowlist,allowAllWallets,testPricing,shopPrices,priceDivisor:testPricing?100:livePriceDivisor,campaignUsdCents:testPricing?testPassCents:livePassCents,rebateSkr:integer('CAMPAIGN_REBATE_SKR',0,0,10000),
+ return {...storePricingConfig(env,testPricing),passSkr:testPricing?integer('TEST_GAME_PASS_SKR',1,1,500):integer('GAME_PASS_SKR',500,1,100000),cluster,mainnet,allowlist,allowAllWallets,testPricing,shopPrices,priceDivisor:testPricing?100:livePriceDivisor,campaignUsdCents:testPricing?testPassCents:livePassCents,rebateSkr:integer('CAMPAIGN_REBATE_SKR',0,0,10000),
   mint:mainnet?MAINNET_SKR_MINT:env.DEVNET_TEST_MINT??'',recipient:mainnet?env.MAINNET_TREASURY??'':env.DEVNET_TREASURY??'',
   decimals:mainnet?6:Number(env.DEVNET_TOKEN_DECIMALS??6),rpcUrl:mainnet?env.MAINNET_RPC_URL??'https://api.mainnet-beta.solana.com':env.DEVNET_RPC_URL??'https://api.devnet.solana.com',
   signerPath:mainnet?env.MAINNET_SIGNER_PATH:env.DEVNET_SIGNER_PATH,signerJson:mainnet?env.MAINNET_SIGNER_JSON:env.DEVNET_SIGNER_JSON,

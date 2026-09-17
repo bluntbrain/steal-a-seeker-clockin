@@ -1,3 +1,4 @@
+import type {StoreItemId} from '../../shared/store';
 import type {PaymentCurrency,ProductPricing} from '../../shared/pricing';
 import type {AccountState,Order,ProductId,SignInChallenge} from '../../shared/commerce';
 import type {Progress} from '../progress/model';
@@ -11,9 +12,11 @@ export async function api<T>(path:string,options:{token?:string;body?:unknown;me
  try{return await walletStep(`api.${path.replace(/\/orders\/[^/]+/, '/orders/:id')}`,async()=>{const response=await fetch(`${API_URL.replace(/\/$/,'')}${path}`,{method:options.method||(options.body?'POST':'GET'),headers:{'Content-Type':'application/json',...(options.token?{Authorization:`Bearer ${options.token}`}:{})},body:options.body?JSON.stringify(options.body):undefined,signal:controller.signal});walletLog('api.response',{status:response.status});const result=await response.json();if(!response.ok)throw new ApiError(response.status,result.error||'Service unavailable.');return result as T;});}finally{clearTimeout(timeout);}
 }
 export type Session={token:string;wallet:string;expiresAt:string};
+export type StoreCatalog={testPricing?:boolean;products:{id:string;usdCents?:number;credits?:number}[];creditStore?:{id:StoreItemId;price:number}[]};
 export const commerceApi={
+ catalog:()=>api<StoreCatalog>('/catalog'),
  unequip:(token:string,slot:'outfit'|'trail'|'frame'|'rack')=>api<AccountState>('/me/unequip',{token,body:{slot}}),
- redeem:(token:string,sku:string)=>api<AccountState>('/credits/redeem',{token,body:{sku}}),
+ redeem:(token:string,sku:string,expectedPrice?:number)=>api<AccountState>('/credits/redeem',{token,body:{sku,expectedPrice}}),
  pricing:(sku:ProductId)=>api<ProductPricing>(`/pricing/${sku}`),
  cancel:(token:string,id:string)=>api<{ok:true}>(`/orders/${id}/cancel`,{token,body:{}}),
  challenge:(wallet:string)=>api<SignInChallenge>('/auth/challenge',{body:{wallet}}),

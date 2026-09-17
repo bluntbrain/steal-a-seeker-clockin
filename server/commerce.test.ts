@@ -606,3 +606,25 @@ test('retired gear cannot be sold; new outfit credits do not alter gameplay enti
  const account=await service.me(u.wallet);assert.equal(account.credits,400);
  assert.equal(account.equipment.outfit,'archive-keeper');assert(!account.entitlements.includes('campaign'));
 });
+
+test('configured prices match catalog and orders; changing config never reprices an open order',async()=>{
+ const user=await login();const config={...service.config,usdPricing:true,passSkr:600,campaignUsdCents:1200,creditPackPrices:{'credits-500':225},storeCreditPrices:{'night-courier':350}};
+ const priced=new CommerceService(pool,chain,config,{rates:async()=>({SKR:'0.02',SOL:'100',at:Date.now()})}),api=await createApp(priced,ranked);
+ try{
+  const catalog=(await api.inject({method:'GET',url:'/catalog'})).json();assert.equal(catalog.products.find((p:any)=>p.id==='credits-500').usdCents,225);assert.equal(catalog.creditStore.find((p:any)=>p.id==='night-courier').price,350);assert.equal(catalog.products.find((p:any)=>p.id==='campaign').skrPrice,600);
+  const preview=await priced.pricing('credits-500'),key=randomUUID(),order=await priced.createOrder(user.wallet,'credits-500',key,'SOL');assert.equal(order.amount,preview.options.find(p=>p.currency==='SOL')!.amount);assert.equal(order.amount,'22500000');
+  config.creditPackPrices['credits-500']=500;assert.equal((await priced.createOrder(user.wallet,'credits-500',key,'SOL')).amount,order.amount);assert.equal((await priced.getOrder(user.wallet,order.id)).amount,order.amount);
+  await priced.cancelQuote(user.wallet,order.id);assert.equal((await priced.createOrder(user.wallet,'credits-500',randomUUID(),'SOL')).amount,'50000000');
+ }finally{await api.close();}
+});
+test('changed credit prices reject stale and old-client requests before debit; retries grant once',async()=>{
+ const u=await login(),o=await quote(u,'credits-500'),sig=b58(randomBytes(64));transactions.set(sig,paidTx(o,sig));await service.attach(u.wallet,o.id,sig);
+ const configured=new CommerceService(pool,chain,{...service.config,storeCreditPrices:{'night-courier':350}}),api=await createApp(configured,ranked);
+ try{
+  for(const payload of [{sku:'night-courier'},{sku:'night-courier',expectedPrice:300}])assert.equal((await api.inject({method:'POST',url:'/credits/redeem',headers:u.headers,payload})).statusCode,409);
+  assert.equal((await service.me(u.wallet)).credits,500);
+  for(let i=0;i<2;i++)assert.equal((await api.inject({method:'POST',url:'/credits/redeem',headers:u.headers,payload:{sku:'night-courier',expectedPrice:350}})).statusCode,200);
+  assert.equal((await service.me(u.wallet)).credits,150);assert.deepEqual((await service.me(u.wallet)).entitlements,['night-courier']);
+  const debit=await pool.query("SELECT delta FROM credit_ledger WHERE wallet=$1 AND source='redeem:night-courier'",[u.wallet]);assert.equal(debit.rows.length,1);assert.equal(Number(debit.rows[0].delta),-350);
+ }finally{await api.close();}
+});

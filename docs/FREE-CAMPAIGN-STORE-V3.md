@@ -78,7 +78,7 @@ Existing Railway service `seeker-api`, Mainnet. Keep `TEST_PRICING=true` while t
 | `TEST_PRICING` | false | Railway currently explicitly sets true |
 | `CAMPAIGN_REBATE_SKR` | 0 | No new campaign completion rebate |
 
-Credit packs and credit item costs live in `shared/store.ts`. Testing divides credit-pack dollar targets by 100; token rounding and network fees mean the final quote may be higher than the raw target. The exact amount is shown before approval. Changing `TEST_PRICING=false` restores live targets without changing stored orders.
+Credit packs and credit item costs have defaults in `shared/store.ts` and backend overrides documented in [PRICING.md](PRICING.md). The current Railway service has explicit per-pack and per-item values. Without overrides, testing divides credit-pack dollar targets by 100; token rounding and network fees mean the final quote may be higher than the raw target. The exact amount is shown before approval. Changing `TEST_PRICING=false` restores live targets without changing stored orders.
 
 ## Artwork
 

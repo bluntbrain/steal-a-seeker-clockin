@@ -16,3 +16,21 @@ test('reward rebalance preserves old credits and previously purchased outfits',(
 test('local store atomically debits once and equips; insufficient funds are unchanged',()=>{const s=emptyInventory();assert.throws(()=>redeemCredits(s,'night-courier'),/Not enough/);assert.equal(s.balance,0);const funded={...s,balance:500},bought=redeemCredits(funded,'night-courier');assert.equal(bought.balance,200);assert.equal(bought.equipment.outfit,'night-courier');assert.strictEqual(redeemCredits(bought,'night-courier'),bought);assert.throws(()=>redeemCredits(bought,'signal-runner'));});
 test('live pass has two distinct choices and testing reduces both',()=>{const now=Date.now(),rates={SKR:'0.02',SOL:'100',at:now};const live=networkConfig({}),testing=networkConfig({TEST_PRICING:'true'});assert.equal(live.passSkr,500);assert.equal(testing.passSkr,1);assert.equal(priceProduct('campaign','SKR',rates,6,now,1,1000,{},live.passSkr).amount,'500000000');assert.equal(priceProduct('campaign','SOL',rates,6,now,1,1000,{},live.passSkr).amount,'100000000');assert.equal(priceProduct('campaign','SKR',rates,6,now,100,10,{},testing.passSkr).amount,'1000000');});
 test('credit pack quote uses dollars, never its credited quantity or cosmetic token price',()=>{const now=Date.now(),rates={SKR:'0.02',SOL:'100',at:now};for(const p of CREDIT_PACKS){const sol=priceProduct(p.id,'SOL',rates,6,now);assert.equal(sol.usdCents,p.usdCents);const testPrice=priceProduct(p.id,'SKR',rates,6,now,100);assert(BigInt(testPrice.amount)<BigInt(priceProduct(p.id,'SKR',rates,6,now).amount));}});
+
+test('backend price profiles validate overrides and keep test and live prices separate',()=>{
+ const env={CREDIT_PACK_USD_CENTS_JSON:'{"credits-500":225}',TEST_CREDIT_PACK_USD_CENTS_JSON:'{"credits-500":2.5}',STORE_CREDIT_PRICES_JSON:'{"night-courier":350}'};
+ const live=networkConfig(env),cheap=networkConfig({...env,TEST_PRICING:'true'}),now=Date.now(),rates={SKR:'0.02',SOL:'100',at:now};
+ assert.equal(live.creditPackPrices['credits-500'],225);assert.equal(cheap.creditPackPrices['credits-500'],2.5);assert.equal(cheap.storeCreditPrices['night-courier'],350);
+ assert.equal(priceProduct('credits-500','SOL',rates,6,now,1,1000,{},500,live.creditPackPrices).amount,'22500000');
+ assert.equal(priceProduct('credits-500','SOL',rates,6,now,100,10,{},1,cheap.creditPackPrices).amount,'300000');
+ for(const bad of ['[]','{"unknown":20}','{"credits-500":0}','{"credits-500":-1}','{"credits-500":"20"}','{"credits-500":1.5}'])assert.throws(()=>networkConfig({CREDIT_PACK_USD_CENTS_JSON:bad}),/Invalid pricing/);
+ for(const bad of ['{"night-courier":0}','{"night-courier":2.5}','{"profile-frame":200}','{"campaign":300}'])assert.throws(()=>networkConfig({STORE_CREDIT_PRICES_JSON:bad}),/Invalid pricing/);
+ assert.throws(()=>networkConfig({TEST_CREDIT_PACK_USD_CENTS_JSON:'{"credits-500":0.001}'}),/Invalid pricing/);
+ // Legacy divisors still use exact rational arithmetic for packs without an override.
+ assert(BigInt(priceProduct('credits-500','SOL',rates,6,now,3).amount)>0n);
+});
+test('guest redemption uses the displayed configured price and remains idempotent',()=>{
+ const funded={...emptyInventory(),balance:500};const bought=redeemCredits(funded,'night-courier',350);
+ assert.equal(bought.balance,150);assert.strictEqual(redeemCredits(bought,'night-courier',400),bought);
+ for(const p of [0,-1,1.5,NaN])assert.throws(()=>redeemCredits(funded,'night-courier',p),/Invalid store price/);
+});

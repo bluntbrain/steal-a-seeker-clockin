@@ -1,0 +1,23 @@
+{
+  "package": "com.bluntbrain.stealaseeker",
+  "version": "0.3.3",
+  "versionCode": 6,
+  "apkSha256": "6380e0029c68be7872c37bdde6e22c53a22f5eb2f7b813f9df550906e24a10a2",
+  "appMint": "39YPwP5Um3Bs9sNXTfthGesCPGMqXxjytc3hEkwA5RYZ",
+  "releaseSubmitted": false,
+  "changes": "Backend configurable pass, credit-pack and credit store prices",
+  "tests": {
+    "pricingUnit": 24,
+    "backend": 73,
+    "typecheck": true,
+    "rules": true
+  },
+  "deploymentId": "c7a96dd6-d567-4929-a6bd-bc263e7ee1bb",
+  "deploymentStatus": "SUCCESS",
+  "testPricing": true,
+  "deviceInstall": "Success: Realme RMX5033",
+  "deviceLaunch": "Status: ok",
+  "startupErrorLog": "",
+  "deviceVisualCheck": "Not verified; phone unlock pending",
+  "liveApiVerified": true
+}

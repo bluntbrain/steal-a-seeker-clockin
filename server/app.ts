@@ -1,5 +1,5 @@
 import {registerSite} from './site';
-import {RETIRED_ITEMS} from '../shared/store';
+import {STORE_ITEMS,RETIRED_ITEMS} from '../shared/store';
 import {CampaignService} from './campaign-service';
 import {CAMPAIGN_IDS,type MissionId} from '../src/game/level';
 import Fastify from 'fastify';
@@ -28,11 +28,11 @@ export async function createApp(service:CommerceService,ranked=new RankedService
  app.get('/health',async()=>{await service.pool.query('SELECT 1');return {ok:true,cluster:service.config.cluster??'solana:devnet'};});
  app.get('/pricing/:sku',async req=>service.pricing(z.object({sku}).parse(req.params).sku));
  app.post('/orders/:id/cancel',async req=>service.cancelQuote((await account(req.headers.authorization)).wallet,z.object({id:uuid}).parse(req.params).id));
- app.get('/catalog',async()=>({cluster:service.config.cluster??'solana:devnet',disclaimer:service.config.cluster==='solana:mainnet'?'Mainnet test: payments use real money.':'Test tokens have no monetary value.',...(service.config.usdPricing?{paymentCurrencies:['SKR','SOL'],products:PRODUCTS.filter(p=>!RETIRED_ITEMS.includes(p.id)).map(({price,...product})=>({...product,...(product.id==='campaign'?{usdCents:service.config.campaignUsdCents??CAMPAIGN_USD_CENTS/(service.config.priceDivisor??1),skrPrice:service.config.passSkr}:product.kind==='credits'?{credits:CREDIT_PACKS.find(p=>p.id===product.id)!.credits,usdCents:CREDIT_PACKS.find(p=>p.id===product.id)!.usdCents/(service.config.priceDivisor??1)}:{skrPrice:service.config.shopPrices?.[product.id]??price/(service.config.priceDivisor??1)})}))}:{currency:'TEST SKR',products:PRODUCTS.filter(p=>!RETIRED_ITEMS.includes(p.id))})}));
+ app.get('/catalog',async()=>({testPricing:service.config.testPricing??false,creditStore:STORE_ITEMS.filter(i=>!RETIRED_ITEMS.includes(i.id)).map(i=>({...i,price:service.config.storeCreditPrices?.[i.id]??i.price})),cluster:service.config.cluster??'solana:devnet',disclaimer:service.config.cluster==='solana:mainnet'?(service.config.testPricing?'Mainnet test: payments use real money.':'Mainnet: payments use real money.'):'Test tokens have no monetary value.',...(service.config.usdPricing?{paymentCurrencies:['SKR','SOL'],products:PRODUCTS.filter(p=>!RETIRED_ITEMS.includes(p.id)).map(({price,...product})=>({...product,...(product.id==='campaign'?{usdCents:service.config.campaignUsdCents??CAMPAIGN_USD_CENTS/(service.config.priceDivisor??1),skrPrice:service.config.passSkr}:product.kind==='credits'?{credits:CREDIT_PACKS.find(p=>p.id===product.id)!.credits,usdCents:service.config.creditPackPrices?.[product.id]??CREDIT_PACKS.find(p=>p.id===product.id)!.usdCents/(service.config.priceDivisor??1)}:{skrPrice:service.config.shopPrices?.[product.id]??price/(service.config.priceDivisor??1)})}))}:{currency:'TEST SKR',products:PRODUCTS.filter(p=>!RETIRED_ITEMS.includes(p.id))})}));
  app.post('/auth/challenge',async req=>service.challenge(z.object({wallet}).strict().parse(req.body).wallet));
  app.post('/auth/verify',async req=>service.signIn(z.object({id:uuid,wallet,signedMessage:bytes,signature:bytes}).strict().parse(req.body)));
  app.post('/auth/logout',async req=>{const a=await account(req.headers.authorization);await service.logout(a.token);return {ok:true};});
- app.post('/credits/redeem',async req=>service.redeem((await account(req.headers.authorization)).wallet,z.object({sku:z.string().max(40)}).strict().parse(req.body).sku));
+ app.post('/credits/redeem',async req=>{const b=z.object({sku:z.string().max(40),expectedPrice:z.number().int().positive().max(100000).optional()}).strict().parse(req.body);return service.redeem((await account(req.headers.authorization)).wallet,b.sku,b.expectedPrice);});
  app.get('/me',async req=>service.me((await account(req.headers.authorization)).wallet));
  app.get('/returns/:id',async req=>returnStatus(service.pool,(await account(req.headers.authorization)).wallet,z.object({id:uuid}).parse(req.params).id));
  app.get('/orders',async req=>service.orders((await account(req.headers.authorization)).wallet));

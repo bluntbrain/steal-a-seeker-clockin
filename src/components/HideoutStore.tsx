@@ -1,7 +1,7 @@
 import React,{useEffect,useRef,useState} from 'react';
 import {Animated,Image,Pressable,StyleSheet,Text,View,useWindowDimensions} from 'react-native';
 import {useEconomy} from '../commerce/EconomyProvider';
-import {STORE_ITEMS,creditReward,type StoreItemId} from '../../shared/store';
+import {creditReward,type StoreItemId} from '../../shared/store';
 import {COSTUMES,costumeFor,type CostumeId} from '../../shared/costumes';
 import {CAMPAIGN_IDS} from '../game/level';
 import {PHONE_EDITIONS} from '../game/collection';
@@ -20,7 +20,7 @@ type Props={progress:Progress;onInspect:(i:number)=>void;ghostEarned:boolean;onE
 export default function HideoutStore({progress,onInspect,ghostEarned,onEquipGhost,onOpenWeekly}:Props){
  const e=useEconomy(),{height}=useWindowDimensions(),compact=height<720;
  const [section,setSection]=useState<'outfits'|'effects'|'collection'>('outfits'),[selected,setSelected]=useState<CostumeId>(()=>costumeFor(e.equipment.outfit).id),[busy,setBusy]=useState(false),[message,setMessage]=useState('');
- const look=costumeFor(selected),product=STORE_ITEMS.find(p=>p.id===selected),trail=STORE_ITEMS.find(p=>p.id==='escape-trail')!;
+ const look=costumeFor(selected),product=e.items.find(p=>p.id===selected),trail=e.items.find(p=>p.id==='escape-trail')!;
  const equippedLook=costumeFor(e.equipment.outfit),isEffect=section==='effects';
  const equipped=isEffect?e.equipment.trail==='escape-trail':equippedLook.id===look.id;
  const owned=isEffect?e.owned.includes('escape-trail'):look.unlock==='free'||(look.unlock==='weekly'?ghostEarned:e.owned.includes(look.id));
@@ -42,7 +42,7 @@ export default function HideoutStore({progress,onInspect,ghostEarned,onEquipGhos
  <View style={s.stageLines}/>{isEffect?<TrailPreview outfit={e.equipment.outfit}/>:<Image source={costumePortrait(look.id)} resizeMode="contain" style={{position:'absolute',width:'100%',height:'95%',bottom:3}} accessibilityLabel={`${look.name} outfit preview`}/>}
  <View style={s.stageTop}><Text style={s.eyebrow}>{isEffect?'CARRY THE PHONE TO ACTIVATE':equipped?'EQUIPPED':'PREVIEW'}</Text>{!isEffect&&<Text style={s.eyebrow}>SAME STATS</Text>}</View>
  </View>
- {section==='outfits'&&<View style={{flexDirection:'row',flexWrap:'wrap',gap:6}}>{COSTUMES.map(c=>{const p=STORE_ITEMS.find(i=>i.id===c.id),has=c.unlock==='free'||(c.unlock==='weekly'?ghostEarned:e.owned.includes(c.id)),active=equippedLook.id===c.id;return <Pressable key={c.id} accessibilityRole="button" accessibilityState={{selected:selected===c.id}} accessibilityLabel={`Preview ${c.name}${active?', equipped':has?', owned':c.unlock==='weekly'?', earn weekly':`, ${p!.price} credits`}`} onPress={()=>{setSelected(c.id);setMessage('');}} style={[s.outfit,{borderColor:selected===c.id?'#CFE6E4':'#30463E',backgroundColor:selected===c.id?'#233D34':'#131E1B'}]}><Image source={costumePortrait(c.id)} resizeMode="contain" style={{height:compact?57:76,width:'100%'}}/><Text numberOfLines={1} style={s.itemName}>{c.name}</Text><Text style={s.price}>{active?'✓ Equipped':has?c.unlock==='free'?'Free':'Owned':c.unlock==='weekly'?'Earn weekly':`◈ ${p!.price}`}</Text></Pressable>;})}</View>}
+ {section==='outfits'&&<View style={{flexDirection:'row',flexWrap:'wrap',gap:6}}>{COSTUMES.map(c=>{const p=e.items.find(i=>i.id===c.id),has=c.unlock==='free'||(c.unlock==='weekly'?ghostEarned:e.owned.includes(c.id)),active=equippedLook.id===c.id;return <Pressable key={c.id} accessibilityRole="button" accessibilityState={{selected:selected===c.id}} accessibilityLabel={`Preview ${c.name}${active?', equipped':has?', owned':c.unlock==='weekly'?', earn weekly':`, ${p!.price} credits`}`} onPress={()=>{setSelected(c.id);setMessage('');}} style={[s.outfit,{borderColor:selected===c.id?'#CFE6E4':'#30463E',backgroundColor:selected===c.id?'#233D34':'#131E1B'}]}><Image source={costumePortrait(c.id)} resizeMode="contain" style={{height:compact?57:76,width:'100%'}}/><Text numberOfLines={1} style={s.itemName}>{c.name}</Text><Text style={s.price}>{active?'✓ Equipped':has?c.unlock==='free'?'Free':'Owned':c.unlock==='weekly'?'Earn weekly':`◈ ${p!.price}`}</Text></Pressable>;})}</View>}
  <View style={{gap:5}}><Text style={s.title}>{title}</Text><Text style={s.note}>{isEffect?trail.description:lockedWeekly?'Clear all three scored weekly missions to earn this outfit.':look.description}</Text>
  {!owned&&!lockedWeekly&&<><View style={{flexDirection:'row',justifyContent:'space-between'}}><Text style={s.note}>◈ {Math.min(e.balance,price)} / {price}</Text><Text style={s.note}>{creditReward(1)}–{creditReward(3)} per first clear</Text></View><View accessibilityRole="progressbar" accessibilityLabel={`Credits towards ${title}`} accessibilityValue={{min:0,max:price,now:Math.min(e.balance,price)}} style={{height:4,borderRadius:2,backgroundColor:'#263D36',overflow:'hidden'}}><View style={{height:4,width:`${Math.min(100,e.balance/price*100)}%`,backgroundColor:'#BCE6D7'}}/></View></>}
  </View>
