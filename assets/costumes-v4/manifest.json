@@ -62,7 +62,11 @@
     "frames": 8,
     "frameWidth": 256,
     "frameHeight": 384,
-    "sha256": "25a440c712fbc35d11a28b02c6c6ddf1d7e1b2753436f5c93bf9e469f162dca1"
+    "sha256": "a52e7518a1cf1d54303b4c4f6380feafb9bc08ca5d5ec993fd0b9e2a8c0a4c5e",
+    "mirroredSourceFrames": [
+      3,
+      7
+    ]
   },
   {
     "name": "ghost-signal",

@@ -49,3 +49,7 @@ The signed Mainnet APK built successfully: `releases/steal-a-seeker-mainnet.apk`
 The initial v4 render mapping incorrectly assumed north=0. The simulation actually uses south=0, west=1, north=2, east=3 and starts at north=2. Corrected the atlas mapping so spawn and upward motion show the backpack, downward motion shows the face, and left/right keep their corresponding profiles. No simulation or scoring rules changed.
 
 Added a regression that checks every campaign spawn and actual movement in all four directions with both tap and stick controls; 25 focused costume, combat and simulation tests pass. Browser QA confirms upward/back and downward/front poses. Refreshed web export and signed Android APK (current SHA256: `0b7ea5a4f1aad6a7205be61b6bf9bd18365a6cf23b4fce11cab51ad1f86552b2`).
+
+### Follow-up: Archive Keeper side poses
+
+The movement-index test above did not validate the artwork. A pixel audit found that Archive Keeper's right idle/walking frames (3 and 7) both faced left. Corrected these two frames and the source preparation recipe. Audited all 24 side poses across six outfits, with deliberately reversed-frame checks to verify that the validator catches this failure. The other five atlases, portraits, front/back poses, movement logic and replay rules are unchanged. The costume tests now also verify that each atlas matches its validated manifest hash.

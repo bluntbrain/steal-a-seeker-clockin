@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
+import {createHash} from 'node:crypto';
 import {COSTUMES,costumeFor,costumeFrame} from '../shared/costumes';
 import {STORE_ITEMS,emptyInventory,redeemCredits,isStoreItemForSale} from '../shared/store';
 import {readAccount} from '../src/commerce/account-model';
@@ -14,13 +15,13 @@ import {initialState,idleInput,step} from '../src/game/simulation';
 
 test('all six costumes have distinct portraits, eight poses and stable old inventory IDs',()=>{
  assert.equal(COSTUMES.length,6);assert.equal(manifest.length,6);assert.equal(frames.length,8);
- for(const c of COSTUMES){assert(manifest.some(m=>m.name===c.asset&&m.frames===8));assert(readFileSync(`assets/costumes-v4/${c.asset}.png`).length>10000);}
+ for(const c of COSTUMES){const entry=manifest.find(m=>m.name===c.asset);assert(entry&&entry.frames===8);assert(readFileSync(`assets/costumes-v4/${c.asset}.png`).length>10000);assert.equal(createHash('sha256').update(readFileSync(`assets/costumes-v4/${c.asset}-atlas.png`)).digest('hex'),entry.sha256,`${c.asset} matches the validated atlas`);}
  assert.equal(costumeFor('signal-runner').name,'Frost Runner');assert.equal(costumeFor('ghost-courier').name,'Ghost Signal');
  assert.equal(costumeFor('unknown').id,'default');
  const base={week:'2026-09-14',rank:null,points:0,cleared:0,ticks:0,domain:null,wallet:'test',final:false,local:true,earned:false};
  assert.equal(new Set(COSTUMES.map(c=>cardPortrait({...base,outfit:c.id}))).size,6);
 });
-test('courier art faces its movement direction and every walking frame stays inside its atlas',()=>{
+test('courier direction indices and walking frame bounds match the atlas layout',()=>{
  assert.deepEqual([0,1,2,3].map(i=>costumeFrame(i,false)),[0,1,2,3]);
  assert.deepEqual([0,1,2,3].map(i=>costumeFrame(i,true)),[4,5,6,7]);
  for(const f of frames){assert(f.x>=0&&f.y>=0&&f.x+f.width<=1024&&f.y+f.height<=768);}

@@ -3,11 +3,17 @@ from pathlib import Path
 import base64, hashlib, json
 import numpy as np
 from PIL import Image, ImageDraw
+from importlib.util import spec_from_file_location, module_from_spec
 
 ROOT=Path(__file__).resolve().parents[1]
 SOURCE=ROOT/'output/imagegen/costumes-v4'
 DEST=ROOT/'assets/costumes-v4'
 NAMES=['default','frost-runner','night-courier','circuit-scout','archive-keeper','ghost-signal']
+# GPT drew both Archive Keeper side columns facing left. Correct the source
+# cells before normalization; do not swap global direction indices.
+MIRRORED_SOURCE_FRAMES={'archive-keeper':(3,7)}
+spec=spec_from_file_location('costume_directions',ROOT/'scripts/check-costume-directions.py')
+directions=module_from_spec(spec);spec.loader.exec_module(directions)
 DEST.mkdir(exist_ok=True)
 manifest=[]; embedded={}
 for name in NAMES:
@@ -29,6 +35,8 @@ for name in NAMES:
     cells=[]; w,h=im.size
     for i in range(8):
         cell=im.crop((i%4*w//4,i//4*h//2,(i%4+1)*w//4,(i//4+1)*h//2))
+        if i in MIRRORED_SOURCE_FRAMES.get(name,()):
+            cell=cell.transpose(Image.Transpose.FLIP_LEFT_RIGHT)
         bounds=cell.getchannel('A').point(lambda x:255 if x>35 else 0).getbbox()
         if not bounds: raise SystemExit(f'Empty {name} frame {i}')
         if bounds[0]<3 or bounds[1]<3 or bounds[2]>cell.width-3 or bounds[3]>cell.height-3:
@@ -39,6 +47,7 @@ for name in NAMES:
     for i,cell in enumerate(cells):
         sprite=cell.resize((round(cell.width*scale),round(cell.height*scale)),Image.Resampling.LANCZOS)
         atlas.alpha_composite(sprite,(i%4*256+(256-sprite.width)//2,i//4*384+375-sprite.height))
+    directions.check_directions(atlas,name)
     atlas.save(DEST/(name+'-atlas.png'),optimize=True)
     front=cells[0]; scale=min(460/front.width,708/front.height)
     front=front.resize((round(front.width*scale),round(front.height*scale)),Image.Resampling.LANCZOS)
@@ -50,6 +59,8 @@ for name in NAMES:
         reference=str((SOURCE/(name+'-reference.png')).relative_to(ROOT)),prompt=str((SOURCE/(name+'.prompt.txt')).relative_to(ROOT)),
         atlas=name+'-atlas.png',portrait=name+'.png',frames=8,frameWidth=256,frameHeight=384,
         sha256=hashlib.sha256((DEST/(name+'-atlas.png')).read_bytes()).hexdigest()))
+    if name in MIRRORED_SOURCE_FRAMES:
+        manifest[-1]['mirroredSourceFrames']=list(MIRRORED_SOURCE_FRAMES[name])
     print('Prepared',name)
 if len(manifest)!=6: raise SystemExit('All six generations are required')
 (DEST/'portraits.embedded.json').write_text(json.dumps(embedded,separators=(',',':'))+'\n')

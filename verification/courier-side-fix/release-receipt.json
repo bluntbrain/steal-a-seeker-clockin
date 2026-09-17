@@ -1,0 +1,9 @@
+{
+  "apkSha256": "8c5b19ac1de58140a11a11ceff9f0e9c5ccac1e4b157eefeb15eb9218817c37e",
+  "apkSpriteResource": "res/V7.png",
+  "packagedPixelsMatch": true,
+  "auditedSidePoses": 24,
+  "negativeControlsDetected": 6,
+  "focusedCostumeTests": 4,
+  "physicalDeviceTested": false
+}

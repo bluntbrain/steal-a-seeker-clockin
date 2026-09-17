@@ -1,0 +1,134 @@
+{
+  "archive-keeper-atlas": [
+    {
+      "frame": 1,
+      "direction": "left",
+      "visorX": 80.2
+    },
+    {
+      "frame": 3,
+      "direction": "right",
+      "visorX": 171.4
+    },
+    {
+      "frame": 5,
+      "direction": "left",
+      "visorX": 91.0
+    },
+    {
+      "frame": 7,
+      "direction": "right",
+      "visorX": 160.5
+    }
+  ],
+  "circuit-scout-atlas": [
+    {
+      "frame": 1,
+      "direction": "left",
+      "visorX": 103.1
+    },
+    {
+      "frame": 3,
+      "direction": "right",
+      "visorX": 151.3
+    },
+    {
+      "frame": 5,
+      "direction": "left",
+      "visorX": 110.1
+    },
+    {
+      "frame": 7,
+      "direction": "right",
+      "visorX": 144.7
+    }
+  ],
+  "default-atlas": [
+    {
+      "frame": 1,
+      "direction": "left",
+      "visorX": 97.0
+    },
+    {
+      "frame": 3,
+      "direction": "right",
+      "visorX": 156.8
+    },
+    {
+      "frame": 5,
+      "direction": "left",
+      "visorX": 112.7
+    },
+    {
+      "frame": 7,
+      "direction": "right",
+      "visorX": 141.7
+    }
+  ],
+  "frost-runner-atlas": [
+    {
+      "frame": 1,
+      "direction": "left",
+      "visorX": 110.2
+    },
+    {
+      "frame": 3,
+      "direction": "right",
+      "visorX": 139.3
+    },
+    {
+      "frame": 5,
+      "direction": "left",
+      "visorX": 123.7
+    },
+    {
+      "frame": 7,
+      "direction": "right",
+      "visorX": 131.8
+    }
+  ],
+  "ghost-signal-atlas": [
+    {
+      "frame": 1,
+      "direction": "left",
+      "visorX": 81.9
+    },
+    {
+      "frame": 3,
+      "direction": "right",
+      "visorX": 164.8
+    },
+    {
+      "frame": 5,
+      "direction": "left",
+      "visorX": 79.4
+    },
+    {
+      "frame": 7,
+      "direction": "right",
+      "visorX": 164.5
+    }
+  ],
+  "night-courier-atlas": [
+    {
+      "frame": 1,
+      "direction": "left",
+      "visorX": 90.6
+    },
+    {
+      "frame": 3,
+      "direction": "right",
+      "visorX": 169.7
+    },
+    {
+      "frame": 5,
+      "direction": "left",
+      "visorX": 104.2
+    },
+    {
+      "frame": 7,
+      "direction": "right",
+      "visorX": 153.8
+    }
+  ]
+}

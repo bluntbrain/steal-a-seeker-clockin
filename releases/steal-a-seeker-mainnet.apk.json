@@ -6,7 +6,6 @@
     "identityUri": "https://stealaseeker.bluntbrain.com"
   },
   "sourceFiles": {
-    "src/components/routeGeometry.ts": "e8c1494065686103a64032e3a65b5e9a57b3bb245ba0086febc215f4a9bcd688",
     "App.tsx": "c2df425b34c9b025ce47a8e82a2511d8f7164f4d96a957730fa4b50d3522dfec",
     "android/app/build.gradle": "a4239ad2d09e9a18c29feb16596e764546fcd5f3fd1e75ee85ba0b2fe6402232",
     "android/app/src/debug/AndroidManifest.xml": "fb1795032c764d975376e1612ab7022058eca2268a45efbe731a47a5d3ac0f60",
@@ -127,6 +126,7 @@
     "src/components/ResultSheet.tsx": "8e5a9f32c3583fb3e8a10a24312e0ef1cf65c92d523707b241623fc18ae95b85",
     "src/components/costumeAssets.ts": "f0a1d1335115eb33d4fc0c801e508a48da4f8a7c80e8c6548fb0178df9cc82f2",
     "src/components/phoneRotation.ts": "ab9b9f465f8a238d917618765b8665b9f36a9f5934ba9d0cc38f793a6151c6b5",
+    "src/components/routeGeometry.ts": "e8c1494065686103a64032e3a65b5e9a57b3bb245ba0086febc215f4a9bcd688",
     "src/game/art.ts": "67d1075981726c912a9fa47dccde49e5ed96fadd7e12f8930a38f9f940f950d4",
     "src/game/collection.ts": "37bbb72e2836e16958c4851d8ef12cd64c640cd660a3a40de656371004106fe0",
     "src/game/combat-levels.ts": "f986c6d8d9829af9765d0c2cfd9eabbab5c77017a982db031672e8a50436c19b",
@@ -213,31 +213,25 @@
     "src/wallet/signInFallback.ts": "d483b760a4393f01fba79cd0db0735489303814c49bb08fe3a4545d095fe2944",
     "src/wallet/useLoggedWallet.ts": "fb6969739c51a90ef2a4a5780d709c1a2e7c1914deb8274bf2375cbd28f3fa26"
   },
-  "sha256": "62e7ebdb4b4541a532974f248b8d0b3c498fe2f271f10421d0da75504b67f947",
-  "bytes": 122920251,
-  "builtAt": "2026-09-17T09:59:44.968Z",
-  "head": "f8f869e4ea0a9afc2ffd24608c0149480a87a0c7",
+  "sha256": "8c5b19ac1de58140a11a11ceff9f0e9c5ccac1e4b157eefeb15eb9218817c37e",
+  "bytes": 122921443,
+  "builtAt": "2026-09-17T10:17:52.884Z",
+  "head": "4863af2605ad09ce916fc0cc65bb9314c5f3cc0c",
   "workingTree": [
-    "M docs/FREE-CAMPAIGN-STORE-V3.md",
+    "M assets/costumes-v4/README.md",
+    " M assets/costumes-v4/archive-keeper-atlas.png",
+    " M assets/costumes-v4/manifest.json",
     " M docs/HIDEOUT-AUDIT-2026-09-17.md",
-    " M releases/steal-a-seeker-mainnet.apk.json",
-    " M server/README.md",
-    " M server/commerce.test.ts",
-    " M shared/store.ts",
-    " M src/commerce/CreditStore.tsx",
-    " M src/components/CombatLayer.tsx",
-    " M src/components/HideoutStore.tsx",
-    " M tests/store.test.ts",
+    " M scripts/prepare-costumes.py",
+    " M tests/costumes.test.ts",
     "?? assets/icon-concepts/01-courier.png",
     "?? assets/icon-concepts/02-snatch.png",
     "?? assets/icon-concepts/03-seeker-s.png",
     "?? assets/icon-concepts/04-spotlight.png",
     "?? assets/icon-concepts/README.md",
-    "?? docs/CREDIT-PROGRESSION-AND-ROUTES.md",
     "?? docs/SEEKER-AUDIENCE-WEEKLY-LEAGUE.md",
-    "?? src/components/routeGeometry.ts",
-    "?? tests/route-geometry.test.ts",
-    "?? verification/credit-route-ui/"
+    "?? scripts/check-costume-directions.py",
+    "?? verification/courier-side-fix/"
   ],
   "architectures": [
     "arm64-v8a"
