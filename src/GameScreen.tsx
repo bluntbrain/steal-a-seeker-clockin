@@ -205,7 +205,7 @@ export function Game({rankTicket,paidPlay,dailyReturn,paidReturn,onRankStart,onR
     <Pressable accessibilityRole="button" accessibilityLabel={paused?'Resume game':'Pause game'} onPress={()=>pause(!paused)} style={s.iconButton}><Text style={s.iconText}>{paused?'▷':'Ⅱ'}</Text></Pressable>
    </View>
    <GestureDetector gesture={combatMode?tapBoard:Gesture.Tap().enabled(false)}><View testID="game-board" style={[s.board,{width:size+2,height:boardHeight+2}]}>
-    <GameCanvas size={size} input={input} game={game} alpha={alpha} clock={clock} level={level} appearance={{...(timedRun?{}:economy.equipment),reducedEffects:settings.reducedEffects}}/>
+    <GameCanvas size={size} input={input} game={game} alpha={alpha} clock={clock} level={level} appearance={{...economy.equipment,reducedEffects:settings.reducedEffects}}/>
     {combatMode&&level.patrols.map((g,i)=>g.reserveAfter!==undefined&&!hud.guards[i]?.spawned?<View pointerEvents="none" key={`reserve-${i}`} style={{position:'absolute',left:g.route[0]!.x*size/12-14,top:g.route[0]!.y*size/12-14,width:28,height:28,borderWidth:2,borderRadius:5,borderColor:alarmOn?'#FFAD71':'#758A87',backgroundColor:'#172826'}}><Text style={{fontSize:10,color:'#FFE7BA',textAlign:'center',lineHeight:24,fontWeight:'800'}}>{alarmOn?Math.max(1,Math.ceil(g.reserveAfter-hud.alarmSeconds)):'+'}</Text></View>:null)}
     <View pointerEvents="none" style={StyleSheet.absoluteFill}><Text style={[s.mapLabel,{top:size/12*(level.exit.y+.23),left:size/12*level.exit.x,width:size/12*level.exit.w,color:'#d6f4e4'}]}>EXIT</Text></View>
 

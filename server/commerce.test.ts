@@ -578,7 +578,7 @@ test('credit redemption is atomic, idempotent, wallet-bound and cannot overspend
  assert.equal((await app.inject({method:'POST',url:'/me/unequip',headers:u.headers,payload:{slot:'access'}})).statusCode,400);
  await assert.rejects(service.redeem(u.wallet,'signal-runner'),/Not enough/);assert.equal((await service.me(u.wallet)).credits,200);
  await assert.rejects(service.redeem(other.wallet,'night-courier'),/Not enough/);await assert.rejects(service.redeem(u.wallet,'campaign'),/Unknown/);
- const races=await Promise.allSettled([service.redeem(u.wallet,'escape-trail'),service.redeem(u.wallet,'profile-frame')]);assert.equal(races.filter(r=>r.status==='fulfilled').length,1);assert((await service.me(u.wallet)).credits!>=0);
+ const races=await Promise.allSettled([service.redeem(u.wallet,'escape-trail'),service.redeem(u.wallet,'signal-runner')]);assert.equal(races.filter(r=>r.status==='fulfilled').length,1);assert((await service.me(u.wallet)).credits!>=0);
 });
 test('free campaign grants verified credits once; forged progress and invalid replays grant none',async()=>{
  const {CampaignService}=await import('./campaign-service'),rules=(await import('../shared/rules-manifest.json')).default;
@@ -587,4 +587,21 @@ test('free campaign grants verified credits once; forged progress and invalid re
  await assert.rejects(campaign.submit(u.wallet,'practice',rules.rulesHash,{version:1,chunks:[{ticks:1,x:0,y:0,buttons:0}]}),/extraction/);
  const replay=fixtureReplay().replay;await Promise.all([campaign.submit(u.wallet,'practice',rules.rulesHash,replay),campaign.submit(u.wallet,'practice',rules.rulesHash,replay)]);
  const balance=(await service.me(u.wallet)).credits!;assert(balance>=100&&balance<=150);await campaign.submit(u.wallet,'practice',rules.rulesHash,replay);assert.equal((await service.me(u.wallet)).credits,balance);assert(!(await service.me(u.wallet)).entitlements.includes('campaign'));
+});
+
+
+test('retired gear cannot be sold; new outfit credits do not alter gameplay entitlements',async()=>{
+ const u=await login();
+ for(const sku of ['profile-frame','rack-theme'] as const){
+  await assert.rejects(service.redeem(u.wallet,sku),/no longer for sale/);
+  await assert.rejects(service.createOrder(u.wallet,sku,randomUUID()),/no longer for sale/);
+ }
+ const products=(await app.inject({method:'GET',url:'/catalog'})).json().products;
+ assert(!products.some((p:any)=>p.id==='profile-frame'||p.id==='rack-theme'));
+ const order=await quote(u,'credits-1500'),sig=b58(randomBytes(64));
+ assert.equal((await service.me(u.wallet)).credits,0,'A quote must not grant credits');
+ transactions.set(sig,paidTx(order,sig));await service.attach(u.wallet,order.id,sig);
+ await service.redeem(u.wallet,'circuit-scout');await service.redeem(u.wallet,'archive-keeper');
+ const account=await service.me(u.wallet);assert.equal(account.credits,400);
+ assert.equal(account.equipment.outfit,'archive-keeper');assert(!account.entitlements.includes('campaign'));
 });

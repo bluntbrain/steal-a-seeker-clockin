@@ -1,7 +1,11 @@
-import background from '../../assets/courier-card-v2/background.embedded.json';
+import portraits from '../../assets/costumes-v4/portraits.embedded.json';
+import {costumeFor} from '../../shared/costumes';
+import background from '../../assets/courier-card-v3/background.embedded.json';
 export const CARD_WIDTH=1080,CARD_HEIGHT=1620,CARD_RATIO=CARD_HEIGHT/CARD_WIDTH;
 export const CARD_BACKGROUND=background.uri;
-export type CourierCardData={week:string;rank:number|null;participants?:number;points:number;cleared:number;ticks:number;domain:string|null;wallet:string;final:boolean;local:boolean;earned:boolean};
+export const CARD_PORTRAIT={x:526,y:350,width:478,height:717};
+export const cardPortrait=(d:CourierCardData)=>portraits[costumeFor(d.outfit).asset];
+export type CourierCardData={week:string;rank:number|null;participants?:number;points:number;cleared:number;ticks:number;domain:string|null;wallet:string;final:boolean;local:boolean;earned:boolean;outfit?:string;frame?:string};
 export type CardText={key:string;text:string;x:number;y:number;width:number;size:number;color:string;weight:'400'|'700'|'900';align?:'left'|'center';spacing?:number};
 const esc=(s:string)=>s.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&apos;'}[c]!));
 const natural=(n:number)=>Number.isFinite(n)?Math.max(0,Math.floor(n)):0;
@@ -27,7 +31,7 @@ export function cardLayout(d:CourierCardData):CardText[]{
  put('rank',rank,70,437,440,Math.max(64,Math.min(180,440/(rank.length*.68))),'#C3EAE1','900');
  put('rank-label',d.local?'NOT A LIVE RANK':placed?'WEEKLY RANK':'NOT YET RANKED',80,657,390,26,'#C0E0D5','700','left',2);
  const participants=natural(d.participants??0);put('participants',d.local?'Local results only':placed&&participants>=d.rank!?`of ${count(participants)} ranked couriers`:placed?'Verified scored runs':'Finish a scored mission',80,706,395,22,'#91ADA3','400');
- put('record',earned?(d.local?'GHOST COURIER · TEST':'GHOST COURIER'):'COURIER RECORD',76,1141,928,29,'#CAE7DE','700','center',4);
+ put('record',earned?(d.local?'GHOST SIGNAL · TEST':'GHOST SIGNAL'):'COURIER RECORD',76,1141,928,29,'#CAE7DE','700','center',4);
  const xs=[76,393,710],width=294,values=[count(d.points),`${cleared} / 3`,cleared?cardTime(d.ticks):'—'],labels=['TOTAL POINTS','MISSIONS CLEARED','TOTAL TIME'];
  values.forEach((v,i)=>{put('stat-'+i,v,xs[i]!,1222,width,Math.min(62,width/(v.length*.62)),'#D6F0E7','900','center');put('label-'+i,labels[i]!,xs[i]!,1300,width,21,'#9EBCB2','700','center',1.5);});
  put('meaning','Best completed run per mission',76,1355,928,21,'#819F94','400','center');
@@ -36,5 +40,5 @@ export function cardLayout(d:CourierCardData):CardText[]{
  put('site','stealaseeker.bluntbrain.com',76,1487,928,21,'#A5C5B9','400','center',2);
  return blocks;
 }
-export function cardDescription(d:CourierCardData){return cardLayout(d).map(b=>b.text).join('. ');}
-export function cardSvg(d:CourierCardData){return `<svg xmlns="http://www.w3.org/2000/svg" width="${CARD_WIDTH}" height="${CARD_HEIGHT}" viewBox="0 0 ${CARD_WIDTH} ${CARD_HEIGHT}"><image href="${CARD_BACKGROUND}" width="${CARD_WIDTH}" height="${CARD_HEIGHT}"/><g font-family="Arial,sans-serif">${cardLayout(d).map(b=>`<text x="${b.align==='center'?b.x+b.width/2:b.x}" y="${b.y}" dominant-baseline="text-before-edge" text-anchor="${b.align==='center'?'middle':'start'}" font-size="${b.size}" font-weight="${b.weight}" letter-spacing="${b.spacing??0}" fill="${b.color}">${esc(b.text)}</text>`).join('')}</g></svg>`;}
+export function cardDescription(d:CourierCardData){return cardLayout(d).map(b=>b.text).join('. ')+'. Outfit: '+costumeFor(d.outfit).name;}
+export function cardSvg(d:CourierCardData){return `<svg xmlns="http://www.w3.org/2000/svg" width="${CARD_WIDTH}" height="${CARD_HEIGHT}" viewBox="0 0 ${CARD_WIDTH} ${CARD_HEIGHT}"><image href="${CARD_BACKGROUND}" width="${CARD_WIDTH}" height="${CARD_HEIGHT}"/><image href="${cardPortrait(d)}" x="${CARD_PORTRAIT.x}" y="${CARD_PORTRAIT.y}" width="${CARD_PORTRAIT.width}" height="${CARD_PORTRAIT.height}"/>${d.frame==='profile-frame'?'<rect x="34" y="34" width="1012" height="1552" rx="28" fill="none" stroke="#CFE6E4" stroke-width="8"/>':''}<g font-family="Arial,sans-serif">${cardLayout(d).map(b=>`<text x="${b.align==='center'?b.x+b.width/2:b.x}" y="${b.y}" dominant-baseline="text-before-edge" text-anchor="${b.align==='center'?'middle':'start'}" font-size="${b.size}" font-weight="${b.weight}" letter-spacing="${b.spacing??0}" fill="${b.color}">${esc(b.text)}</text>`).join('')}</g></svg>`;}

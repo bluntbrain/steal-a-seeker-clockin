@@ -1,5 +1,5 @@
 import React,{memo,useMemo} from 'react';
-import {Canvas,Group,Picture,Image,Atlas,Circle,RoundedRect,Oval,Line,Path,Skia,DashPathEffect,ColorMatrix,useImage,useRSXformBuffer} from '@shopify/react-native-skia';
+import {Canvas,Group,Picture,Image,Atlas,Circle,RoundedRect,Oval,Line,Path,Skia,DashPathEffect,useImage,useRSXformBuffer} from '@shopify/react-native-skia';
 import {useDerivedValue,type SharedValue} from 'react-native-reanimated';
 import {makeWarehouse} from '../game/art';
 import {districtFor,environmentFor} from '../game/environment';
@@ -7,11 +7,12 @@ import {TUNING,SECURITY,type LevelDefinition} from '../game/level';
 import {targetPhone,decoyLanding,type GameState,type Input} from '../game/simulation';
 import {editionIndex} from '../game/collection';
 import phoneAtlas from '../../assets/world-v3/phones.frames.json';
-import frames from '../../assets/courier.frames.json';
+import frames from '../../assets/costumes-v4/frames.json';
+import {costumeAtlas} from './costumeAssets';
+import {costumeFrame} from '../../shared/costumes';
 import GuardLayer from './GuardLayer';
 import CombatLayer from './CombatLayer';
 type Props={size:number;input:SharedValue<Input>;game:SharedValue<GameState>;alpha:SharedValue<number>;clock:SharedValue<number>;level:LevelDefinition;appearance?:{outfit?:string;trail?:string;reducedEffects?:boolean}};
-const cleanAlpha=[1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,1.5,-.5];
 function GateLayer({game,level,index}:Pick<Props,'game'|'level'>&{index:number}){const b=level.gates![index]!.box,color=useDerivedValue(()=>game.value.closedGates[index]?'#edb768':'#99dfc4'),opacity=useDerivedValue(()=>game.value.closedGates[index]?.85:.2);return <RoundedRect x={b.x} y={b.y} width={b.w} height={b.h} r={.04} color={color} opacity={opacity}/>;}
 function DecoyLayer({game,input,reduced}:{game:SharedValue<GameState>;input:SharedValue<Input>;reduced:boolean}){
  const landing=useDerivedValue(()=>decoyLanding(game.value,input.value));
@@ -39,12 +40,11 @@ export default memo(function GameCanvas({size,input,game,alpha,clock,level,appea
  const phoneSprites=useMemo(()=>[phoneFrame],[phoneIndex]);
  const phoneTransforms=useMemo(()=>[Skia.RSXform(phoneScale,0,-phoneFrame.width/2*phoneScale,0)],[phoneIndex]);
  const carryTransforms=useMemo(()=>[Skia.RSXform(.48/phoneFrame.height,0,0,0)],[]);
- const sprite=useImage(require('../../assets/courier.png'));
+ const sprite=useImage(costumeAtlas(appearance.outfit));
  const reduced=!!appearance.reducedEffects;
- const costumeMatrix=useMemo(()=>appearance.outfit==='ghost-courier'?[.7,0,0,0,.06,0,.72,0,0,.02,0,0,1,0,.12,0,0,0,1.5,-.5]:appearance.outfit==='night-courier'?[.38,0,0,0,0,0,.43,0,0,.015,0,0,.49,0,.018,0,0,0,1.5,-.5]:cleanAlpha,[appearance.outfit]);
  const x=useDerivedValue(()=>game.value.px+(game.value.x-game.value.px)*alpha.value);
  const y=useDerivedValue(()=>game.value.py+(game.value.y-game.value.py)*alpha.value);
- const frame=useDerivedValue(()=>{const s=game.value;return s.facing+(Math.hypot(s.vx,s.vy)>.1 && Math.floor(s.walked*3.5)%2===1?4:0);});
+ const frame=useDerivedValue(()=>{const s=game.value;return costumeFrame(s.facing,Math.hypot(s.vx,s.vy)>.1 && Math.floor(s.walked*3.5)%2===1);});
  const sprites=useDerivedValue(()=>[frames[frame.value]!]);
  const transforms=useRSXformBuffer(1,(transform)=>{
   'worklet';const f=frames[frame.value]!;const scale=1.62/f.height;const bob=reduced?0:Math.hypot(game.value.vx,game.value.vy)>.1?Math.abs(Math.sin(game.value.walked*11))*.045:Math.sin(clock.value*2)*.012;transform.set(scale,0,x.value-f.width*scale/2,y.value-f.height*scale+.12-bob);});
@@ -60,8 +60,6 @@ export default memo(function GameCanvas({size,input,game,alpha,clock,level,appea
  const footRadius=useDerivedValue(()=>.3+(1-burst.value)*.8);
  const escapeOpacity=useDerivedValue(()=>!reduced&&appearance.trail==='escape-trail'&&game.value.carrying&&Math.hypot(game.value.vx,game.value.vy)>.1?.48:0);
  const escapeTransform=useDerivedValue(()=>[{translateX:x.value},{translateY:y.value},{rotate:Math.atan2(game.value.vy,game.value.vx)}]);
- const trimTransform=useDerivedValue(()=>[{translateX:x.value},{translateY:y.value-.75}]);
- const trim=appearance.outfit==='signal-runner'?'#FD8F3A':'#CFE6E4';
  const glow=useDerivedValue(()=>reduced?.12:.12+Math.sin(clock.value*2)*.035);
  const extract=useDerivedValue(()=>game.value.extraction/TUNING.extractHold*level.exit.w);
  const pickupWidth=useDerivedValue(()=>game.value.pickup/TUNING.pickupHold*1.1);
@@ -93,8 +91,7 @@ export default memo(function GameCanvas({size,input,game,alpha,clock,level,appea
    <Circle cx={x} cy={y} r={footRadius} color="#CFE6E4" style="stroke" strokeWidth={.055} opacity={burst}/>
 
    <Oval rect={shadow} color="#070c0d" opacity={.7}/>
-   {sprite && <Atlas image={sprite} sprites={sprites} transforms={transforms}><ColorMatrix matrix={costumeMatrix}/></Atlas>}
-   {!!appearance.outfit&&<Group transform={trimTransform}><RoundedRect x={-.15} y={-.03} width={.3} height={.07} r={.02} color={trim}/></Group>}
+   {sprite && <Atlas image={sprite} sprites={sprites} transforms={transforms}/>}
    {!!level.combat&&<CombatLayer game={game} alpha={alpha} input={input}/>}
    <Group transform={carriedTransform} opacity={carry}>
     <Atlas image={phones} sprites={phoneSprites} transforms={carryTransforms}/>

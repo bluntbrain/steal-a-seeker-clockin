@@ -5,16 +5,20 @@ export const CREDIT_PACKS=[
  {id:'credits-3500',name:'Vault stash',credits:3500,usdCents:500},
 ] as const;
 export const STORE_ITEMS=[
- {id:'night-courier',name:'Night Courier',price:300,kind:'outfit',description:'Charcoal hood. Mint seams.'},
- {id:'signal-runner',name:'Signal Runner',price:400,kind:'outfit',description:'Ivory hood. Signal-orange trim.'},
- {id:'escape-trail',name:'Escape trail',price:200,kind:'trail',description:'A mint trail behind your courier.'},
+ {id:'night-courier',name:'Night Courier',price:300,kind:'outfit',description:'Charcoal hood and dark backpack.'},
+ {id:'signal-runner',name:'Frost Runner',price:400,kind:'outfit',description:'Snowflake hood. Mint winter trim.'},
+ {id:'circuit-scout',name:'Circuit Scout',price:500,kind:'outfit',description:'Mint circuit stripes on charcoal.'},
+ {id:'archive-keeper',name:'Archive Keeper',price:600,kind:'outfit',description:'Cream jacket and tan satchel straps.'},
+ {id:'escape-trail',name:'Escape trail',price:200,kind:'trail',description:'Mint light follows you while carrying the phone. No speed boost.'},
  {id:'profile-frame',name:'Courier frame',price:150,kind:'frame',description:'A mint finish for your profile.'},
  {id:'rack-theme',name:'Vault finish',price:250,kind:'rack',description:'A mint-lit finish for your collection.'},
 ] as const;
 export type StoreItemId=typeof STORE_ITEMS[number]['id'];
+export const RETIRED_ITEMS:readonly string[]=['profile-frame','rack-theme'];
+export const isStoreItemForSale=(id:string)=>STORE_ITEMS.some(i=>i.id===id)&&!RETIRED_ITEMS.includes(id);
 export type CreditPackId=typeof CREDIT_PACKS[number]['id'];
 export function creditReward(stars:number){return stars>=1&&stars<=3&&Number.isInteger(stars)?100+(stars-1)*25:0;}
 export type LocalInventory={version:1;balance:number;stars:Record<string,number>;owned:StoreItemId[];equipment:Record<string,string>};
 export const emptyInventory=():LocalInventory=>({version:1,balance:0,stars:{},owned:[],equipment:{}});
 export function earnCredits(s:LocalInventory,mission:string,stars:number):LocalInventory{const old=s.stars[mission]??0,delta=creditReward(stars)-creditReward(old);return delta>0?{...s,balance:s.balance+delta,stars:{...s.stars,[mission]:stars}}:s;}
-export function redeemCredits(s:LocalInventory,id:StoreItemId):LocalInventory{const item=STORE_ITEMS.find(i=>i.id===id);if(!item)throw Error('Unknown item.');if(s.owned.includes(id))return s;if(s.balance<item.price)throw Error('Not enough credits.');return {...s,balance:s.balance-item.price,owned:[...s.owned,id],equipment:{...s.equipment,[item.kind]:id}};}
+export function redeemCredits(s:LocalInventory,id:StoreItemId):LocalInventory{const item=STORE_ITEMS.find(i=>i.id===id);if(!item)throw Error('Unknown item.');if(s.owned.includes(id))return s;if(!isStoreItemForSale(id))throw Error('This item is no longer for sale.');if(s.balance<item.price)throw Error('Not enough credits.');return {...s,balance:s.balance-item.price,owned:[...s.owned,id],equipment:{...s.equipment,[item.kind]:id}};}

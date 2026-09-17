@@ -1,4 +1,4 @@
-import {CREDIT_PACKS,STORE_ITEMS} from '../shared/store';
+import {CREDIT_PACKS,STORE_ITEMS,RETIRED_ITEMS} from '../shared/store';
 import type {SolanaCluster} from '../shared/network';
 import {CoinbasePriceFeed,priceProduct,productPricing,type PriceFeed} from './pricing';
 import type {PaymentCurrency} from '../shared/pricing';
@@ -42,6 +42,7 @@ export class CommerceService {
  async createOrder(wallet:string,sku:ProductId,key:string,currency:PaymentCurrency='SKR'):Promise<Order>{
   if(this.config.cluster==='solana:mainnet'&&!this.config.allowAllWallets&&!this.config.allowlist?.includes(wallet))throw new ServiceError(403,'Wallet not enabled for Mainnet testing.');
   const product=PRODUCTS.find(p=>p.id===sku);if(!product)throw new ServiceError(400,'Unknown product.');
+  if(RETIRED_ITEMS.includes(sku))throw new ServiceError(400,'This item is no longer for sale.');
   if(currency==='SOL'&&!this.config.usdPricing)throw new ServiceError(503,'SOL payments are not enabled.');
   const existing=await this.pool.query('SELECT * FROM orders WHERE wallet=$1 AND idempotency_key=$2',[wallet,key]);if(existing.rowCount){if(existing.rows[0].sku!==sku||(existing.rows[0].currency??'SKR')!==currency)throw new ServiceError(409,'This request key belongs to another product.');return orderFromRow(existing.rows[0]);}
   try{await this.chain.ready();}catch{throw new ServiceError(503,'Payments are not ready. No payment has been requested.');}
@@ -158,6 +159,7 @@ export class CommerceService {
   await transaction(this.pool,async db=>{const row=await db.query('SELECT progress FROM wallets WHERE address=$1 FOR UPDATE',[wallet]);if(!row.rowCount)throw new ServiceError(404,'Account not found.');const next=mergeProgress(row.rows[0].progress,incoming);await db.query('UPDATE wallets SET progress=$2 WHERE address=$1',[wallet,next]);});return this.me(wallet);
  }
  async redeem(wallet:string,sku:string){
+  if(RETIRED_ITEMS.includes(sku))throw new ServiceError(400,'This item is no longer for sale.');
   const item=STORE_ITEMS.find(i=>i.id===sku);if(!item)throw new ServiceError(400,'Unknown store item.');
   await transaction(this.pool,async db=>{const r=await db.query('SELECT credits FROM wallets WHERE address=$1 FOR UPDATE',[wallet]);if(!r.rowCount)throw new ServiceError(404,'Account not found.');const owned=await db.query('SELECT 1 FROM entitlements WHERE wallet=$1 AND sku=$2',[wallet,sku]);if(owned.rowCount)return;if(r.rows[0].credits<item.price)throw new ServiceError(409,'Not enough credits.');const balance=r.rows[0].credits-item.price;await db.query('UPDATE wallets SET credits=$2,equipment=equipment || $3::jsonb WHERE address=$1',[wallet,balance,JSON.stringify({[item.kind]:sku})]);await db.query('INSERT INTO entitlements(wallet,sku) VALUES($1,$2)',[wallet,sku]);await db.query('INSERT INTO credit_ledger(id,wallet,source,delta,balance_after) VALUES($1,$2,$3,$4,$5)',[randomUUID(),wallet,`redeem:${sku}`,-item.price,balance]);});return this.me(wallet);
  }

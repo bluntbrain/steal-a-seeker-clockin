@@ -10,7 +10,7 @@ import WalletPanel from '../wallet/WalletPanel';
 import type {ProductId} from '../../shared/commerce';
 import {changePlaytest} from '../playtest/store';
 type EquipmentSlot='outfit'|'trail'|'frame'|'rack';
-export type Economy={unequip:(slot:EquipmentSlot)=>Promise<void>;tab:'map'|'leaderboard'|'rack';setTab:(tab:'map'|'leaderboard'|'rack')=>void;balance:number;ready:boolean;local:boolean;owned:readonly string[];equipment:Record<string,string>;notice:string;openCredits:()=>void;openPass:()=>void;redeem:(sku:StoreItemId)=>Promise<void>;equip:(sku:StoreItemId)=>Promise<void>;earn:(mission:string,stars:number)=>Promise<number>};
+export type Economy={syncGhost:()=>Promise<void>;unequip:(slot:EquipmentSlot)=>Promise<void>;tab:'map'|'leaderboard'|'rack';setTab:(tab:'map'|'leaderboard'|'rack')=>void;balance:number;ready:boolean;local:boolean;owned:readonly string[];equipment:Record<string,string>;notice:string;openCredits:()=>void;openPass:()=>void;redeem:(sku:StoreItemId)=>Promise<void>;equip:(sku:StoreItemId)=>Promise<void>;earn:(mission:string,stars:number)=>Promise<number>};
 const Context=createContext<Economy|undefined>(undefined);
 export function useEconomy(){const c=useContext(Context);if(!c)throw Error('EconomyProvider missing');return c;}
 export default function EconomyProvider({children}:{children:ReactNode}){
@@ -28,6 +28,6 @@ export default function EconomyProvider({children}:{children:ReactNode}){
  async function earn(mission:string,stars:number){if(!local||!ready||!CAMPAIGN_IDS.includes(mission as any))return 0;return mutate(s=>earnCredits(s,mission,stars));}
  // The native wallet can change while checkout is open. The checkout itself
  // reconciles the wallet-bound order; a browser purchase is explicitly a demo.
- const value:Economy={tab,setTab,balance:local?saved.balance:account.account?.credits??0,ready:local?ready:!!account.account,local,owned,equipment,notice,redeem,equip,unequip,earn,openCredits:()=>setCreditsOpen(true),openPass:()=>setCheckout('campaign')};
- return <Context.Provider value={value}>{children}<CreditStore visible={creditsOpen} onClose={()=>setCreditsOpen(false)} onBuy={sku=>setCheckout(sku)}/>{checkout&&<WalletPanel key={checkout} visible checkout sku={checkout} fullScreen onClose={()=>setCheckout(null)} onDemoComplete={async credits=>{if(credits)await mutate(s=>({...s,balance:s.balance+credits}));else changePlaytest(s=>({...s,owned:[...new Set([...s.owned,'campaign' as const])]}));}}/>}</Context.Provider>;
+ const value:Economy={syncGhost:async()=>{if(account.preview)await mutate(s=>({...s,equipment:{...s.equipment,outfit:'ghost-courier'}}));},tab,setTab,balance:local?saved.balance:account.account?.credits??0,ready:local?ready:!!account.account,local,owned,equipment,notice,redeem,equip,unequip,earn,openCredits:()=>setCreditsOpen(true),openPass:()=>setCheckout('campaign')};
+ return <Context.Provider value={value}>{children}<CreditStore visible={creditsOpen} onClose={()=>setCreditsOpen(false)} onBuy={sku=>setCheckout(sku)}/>{checkout&&<WalletPanel key={checkout} visible checkout sku={checkout} fullScreen onClose={()=>setCheckout(null)} onDemoComplete={async credits=>{if(!account.preview)throw Error('Demo top-ups are unavailable in the Android app.');if(credits)await mutate(s=>({...s,balance:s.balance+credits}));else changePlaytest(s=>({...s,owned:[...new Set([...s.owned,'campaign' as const])]}));}}/>}</Context.Provider>;
 }
