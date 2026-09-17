@@ -14,3 +14,9 @@ run('./gradlew',[':app:cleanCreateBundleReleaseJsAndAssets',':app:assembleReleas
 fs.mkdirSync('releases',{recursive:true});const out=`releases/steal-a-seeker-${mode}.apk`;fs.copyFileSync('android/app/build/outputs/apk/release/app-release.apk',out);
 const crypto=require('crypto'),sourceFiles=Object.fromEntries(cp.execFileSync('git',['ls-files','--cached','--others','--exclude-standard'],{encoding:'utf8'}).trim().split('\n').filter(f=>/^(src\/|shared\/|android\/app\/src\/|App\.tsx$|index\.ts$|app\.json$|package.*\.json$|babel\.config|metro\.config|android\/app\/build\.gradle$)/.test(f)&&fs.existsSync(f)&&fs.statSync(f).isFile()).map(f=>[f,crypto.createHash('sha256').update(fs.readFileSync(f)).digest('hex')])),sha256=crypto.createHash('sha256').update(fs.readFileSync(out)).digest('hex');
 fs.writeFileSync(out+'.json',JSON.stringify({mode,application:{package:require('../app.json').expo.android.package+(mode==='judge'?'.judge':''),version:require('../app.json').expo.version,versionCode:require('../app.json').expo.android.versionCode},publicConfig:{apiUrl:env.EXPO_PUBLIC_API_URL||null,cluster:mode==='mainnet'?'solana:mainnet':'solana:devnet',identityUri:env.EXPO_PUBLIC_APP_IDENTITY_URI||'https://stealaseeker.bluntbrain.com'},sourceFiles,sha256,bytes:fs.statSync(out).size,builtAt:new Date().toISOString(),head:cp.execFileSync('git',['rev-parse','HEAD'],{encoding:'utf8'}).trim(),workingTree:cp.execFileSync('git',['status','--porcelain'],{encoding:'utf8'}).trim().split('\n'),architectures:['arm64-v8a'],diagnostics:false},null,2));console.log('Built '+out+' SHA256 '+sha256);
+// Keep the stable filename for local tooling and a labelled file for uploads.
+const app=require('../app.json').expo;
+const upload=`releases/steal-a-seeker-${mode}-v${app.version}-code${app.android.versionCode}.apk`;
+fs.copyFileSync(out,upload,fs.constants.COPYFILE_FICLONE);
+fs.copyFileSync(out+'.json',upload+'.json');
+console.log('Upload file: '+upload);

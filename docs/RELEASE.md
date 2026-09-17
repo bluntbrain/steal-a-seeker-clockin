@@ -4,7 +4,7 @@ The current submission plan, build instructions, signing locations, public URLs 
 
 The game uses Mainnet for native purchases. The browser is a local preview and does not transfer funds. Free campaign access does not require a payment. The Game Pass unlocks weekly ranked play; weekly token prizes are not active.
 
-Build on the configured Mac with `npm run build:apk`. The script uses the existing private signing configuration outside Git and outputs `releases/steal-a-seeker-mainnet.apk`. Keep the same package and release key for all updates, and raise versionCode on each submission. A signed build is not evidence of store acceptance or a physical-device payment test.
+Build on the configured Mac with `npm run build:apk`. The script uses the existing private signing configuration outside Git. The upload file includes the network, version and versionCode: `releases/steal-a-seeker-mainnet-v0.3.4-code7.apk` for the current release, with a JSON build receipt alongside it. The stable `releases/steal-a-seeker-mainnet.apk` filename is also refreshed for existing tooling. Both APKs are ignored by Git. Keep the same package and release key for all updates, and raise versionCode on each submission. A signed build is not evidence of store acceptance or a physical-device payment test.
 
 Do not share the Android keystore or its passwords with app reviewers. They need the APK. Keep an encrypted backup of both signing files; neither is the game's treasury wallet.
 
