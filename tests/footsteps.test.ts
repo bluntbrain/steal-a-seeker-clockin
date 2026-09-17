@@ -15,7 +15,7 @@ test('footsteps require travel, alternate feet, and do not replay on other UI re
     if (update.cue !== null) cues.push(update.cue);
     assert.equal(advanceFootsteps(tracker, state, true).cue, null);
   }
-  assert(cues.length >= 12 && cues.length <= 15);
+  assert(cues.length >= 21 && cues.length <= 24,`Expected a brisk run, got ${cues.length} steps in four seconds`);
   assert(cues.every((cue, i) => cue === i % 2));
   const stopped = advanceFootsteps(tracker, snapshot(124, 16.4), true);
   assert.equal(stopped.cue, null); assert.equal(stopped.moving, false);
@@ -46,7 +46,24 @@ test('carrying pace is slower, stationary shooting and blocked travel are silent
     }
     return total;
   };
-  assert(count(4.1) > count(3.15));
+  assert(count(4.1) >= 54 && count(4.1) <= 59,'Normal running should land about 5–6 steps per second');
+  assert(count(3.15) >= 41 && count(3.15) <= 46,'Carrying should slow the cadence with actual speed');
   assert.equal(count(0), 0);
   assert.equal(count(.005), 0);
+});
+
+test('cadence follows distance across HUD refresh rates without catch-up bursts',()=>{
+ const count=(cadence:number)=>{
+  let tracker=freshFootsteps(),cues=0,last=-Infinity;
+  for(let ticks=0;ticks<=300;ticks+=cadence){
+   const update=advanceFootsteps(tracker,snapshot(ticks,ticks/30*4.1),true);tracker=update.tracker;
+   if(update.cue!==null){assert(ticks/30-last>=.12-1e-9);last=ticks/30;cues++;}
+  }
+  return cues;
+ };
+ assert(Math.abs(count(1)-count(4))<=1,'Changing HUD frequency must not halve footsteps');
+ let tracker=advanceFootsteps(freshFootsteps(),snapshot(0,0),true).tracker;
+ const late=advanceFootsteps(tracker,snapshot(12,1.64),true);
+ assert.notEqual(late.cue,null);tracker=late.tracker;
+ assert.equal(advanceFootsteps(tracker,snapshot(12,1.64),true).cue,null,'A repeated late frame cannot replay a burst');
 });

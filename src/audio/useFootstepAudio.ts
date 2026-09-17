@@ -19,7 +19,7 @@ export function useFootstepAudio(state: GameState, enabled: boolean, volume: num
     const result = advanceFootsteps(tracker.current, state, allowed.current);
     tracker.current = result.tracker;
     // Slightly duck under combat and alarms; keep the targeting cue intelligible.
-    const gain = Math.max(0, Math.min(1, volume)) * (state.alert > 0 ? .22 : state.securityAlarm ? .28 : .36);
+    const gain = Math.max(0, Math.min(1, volume)) * (state.alert > 0 ? .28 : state.securityAlarm ? .36 : .46);
     left.volume = gain; right.volume = gain;
     if (!result.moving) {
       epoch.current++;

@@ -57,7 +57,7 @@ def main():
     (ROOT / 'manifest.json').write_text(json.dumps(manifest, indent=2) + '\n')
     # Audition: brisk steps, a stop, then slower steps while carrying the phone.
     preview = [0.] * (RATE * 7)
-    times = [.15 + i * .28 for i in range(9)] + [3.6 + i * .37 for i in range(8)]
+    times = [.15 + i * (.72 / 4.1) for i in range(14)] + [3.6 + i * (.72 / 3.15) for i in range(12)]
     for i, at in enumerate(times):
         start = round(at * RATE)
         for j, v in enumerate(clips[i % 2]): preview[start+j] += v * .65

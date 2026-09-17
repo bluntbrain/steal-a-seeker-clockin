@@ -9,7 +9,9 @@ Original shoe-on-concrete foley generated with ElevenLabs `eleven_text_to_sound_
 
 ## Playback
 
-`src/audio/useFootstepAudio.ts` reads the courier's accumulated travel from HUD snapshots. First movement triggers a step; subsequent steps occur roughly every 1.15 map units, capped at one per 240 ms. Carrying the phone naturally slows the cadence. Two feet alternate. Gunfire/alarms reduce footstep gain.
+`src/audio/useFootstepAudio.ts` reads the courier's accumulated travel from HUD snapshots. First movement triggers a step; subsequent steps occur roughly every 0.72 map units, with a 120 ms guard against bunched cues. Normal running is about 5–6 steps per second; carrying is about 4–4.5. Two feet alternate. Gunfire/alarms reduce footstep gain. Quiet/alert/alarm gain is 0.46/0.28/0.36 times the user's volume setting.
+
+The faster cadence was checked against 30 Hz and four-tick HUD snapshots: 57 steps over ten seconds at normal speed, 44 when carrying. The 11 footstep, combat-audio and player-lifecycle tests pass. The audition was retimed from the existing generated samples; no new API generation was needed.
 
 Standing, blocked movement, pause, tutorial instructions, menus, mute, backgrounding, mission restart and finished runs stop playback. A long update gap discards old travel rather than playing delayed footsteps. No new timers, network playback, simulation rules or guard-hearing changes.
 

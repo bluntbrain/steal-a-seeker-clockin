@@ -1,6 +1,10 @@
 import type {GameState} from '../game/simulation';
 
 export type FootstepSnapshot = Pick<GameState, 'mission' | 'walked' | 'elapsed' | 'ticks' | 'status'>;
+// Short strides suit the courier's quick pace: ~5.7 steps/s at 4.1 units/s.
+// The guard only prevents duplicate/bunched cues, not normal running cadence.
+export const FOOTSTEP_STRIDE = .72;
+const MIN_STEP_INTERVAL = .12;
 export type FootstepTracker = {
   previous: FootstepSnapshot | null;
   distance: number;
@@ -28,14 +32,14 @@ export function advanceFootsteps(tracker: FootstepTracker, state: FootstepSnapsh
   }
   next.moving = true;
   next.distance += travelled;
-  const stride = tracker.moving ? 1.15 : .12;
-  if (next.distance < stride || state.elapsed - tracker.lastStepAt < .24) {
+  const stride = tracker.moving ? FOOTSTEP_STRIDE : .12;
+  if (next.distance < stride || state.elapsed - tracker.lastStepAt < MIN_STEP_INTERVAL) {
     return {tracker: next, cue: null, moving: true};
   }
   // At most one cue per snapshot; missed frames must not create a burst.
   const cue = next.next;
   next.next = cue === 0 ? 1 : 0;
-  next.distance = tracker.moving ? next.distance % 1.15 : 0;
+  next.distance = tracker.moving ? next.distance % FOOTSTEP_STRIDE : 0;
   next.lastStepAt = state.elapsed;
   return {tracker: next, cue, moving: true};
 }
