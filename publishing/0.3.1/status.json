@@ -1,0 +1,15 @@
+{
+  "status": "prepared-not-submitted",
+  "version": "0.3.1",
+  "versionCode": 4,
+  "publisherUrl": "https://publish.solanamobile.com/dashboard/new-dapp",
+  "formFilled": ["name", "package", "subtitle", "description", "website", "supportEmail", "contactEmail", "icon", "banner"],
+  "formRemaining": ["four screenshots", "English language", "live terms URL", "live privacy URL", "save draft", "APK upload", "publisher agreement and wallet approval"],
+  "websiteStatus": "Local draft at http://127.0.0.1:8792/; not deployed pending legal operator name",
+  "livePricingAtCheck": {"gamePassSkr": 1, "gamePassUsd": 0.1, "weeklyCashPrizesActive": false},
+  "pendingUser": ["Legal operator name and country", "Keep test prices or use public prices", "Chrome publisher tab available without concurrent typing"],
+  "apkSigned": true,
+  "appTestsPassed": 184,
+  "serverTestsPassed": 71,
+  "emailStatus": "Local text draft only; nothing sent; no signing material attached"
+}

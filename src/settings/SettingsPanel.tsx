@@ -1,8 +1,9 @@
 import PlaytestControls from '../telemetry/PlaytestControls';
 import React from 'react';
-import {Modal, Platform, Pressable, ScrollView, StyleSheet, Switch, Text, View} from 'react-native';
+import {Alert, Linking, Modal, Platform, Pressable, ScrollView, StyleSheet, Switch, Text, View} from 'react-native';
 import {useSettings} from './SettingsProvider';
 import app from '../../app.json';
+import {IS_MAINNET} from '../wallet/config';
 import type {MissionId} from '../game/level';
 
 export default function SettingsPanel({visible, onClose, mission, onReplayTips}: {visible: boolean; onClose: () => void; mission?:MissionId;onReplayTips?:()=>void}) {
@@ -22,9 +23,10 @@ export default function SettingsPanel({visible, onClose, mission, onReplayTips}:
       {toggle('Reduced effects', 'Use a steady alarm border; hide the red screen pulse, escape trails and decorative motion. Guard cones and movement stay visible.', settings.reducedEffects, reducedEffects => update({reducedEffects}))}
       {!!error && <View style={{gap: 10}}><Text accessibilityLiveRegion="polite" style={styles.detail}>{error}</Text><Pressable accessibilityRole="button" onPress={retry} style={styles.button}><Text style={styles.buttonText}>Save preferences again</Text></Pressable></View>}
       <View style={{gap: 10}}><Text style={styles.label}>Controls</Text><Text style={styles.detail}>Tap the floor to move. Tap a guard to stop and shoot. Tap elsewhere to escape its aim. Tap the phone to collect it, then tap the exit. Walls stop bullets. Your outfit does not change combat stats.</Text><Text style={styles.detail}>Opening a menu pauses gameplay. Choose Resume when you return. Daily submission deadlines keep counting while paused.</Text></View>
+      <View style={{gap:12}}><Text style={styles.label}>Help & privacy</Text><View style={{flexDirection:'row',flexWrap:'wrap',gap:8}}>{[['Support','support'],['Privacy','privacy'],['Terms','terms'],['Delete account','delete-account']].map(([label,path])=><Pressable key={path} accessibilityRole="link" accessibilityLabel={label} onPress={()=>{void Linking.openURL(`https://stealaseeker.bluntbrain.com/${path}`).catch(()=>Alert.alert('Could not open page','Visit stealaseeker.bluntbrain.com or email hello@kraneapps.com.'));}} style={{padding:12,borderRadius:10,backgroundColor:'#294139'}}><Text style={styles.label}>{label}</Text></Pressable>)}</View></View>
       <PlaytestControls/>
       {onReplayTips&&<Pressable accessibilityRole="button" onPress={onReplayTips} style={styles.button}><Text style={styles.buttonText}>Replay first-mission tips</Text></Pressable>}
-      <Text style={styles.detail}>Version {app.expo.version} · Devnet test build{Platform.OS === 'web' ? ' · Browser preview' : ''}{'\n'}Preferences are saved on this device. TEST SKR has no monetary value.</Text>
+      <Text style={styles.detail}>Version {app.expo.version} · {Platform.OS === 'web' ? 'Browser preview · no payments' : IS_MAINNET ? 'Solana Mainnet · real payments' : 'Devnet · test tokens'}{'\n'}Preferences are saved on this device.</Text>
     </ScrollView><Pressable accessibilityRole="button" accessibilityLabel="Close settings" onPress={onClose} style={[styles.button,{margin:12}]}><Text style={styles.buttonText}>Close settings</Text></Pressable></View></View>
   </Modal>;
 }
