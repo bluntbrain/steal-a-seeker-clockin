@@ -22,5 +22,5 @@ for stage in range(8):
   if next_label is not None and next_label.get('text')!=text:break
  else:raise RuntimeError('Tutorial failed to advance')
 (root/'android-tutorial-complete.png').write_bytes(adb('exec-out','screencap','-p'))
-(root/'android-tutorial.json').write_text(json.dumps({'device':DEVICE,'package':'com.krane.stealaseeker.judge','steps':steps,'completed':True,'walletTested':False},indent=2))
+(root/'android-tutorial.json').write_text(json.dumps({'device':DEVICE,'package':'com.bluntbrain.stealaseeker.judge','steps':steps,'completed':True,'walletTested':False},indent=2))
 print('PASS Android tutorial',flush=True)

@@ -1,0 +1,21 @@
+{
+  "package": "com.bluntbrain.stealaseeker",
+  "deviceModel": "Realme RMX5033",
+  "version": "0.3.2",
+  "versionCode": 5,
+  "install": "Success",
+  "launch": "Status: ok",
+  "running": true,
+  "packageInfo": [
+    "versionCode=5 minSdk=24 targetSdk=36",
+    "versionName=0.3.2",
+    "lastUpdateTime=2026-09-17 16:25:24",
+    "firstInstallTime=2026-09-17 16:25:24"
+  ],
+  "startupErrorLog": "",
+  "signerSha256": "4fa3e9942238f110824fb67dc99438fc1d70ef48a273e4a79331d5f8a1e1e913",
+  "apkSha256": "ee4d8c07ecb9ddc1cf9be54a11780594b104de0e65ce25263e599ccd3c67e07b",
+  "oldAppPreserved": true,
+  "walletPaymentTest": "Pending user; no transaction approved",
+  "visualCheck": "Pending user unlock; screen was asleep/locked, not a verified game screenshot."
+}

@@ -27,7 +27,7 @@ n=next(n for n in state.iter('node') if n.get('content-desc')=='Retry level')
 import re
 x1,y1,x2,y2=map(int,re.findall(r'\d+',n.get('bounds')));tap((x1+x2)//2,(y1+y2)//2)
 state=ui('night-shift-native-retry');assert 'NIGHT SHIFT' in ' '.join(texts(state));assert not any('CAUGHT BY PATROL' in x for x in texts(state))
-adb('shell','input','keyevent','3');time.sleep(.4);adb('shell','monkey','-p','com.krane.stealaseeker.mvp','-c','android.intent.category.LAUNCHER','1')
+adb('shell','input','keyevent','3');time.sleep(.4);adb('shell','monkey','-p','com.bluntbrain.stealaseeker','-c','android.intent.category.LAUNCHER','1')
 state=ui('night-shift-native-background');assert 'RUN PAUSED' in texts(state)
 (OUT/'night-shift-native-check.json').write_text(json.dumps({'status':'passed','device':'Pixel 9 Pro Android 36 emulator','checks':['mission selection','pause freezes timer','touch movement into patrol','caught screen','retry retains Night Shift','background pauses run'],'physicalSeekerTested':False},indent=2))
 print('Native patrol smoke check passed')

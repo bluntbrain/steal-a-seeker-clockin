@@ -1,5 +1,5 @@
 {
-  "status": "listing-saved-awaiting-app-mint",
+  "status": "deleted-by-user",
   "version": "0.3.1",
   "versionCode": 4,
   "publisherUrl": "https://publish.solanamobile.com/dapp/com.krane.stealaseeker.mvp",
@@ -19,25 +19,20 @@
     "privacy URL",
     "saved listing"
   ],
-  "formRemaining": [
-    "User: Mint App with publisher wallet",
-    "APK release upload after App NFT exists",
-    "Final publisher agreement and release wallet approval"
-  ],
+  "formRemaining": [],
   "websiteStatus": "Live. All five pages verified over HTTPS.",
   "livePricingAtCheck": {
     "gamePassSkr": 1,
     "gamePassUsd": 0.1,
     "weeklyCashPrizesActive": false
   },
-  "pendingUser": [
-    "Mint App: portal estimates about 0.02 SOL plus upload costs; review and approve in publisher wallet"
-  ],
+  "pendingUser": [],
   "apkSigned": true,
   "appTestsPassed": 184,
   "serverTestsPassed": 71,
   "emailStatus": "Local text draft only; nothing sent; no signing material attached",
   "deploymentId": "791f6c21-9e52-4d1c-beda-6113d661f3ae",
   "pricingDecision": "Existing test pricing preserved; no price changes made.",
-  "storeStatus": "Draft. Live Version None. Next Release None. No release submitted."
+  "storeStatus": "Old prototype listing deleted by user on 17 September 2026.",
+  "supersededByPackage": "com.bluntbrain.stealaseeker"
 }

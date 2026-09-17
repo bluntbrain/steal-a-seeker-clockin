@@ -1,8 +1,10 @@
 # Steal a Seeker — dApp Store release 0.3.1
 
+Historical record. Superseded by [0.3.2](PUBLISHING-0.3.2.md). The user deleted this prototype-package portal draft. Its archived APK is `releases/steal-a-seeker-legacy-0.3.1.apk`; do not upload it for the new package.
+
 ## APK and signing
 
-The installable app is `releases/steal-a-seeker-mainnet.apk`. Package: `com.krane.stealaseeker.mvp`. Version: 0.3.1, Android versionCode 4. Target SDK 36; minimum SDK 24; arm64-v8a. This is a native React Native release build with bundled JavaScript, artwork and sound; it does not require Metro or the Mac after installation. Online services and wallet payments require internet access.
+The archived app is `releases/steal-a-seeker-legacy-0.3.1.apk`. Package: `com.krane.stealaseeker.mvp`. Version: 0.3.1, Android versionCode 4. Target SDK 36; minimum SDK 24; arm64-v8a. This is a native React Native release build with bundled JavaScript, artwork and sound; it does not require Metro or the Mac after installation. Online services and wallet payments require internet access.
 
 Build on this Mac:
 

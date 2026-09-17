@@ -1,7 +1,7 @@
 """Touch QA in the isolated .qa package with synthetic tickets; never uses wallets."""
 import subprocess,time,xml.etree.ElementTree as ET,re,pathlib,json
 ADB='/Users/bluntbrain/Library/Android/sdk/platform-tools/adb'
-APP='com.krane.stealaseeker.qa'
+APP='com.bluntbrain.stealaseeker.qa'
 def adb(*a):return subprocess.check_output([ADB,'-s','emulator-5554',*map(str,a)],timeout=30)
 def ui():
  adb('shell','uiautomator','dump','/sdcard/seeker-quick-qa.xml')
@@ -26,7 +26,7 @@ for name in ['Ghost Freight','Skyline Relay','Pulse Vault']:
 # Paywall playback must stay mounted while toggling and backgrounding.
 tap('QA paywall');time.sleep(3);assert find(ui(),'Pause trailer') is not None
 shot('seeker-native-video.png');tap('Pause trailer');assert find(ui(),'Play trailer') is not None
-tap('Play trailer');adb('shell','input','keyevent','3');adb('shell','am','start','-n',APP+'/com.krane.stealaseeker.mvp.MainActivity');time.sleep(1)
+tap('Play trailer');adb('shell','input','keyevent','3');adb('shell','am','start','-n',APP+'/com.bluntbrain.stealaseeker.MainActivity');time.sleep(1)
 assert find(ui(),'Pause trailer') is not None
 tap('QA campaign');root=ui();scroll=next((n for n in root.iter('node') if n.get('resource-id')=='mission-districts'),None)
 assert scroll is not None and scroll.get('scrollable')=='true','Native mission list must scroll'

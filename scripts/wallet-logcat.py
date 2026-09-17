@@ -8,7 +8,7 @@ import sys
 adb = str(pathlib.Path.home() / 'Library/Android/sdk/platform-tools/adb')
 serial = sys.argv[1] if len(sys.argv) > 1 else None
 command = [adb] + (['-s', serial] if serial else [])
-package = 'com.krane.stealaseeker.mvp'
+package = 'com.bluntbrain.stealaseeker'
 pid = subprocess.run(command + ['shell', 'pidof', package], capture_output=True, text=True)
 if pid.returncode or not pid.stdout.strip():
     sys.exit('Connect and unlock the phone, then open Steal a Seeker before capturing.')

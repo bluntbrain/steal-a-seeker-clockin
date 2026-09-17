@@ -2,7 +2,7 @@
 Requires EXPO_PUBLIC_NATIVE_RECOVERY=1; never authenticates or sends a payment.
 """
 import subprocess,time,pathlib,xml.etree.ElementTree as ET,json,re,math
-ADB='/Users/bluntbrain/Library/Android/sdk/platform-tools/adb';APP='com.krane.stealaseeker.mvp';OUT=pathlib.Path('verification')
+ADB='/Users/bluntbrain/Library/Android/sdk/platform-tools/adb';APP='com.bluntbrain.stealaseeker';OUT=pathlib.Path('verification')
 def adb(*args):return subprocess.check_output([ADB,'-s','emulator-5554',*map(str,args)],timeout=30)
 def ui():
  for attempt in range(3):

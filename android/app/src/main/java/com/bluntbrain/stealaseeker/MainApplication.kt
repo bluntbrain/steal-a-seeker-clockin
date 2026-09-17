@@ -1,4 +1,4 @@
-package com.krane.stealaseeker.mvp
+package com.bluntbrain.stealaseeker
 
 import android.app.Application
 import android.content.res.Configuration

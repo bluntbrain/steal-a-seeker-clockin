@@ -18,7 +18,7 @@ def ui(name):
 # recorded route, not portable across densities or emulator load; inspect
 # screenshots if a route assertion fails. No gameplay-state injection.
 tap(1100,2729);time.sleep(.3);shot('android-level-01')
-adb('shell','dumpsys','gfxinfo','com.krane.stealaseeker.mvp','reset')
+adb('shell','dumpsys','gfxinfo','com.bluntbrain.stealaseeker','reset')
 for x,y,ms in [(395,2511,481),(279,2395,2184),(395,2511,919),(279,2395,1153),(395,2511,731),(279,2395,184),(395,2511,790),(279,2395,420)]:hold(x,y,ms)
 hold(761,2515,650)
 r=ui('android-carrying');shot('android-carrying')
@@ -28,5 +28,5 @@ r=ui('android-extracted');shot('android-extracted')
 assert any(t=='EXTRACTION COMPLETE' for t,c,b in r),'Route missed exit'
 assert any('80% charge' in t for t,c,b in r),'Dash charge mismatch'
 (OUT/'android-touch-commands.json').write_text(json.dumps(commands,indent=2))
-(OUT/'android-gfxinfo.txt').write_bytes(adb('shell','dumpsys','gfxinfo','com.krane.stealaseeker.mvp'))
+(OUT/'android-gfxinfo.txt').write_bytes(adb('shell','dumpsys','gfxinfo','com.bluntbrain.stealaseeker'))
 print('Android touch route passed')
