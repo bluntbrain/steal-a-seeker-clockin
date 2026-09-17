@@ -1,0 +1,18 @@
+{
+  "level": 4,
+  "title": "Loading Lockdown",
+  "name": "04-loading-lockdown",
+  "bpmDirection": 112,
+  "prompt": "Compose an ORIGINAL instrumental background cue for a small top-down stealth action mobile game. No references to existing songs or artists. No vocals, speech, sound effects, gunshots, alarms or footsteps. Maintain a consistent groove for a seamless repeating gameplay loop. Begin in the groove immediately, no long intro, no final crash or fade to silence. Keep the last phrase harmonically compatible with the first. Leave the midrange open for footsteps, shots and targeting sounds. Moderate dynamics, dry close percussion, cinematic suspense without overwhelming orchestral loudness. Tempo about 112 BPM. Industrial night heist: muted metallic percussion, dark analog bass, bowed low strings, distant filtered brass. A pulsing warehouse engine and a clock running out.",
+  "provider": "ElevenLabs",
+  "model": "music_v1",
+  "requestedSeconds": 40,
+  "songId": "DyKYMEH07YBbXdxdFfOM",
+  "requestId": null,
+  "file": "04-loading-lockdown.m4a",
+  "seconds": 39,
+  "sha256": "398d335074ad6b930066796f398a0bd513e36b85e453e0015b64c71d71e49074",
+  "bytes": 793008,
+  "rawSha256": "7d6d95e96258369f2b24387ab22b7faec2f430f9224e5c867ad7af4e3fb291ad",
+  "mix": "-21 LUFS target, -3 dBTP ceiling; circular one-second equal-power crossfade"
+}

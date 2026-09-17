@@ -1,6 +1,6 @@
 const http=require('http'),fs=require('fs'),path=require('path');
 const root=path.resolve(__dirname,'../dist'),port=Number(process.env.PORT||8787);
-const types={'.html':'text/html','.js':'text/javascript','.json':'application/json','.wasm':'application/wasm','.png':'image/png','.webp':'image/webp','.mp4':'video/mp4','.wav':'audio/wav','.txt':'text/plain'};
+const types={'.html':'text/html','.js':'text/javascript','.json':'application/json','.wasm':'application/wasm','.png':'image/png','.webp':'image/webp','.mp4':'video/mp4','.m4a':'audio/mp4','.ogg':'audio/ogg','.mp3':'audio/mpeg','.wav':'audio/wav','.txt':'text/plain'};
 http.createServer(async(req,res)=>{
  let name;try{name=decodeURIComponent(new URL(req.url,'http://localhost').pathname);}catch{res.writeHead(400);return res.end();}
  // Local preview exposes only public challenge reads, never authenticated actions.

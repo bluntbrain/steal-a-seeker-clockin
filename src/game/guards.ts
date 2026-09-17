@@ -1,10 +1,10 @@
 import {findPath,walkableSegment} from './navigation';
 import { LEVEL, getLevel, GUARD_TUNING, type MissionId, type LevelDefinition, type Point, alarmSpeed, SECURITY } from './level';
 
-export type Guard = {hp:number;maxHp:number;combatRole:import('./combat-levels').EnemyRole;gunPhase:'ready'|'aim'|'fire'|'recover';gunTicks:number;burstLeft:number;shotAngle:number;spawned:boolean;flash:number;x:number;y:number;px:number;py:number;angle:number;target:number;wait:number;exposure:number;seesPlayer:boolean;range:number;halfAngle:number;spotSeconds:number;clock:number;kind:'patrol'|'scanner'|'warden';mode:'patrol'|'investigate'|'search'|'return';path:Point[];pathIndex:number;searchLeft:number;searchAngle:number;lastSeen:Point;active:boolean;lureId:number;lureAttemptId:number;lureRetryAt:number;nextReport:number;nextChase:number;};
+export type Guard = {reactionTicks:number;alerted:boolean;hp:number;maxHp:number;combatRole:import('./combat-levels').EnemyRole;gunPhase:'ready'|'aim'|'fire'|'recover';gunTicks:number;burstLeft:number;shotAngle:number;spawned:boolean;flash:number;x:number;y:number;px:number;py:number;angle:number;target:number;wait:number;exposure:number;seesPlayer:boolean;range:number;halfAngle:number;spotSeconds:number;clock:number;kind:'patrol'|'scanner'|'warden';mode:'patrol'|'investigate'|'search'|'return';path:Point[];pathIndex:number;searchLeft:number;searchAngle:number;lastSeen:Point;active:boolean;lureId:number;lureAttemptId:number;lureRetryAt:number;nextReport:number;nextChase:number;};
 export function makeGuards(mission:MissionId,override?:LevelDefinition):Guard[]{
  'worklet';
- return (override??getLevel(mission)).patrols.map(({route,range,halfAngle,spotSeconds,kind,sweep,activePower,combatRole='scout',reserveAfter})=>({hp:({drone:25,scout:50,sentry:75,heavy:150,warden:200})[combatRole],maxHp:({drone:25,scout:50,sentry:75,heavy:150,warden:200})[combatRole],combatRole,gunPhase:'ready',gunTicks:0,burstLeft:0,shotAngle:0,spawned:reserveAfter===undefined,flash:0,x:route[0]!.x,y:route[0]!.y,px:route[0]!.x,py:route[0]!.y,angle:sweep?sweep.angle:Math.atan2(route[1]!.y-route[0]!.y,route[1]!.x-route[0]!.x),target:1,wait:0,exposure:0,seesPlayer:false,range,halfAngle,spotSeconds,clock:0,active:reserveAfter===undefined&&(activePower===undefined||activePower===0),kind:kind??'patrol',lureId:0,lureAttemptId:0,lureRetryAt:0,nextReport:0,nextChase:0,mode:'patrol',path:[],pathIndex:0,searchLeft:0,searchAngle:0,lastSeen:{...route[0]!}}));
+ return (override??getLevel(mission)).patrols.map(({route,range,halfAngle,spotSeconds,kind,sweep,activePower,combatRole='scout',reserveAfter})=>({reactionTicks:0,alerted:false,hp:({drone:25,scout:50,sentry:75,heavy:150,warden:200})[combatRole],maxHp:({drone:25,scout:50,sentry:75,heavy:150,warden:200})[combatRole],combatRole,gunPhase:'ready',gunTicks:0,burstLeft:0,shotAngle:0,spawned:reserveAfter===undefined,flash:0,x:route[0]!.x,y:route[0]!.y,px:route[0]!.x,py:route[0]!.y,angle:sweep?sweep.angle:Math.atan2(route[1]!.y-route[0]!.y,route[1]!.x-route[0]!.x),target:1,wait:0,exposure:0,seesPlayer:false,range,halfAngle,spotSeconds,clock:0,active:reserveAfter===undefined&&(activePower===undefined||activePower===0),kind:kind??'patrol',lureId:0,lureAttemptId:0,lureRetryAt:0,nextReport:0,nextChase:0,mode:'patrol',path:[],pathIndex:0,searchLeft:0,searchAngle:0,lastSeen:{...route[0]!}}));
 }
 // Slab intersection returns the nearest wall/crate along a ray. Shared by detection
 // and cone rendering, so the highlighted floor agrees with what a guard can see.
@@ -27,8 +27,9 @@ export function sees(guard:Guard,x:number,y:number,level:LevelDefinition=LEVEL){
  const dx=x-guard.x,dy=y-guard.y,d=Math.hypot(dx,dy);
  if(d>guard.range)return false;
  if(d<1e-6)return true;
- // Contact also detects the player behind a guard, but never through cover.
- if(d>.5&&(dx*Math.cos(guard.angle)+dy*Math.sin(guard.angle))/d<Math.cos(guard.halfAngle))return false;
+ // Revision 6 combat uses the visible cone even at close range. Older replays
+ // retain contact detection so a published weekly competition never changes.
+ if(((level.combat?.revision??0)>=6||d>.5)&&(dx*Math.cos(guard.angle)+dy*Math.sin(guard.angle))/d<Math.cos(guard.halfAngle))return false;
  return sightDistance(guard.x,guard.y,dx/d,dy/d,d,level)>=d-1e-7;
 }
 function destination(g:Guard,point:Point,level:LevelDefinition,mode:'investigate'|'return'){

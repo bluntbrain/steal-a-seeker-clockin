@@ -1,0 +1,18 @@
+{
+  "level": 1,
+  "title": "First Pickup",
+  "name": "01-first-pickup",
+  "bpmDirection": 104,
+  "prompt": "Compose an ORIGINAL instrumental background cue for a small top-down stealth action mobile game. No references to existing songs or artists. No vocals, speech, sound effects, gunshots, alarms or footsteps. Maintain a consistent groove for a seamless repeating gameplay loop. Begin in the groove immediately, no long intro, no final crash or fade to silence. Keep the last phrase harmonically compatible with the first. Leave the midrange open for footsteps, shots and targeting sounds. Moderate dynamics, dry close percussion, cinematic suspense without overwhelming orchestral loudness. Tempo about 104 BPM. A curious stealth opening: muted plucked strings, warm soft synth bass, dry woodblock pulse and a restrained rising minor-key figure. Light tension and a feeling of being clever, not horror.",
+  "provider": "ElevenLabs",
+  "model": "music_v1",
+  "requestedSeconds": 40,
+  "songId": "TIaWW96if0yT5XdmHq20",
+  "requestId": null,
+  "file": "01-first-pickup.m4a",
+  "seconds": 39,
+  "sha256": "247af34bea82f28562f652ef268060507eb07e4d2d94a71167993bc183329058",
+  "bytes": 846651,
+  "rawSha256": "9ad120abe1466b2baa8a2fc72b8c8013d6564c7ff65872635f7764ba5e192e8f",
+  "mix": "-21 LUFS target, -3 dBTP ceiling; circular one-second equal-power crossfade"
+}

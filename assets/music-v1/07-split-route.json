@@ -1,0 +1,18 @@
+{
+  "level": 7,
+  "title": "Split Route",
+  "name": "07-split-route",
+  "bpmDirection": 122,
+  "prompt": "Compose an ORIGINAL instrumental background cue for a small top-down stealth action mobile game. No references to existing songs or artists. No vocals, speech, sound effects, gunshots, alarms or footsteps. Maintain a consistent groove for a seamless repeating gameplay loop. Begin in the groove immediately, no long intro, no final crash or fade to silence. Keep the last phrase harmonically compatible with the first. Leave the midrange open for footsteps, shots and targeting sounds. Moderate dynamics, dry close percussion, cinematic suspense without overwhelming orchestral loudness. Tempo about 122 BPM. A clever escape chase: interlocking mallet and synth rhythms, short staccato strings, light snare syncopation and a propulsive bass line. One repeating motif answers another.",
+  "provider": "ElevenLabs",
+  "model": "music_v1",
+  "requestedSeconds": 40,
+  "songId": "30mzK6iYjuhme1j5vwgV",
+  "requestId": null,
+  "file": "07-split-route.m4a",
+  "seconds": 39,
+  "sha256": "51194008a9e9da37c1a05202470932fb00a8e9ffa169383490d7d5e68df89cec",
+  "bytes": 877364,
+  "rawSha256": "cc4d1471c68bf58c69948d71cb3e262e81464a518a3d9494ea682e80e9bd5c6f",
+  "mix": "-21 LUFS target, -3 dBTP ceiling; circular one-second equal-power crossfade"
+}

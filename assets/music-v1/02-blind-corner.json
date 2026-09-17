@@ -1,0 +1,18 @@
+{
+  "level": 2,
+  "title": "Blind Corner",
+  "name": "02-blind-corner",
+  "bpmDirection": 110,
+  "prompt": "Compose an ORIGINAL instrumental background cue for a small top-down stealth action mobile game. No references to existing songs or artists. No vocals, speech, sound effects, gunshots, alarms or footsteps. Maintain a consistent groove for a seamless repeating gameplay loop. Begin in the groove immediately, no long intro, no final crash or fade to silence. Keep the last phrase harmonically compatible with the first. Leave the midrange open for footsteps, shots and targeting sounds. Moderate dynamics, dry close percussion, cinematic suspense without overwhelming orchestral loudness. Tempo about 110 BPM. Cautious spy suspense: pizzicato cello, ticking rim percussion, two alternating low synth pulses, brief brushed cymbal swells. Pauses in the arrangement make corners feel dangerous.",
+  "provider": "ElevenLabs",
+  "model": "music_v1",
+  "requestedSeconds": 40,
+  "songId": "9SVFpNDWEE8Uynjb6Cbe",
+  "requestId": null,
+  "file": "02-blind-corner.m4a",
+  "seconds": 39,
+  "sha256": "f6c90473137b2d4974e05cb53a30a4263732b1b23c0b2b58e5cb79b193ec98fc",
+  "bytes": 806959,
+  "rawSha256": "4e355a3e3e74cb41db22e922ef713e06fbdf375b281d49df632aa9f18bde02f8",
+  "mix": "-21 LUFS target, -3 dBTP ceiling; circular one-second equal-power crossfade"
+}

@@ -1,0 +1,18 @@
+{
+  "level": 6,
+  "title": "Heavy Watch",
+  "name": "06-heavy-watch",
+  "bpmDirection": 108,
+  "prompt": "Compose an ORIGINAL instrumental background cue for a small top-down stealth action mobile game. No references to existing songs or artists. No vocals, speech, sound effects, gunshots, alarms or footsteps. Maintain a consistent groove for a seamless repeating gameplay loop. Begin in the groove immediately, no long intro, no final crash or fade to silence. Keep the last phrase harmonically compatible with the first. Leave the midrange open for footsteps, shots and targeting sounds. Moderate dynamics, dry close percussion, cinematic suspense without overwhelming orchestral loudness. Tempo about 108 BPM. An armored sentry thriller: weighty low brass stabs, deliberate tom rhythm, tense tremolo strings, a dark pulsing synthesizer. Controlled menace and determination, no jump scares.",
+  "provider": "ElevenLabs",
+  "model": "music_v1",
+  "requestedSeconds": 40,
+  "songId": "TvL4fWqgnjptkWNWSk3k",
+  "requestId": null,
+  "file": "06-heavy-watch.m4a",
+  "seconds": 39,
+  "sha256": "939cb3e186c2762fcf2ab0db2e414a00dc3be2d69cf445c90a2962e424b19ec6",
+  "bytes": 814549,
+  "rawSha256": "bd6e73c7a8339d2fdfdf8ee2e1efaa14d7b5e0d0cd17f3087d9bc3eebaffbe1d",
+  "mix": "-21 LUFS target, -3 dBTP ceiling; circular one-second equal-power crossfade"
+}

@@ -11,6 +11,15 @@ export const COMBAT={damage:25,range:4,shotTicks:12,bulletSpeed:16,maxProjectile
 export function freshCombat():CombatState{'worklet';return {version:2,hp:100,commandSeen:0,order:null,path:[],pathIndex:0,cooldown:0,invulnerable:0,shots:0,enemyShots:0,kills:0,damageTaken:0,aimEvents:0,hitEvents:0,feedback:'none',feedbackLeft:0,projectiles:[],nextShot:1,noise:{x:0,y:0},noiseLeft:0,flash:0,repath:0};}
 export function enemyStats(role:EnemyRole,hard=false){'worklet';if(hard)return role==='drone'?{hp:25,aim:0,damage:0,burst:0,recover:90}:role==='scout'?{hp:50,aim:21,damage:25,burst:2,recover:25}:role==='sentry'?{hp:75,aim:18,damage:20,burst:3,recover:30}:role==='heavy'?{hp:150,aim:30,damage:22,burst:3,recover:36}:{hp:200,aim:27,damage:25,burst:5,recover:33};return role==='drone'?{hp:25,aim:0,damage:0,burst:0,recover:90}:role==='scout'?{hp:50,aim:27,damage:20,burst:1,recover:33}:role==='sentry'?{hp:75,aim:24,damage:15,burst:2,recover:33}:role==='heavy'?{hp:150,aim:36,damage:10,burst:3,recover:42}:{hp:200,aim:42,damage:15,burst:3,recover:42};}
 export function tacticalCombat(l:LevelDefinition){'worklet';return (l.combat?.revision??0)>=3&&l.id!=='combat-v2:practice';}
+export function fairAmbush(l:LevelDefinition){'worklet';return (l.combat?.revision??0)>=6;}
+function turnToward(g:Guard,angle:number,dt:number){
+ 'worklet';const delta=Math.atan2(Math.sin(angle-g.angle),Math.cos(angle-g.angle));
+ g.angle+=Math.max(-Math.PI*2*dt,Math.min(Math.PI*2*dt,delta));
+}
+function reactToNoise(g:Guard,point:Point,l:LevelDefinition){
+ 'worklet';g.lastSeen={x:point.x,y:point.y};g.path=findPath(g,g.lastSeen,l);g.pathIndex=0;g.mode='investigate';
+ if(!g.alerted){g.alerted=true;g.reactionTicks=9;}
+}
 function clearOrder(c:CombatState){'worklet';c.order=null;c.path=[];c.pathIndex=0;}
 export function combatTap(s:GameState,x:number,y:number,seq:number):CombatCommand{
  'worklet';const level=s.definition!,radius=.85;let target=-1,best=radius;
@@ -49,7 +58,8 @@ function enemies(s:GameState,dt:number,l:LevelDefinition){
   if(spec.reserveAfter!==undefined&&!g.spawned){g.active=s.securityAlarm&&s.alarmSeconds>=spec.reserveAfter&&Math.hypot(s.x-g.x,s.y-g.y)>1.25;if(!g.active)continue;g.spawned=true;}
   g.active=true;g.clock+=dt;g.flash=Math.max(0,g.flash-dt);g.range=spec.range+(tacticalCombat(l)&&s.securityAlarm?.8:0);
   if(g.combatRole==='drone'){g.seesPlayer=false;g.exposure=0;continue;}
-  const seen=sees(g,s.x,s.y,l);if(tacticalCombat(l)&&g.seesPlayer&&!seen){g.path=findPath(g,g.lastSeen,l);g.pathIndex=0;g.mode='investigate';g.nextReport=g.clock+1.4;}g.seesPlayer=seen;g.exposure=seen?1:0;if(seen){s.spotted=true;g.lastSeen={x:s.x,y:s.y};}
+  if(fairAmbush(l)&&g.reactionTicks>0){g.reactionTicks--;g.seesPlayer=false;g.exposure=0;continue;}
+  const seen=sees(g,s.x,s.y,l);if(tacticalCombat(l)&&g.seesPlayer&&!seen){g.path=findPath(g,g.lastSeen,l);g.pathIndex=0;g.mode='investigate';g.nextReport=g.clock+1.4;}g.seesPlayer=seen;g.exposure=seen?1:0;if(seen){s.spotted=true;g.lastSeen={x:s.x,y:s.y};if(fairAmbush(l))g.alerted=true;}
   if(g.gunPhase==='aim'){
    if(!seen){g.gunPhase='recover';g.gunTicks=12;continue;}
    if(g.gunTicks>6)g.shotAngle=Math.atan2(s.y-g.y,s.x-g.x);g.angle=g.shotAngle;
@@ -61,13 +71,16 @@ function enemies(s:GameState,dt:number,l:LevelDefinition){
   if(g.gunPhase==='aim')continue;
   const recovering=g.gunPhase==='recover'&&--g.gunTicks>0;if(recovering&&(!tacticalCombat(l)||g.gunTicks>stats.recover-8))continue;if(!recovering&&g.gunPhase==='recover')g.gunPhase='ready';
   if(seen&&!recovering){g.gunPhase='aim';g.gunTicks=stats.aim;g.shotAngle=Math.atan2(s.y-g.y,s.x-g.x);c.aimEvents++;continue;}
-  if((s.securityAlarm&&g.clock>=g.nextReport)||(c.noiseLeft>0&&Math.hypot(c.noise.x-g.x,c.noise.y-g.y)<(tacticalCombat(l)?7:5)&&g.clock>=g.nextChase)){
-   g.lastSeen=s.securityAlarm?{x:s.x,y:s.y}:{...c.noise};g.path=findPath(g,g.lastSeen,l);g.pathIndex=0;g.nextReport=g.clock+(tacticalCombat(l)?1.4+(i%3)*.15:4);g.nextChase=g.clock+1.3;g.mode='investigate';
+  if((s.securityAlarm&&g.clock>=g.nextReport)||(c.noiseLeft>0&&Math.hypot(c.noise.x-g.x,c.noise.y-g.y)<(fairAmbush(l)?3.5:tacticalCombat(l)?7:5)&&g.clock>=g.nextChase)){
+   const source=s.securityAlarm?{x:s.x,y:s.y}:{...c.noise};
+   if(fairAmbush(l)){if(s.securityAlarm)g.alerted=true;reactToNoise(g,source,l);}else{g.lastSeen=source;g.path=findPath(g,g.lastSeen,l);g.pathIndex=0;g.mode='investigate';}
+   g.nextReport=g.clock+(tacticalCombat(l)?1.4+(i%3)*.15:4);g.nextChase=g.clock+1.3;
+   if(fairAmbush(l)&&g.reactionTicks>0)continue;
   }
   const multiplier=s.securityAlarm?(tacticalCombat(l)?2+.35*Math.min(1,s.alarmSeconds/12):1.35+.15*Math.min(1,s.alarmSeconds/10)):1;
   if(recovering&&seen&&g.clock>=g.nextChase){g.path=findPath(g,g.lastSeen,l);g.pathIndex=0;g.mode='investigate';g.nextChase=g.clock+.7;}
   let p:Point|undefined;if(g.mode==='investigate'||g.mode==='return'){p=g.path[g.pathIndex];if(!p){if(g.mode==='return'){g.mode='patrol';g.wait=.6;}else{g.path=findPath(g,spec.route[g.target]!,l);g.pathIndex=0;g.mode='return';}}}else if(g.wait>0){g.wait-=dt;continue;}else p=spec.route[g.target];
-  if(p){const dx=p.x-g.x,dy=p.y-g.y;if(Math.hypot(dx,dy)>.01)g.angle=Math.atan2(dy,dx);if(walkActor(g,p,spec.speed*multiplier,dt,l)&&Math.hypot(g.x-p.x,g.y-p.y)<.02){if(g.mode==='investigate'||g.mode==='return')g.pathIndex++;else{g.target=(g.target+1)%spec.route.length;g.wait=spec.pauseSeconds;}}}
+  if(p){const dx=p.x-g.x,dy=p.y-g.y;if(Math.hypot(dx,dy)>.01){const angle=Math.atan2(dy,dx);if(fairAmbush(l))turnToward(g,angle,dt);else g.angle=angle;}if(walkActor(g,p,spec.speed*multiplier,dt,l)&&Math.hypot(g.x-p.x,g.y-p.y)<.02){if(g.mode==='investigate'||g.mode==='return')g.pathIndex++;else{g.target=(g.target+1)%spec.route.length;g.wait=spec.pauseSeconds;}}}
  }
 }
 function projectiles(s:GameState,dt:number,l:LevelDefinition){
@@ -75,7 +88,14 @@ function projectiles(s:GameState,dt:number,l:LevelDefinition){
  for(const p of c.projectiles){p.px=p.x;p.py=p.y;const travel=Math.min(p.left,Math.hypot(p.vx,p.vy)*dt),speed=Math.hypot(p.vx,p.vy),dx=p.vx/speed,dy=p.vy/speed;let distance=sightDistance(p.x,p.y,dx,dy,travel,l),hit=-2;
   const targets=p.owner<0?s.guards:[s];for(let i=0;i<targets.length;i++){const a=targets[i]!;if(p.owner<0&&(!(a as Guard).active||(a as Guard).hp<=0))continue;const ax=a.x-p.x,ay=a.y-p.y,along=ax*dx+ay*dy,perp=ax*ax+ay*ay-along*along,r=.38;if(perp>r*r||along+r<0)continue;const contact=Math.max(0,along-Math.sqrt(Math.max(0,r*r-perp)));if(contact<=distance){distance=contact;hit=i;}}
   p.x+=dx*distance;p.y+=dy*distance;p.left-=travel;
-  if(hit>=0){if(p.owner<0){const g=s.guards[hit]!;const ambush=p.damage>COMBAT.damage;const damage=p.damage;if(ambush){c.feedback='ambush';c.feedbackLeft=.65;}g.hp=Math.max(0,g.hp-damage);if(tacticalCombat(l)&&g.hp>0){g.lastSeen={x:s.x,y:s.y};if(visible(g,s,l)&&g.gunPhase!=='fire'&&g.gunPhase!=='aim'){g.angle=Math.atan2(s.y-g.y,s.x-g.x);g.shotAngle=g.angle;g.gunPhase='aim';g.gunTicks=enemyStats(g.combatRole,true).aim;c.aimEvents++;}}g.flash=.15;c.hitEvents++;if(!g.hp){g.active=false;g.seesPlayer=false;c.kills++;}}else if(c.invulnerable===0){const damage=Math.min(c.hp,p.damage);c.hp-=damage;c.damageTaken+=damage;c.invulnerable=COMBAT.damageGrace;c.flash=.2;if(!c.hp){s.status='caught';s.caughtBy=p.owner;}}continue;}
+  if(hit>=0){if(p.owner<0){const g=s.guards[hit]!;const ambush=p.damage>COMBAT.damage;const damage=p.damage;if(ambush){c.feedback='ambush';c.feedbackLeft=.65;}g.hp=Math.max(0,g.hp-damage);if(tacticalCombat(l)&&g.hp>0){
+     g.lastSeen={x:s.x,y:s.y};
+     if(fairAmbush(l)){
+      // Only the opening ambush staggers armor. Repeated hits cannot stun-lock it.
+      reactToNoise(g,s,l);
+      if(ambush){g.reactionTicks=Math.max(g.reactionTicks,12);g.gunPhase='ready';g.gunTicks=0;}
+     }else if(visible(g,s,l)&&g.gunPhase!=='fire'&&g.gunPhase!=='aim'){g.angle=Math.atan2(s.y-g.y,s.x-g.x);g.shotAngle=g.angle;g.gunPhase='aim';g.gunTicks=enemyStats(g.combatRole,true).aim;c.aimEvents++;}
+    }g.flash=.15;c.hitEvents++;if(!g.hp){g.active=false;g.seesPlayer=false;c.kills++;}}else if(c.invulnerable===0){const damage=Math.min(c.hp,p.damage);c.hp-=damage;c.damageTaken+=damage;c.invulnerable=COMBAT.damageGrace;c.flash=.2;if(!c.hp){s.status='caught';s.caughtBy=p.owner;}}continue;}
   if(distance+1e-7>=travel&&p.left>0)alive.push(p);
  }c.projectiles=alive;
 }
@@ -85,7 +105,7 @@ export function stepCombat(s:GameState,input:Input,dt=TUNING.step){
  const order=c.order;
  if(order?.kind==='attack'){
   const g=s.guards[order.target];if(!g||!g.active||g.hp<=0)clearOrder(c);
-  else if(visible(s,g,level)&&Math.hypot(s.x-g.x,s.y-g.y)<=COMBAT.range){c.path=[];s.facing=Math.abs(g.x-s.x)>Math.abs(g.y-s.y)?(g.x<s.x?1:3):(g.y<s.y?2:0);if(!c.cooldown){const behind=(s.x-g.x)*Math.cos(g.angle)+(s.y-g.y)*Math.sin(g.angle)<0;const damage=tacticalCombat(level)&&!s.securityAlarm&&!g.seesPlayer&&g.gunPhase==='ready'&&behind?50:25;spawnShot(s,s,Math.atan2(g.y-s.y,g.x-s.x),-1,damage);c.cooldown=12;}}
+  else if(visible(s,g,level)&&Math.hypot(s.x-g.x,s.y-g.y)<=COMBAT.range){c.path=[];s.facing=Math.abs(g.x-s.x)>Math.abs(g.y-s.y)?(g.x<s.x?1:3):(g.y<s.y?2:0);if(!c.cooldown){const behind=(s.x-g.x)*Math.cos(g.angle)+(s.y-g.y)*Math.sin(g.angle)<0;const unaware=fairAmbush(level)?g.hp===g.maxHp&&!sees(g,s.x,s.y,level):!g.seesPlayer;const damage=tacticalCombat(level)&&!s.securityAlarm&&unaware&&g.gunPhase==='ready'&&behind?50:25;spawnShot(s,s,Math.atan2(g.y-s.y,g.x-s.x),-1,damage);c.cooldown=12;}}
   else if(c.pathIndex>=c.path.length){clearOrder(c);c.feedback='cover';c.feedbackLeft=1;}
  }
  const point=c.path[c.pathIndex];if(point){if(walkActor(s,point,tacticalCombat(level)?(s.carrying?3.15:4.1):(s.carrying?2.8:3.4),dt,level)){if(Math.hypot(point.x-s.x,point.y-s.y)<.02)c.pathIndex++;}else{c.repath++;if(!setPath(s,c.path[c.path.length-1]!,level)){clearOrder(c);c.feedback='blocked';c.feedbackLeft=1;}}}

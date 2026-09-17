@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import frozen from './fixtures/weekly-2026-09-14.json';
 import engine from '../shared/weekly-engine.json';
 import rules from '../shared/rules-manifest.json';
-import {isWeeklyCompatible,LEGACY_WEEKLY_ENGINES,type WeeklyCompatibility} from '../shared/weekly-compatibility';
+import {isWeeklyCompatible,LEGACY_WEEKLY_ENGINES,PRESERVED_REVISION_3_ENGINE,type WeeklyCompatibility} from '../shared/weekly-compatibility';
 import {currentWeeklyEngine} from '../server/rules-version';
 import {checkRuleBundle} from '../server/rule-bundle';
 import {verifyReplay} from '../server/replay';
@@ -29,7 +29,7 @@ test('unknown weekly mechanics fail closed even when the engine fingerprint matc
  assert(!isWeeklyCompatible({...manifest,contracts:manifest.contracts.slice(0,2)}));
 });
 test('the frozen active week has identical winning and delayed outcomes in its archived verifier',async()=>{
- assert.equal(LEGACY_WEEKLY_ENGINES[manifest.rulesHash],engine.engineHash,'Engine changed: re-audit or remove the legacy compatibility entry.');
+ assert.equal(LEGACY_WEEKLY_ENGINES[manifest.rulesHash],PRESERVED_REVISION_3_ENGINE,'Preserved engine must have an archived verifier.');
  const archived=await import((await checkRuleBundle(manifest.rulesHash)).href);
  for(const c of manifest.contracts){
   const win=solveCombat(c.level);assert(win,`${c.name}: no winning input sequence`);

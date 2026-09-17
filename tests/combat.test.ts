@@ -25,7 +25,7 @@ test('52 weekly combat rotations are deterministic, connected and distinguish he
 test('tactical guards react to being shot and rear ambush damage is decided when fired',()=>{
  const l=arena();l.id='combat-v2:cone-lesson';l.number=2;l.patrols[0]={...l.patrols[0]!,combatRole:'scout',route:[{x:4,y:10},{x:5,y:10}],speed:0};
  const s=initialState(l.mission,l);tick(s,15,order(s,4,10,1));assert.equal(s.guards[0]!.hp,0,'A clean rear opening drops one scout');assert.equal(s.combat!.shots,1);
- l.patrols[0]!.combatRole='heavy';const h=initialState(l.mission,l);tick(h,10,order(h,4,10,1));assert(h.guards[0]!.hp<150);assert.equal(h.guards[0]!.gunPhase,'aim','Surviving armor returns fire');
+ l.patrols[0]!.combatRole='heavy';const h=initialState(l.mission,l);tick(h,10,order(h,4,10,1));assert(h.guards[0]!.hp<150);assert(h.guards[0]!.reactionTicks>0,'Surviving armor pauses before turning');assert.equal(h.combat!.enemyShots,0);tick(h,1,{seq:2,kind:'stop',x:h.x,y:h.y,target:-1});tick(h,90);assert(h.combat!.enemyShots>0,'Surviving armor eventually returns fire');
 });
 test('tactical alarm doubles pursuit speed while preserving a readable aim window',()=>{
  const l=arena();l.id='combat-v2:cone-lesson';l.number=2;l.patrols[0]={...l.patrols[0]!,combatRole:'scout',route:[{x:8,y:5},{x:8,y:6}],speed:1.45};
@@ -34,4 +34,20 @@ test('tactical alarm doubles pursuit speed while preserving a readable aim windo
 });
 test('repeated phone taps do not restart the tactical pickup hold',()=>{
  const l=arena();l.id='combat-v2:cone-lesson';l.number=2;l.patrols=[];l.spawn={...l.phone};const s=initialState(l.mission,l);for(let i=1;i<=20;i++)tick(s,1,order(s,l.phone.x,l.phone.y,i));assert(s.carrying);
+});
+
+// These cases catch the rear-contact and instant-noise-turn regressions.
+test('close rear approach is unseen, while the front cone still detects at the same distance',async()=>{
+ const {sees}=await import('../src/game/guards');const l=arena();l.id='combat-v2:rear-test';
+ l.patrols[0]={...l.patrols[0]!,combatRole:'scout',route:[{x:4,y:10},{x:5,y:10}],speed:0};
+ const s=initialState(l.mission,l),g=s.guards[0]!;
+ assert.equal(sees(g,3.6,10,l),false);assert.equal(sees(g,4.4,10,l),true);
+ assert.equal(sees(g,3.6,10,{...l,combat:{version:2,revision:3}}),true,'Published old rules retain contact detection');
+ s.x=3.6;tick(s,10,order(s,4,10,1));assert.equal(g.hp,0);assert.equal(s.combat!.enemyShots,0);assert.equal(s.combat!.hp,100);
+});
+test('rear opening defeats a sentry; an armored survivor cannot be stun-locked',()=>{
+ const l=arena();l.id='combat-v2:rear-test';l.patrols[0]={...l.patrols[0]!,combatRole:'sentry',route:[{x:4,y:10},{x:5,y:10}],speed:0};
+ const s=initialState(l.mission,l);tick(s,25,order(s,4,10,1));assert.equal(s.guards[0]!.hp,0);assert.equal(s.combat!.shots,2);assert.equal(s.combat!.enemyShots,0);
+ l.patrols[0]!.combatRole='warden';const a=initialState(l.mission,l);tick(a,10,order(a,4,10,1));assert.equal(a.guards[0]!.hp,150);assert.equal(a.guards[0]!.angle,0,'No instant spin when the shot lands');
+ tick(a,12);assert.equal(a.guards[0]!.reactionTicks,0,'Follow-up hits do not restart the stagger');assert(a.guards[0]!.angle>0,'The guard turns gradually after reacting');
 });

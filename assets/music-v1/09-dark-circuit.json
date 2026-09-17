@@ -1,0 +1,18 @@
+{
+  "level": 9,
+  "title": "Dark Circuit",
+  "name": "09-dark-circuit",
+  "bpmDirection": 106,
+  "prompt": "Compose an ORIGINAL instrumental background cue for a small top-down stealth action mobile game. No references to existing songs or artists. No vocals, speech, sound effects, gunshots, alarms or footsteps. Maintain a consistent groove for a seamless repeating gameplay loop. Begin in the groove immediately, no long intro, no final crash or fade to silence. Keep the last phrase harmonically compatible with the first. Leave the midrange open for footsteps, shots and targeting sounds. Moderate dynamics, dry close percussion, cinematic suspense without overwhelming orchestral loudness. Tempo about 106 BPM. A power station infiltration: deep analog sequencer, distant metallic ticks, tense sustained viola, soft sub pulse. Electric unease with a clear steady groove and plenty of room for game sounds.",
+  "provider": "ElevenLabs",
+  "model": "music_v1",
+  "requestedSeconds": 40,
+  "songId": "DT5NEUr6DHDO2oEkRLVJ",
+  "requestId": null,
+  "file": "09-dark-circuit.m4a",
+  "seconds": 39,
+  "sha256": "613e4ecc8d591342afbf56d04b63ab9fb5e1e27162b4c2263b5243ebc4351fcd",
+  "bytes": 832599,
+  "rawSha256": "e632d41a57e2fab404f30a5b29bc72ea22e91901e4ebdc50ad26e0dd49a6b0f7",
+  "mix": "-21 LUFS target, -3 dBTP ceiling; circular one-second equal-power crossfade"
+}

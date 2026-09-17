@@ -1,0 +1,266 @@
+[
+  {
+    "level": 1,
+    "file": "01-first-pickup.m4a",
+    "programs": [],
+    "stream_groups": [],
+    "streams": [
+      {
+        "codec_name": "aac",
+        "sample_rate": "44100",
+        "channels": 2
+      }
+    ],
+    "format": {
+      "duration": "39.000000",
+      "size": "846651"
+    },
+    "levels": [
+      "mean_volume: -23.3 dB",
+      "max_volume: -3.0 dB"
+    ],
+    "sha256": "247af34bea82f28562f652ef268060507eb07e4d2d94a71167993bc183329058"
+  },
+  {
+    "level": 2,
+    "file": "02-blind-corner.m4a",
+    "programs": [],
+    "stream_groups": [],
+    "streams": [
+      {
+        "codec_name": "aac",
+        "sample_rate": "44100",
+        "channels": 2
+      }
+    ],
+    "format": {
+      "duration": "39.000000",
+      "size": "806959"
+    },
+    "levels": [
+      "mean_volume: -23.3 dB",
+      "max_volume: -3.4 dB"
+    ],
+    "sha256": "f6c90473137b2d4974e05cb53a30a4263732b1b23c0b2b58e5cb79b193ec98fc"
+  },
+  {
+    "level": 3,
+    "file": "03-crossfire.m4a",
+    "programs": [],
+    "stream_groups": [],
+    "streams": [
+      {
+        "codec_name": "aac",
+        "sample_rate": "44100",
+        "channels": 2
+      }
+    ],
+    "format": {
+      "duration": "39.000000",
+      "size": "807296"
+    },
+    "levels": [
+      "mean_volume: -21.9 dB",
+      "max_volume: -6.3 dB"
+    ],
+    "sha256": "e9581287a8fce633f4811c13888c2e7f02888d6f0d23eb985c56c15024e9a0eb"
+  },
+  {
+    "level": 4,
+    "file": "04-loading-lockdown.m4a",
+    "programs": [],
+    "stream_groups": [],
+    "streams": [
+      {
+        "codec_name": "aac",
+        "sample_rate": "44100",
+        "channels": 2
+      }
+    ],
+    "format": {
+      "duration": "39.000000",
+      "size": "793008"
+    },
+    "levels": [
+      "mean_volume: -22.1 dB",
+      "max_volume: -7.4 dB"
+    ],
+    "sha256": "398d335074ad6b930066796f398a0bd513e36b85e453e0015b64c71d71e49074"
+  },
+  {
+    "level": 5,
+    "file": "05-skybridge.m4a",
+    "programs": [],
+    "stream_groups": [],
+    "streams": [
+      {
+        "codec_name": "aac",
+        "sample_rate": "44100",
+        "channels": 2
+      }
+    ],
+    "format": {
+      "duration": "39.000000",
+      "size": "801362"
+    },
+    "levels": [
+      "mean_volume: -22.4 dB",
+      "max_volume: -5.0 dB"
+    ],
+    "sha256": "98da62733d185adaec26fe151bde6db9375e0f88f0d65226f3f5147ad265f632"
+  },
+  {
+    "level": 6,
+    "file": "06-heavy-watch.m4a",
+    "programs": [],
+    "stream_groups": [],
+    "streams": [
+      {
+        "codec_name": "aac",
+        "sample_rate": "44100",
+        "channels": 2
+      }
+    ],
+    "format": {
+      "duration": "39.000000",
+      "size": "814549"
+    },
+    "levels": [
+      "mean_volume: -21.3 dB",
+      "max_volume: -7.6 dB"
+    ],
+    "sha256": "939cb3e186c2762fcf2ab0db2e414a00dc3be2d69cf445c90a2962e424b19ec6"
+  },
+  {
+    "level": 7,
+    "file": "07-split-route.m4a",
+    "programs": [],
+    "stream_groups": [],
+    "streams": [
+      {
+        "codec_name": "aac",
+        "sample_rate": "44100",
+        "channels": 2
+      }
+    ],
+    "format": {
+      "duration": "39.000000",
+      "size": "877364"
+    },
+    "levels": [
+      "mean_volume: -22.9 dB",
+      "max_volume: -4.4 dB"
+    ],
+    "sha256": "51194008a9e9da37c1a05202470932fb00a8e9ffa169383490d7d5e68df89cec"
+  },
+  {
+    "level": 8,
+    "file": "08-twin-relay.m4a",
+    "programs": [],
+    "stream_groups": [],
+    "streams": [
+      {
+        "codec_name": "aac",
+        "sample_rate": "44100",
+        "channels": 2
+      }
+    ],
+    "format": {
+      "duration": "39.000000",
+      "size": "799323"
+    },
+    "levels": [
+      "mean_volume: -22.5 dB",
+      "max_volume: -3.3 dB"
+    ],
+    "sha256": "7ac494a46261c7c8e2ff900b8a2c84fb7f25bfa47a2e34849bb1c0fcd92b8091"
+  },
+  {
+    "level": 9,
+    "file": "09-dark-circuit.m4a",
+    "programs": [],
+    "stream_groups": [],
+    "streams": [
+      {
+        "codec_name": "aac",
+        "sample_rate": "44100",
+        "channels": 2
+      }
+    ],
+    "format": {
+      "duration": "39.000000",
+      "size": "832599"
+    },
+    "levels": [
+      "mean_volume: -22.9 dB",
+      "max_volume: -5.7 dB"
+    ],
+    "sha256": "613e4ecc8d591342afbf56d04b63ab9fb5e1e27162b4c2263b5243ebc4351fcd"
+  },
+  {
+    "level": 10,
+    "file": "10-vault-window.m4a",
+    "programs": [],
+    "stream_groups": [],
+    "streams": [
+      {
+        "codec_name": "aac",
+        "sample_rate": "44100",
+        "channels": 2
+      }
+    ],
+    "format": {
+      "duration": "39.000000",
+      "size": "805995"
+    },
+    "levels": [
+      "mean_volume: -22.7 dB",
+      "max_volume: -4.7 dB"
+    ],
+    "sha256": "4414c5a8fc698da2435c5b7b325f6d0529ebd440e87f2914b941cae7c97b022b"
+  },
+  {
+    "level": 11,
+    "file": "11-security-grid.m4a",
+    "programs": [],
+    "stream_groups": [],
+    "streams": [
+      {
+        "codec_name": "aac",
+        "sample_rate": "44100",
+        "channels": 2
+      }
+    ],
+    "format": {
+      "duration": "39.000000",
+      "size": "842929"
+    },
+    "levels": [
+      "mean_volume: -23.1 dB",
+      "max_volume: -8.1 dB"
+    ],
+    "sha256": "b142c4a44a2d1703f0834884f256dbeb4f72d8c925a57aeafd89c4159b0100b7"
+  },
+  {
+    "level": 12,
+    "file": "12-last-seeker.m4a",
+    "programs": [],
+    "stream_groups": [],
+    "streams": [
+      {
+        "codec_name": "aac",
+        "sample_rate": "44100",
+        "channels": 2
+      }
+    ],
+    "format": {
+      "duration": "39.000000",
+      "size": "801984"
+    },
+    "levels": [
+      "mean_volume: -21.7 dB",
+      "max_volume: -5.9 dB"
+    ],
+    "sha256": "d85fa3244e8d96bdfdabe810d1223221da35e84769ea8cf658c2fedbea8052dc"
+  }
+]

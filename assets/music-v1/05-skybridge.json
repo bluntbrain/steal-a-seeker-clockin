@@ -1,0 +1,18 @@
+{
+  "level": 5,
+  "title": "Skybridge",
+  "name": "05-skybridge",
+  "bpmDirection": 118,
+  "prompt": "Compose an ORIGINAL instrumental background cue for a small top-down stealth action mobile game. No references to existing songs or artists. No vocals, speech, sound effects, gunshots, alarms or footsteps. Maintain a consistent groove for a seamless repeating gameplay loop. Begin in the groove immediately, no long intro, no final crash or fade to silence. Keep the last phrase harmonically compatible with the first. Leave the midrange open for footsteps, shots and targeting sounds. Moderate dynamics, dry close percussion, cinematic suspense without overwhelming orchestral loudness. Tempo about 118 BPM. A rooftop chase at night: airy arpeggiated synths, a taut cello pulse, crisp restrained breakbeat percussion and a spacious low bass. High altitude suspense, agile rather than heavy.",
+  "provider": "ElevenLabs",
+  "model": "music_v1",
+  "requestedSeconds": 40,
+  "songId": "yEkJEAUYpASY1l6JGBr0",
+  "requestId": null,
+  "file": "05-skybridge.m4a",
+  "seconds": 39,
+  "sha256": "98da62733d185adaec26fe151bde6db9375e0f88f0d65226f3f5147ad265f632",
+  "bytes": 801362,
+  "rawSha256": "2202b49914f8116591307eba93800463c5c15a54a76290a43d1abc55ed9980a4",
+  "mix": "-21 LUFS target, -3 dBTP ceiling; circular one-second equal-power crossfade"
+}

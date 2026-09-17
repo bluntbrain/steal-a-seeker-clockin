@@ -1,0 +1,18 @@
+{
+  "level": 3,
+  "title": "Crossfire",
+  "name": "03-crossfire",
+  "bpmDirection": 116,
+  "prompt": "Compose an ORIGINAL instrumental background cue for a small top-down stealth action mobile game. No references to existing songs or artists. No vocals, speech, sound effects, gunshots, alarms or footsteps. Maintain a consistent groove for a seamless repeating gameplay loop. Begin in the groove immediately, no long intro, no final crash or fade to silence. Keep the last phrase harmonically compatible with the first. Leave the midrange open for footsteps, shots and targeting sounds. Moderate dynamics, dry close percussion, cinematic suspense without overwhelming orchestral loudness. Tempo about 116 BPM. A nimble action thriller: syncopated low strings, compact electronic drums, short brass accents and a moving bass ostinato. Energetic tactical tension, not a wall of sound.",
+  "provider": "ElevenLabs",
+  "model": "music_v1",
+  "requestedSeconds": 40,
+  "songId": "MXd5018N0gSPBUtTtUPB",
+  "requestId": null,
+  "file": "03-crossfire.m4a",
+  "seconds": 39,
+  "sha256": "e9581287a8fce633f4811c13888c2e7f02888d6f0d23eb985c56c15024e9a0eb",
+  "bytes": 807296,
+  "rawSha256": "c13dcb9d5a3b1ddba2cddfa481ea82c21b47ab8d5f04989ce0754e9a4b4e0ed8",
+  "mix": "-21 LUFS target, -3 dBTP ceiling; circular one-second equal-power crossfade"
+}

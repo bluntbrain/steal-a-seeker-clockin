@@ -1,0 +1,18 @@
+{
+  "level": 12,
+  "title": "Last Seeker",
+  "name": "12-last-seeker",
+  "bpmDirection": 128,
+  "prompt": "Compose an ORIGINAL instrumental background cue for a small top-down stealth action mobile game. No references to existing songs or artists. No vocals, speech, sound effects, gunshots, alarms or footsteps. Maintain a consistent groove for a seamless repeating gameplay loop. Begin in the groove immediately, no long intro, no final crash or fade to silence. Keep the last phrase harmonically compatible with the first. Leave the midrange open for footsteps, shots and targeting sounds. Moderate dynamics, dry close percussion, cinematic suspense without overwhelming orchestral loudness. Tempo about 128 BPM. The final heist: a memorable original minor-key cello motif, restrained heroic low brass, layered pulsing synth and compact cinematic drums. A determined epic thriller climax, still suitable beneath gameplay.",
+  "provider": "ElevenLabs",
+  "model": "music_v1",
+  "requestedSeconds": 40,
+  "songId": "WfsgaMWHAIz760bTfMoW",
+  "requestId": null,
+  "file": "12-last-seeker.m4a",
+  "seconds": 39,
+  "sha256": "d85fa3244e8d96bdfdabe810d1223221da35e84769ea8cf658c2fedbea8052dc",
+  "bytes": 801984,
+  "rawSha256": "8bc52ed03857987fad71f6407454b50515b5e63dcd6c187acac249e48ff74b28",
+  "mix": "-21 LUFS target, -3 dBTP ceiling; circular one-second equal-power crossfade"
+}

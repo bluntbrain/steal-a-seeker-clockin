@@ -311,7 +311,7 @@ export function combatLevel(mission:MissionId):LevelDefinition{
  if(n===8)level.targets=[phone,{x:9.8,y:3.4}];
  if(n===9){level.blockers.push(cover(8.55,.65,.25,4.05,'wall'));level.switches=[{x:5.7,y:11,kind:'power'}];level.gates=[{box:cover(8.55,4.7,2.8,.25,'wall'),mode:'power',power:1,period:10,openSeconds:5,phase:0}];}
  if(n===10)level.exitWindow={period:8,openSeconds:4,phase:0};
- level.combat={version:2,revision:5};
+ level.combat={version:2,revision:6};
  // The guided room keeps its scripted combat positions; new cover frames that route.
  if(n===1){level.blockers.push(cover(.65,.65,3.3,7.7,'wall'),cover(5,.65,2.5,3.5,'wall'),cover(8.6,15.6,2.75,.9,'crate'),cover(.8,9.1,1,1.5,'wall'),cover(8.8,12.8,2.5,.85,'wall'),cover(4.2,5,1.15,3,'wall'));level.patrols[2]!.route=[{x:4.4,y:2},{x:4.4,y:3}];}
  if(n>1){level.gates=undefined;level.switches=undefined;applyDenseLayout(level,n);}

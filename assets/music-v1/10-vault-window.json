@@ -1,0 +1,18 @@
+{
+  "level": 10,
+  "title": "Vault Window",
+  "name": "10-vault-window",
+  "bpmDirection": 124,
+  "prompt": "Compose an ORIGINAL instrumental background cue for a small top-down stealth action mobile game. No references to existing songs or artists. No vocals, speech, sound effects, gunshots, alarms or footsteps. Maintain a consistent groove for a seamless repeating gameplay loop. Begin in the groove immediately, no long intro, no final crash or fade to silence. Keep the last phrase harmonically compatible with the first. Leave the midrange open for footsteps, shots and targeting sounds. Moderate dynamics, dry close percussion, cinematic suspense without overwhelming orchestral loudness. Tempo about 124 BPM. A timed vault escape: clocklike high woodblock, low string ostinato, understated hybrid percussion, short rising brass figures. Urgency builds around a repeating countdown motif.",
+  "provider": "ElevenLabs",
+  "model": "music_v1",
+  "requestedSeconds": 40,
+  "songId": "6yaVHMIO3KyrPuF29r6I",
+  "requestId": null,
+  "file": "10-vault-window.m4a",
+  "seconds": 39,
+  "sha256": "4414c5a8fc698da2435c5b7b325f6d0529ebd440e87f2914b941cae7c97b022b",
+  "bytes": 805995,
+  "rawSha256": "59e6dab37f266be008e452eaee1fa61540c3cb3e61771d69865c8b812d775686",
+  "mix": "-21 LUFS target, -3 dBTP ceiling; circular one-second equal-power crossfade"
+}

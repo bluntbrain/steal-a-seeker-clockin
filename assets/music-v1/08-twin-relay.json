@@ -1,0 +1,18 @@
+{
+  "level": 8,
+  "title": "Twin Relay",
+  "name": "08-twin-relay",
+  "bpmDirection": 120,
+  "prompt": "Compose an ORIGINAL instrumental background cue for a small top-down stealth action mobile game. No references to existing songs or artists. No vocals, speech, sound effects, gunshots, alarms or footsteps. Maintain a consistent groove for a seamless repeating gameplay loop. Begin in the groove immediately, no long intro, no final crash or fade to silence. Keep the last phrase harmonically compatible with the first. Leave the midrange open for footsteps, shots and targeting sounds. Moderate dynamics, dry close percussion, cinematic suspense without overwhelming orchestral loudness. Tempo about 120 BPM. A two-stage rooftop heist: paired synth pulses, alternating pizzicato and bowed cello phrases, tight toms and restrained cymbals. The motif builds then returns to its starting tension.",
+  "provider": "ElevenLabs",
+  "model": "music_v1",
+  "requestedSeconds": 40,
+  "songId": "wtpNBuqNn2cVq25PCm9h",
+  "requestId": null,
+  "file": "08-twin-relay.m4a",
+  "seconds": 39,
+  "sha256": "7ac494a46261c7c8e2ff900b8a2c84fb7f25bfa47a2e34849bb1c0fcd92b8091",
+  "bytes": 799323,
+  "rawSha256": "7765fbad34cef3fad9b64b8dd834baf2da0a92b82d7ce7d09000166290e1b273",
+  "mix": "-21 LUFS target, -3 dBTP ceiling; circular one-second equal-power crossfade"
+}
