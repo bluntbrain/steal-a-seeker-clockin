@@ -1,0 +1,18 @@
+{
+  "checkedAt": "2026-09-17T10:00:16.286320+00:00",
+  "deploymentId": "29cbcb9f-23fc-4627-96ff-a2302c904047",
+  "deploymentStatus": "SUCCESS",
+  "service": "seeker-api",
+  "health": {
+    "ok": true,
+    "cluster": "solana:mainnet"
+  },
+  "week": "2026-09-14",
+  "rulesHash": "5f8cc7939b12bd941e07ed3bca9ed0c0e3fece3892d7272e6cb248f107955d21",
+  "apkSha256": "62e7ebdb4b4541a532974f248b8d0b3c498fe2f271f10421d0da75504b67f947",
+  "apkBytes": 122920251,
+  "gameTests": 184,
+  "backendTests": 70,
+  "realMoneyPaymentPerformed": false,
+  "physicalDeviceTestPerformed": false
+}

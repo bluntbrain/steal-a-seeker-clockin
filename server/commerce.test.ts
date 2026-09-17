@@ -578,7 +578,8 @@ test('credit redemption is atomic, idempotent, wallet-bound and cannot overspend
  assert.equal((await app.inject({method:'POST',url:'/me/unequip',headers:u.headers,payload:{slot:'access'}})).statusCode,400);
  await assert.rejects(service.redeem(u.wallet,'signal-runner'),/Not enough/);assert.equal((await service.me(u.wallet)).credits,200);
  await assert.rejects(service.redeem(other.wallet,'night-courier'),/Not enough/);await assert.rejects(service.redeem(u.wallet,'campaign'),/Unknown/);
- const races=await Promise.allSettled([service.redeem(u.wallet,'escape-trail'),service.redeem(u.wallet,'signal-runner')]);assert.equal(races.filter(r=>r.status==='fulfilled').length,1);assert((await service.me(u.wallet)).credits!>=0);
+ const refill=await quote(other,'credits-500'),refillSig=b58(randomBytes(64));transactions.set(refillSig,paidTx(refill,refillSig));await service.attach(other.wallet,refill.id,refillSig);
+ const races=await Promise.allSettled([service.redeem(other.wallet,'escape-trail'),service.redeem(other.wallet,'signal-runner')]);assert.equal(races.filter(r=>r.status==='fulfilled').length,1);assert((await service.me(other.wallet)).credits!>=0);
 });
 test('free campaign grants verified credits once; forged progress and invalid replays grant none',async()=>{
  const {CampaignService}=await import('./campaign-service'),rules=(await import('../shared/rules-manifest.json')).default;
@@ -586,7 +587,7 @@ test('free campaign grants verified credits once; forged progress and invalid re
  await service.syncProgress(u.wallet,{version:1,missions:{practice:{stars:3,seconds:1,score:99999,battery:100,completions:999}}});assert.equal((await service.me(u.wallet)).credits,0);
  await assert.rejects(campaign.submit(u.wallet,'practice',rules.rulesHash,{version:1,chunks:[{ticks:1,x:0,y:0,buttons:0}]}),/extraction/);
  const replay=fixtureReplay().replay;await Promise.all([campaign.submit(u.wallet,'practice',rules.rulesHash,replay),campaign.submit(u.wallet,'practice',rules.rulesHash,replay)]);
- const balance=(await service.me(u.wallet)).credits!;assert(balance>=100&&balance<=150);await campaign.submit(u.wallet,'practice',rules.rulesHash,replay);assert.equal((await service.me(u.wallet)).credits,balance);assert(!(await service.me(u.wallet)).entitlements.includes('campaign'));
+ const balance=(await service.me(u.wallet)).credits!;assert(balance>=50&&balance<=60);await campaign.submit(u.wallet,'practice',rules.rulesHash,replay);assert.equal((await service.me(u.wallet)).credits,balance);assert(!(await service.me(u.wallet)).entitlements.includes('campaign'));
 });
 
 

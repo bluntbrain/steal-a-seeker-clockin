@@ -7,7 +7,7 @@
 - All 12 campaign missions are free, with unlimited retries and no wallet requirement. Unlock them through play.
 - Leaderboard standings and weekly practice are free to view/play. A one-time Game Pass unlocks five ranked attempts per mission across three weekly missions. No paid extra attempts.
 - Live pass: fixed 500 SKR OR $10 worth of SOL, plus network fees. These are alternative prices, not a claim that 500 SKR equals $10. Existing backend test switch reduces both. Every order freezes its exact amount.
-- Credits are game currency, never withdrawable and never a token prize. First clear: 100 credits; each additional star: 25 credits. Total available from a three-star campaign: 1,800 credits. Replaying the same result does not mint credits again.
+- Credits are game currency, never withdrawable and never a token prize. Updated progression: first clear 50 credits; each additional star 5 credits. Total available from a three-star campaign: 720 credits. The first outfit costs 300, earned after 5 perfect or 6 ordinary clears. Replaying the same result does not mint credits again. Balances earned before this rebalance are kept.
 - Outfits, trails and room finishes cost credits. Existing purchased items stay owned. Credit packs: 500/$1, 1,500/$2.50, 3,500/$5, payable in SKR or SOL at the quote rate. Testing discount remains server-controlled.
 - Bought gameplay advantages must never enter ranked weekly play. First release prioritizes permanent cosmetic unlocks. A campaign-only protective lining can be added only with matching replay verification; do not sell an unimplemented power-up.
 - A credit plus button appears in the shared navigation header and as a compact balance during gameplay. Gameplay pauses before opening a store screen.

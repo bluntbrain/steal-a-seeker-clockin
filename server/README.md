@@ -25,7 +25,7 @@ Tests assert the database is named `seeker_clockin_test` before truncating. They
 
 Migration 013 adds wallet credit balances, an append-only `credit_ledger` and per-mission rewarded stars. It permits credit-funded entitlements with no payment order ID. Previous migrations remain unchanged and checksum-verified.
 
-- `POST /campaign/runs`: authenticated, pass not required. Server replays a complete extraction. Current rules can grant 100/125/150 credits for 1/2/3 stars; upgrades grant only the difference. Wallet row locks and ledger source uniqueness prevent duplicate awards.
+- `POST /campaign/runs`: authenticated, pass not required. Server replays a complete extraction. Current rules grant 50/55/60 credits for 1/2/3 stars; upgrades grant only the difference. A 300-credit first outfit takes 5 perfect or 6 ordinary clears. Existing credits and owned items are retained. Wallet row locks and ledger source uniqueness prevent duplicate awards.
 - `PUT /me/progress`: authenticated, pass not required. Merges campaign bests. This client-reported data never grants credits or ranks.
 - `POST /credits/redeem`: authenticated `{sku}` from the store catalog. One atomic transaction locks the wallet, checks balance/ownership, debits, grants ownership and equips. Repeating an owned redemption does not charge again.
 - `PUT /me/equipment`: equips an owned cosmetic. `POST /me/unequip` clears a cosmetic slot without revoking ownership or changing credits.

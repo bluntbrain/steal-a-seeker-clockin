@@ -9,7 +9,7 @@ export const STORE_ITEMS=[
  {id:'signal-runner',name:'Frost Runner',price:400,kind:'outfit',description:'Snowflake hood. Mint winter trim.'},
  {id:'circuit-scout',name:'Circuit Scout',price:500,kind:'outfit',description:'Mint circuit stripes on charcoal.'},
  {id:'archive-keeper',name:'Archive Keeper',price:600,kind:'outfit',description:'Cream jacket and tan satchel straps.'},
- {id:'escape-trail',name:'Escape trail',price:200,kind:'trail',description:'Mint light follows you while carrying the phone. No speed boost.'},
+ {id:'escape-trail',name:'Escape trail',price:300,kind:'trail',description:'Mint light follows you while carrying the phone. No speed boost.'},
  {id:'profile-frame',name:'Courier frame',price:150,kind:'frame',description:'A mint finish for your profile.'},
  {id:'rack-theme',name:'Vault finish',price:250,kind:'rack',description:'A mint-lit finish for your collection.'},
 ] as const;
@@ -17,7 +17,11 @@ export type StoreItemId=typeof STORE_ITEMS[number]['id'];
 export const RETIRED_ITEMS:readonly string[]=['profile-frame','rack-theme'];
 export const isStoreItemForSale=(id:string)=>STORE_ITEMS.some(i=>i.id===id)&&!RETIRED_ITEMS.includes(id);
 export type CreditPackId=typeof CREDIT_PACKS[number]['id'];
-export function creditReward(stars:number){return stars>=1&&stars<=3&&Number.isInteger(stars)?100+(stars-1)*25:0;}
+// The 300-credit starter outfit takes five perfect clears or six basic clears.
+// Replay upgrades earn only the extra stars; existing balances are never reset.
+export const CAMPAIGN_CLEAR_CREDITS=50;
+export const CAMPAIGN_STAR_BONUS=5;
+export function creditReward(stars:number){return stars>=1&&stars<=3&&Number.isInteger(stars)?CAMPAIGN_CLEAR_CREDITS+(stars-1)*CAMPAIGN_STAR_BONUS:0;}
 export type LocalInventory={version:1;balance:number;stars:Record<string,number>;owned:StoreItemId[];equipment:Record<string,string>};
 export const emptyInventory=():LocalInventory=>({version:1,balance:0,stars:{},owned:[],equipment:{}});
 export function earnCredits(s:LocalInventory,mission:string,stars:number):LocalInventory{const old=s.stars[mission]??0,delta=creditReward(stars)-creditReward(old);return delta>0?{...s,balance:s.balance+delta,stars:{...s.stars,[mission]:stars}}:s;}

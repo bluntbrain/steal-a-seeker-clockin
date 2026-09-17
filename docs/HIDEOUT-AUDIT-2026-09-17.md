@@ -14,7 +14,7 @@ Replaced those paths with six separate outfits generated from the supplied `02-c
 | Circuit Scout | 500 credits | Mint circuit stripes |
 | Archive Keeper | 600 credits | Cream jacket and tan satchel straps |
 | Ghost Signal | Clear all 3 scored weekly missions | Glass-grey hood and mint pack; permanent earned outfit |
-| Escape trail | 200 credits | Mint trail while moving with the phone; no speed bonus; off with reduced effects |
+| Escape trail | 300 credits | Mint trail while moving with the phone; no speed bonus; off with reduced effects |
 | Courier frame | Retired from new sales | Previously only a small border; existing ownership kept and legacy card border supported |
 | Vault finish | Retired from new sales | Previously only a Hideout border; existing ownership kept |
 | Phones | Complete campaign missions | Recovered collection and inspection, not a purchasable SKU |
