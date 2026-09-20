@@ -40,3 +40,18 @@ test('assisted taps preserve all eight guided tutorial actions',async()=>{
  for(let i=0;i<GUIDE_STEPS.length;i++){const target=guideTarget(i,s)!;const command=guideCommand(i,assistedCombatTap(s,target.x,target.y,i+1));assert(command,`Guide action ${i} accepted`);step(s,{...idleInput(),command});let budget=600;while(!guideDone(i,s)&&s.status==='playing'&&budget--)step(s,idleInput());assert(guideDone(i,s),`Guide action ${i} completed`);}
  assert.equal(s.status,'won');
 });
+
+
+test('Dark Circuit gate and switch label taps activate the linked switch and open the passage',async()=>{
+ const {mechanismHint}=await import('../src/controls/mechanisms');
+ for(const target of ['gate','label']){
+  const l=combatLevel('power-trade');l.patrols=[];const s=initialState('power-trade',l),b=l.gates![0]!.box,p=l.switches![0]!;
+  assert(s.closedGates[0]);assert.match(mechanismHint(s,l)!,/Tap.*switch/);
+  const tap=target==='gate'?{x:b.x+b.w/2,y:b.y+b.h/2}:{x:p.x,y:p.y-1};
+  const command=assistedCombatTap(s,tap.x,tap.y,1);assert.equal(command.kind,'switch');assert.equal(command.target,0);
+  step(s,{...idleInput(),command});assert.match(mechanismHint(s,l)!,/Moving/);
+  let budget=1800;while(!s.activations&&s.status==='playing'&&budget--)step(s,idleInput());step(s,idleInput());
+  assert.equal(s.activations,1);assert.equal(s.power,1);assert.equal(s.closedGates[0],false);assert.match(mechanismHint(s,l)!,/Gate open/);
+  assert(!s.blockers.some(v=>v.x===b.x&&v.y===b.y&&v.w===b.w&&v.h===b.h),'opened gate removed from collision');
+ }
+});

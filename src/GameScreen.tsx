@@ -4,7 +4,7 @@ import CreditBalance from './components/CreditBalance';
 import {localTestMission} from './playtest/mission';
 import {combatLevel} from './game/combat-levels';
 import {assistedCombatTap} from './controls/tapDestination';
-import {PhoneObjectivePill,SecurityEntrances} from './components/ObjectiveSignals';
+import {PhoneObjectivePill,SecurityEntrances,MechanismLabels} from './components/ObjectiveSignals';
 import CampaignConfetti from './components/CampaignConfetti';
 import CompletionCard from './campaign/CompletionCard';
 import {completedCampaign,campaignSummary,nextCampaignMission} from './campaign/completion';
@@ -229,7 +229,8 @@ export function Game({rankTicket,paidPlay,dailyReturn,paidReturn,onRankStart,onR
    <GestureDetector gesture={combatMode?tapBoard:Gesture.Tap().enabled(false)}><View testID="game-board" style={[s.board,{width:size+2,height:boardHeight+2}]}>
     <GameCanvas size={size} input={input} game={game} alpha={alpha} clock={clock} level={level} appearance={{...economy.equipment,reducedEffects:settings.reducedEffects}}/>
     {combatMode&&<SecurityEntrances level={level} state={hud} size={size} reduced={!!settings.reducedEffects}/>}
-    {!guide.active&&hud.status==='playing'&&<PhoneObjectivePill state={hud} total={level.targets?.length??1}/>}
+    {!guide.active&&hud.status==='playing'&&<PhoneObjectivePill state={hud} total={level.targets?.length??1} level={level}/>}
+    <MechanismLabels level={level} state={hud} size={size}/>
     <View pointerEvents="none" style={StyleSheet.absoluteFill}><Text style={[s.mapLabel,{top:size/12*(level.exit.y+.23),left:size/12*level.exit.x,width:size/12*level.exit.w,color:'#d6f4e4'}]}>EXIT</Text></View>
 
     {!!(contextHint||coach.text)&&!paused&&hud.status==='playing'&&<View pointerEvents="none" testID="security-banner" accessibilityLiveRegion="polite" style={[s.contextToast,alarmOn&&{backgroundColor:'#3A171FEF'}]}><Text style={s.contextText} numberOfLines={2}>{contextHint||coach.text}</Text></View>}

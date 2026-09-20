@@ -1,0 +1,13 @@
+{
+  "passed": true,
+  "scope": "Explicit fixture unlocks mission 9. Actual pointer tap on gate, real gameplay and guards; no simulation mutation.",
+  "checks": [
+    "briefing and switch instruction visible",
+    "gate tap walks to linked switch",
+    "switch activates and gate opens",
+    "labels reflect actual power state",
+    "no browser exceptions"
+  ],
+  "hp": 100,
+  "errors": []
+}

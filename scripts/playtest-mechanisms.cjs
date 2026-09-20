@@ -1,0 +1,15 @@
+const {chromium}=require('playwright'),fs=require('node:fs'),assert=require('node:assert/strict');
+(async()=>{const browser=await chromium.launch({headless:true,executablePath:'/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'});try{
+ const p=await browser.newPage({viewport:{width:390,height:844}}),errors=[];p.on('pageerror',e=>errors.push(e.message));
+ await p.addInitScript(()=>{localStorage.setItem('seeker.combat-tutorial.v2','done');const ids=['practice','cone-lesson','battery-dash','crossing-signals','sweep-window','narrow-crossing','false-footsteps','warden-gate','power-trade','two-targets','silent-circuit','last-vault'];localStorage.setItem('seeker.campaign.progress.v1',JSON.stringify({version:1,missions:Object.fromEntries(ids.map(id=>[id,{stars:1,seconds:60,score:1000,battery:70,completions:1}]))}));});
+ await p.goto('http://127.0.0.1:8787/?build=clear-gates');await p.getByTestId('mission-node-9').click();await p.screenshot({path:'verification/mechanisms/briefing.png'});await p.getByRole('button',{name:/^Start /}).click();await p.waitForFunction(()=>window.__SEEKER_MVP__?.snapshot().ticks>0);await p.waitForTimeout(400);
+ assert.match(await p.getByTestId('phone-objective').innerText(),/Tap.*switch/);assert.match(await p.getByTestId('gate-label-0').innerText(),/LOCKED/);await p.screenshot({path:'verification/mechanisms/closed.png'});
+ const s=await p.evaluate(()=>window.__SEEKER_MVP__.snapshot()),b=s.definition.gates[0].box,box=await p.getByTestId('game-board').boundingBox();
+ await p.mouse.click(box.x+1+(b.x+b.w/2)/12*(box.width-2),box.y+1+(b.y+b.h/2)/20*(box.height-2));
+ await p.waitForFunction(()=>window.__SEEKER_MVP__.snapshot().combat.order?.kind==='switch');
+ await p.waitForFunction(()=>document.querySelector('[data-testid="phone-objective"]')?.textContent.includes('Moving'));
+ await p.waitForFunction(()=>{const s=window.__SEEKER_MVP__.snapshot();return !s.closedGates[0]||s.status!=='playing';},null,{timeout:25000});
+ const after=await p.evaluate(()=>window.__SEEKER_MVP__.snapshot());await p.screenshot({path:'verification/mechanisms/after-gate-tap.png'});assert.equal(after.closedGates[0],false,'courier must reach and activate the switch');
+ await p.waitForTimeout(500);assert.match(await p.getByTestId('gate-label-0').innerText(),/OPEN/);assert.match(await p.getByTestId('switch-label-0').innerText(),/ON/);await p.screenshot({path:'verification/mechanisms/open.png'});
+ assert.deepEqual(errors,[]);fs.writeFileSync('verification/mechanisms/report.json',JSON.stringify({passed:true,scope:'Explicit fixture unlocks mission 9. Actual pointer tap on gate, real gameplay and guards; no simulation mutation.',checks:['briefing and switch instruction visible','gate tap walks to linked switch','switch activates and gate opens','labels reflect actual power state','no browser exceptions'],hp:after.combat.hp,errors},null,2));console.log('Mechanism browser checks passed');
+ }finally{await browser.close();}})().catch(e=>{console.error(e);process.exitCode=1});

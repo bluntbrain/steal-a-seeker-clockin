@@ -4,6 +4,7 @@ import {intersectsBox} from '../game/geometry';
 import {sightDistance} from '../game/guards';
 import type {LevelDefinition,Point} from '../game/level';
 import type {GameState} from '../game/simulation';
+import {gateSwitchIndex} from './mechanisms';
 
 function valid(p:Point,l:LevelDefinition){'worklet';return p.x>.65&&p.y>.65&&p.x<l.width-.65&&p.y<l.height-.65&&!l.blockers.some(b=>intersectsBox(p.x,p.y,b,.33));}
 /** Input assistance only. The chosen floor coordinates are recorded in the
@@ -39,7 +40,15 @@ export function nearestReachableFloor(from:Point,tap:Point,l:LevelDefinition):Po
  return {x:Math.round(best.x*10000)/10000,y:Math.round(best.y*10000)/10000};
 }
 export function assistedCombatTap(s:GameState,x:number,y:number,seq:number):CombatCommand{
- 'worklet';const l={...s.definition!,blockers:s.blockers},raw=combatTap(s,x,y,seq);
+ 'worklet';const l={...s.definition!,blockers:s.blockers};let raw=combatTap(s,x,y,seq);
+ // A locked gate is a clue to its switch, not an invitation to walk into it.
+ if(raw.kind!=='attack'&&raw.kind!=='phone'){
+  for(let i=0;i<(l.gates?.length??0);i++){const b=l.gates![i]!.box,index=gateSwitchIndex(l,i),p=l.switches?.[index];
+   if(p&&s.closedGates[i]&&x>=b.x-.15&&x<=b.x+b.w+.15&&y>=b.y-.7&&y<=b.y+b.h+.15&&valid(p,l)&&findPath(s,p,l).length){raw={seq,kind:'switch',target:index,x:p.x,y:p.y};break;}
+  }
+  if(raw.kind==='move'||raw.kind==='stop')for(let i=0;i<(l.switches?.length??0);i++){const p=l.switches![i]!;if(Math.abs(x-p.x)<.8&&y>=p.y-1.25&&y<=p.y+.55){raw={seq,kind:'switch',target:i,x:p.x,y:p.y};break;}}
+ }
+
  if(raw.kind==='stop')return raw;
  if(raw.kind==='attack'){
   const g=s.guards[raw.target]!,d=Math.hypot(g.x-s.x,g.y-s.y);
