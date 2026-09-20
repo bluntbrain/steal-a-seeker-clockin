@@ -1,0 +1,14 @@
+{
+  "provider": "built-in image_gen",
+  "generatedOn": "2026-09-20",
+  "referenceSheet": "design/visual-v2/completion-options/seeker-phone-sheet.png",
+  "source": "design/visual-v2/completion-options/assets/courier-celebration-source.png",
+  "asset": "assets/campaign-celebration/hero.webp",
+  "sha256": "3c64866f169f22b39c6d0f74878f8c18faab8476da36fea1f69dcf7d4e111841",
+  "notes": [
+    "Rear phone geometry based on the three supplied Seeker photographs.",
+    "Transparent text-free hero; stats and controls rendered live.",
+    "No baked-in confetti; native-driver paper animation.",
+    "Other equipped outfits keep their existing correct portraits."
+  ]
+}

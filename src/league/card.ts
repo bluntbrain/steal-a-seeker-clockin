@@ -1,10 +1,13 @@
+import celebration from '../../assets/campaign-celebration/hero.embedded.json';
 import portraits from '../../assets/costumes-v4/portraits.embedded.json';
 import {costumeFor} from '../../shared/costumes';
 import background from '../../assets/courier-card-v3/background.embedded.json';
 export const CARD_WIDTH=1080,CARD_HEIGHT=1620,CARD_RATIO=CARD_HEIGHT/CARD_WIDTH;
 export const CARD_BACKGROUND=background.uri;
 export const CARD_PORTRAIT={x:526,y:350,width:478,height:717};
-export const cardPortrait=(d:CourierCardData)=>portraits[costumeFor(d.outfit).asset];
+export const cardPortrait=(d:CourierCardData)=>d.campaign&&costumeFor(d.outfit).id==='default'?celebration.uri:portraits[costumeFor(d.outfit).asset];
+export const cardHeight=(d:CourierCardData)=>d.campaign?1450:CARD_HEIGHT;
+export const cardPortraitRect=(d:CourierCardData)=>d.campaign?{x:40,y:185,width:1000,height:970}:CARD_PORTRAIT;
 export type CourierCardData={week:string;rank:number|null;participants?:number;points:number;cleared:number;ticks:number;domain:string|null;wallet:string;final:boolean;local:boolean;earned:boolean;outfit?:string;frame?:string;campaign?:{cleared:number;stars:number;score:number;seconds:number}};
 export type CardText={key:string;text:string;x:number;y:number;width:number;size:number;color:string;weight:'400'|'700'|'900';align?:'left'|'center';spacing?:number};
 const esc=(s:string)=>s.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&apos;'}[c]!));
@@ -25,20 +28,14 @@ export function cardLayout(d:CourierCardData):CardText[]{
  const blocks:CardText[]=[],put=(key:string,text:string,x:number,y:number,width:number,size:number,color='#CFE6E4',weight:CardText['weight']='700',align:CardText['align']='left',spacing=0)=>blocks.push({key,text,x,y,width,size,color,weight,align,spacing});
  if(d.campaign){
   const c=d.campaign;
-  put('brand','STEAL A SEEKER',76,122,928,26,'#AECAC3','700','left',5);
-  put('name','EVERY SEEKER. SECURED.',76,186,928,51,'#E2F2EB','900');
-  put('status','CAMPAIGN COMPLETE',76,365,435,24,'#F3D285','700','left',2);
-  put('rank',`${natural(c.cleared)}`,70,437,440,180,'#C3EAE1','900');
-  put('rank-label','OF 12 HEISTS CLEARED',80,657,440,26,'#C0E0D5','700');
-  put('participants','Warehouse · Rooftops · Vault',80,706,440,22,'#91ADA3','400');
-  put('record','MASTER COURIER',76,1141,928,29,'#F3D285','700','center',4);
-  [String(natural(c.stars))+' / 36',count(c.score),cardTime(c.seconds*30)].forEach((v,i)=>{
-   put('stat-'+i,v,[76,393,710][i]!,1222,294,Math.min(62,294/(v.length*.62)),'#D6F0E7','900','center');
-   put('label-'+i,['STARS EARNED','BEST SCORES','BEST TIMES'][i]!,[76,393,710][i]!,1300,294,21,'#9EBCB2','700','center',1.5);
+  put('status',`${natural(c.cleared)} / 12 HEISTS`,40,35,1000,31,'#ACCBC6','700','center',5);
+  put('name','Every Seeker. Secured.',25,101,1030,77,'#F6F6F5','900','center');
+  put('meaning','Personal bests',330,1135,420,30,'#94ACA4','700','center');
+  [String(natural(c.stars))+' / 36',count(c.score),cardTime(Math.round(c.seconds*30))].forEach((v,i)=>{
+   put('stat-'+i,v,[20,380,740][i]!,1255,320,Math.min(68,320/(v.length*.57)),'#E1F2EC','900','center');
+   put('label-'+i,['STARS','BEST SCORE','BEST TIME'][i]!,[20,380,740][i]!,1333,320,27,'#9EBCB2','700','center',1);
   });
-  put('meaning','Personal campaign record · best run stats per mission',76,1355,928,21,'#819F94','400','center');
-  put('qualifier',d.local?'Played in browser':'Played on Android',76,1410,928,23,'#9BB7AD','400','center');
-  put('site','stealaseeker.bluntbrain.com',76,1487,928,21,'#A5C5B9','400','center',2);
+  put('qualifier',d.local?'Personal campaign record · Played in browser':'Personal campaign record · Played on Android',30,1400,1020,22,'#8FA99E','400','center');
   return blocks;
  }
  const name=d.domain||shortWallet(d.wallet),cleared=Math.min(3,natural(d.cleared)),placed=d.rank!==null&&natural(d.rank)>0,rank=d.local?'TEST':placed?'#'+count(d.rank!):'—',earned=d.earned&&cleared===3;
@@ -59,4 +56,8 @@ export function cardLayout(d:CourierCardData):CardText[]{
  return blocks;
 }
 export function cardDescription(d:CourierCardData){return cardLayout(d).map(b=>b.text).join('. ')+'. Outfit: '+costumeFor(d.outfit).name;}
-export function cardSvg(d:CourierCardData){return `<svg xmlns="http://www.w3.org/2000/svg" width="${CARD_WIDTH}" height="${CARD_HEIGHT}" viewBox="0 0 ${CARD_WIDTH} ${CARD_HEIGHT}"><image href="${CARD_BACKGROUND}" width="${CARD_WIDTH}" height="${CARD_HEIGHT}"/><image href="${cardPortrait(d)}" x="${CARD_PORTRAIT.x}" y="${CARD_PORTRAIT.y}" width="${CARD_PORTRAIT.width}" height="${CARD_PORTRAIT.height}"/>${d.frame==='profile-frame'?'<rect x="34" y="34" width="1012" height="1552" rx="28" fill="none" stroke="#CFE6E4" stroke-width="8"/>':''}<g font-family="Arial,sans-serif">${cardLayout(d).map(b=>`<text x="${b.align==='center'?b.x+b.width/2:b.x}" y="${b.y}" dominant-baseline="text-before-edge" text-anchor="${b.align==='center'?'middle':'start'}" font-size="${b.size}" font-weight="${b.weight}" letter-spacing="${b.spacing??0}" fill="${b.color}">${esc(b.text)}</text>`).join('')}</g></svg>`;}
+export function cardSvg(d:CourierCardData){
+ const height=cardHeight(d),p=cardPortraitRect(d);
+ const bg=d.campaign?'<rect width="1080" height="1450" fill="#14211E"/><path d="M30 1155 H310 M770 1155 H1050 M360 1200 V1368 M720 1200 V1368" stroke="#40564E" stroke-width="2"/><path d="M180 1198 L187 1214 L205 1216 L191 1228 L195 1246 L180 1237 L165 1246 L169 1228 L155 1216 L173 1214 Z" fill="#C3EAE1"/><g fill="#E7CE8E"><rect x="516" y="1216" width="12" height="28" rx="2"/><rect x="535" y="1198" width="12" height="46" rx="2"/><rect x="554" y="1208" width="12" height="36" rx="2"/></g><g fill="none" stroke="#E7CE8E" stroke-width="5" stroke-linecap="round"><circle cx="900" cy="1224" r="19"/><path d="M900 1211 V1224 H910 M894 1198 H906 M900 1198 V1204"/></g>':`<image href="${CARD_BACKGROUND}" width="${CARD_WIDTH}" height="${CARD_HEIGHT}"/>`;
+ return `<svg xmlns="http://www.w3.org/2000/svg" width="${CARD_WIDTH}" height="${height}" viewBox="0 0 ${CARD_WIDTH} ${height}">${bg}<image href="${cardPortrait(d)}" x="${p.x}" y="${p.y}" width="${p.width}" height="${p.height}" preserveAspectRatio="xMidYMid meet"/>${!d.campaign&&d.frame==='profile-frame'?'<rect x="34" y="34" width="1012" height="1552" rx="28" fill="none" stroke="#CFE6E4" stroke-width="8"/>':''}<g font-family="Arial,sans-serif">${cardLayout(d).map(b=>`<text x="${b.align==='center'?b.x+b.width/2:b.x}" y="${b.y}" dominant-baseline="text-before-edge" text-anchor="${b.align==='center'?'middle':'start'}" font-size="${b.size}" font-weight="${b.weight}" letter-spacing="${b.spacing??0}" fill="${b.color}">${esc(b.text)}</text>`).join('')}</g></svg>`;
+}

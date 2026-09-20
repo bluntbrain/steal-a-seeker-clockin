@@ -15,3 +15,14 @@ test('campaign export labels real aggregated progress, never a weekly rank or ca
 test('two phone instructions explain every pickup and delivery stage',()=>{
  assert.equal(phoneObjective({delivered:0,carrying:false},2),'Take phone 1 of 2');assert.match(phoneObjective({delivered:0,carrying:true},2),/Return phone 1 of 2/);assert.equal(phoneObjective({delivered:1,carrying:false},2),'One secured. Take phone 2 of 2');assert.match(phoneObjective({delivered:1,carrying:true},2),/Return phone 2 of 2/);assert.equal(phoneObjective({delivered:2,carrying:false},2),'All phones secured');
 });
+
+test('celebration export fits its own dimensions and preserves equipped outfits',async()=>{
+ const {cardHeight,CARD_WIDTH,cardPortrait,cardPortraitRect,cardSvg}=await import('../src/league/card');
+ const {COSTUMES}=await import('../shared/costumes');
+ const d:CourierCardData={week:'',rank:null,points:0,cleared:0,ticks:0,domain:null,wallet:'browser-playtest',local:true,earned:false,final:true,campaign:{cleared:12,stars:34,score:143845,seconds:330.7333333}};
+ const svg=cardSvg(d);assert(svg.includes(`width="1080" height="1450"`));assert(svg.includes('Every Seeker. Secured.'));assert(svg.includes('05:30.73'));assert(!svg.includes('Replay'),'export contains achievement, not UI buttons');
+ for(const b of cardLayout(d)){assert(b.x+b.width<=CARD_WIDTH);assert(b.y+b.size*1.18<cardHeight(d));}
+ const p=cardPortraitRect(d);assert(p.x+p.width<=CARD_WIDTH);assert(p.y+p.height<cardHeight(d));
+ assert.equal(new Set(COSTUMES.map(c=>cardPortrait({...d,outfit:c.id}))).size,6,'equipped outfit remains distinct in the finale');
+ assert.deepEqual(cardLayout({...d,outfit:'night-courier'}),cardLayout(d),'outfit cannot alter earned stats');
+});

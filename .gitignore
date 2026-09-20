@@ -52,3 +52,6 @@ credentials.env
 *signing-backup*.zip
 mainnet-treasury.json
 devnet-treasury.json
+
+# Regenerated campaign celebration preview
+design/visual-v2/completion-options/preview.js
