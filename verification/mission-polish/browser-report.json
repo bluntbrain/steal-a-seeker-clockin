@@ -1,0 +1,12 @@
+{
+  "passed": true,
+  "scope": "11 saved-win fixtures plus actual pointer tutorial completion; responsive finale and PNG export",
+  "errors": [],
+  "checks": [
+    "no next mission when campaign complete",
+    "replay left / share right",
+    "390x844 and 360x640 finale fits",
+    "real PNG download",
+    "X compose entry without automatic posting"
+  ]
+}

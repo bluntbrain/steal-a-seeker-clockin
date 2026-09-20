@@ -5,7 +5,7 @@ export const CARD_WIDTH=1080,CARD_HEIGHT=1620,CARD_RATIO=CARD_HEIGHT/CARD_WIDTH;
 export const CARD_BACKGROUND=background.uri;
 export const CARD_PORTRAIT={x:526,y:350,width:478,height:717};
 export const cardPortrait=(d:CourierCardData)=>portraits[costumeFor(d.outfit).asset];
-export type CourierCardData={week:string;rank:number|null;participants?:number;points:number;cleared:number;ticks:number;domain:string|null;wallet:string;final:boolean;local:boolean;earned:boolean;outfit?:string;frame?:string};
+export type CourierCardData={week:string;rank:number|null;participants?:number;points:number;cleared:number;ticks:number;domain:string|null;wallet:string;final:boolean;local:boolean;earned:boolean;outfit?:string;frame?:string;campaign?:{cleared:number;stars:number;score:number;seconds:number}};
 export type CardText={key:string;text:string;x:number;y:number;width:number;size:number;color:string;weight:'400'|'700'|'900';align?:'left'|'center';spacing?:number};
 const esc=(s:string)=>s.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&apos;'}[c]!));
 const natural=(n:number)=>Number.isFinite(n)?Math.max(0,Math.floor(n)):0;
@@ -19,10 +19,28 @@ export function cardWeek(week:string){
  const a=`${start.getUTCDate()} ${month[start.getUTCMonth()]}`,b=`${end.getUTCDate()} ${month[end.getUTCMonth()]} ${end.getUTCFullYear()}`;
  return start.getUTCFullYear()!==end.getUTCFullYear()?`${a} ${start.getUTCFullYear()} – ${b} · UTC`:start.getUTCMonth()!==end.getUTCMonth()?`${a} – ${b} · UTC`:`${start.getUTCDate()}–${b} · UTC`;
 }
-export const cardFileName=(d:CourierCardData)=>`seeker-${/^\d{4}-\d{2}-\d{2}$/.test(d.week)?d.week:'weekly'}.png`;
+export const cardFileName=(d:CourierCardData)=>d.campaign?'seeker-campaign-complete.png':`seeker-${/^\d{4}-\d{2}-\d{2}$/.test(d.week)?d.week:'weekly'}.png`;
 /** Shared layout keeps native preview, browser preview and exported PNG values identical. */
 export function cardLayout(d:CourierCardData):CardText[]{
  const blocks:CardText[]=[],put=(key:string,text:string,x:number,y:number,width:number,size:number,color='#CFE6E4',weight:CardText['weight']='700',align:CardText['align']='left',spacing=0)=>blocks.push({key,text,x,y,width,size,color,weight,align,spacing});
+ if(d.campaign){
+  const c=d.campaign;
+  put('brand','STEAL A SEEKER',76,122,928,26,'#AECAC3','700','left',5);
+  put('name','EVERY SEEKER. SECURED.',76,186,928,51,'#E2F2EB','900');
+  put('status','CAMPAIGN COMPLETE',76,365,435,24,'#F3D285','700','left',2);
+  put('rank',`${natural(c.cleared)}`,70,437,440,180,'#C3EAE1','900');
+  put('rank-label','OF 12 HEISTS CLEARED',80,657,440,26,'#C0E0D5','700');
+  put('participants','Warehouse · Rooftops · Vault',80,706,440,22,'#91ADA3','400');
+  put('record','MASTER COURIER',76,1141,928,29,'#F3D285','700','center',4);
+  [String(natural(c.stars))+' / 36',count(c.score),cardTime(c.seconds*30)].forEach((v,i)=>{
+   put('stat-'+i,v,[76,393,710][i]!,1222,294,Math.min(62,294/(v.length*.62)),'#D6F0E7','900','center');
+   put('label-'+i,['STARS EARNED','BEST SCORES','BEST TIMES'][i]!,[76,393,710][i]!,1300,294,21,'#9EBCB2','700','center',1.5);
+  });
+  put('meaning','Personal campaign record · best run stats per mission',76,1355,928,21,'#819F94','400','center');
+  put('qualifier',d.local?'Played in browser':'Played on Android',76,1410,928,23,'#9BB7AD','400','center');
+  put('site','stealaseeker.bluntbrain.com',76,1487,928,21,'#A5C5B9','400','center',2);
+  return blocks;
+ }
  const name=d.domain||shortWallet(d.wallet),cleared=Math.min(3,natural(d.cleared)),placed=d.rank!==null&&natural(d.rank)>0,rank=d.local?'TEST':placed?'#'+count(d.rank!):'—',earned=d.earned&&cleared===3;
  put('brand','STEAL A SEEKER',76,122,928,26,'#AECAC3','700','left',5);
  put('name',name,76,173,928,Math.max(22,Math.min(62,928/(Math.max(1,name.length)*.62))),'#E2F2EB','900');

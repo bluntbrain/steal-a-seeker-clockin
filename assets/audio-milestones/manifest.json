@@ -1,0 +1,18 @@
+[
+  {
+    "file": "campaign-complete.wav",
+    "prompt": "Original premium stealth game campaign completion sound, four seconds. Immediate satisfying soft impact and mechanical vault unlock, bright rising three-note bell arpeggio resolving into a warm triumphant synth chord, delicate sparkling confetti ticks and a smooth short tail. Celebratory and earned, clean mobile speaker sound, no voices, no speech, no siren, no harsh bass, no clipping.",
+    "provider": "ElevenLabs",
+    "model": "eleven_text_to_sound_v2",
+    "duration": 4.0,
+    "sha256": "5565c3ed11a0abd2a62ae992ae6186d8d5a20effeed6347fdc3ede26800bfe71"
+  },
+  {
+    "file": "next-phone.wav",
+    "prompt": "Short clean game objective discovery chime, two warm ascending glass notes and a tiny digital shimmer. One second, immediate start, gentle but clearly audible over game ambience. A new golden objective has appeared. No voice, no speech, no music bed, no alarm.",
+    "provider": "ElevenLabs",
+    "model": "eleven_text_to_sound_v2",
+    "duration": 1.2,
+    "sha256": "3b425e42dd071ee7e8bdcb55920367e3b9c54cde8d62eda22a45fcb4f5f692ea"
+  }
+]

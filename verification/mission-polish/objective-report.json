@@ -1,0 +1,19 @@
+{
+  "passed": true,
+  "scope": "All missions unlocked with explicit local fixture; genuine pointer movement and mission-8 rendering",
+  "checks": [
+    "wall tap resolves and courier reaches resolved marker",
+    "no no-route feedback",
+    "two-phone instruction visible",
+    "security door markers replace counters",
+    "restart left and resume right"
+  ],
+  "command": {
+    "seq": 1,
+    "kind": "move",
+    "target": -1,
+    "x": 0.99,
+    "y": 17.63
+  },
+  "errors": []
+}

@@ -50,8 +50,10 @@ export default memo(function GameCanvas({size,input,game,alpha,clock,level,appea
   'worklet';const f=frames[frame.value]!;const scale=1.62/f.height;const bob=reduced?0:Math.hypot(game.value.vx,game.value.vy)>.1?Math.abs(Math.sin(game.value.walked*11))*.045:Math.sin(clock.value*2)*.012;transform.set(scale,0,x.value-f.width*scale/2,y.value-f.height*scale+.12-bob);});
  const shadow=useDerivedValue(()=>({x:x.value-.36,y:y.value-.02,width:.72,height:.22}));
  const carry=useDerivedValue(()=>game.value.carrying?1:0);
- const target=useDerivedValue(()=>game.value.carrying?0:1);
+ const target=useDerivedValue(()=>game.value.carrying||game.value.delivered>=(level.targets?.length??1)?0:1);
  const phonePosition=useDerivedValue(()=>[{translateX:targetPhone(game.value).x},{translateY:targetPhone(game.value).y}]);
+ const phoneGlow=useDerivedValue(()=>reduced?.34:.22+.22*(.5+.5*Math.sin(clock.value*2.2)));
+ const phoneHalo=useDerivedValue(()=>reduced?.85:.80+.12*(.5+.5*Math.sin(clock.value*2.2)));
  const phoneBob=useDerivedValue(()=>-.91+(reduced?0:Math.sin(clock.value*2.6)*.07));
  const carriedTransform=useDerivedValue(()=>[{translateX:x.value+.29},{translateY:y.value-.61},{rotate:.12}]);
  // The burst survives the 0.2s movement impulse, without changing replay physics.
@@ -72,7 +74,7 @@ export default memo(function GameCanvas({size,input,game,alpha,clock,level,appea
    <RoundedRect x={level.exit.x} y={level.exit.y} width={level.exit.w} height={level.exit.h} r={.1} color="#b9e6d6" opacity={glow}/>
    <RoundedRect x={level.exit.x} y={level.exit.y+level.exit.h-.10} width={extract} height={.08} r={.02} color="#e3fff5"/>
    <Group opacity={target} transform={phonePosition}>
-    <Circle cx={0} cy={0-.13} r={.91} color="#a5e4d0" opacity={glow}/>
+    <Circle cx={0} cy={-.13} r={1.12} color="#FFD15C" opacity={useDerivedValue(()=>phoneGlow.value*.25)}/><Circle cx={0} cy={-.13} r={phoneHalo} color="#FFD978" opacity={phoneGlow}/><Circle cx={0} cy={-.13} r={phoneHalo} color="#FFE5A0" style="stroke" strokeWidth={.035} opacity={phoneGlow}/>
     <Group transform={useDerivedValue(()=>[{translateY:phoneBob.value}])}><Atlas image={phones} sprites={phoneSprites} transforms={phoneTransforms}/></Group>
     <RoundedRect x={0-.55} y={0+.65} width={pickupWidth} height={.07} r={.025} color="#d9fff0"/>
    </Group>
