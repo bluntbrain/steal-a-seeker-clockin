@@ -12,7 +12,7 @@ let writes=Promise.resolve();
 async function mutate(wallet:string,fn:(items:Pending[])=>Pending[]){const next=writes.catch(()=>{}).then(async()=>{const raw=await readSave(key(wallet));await writeSave(key(wallet),JSON.stringify(fn(raw?JSON.parse(raw):[])));});writes=next;await next;}
 export const campaignApi={summary:(token:string)=>api<CampaignSummary>('/campaign',{token}),board:()=>api<CampaignRank[]>('/campaign/leaderboard'),claim:(token:string)=>api<CampaignSummary>('/campaign/claim',{token,body:{}})};
 export async function enqueue(wallet:string,mission:MissionId,replay:Replay){await mutate(wallet,items=>[...items.filter(i=>i.mission!==mission),{mission,rulesHash:rules.rulesHash,replay}]);}
-export async function syncCampaign(wallet:string,token:string){await writes.catch(()=>{});const raw=await readSave(key(wallet)),items:Pending[]=raw?JSON.parse(raw):[];for(const item of items){await api<CampaignSummary>('/campaign/runs',{token,body:item});await mutate(wallet,current=>current.filter(i=>JSON.stringify(i)!==JSON.stringify(item)));}return campaignApi.summary(token);}
+export async function syncCampaign(wallet:string,token:string,onAward?:(mission:string,credits:number|null)=>void){await writes.catch(()=>{});const raw=await readSave(key(wallet)),items:Pending[]=raw?JSON.parse(raw):[];for(const item of items){const receipt=await api<CampaignSummary>('/campaign/runs',{token,body:item});onAward?.(item.mission,receipt.creditAward?.credits??null);await mutate(wallet,current=>current.filter(i=>JSON.stringify(i)!==JSON.stringify(item)));}return campaignApi.summary(token);}
 
 // Import only server-verified guest replays. Never trust the device balance,
 // or spend a newly connected wallet's credits to restore guest cosmetics.

@@ -1,0 +1,10 @@
+[
+  {
+    "file": "coin-collect.wav",
+    "prompt": "Original mobile game reward collection sound. A short soft airy swoosh lifts a handful of small metal coins, then a tight ascending cascade of clean coin clinks drops into a pouch, ending in a warm delicate confirmation ping. Immediate start, coins arriving mainly in the second half, dry close sound, playful but restrained, no voice, no music, no heavy bass, no casino sounds. Exactly one brief collection action.",
+    "provider": "ElevenLabs",
+    "model": "eleven_text_to_sound_v2",
+    "duration": 1.5,
+    "sha256": "6255a654e6bcfd41b757f49a8c6742417091422ab222339c8b64cadd6bd2cbcf"
+  }
+]

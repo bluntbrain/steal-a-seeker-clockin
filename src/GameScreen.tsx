@@ -28,7 +28,8 @@ import {SafeAreaProvider,SafeAreaView,useSafeAreaInsets} from 'react-native-safe
 import {Gesture,GestureDetector,GestureHandlerRootView} from 'react-native-gesture-handler';
 import Animated,{runOnJS,runOnUI,useAnimatedStyle,useFrameCallback,useSharedValue,withTiming} from 'react-native-reanimated';
 import {useGameAudio as useAudioPlayer} from './audio/useGameAudio';
-import * as Haptics from 'expo-haptics';
+import {useHaptics} from './feedback/useHaptics';
+import CreditClaim,{type CreditReward} from './components/CreditClaim';
 import GameCanvas from './components/GameCanvas';
 import RecoveryBoundary from './components/RecoveryBoundary';
 import ActionIcon from './components/ActionIcon';
@@ -76,6 +77,7 @@ export function Game({rankTicket,paidPlay,dailyReturn,paidReturn,onRankStart,onR
  const closeOverlay=(close:(open:boolean)=>void)=>{close(false);if(returnHome){setHideoutOpen(true);setReturnHome(false);}};
  const paidEntry=paidPlay?.entry,timedRun=!!rankTicket||!!paidEntry,startMission=rankTicket?.manifest.mission??paidEntry?.manifest.mission??testMission??'practice';
  const account=useAccount(),economy=useEconomy(),{settings}=useSettings();
+ const haptic=useHaptics();
  const settingsRef=useRef(settings);settingsRef.current=settings;
  const {width,height}=useWindowDimensions(),insets=useSafeAreaInsets();
  const combatMode=!timedRun||!!rankTicket?.manifest.contract?.level.combat;
@@ -94,9 +96,9 @@ export function Game({rankTicket,paidPlay,dailyReturn,paidReturn,onRankStart,onR
  useEffect(()=>{guideWaiting.value=!guide.ready||(guide.active&&guide.waiting);guideStage.value=guide.active?guide.stage:-1;},[guide.ready,guide.active,guide.waiting,guide.stage]);
  useEffect(()=>{if(guide.active&&(hud.status==='caught'||hud.status==='timeout')&&guide.checkpoint.current){const saved=JSON.parse(JSON.stringify(guide.checkpoint.current));game.value=saved;setHud(saved);recording.value=[];input.value=idleInput();accumulator.value=0;setCompletedReplay(undefined);guide.retry();}},[hud.status,guide.active]);
  const damagePulse=useSharedValue(0);
- const showDamage=useCallback(()=>{damagePulse.value=settingsRef.current.reducedEffects?.45:1;damagePulse.value=withTiming(0,{duration:settingsRef.current.reducedEffects?160:280});},[damagePulse]);
+ const showDamage=useCallback(()=>{haptic('damage');damagePulse.value=settingsRef.current.reducedEffects?.45:1;damagePulse.value=withTiming(0,{duration:settingsRef.current.reducedEffects?160:280});},[damagePulse,haptic]);
  const gameplayVisible=!paused&&!hideoutOpen&&!walletOpen&&!mapOpen&&!settingsOpen&&!dailyOpen&&!paidOpen&&!rewardsOpen;
- useCombatAudio(hud,settings.sound&&gameplayVisible,settings.volume,showDamage,gameplayVisible);
+ useCombatAudio(hud,settings.sound&&gameplayVisible,settings.volume,showDamage,gameplayVisible,haptic);
  useEffect(()=>{if(!gameplayVisible||hud.ticks===0)damagePulse.value=0;},[gameplayVisible,hud.ticks===0,damagePulse]);
  useFootstepAudio(hud,settings.sound&&!paused&&!hideoutOpen&&!walletOpen&&!mapOpen&&!settingsOpen&&!dailyOpen&&!paidOpen&&!rewardsOpen&&!(guide.active&&guide.waiting),settings.volume);
  const level=useMemo(()=>rankTicket?.manifest.contract?.level??(combatMode?combatLevel(mission):getLevel(mission)),[rankTicket?.manifest.contract?.level,combatMode,mission]);
@@ -104,8 +106,14 @@ export function Game({rankTicket,paidPlay,dailyReturn,paidReturn,onRankStart,onR
  const boardHeight=size*20/12;
  const progress=useProgress(),recorded=useRef(false),rankResolved=useRef(false);
  const [earnedNotice,setEarnedNotice]=useState('');
+ const rewardEpoch=useRef(0);
+ useEffect(()=>()=>{rewardEpoch.current++;},[]);
+ const [creditReward,setCreditReward]=useState<CreditReward>({amount:null}),[rewardClaimed,setRewardClaimed]=useState(false);
+ const claimVisible=!timedRun&&!trial.active&&!testMission&&hud.status==='won'&&!paused&&!hideoutOpen&&!walletOpen&&!settingsOpen&&!rewardClaimed;
+ const rewardResolved=useCallback((amount:number|null,message?:string)=>setCreditReward({amount,message}),[]);
+ const saveLocalReward=()=>{const epoch=rewardEpoch.current;rewardResolved(null);void economy.earn(hud.mission,starsFor(hud)).then(n=>{if(epoch!==rewardEpoch.current)return;setEarnedNotice(n>0?`+${n} credits`:'');rewardResolved(n);}).catch(()=>{if(epoch===rewardEpoch.current)rewardResolved(null,'Credit save failed. Tap Retry save.');});};
  const campaignFinished=!timedRun&&!trial.active&&!testMission&&completedCampaign(progress.progress,hud);
- const finaleVisible=campaignFinished&&!paused&&!hideoutOpen&&!walletOpen&&!settingsOpen;
+ const finaleVisible=campaignFinished&&!claimVisible&&!paused&&!hideoutOpen&&!walletOpen&&!settingsOpen;
  const nextMission=nextCampaignMission(mission);
  const shareAction=useRef<(()=>Promise<void>)|null>(null),[shareReady,setShareReady]=useState(false);
  const registerShare=useCallback((fn:(()=>Promise<void>)|null)=>{shareAction.current=fn;setShareReady(!!fn);},[]);
@@ -115,7 +123,7 @@ export function Game({rankTicket,paidPlay,dailyReturn,paidReturn,onRankStart,onR
  useEffect(()=>{let cancelled=false;if(hud.status==='playing')finalePlayed.current=false;if(finaleVisible&&!finalePlayed.current){finalePlayed.current=true;if(settings.sound){finaleAudio.volume=settings.volume*.8;void finaleAudio.seekTo(0).then(()=>{if(!cancelled)finaleAudio.play();}).catch(()=>{});}}if(!settings.sound||paused||hideoutOpen)finaleAudio.pause();return()=>{cancelled=true;};},[finaleVisible,hud.status,settings.sound,settings.volume,paused,hideoutOpen,finaleAudio]);
  useEffect(()=>{let cancelled=false;if(gameplayVisible&&hud.status==='playing'&&hud.delivered>previousDelivery.current&&hud.delivered<(level.targets?.length??1)&&settings.sound){objectiveAudio.volume=settings.volume*.7;void objectiveAudio.seekTo(0).then(()=>{if(!cancelled)objectiveAudio.play();}).catch(()=>{});}previousDelivery.current=hud.delivered;if(!gameplayVisible||!settings.sound)objectiveAudio.pause();return()=>{cancelled=true;};},[hud.delivered,gameplayVisible,settings.sound,settings.volume,objectiveAudio,level]);
 
- useEffect(()=>{if(!testMission&&!trial.active&&!timedRun&&hud.status==='won'&&!recorded.current&&progress.ready){recorded.current=true;progress.complete(hud);void economy.earn(hud.mission,starsFor(hud)).then(n=>setEarnedNotice(n>0?`+${n} credits`:'')).catch(()=>setEarnedNotice('Credit save pending. Keep this result open.'));}},[hud,progress.ready,progress.complete,timedRun,trial.active]);
+ useEffect(()=>{if(!testMission&&!trial.active&&!timedRun&&hud.status==='won'&&!recorded.current&&progress.ready&&economy.ready){recorded.current=true;progress.complete(hud);if(economy.local)saveLocalReward();else if(guide.retries>0)rewardResolved(0,'Tutorial checkpoint run. Replay the mission to earn verified credits.');}},[hud,progress.ready,progress.complete,timedRun,trial.active,economy.ready,economy.local,rewardResolved]);
  useEffect(()=>{if(hud.status!=='playing'&&!completedReplay)setCompletedReplay({version:(combatMode?2:1) as 1|2,chunks:recording.value.map(c=>({...c}))});},[hud.status,completedReplay,recording]);
  const latest=useRef<GameState>(initialState(startMission,rankTicket?.manifest.contract?.level??(combatMode?combatLevel(startMission):undefined))),latestStats=useRef<Stats>(zeroStats);
  const alarmAudio=useAudioPlayer(require('../assets/audio-combat-v3/alarm.wav'));
@@ -130,10 +138,8 @@ export function Game({rankTicket,paidPlay,dailyReturn,paidReturn,onRankStart,onR
  const event=useCallback((kind:'pickup'|'dash'|'success'|'caught'|'decoy'|'spot'|'switch')=>{
    if(kind==='spot'){const now=Date.now();if(now-lastSpotAt.current<1300)return;lastSpotAt.current=now;}
    if(soundAllowed.current&&!(kind==='success'&&!timedRun&&CAMPAIGN_IDS.every(id=>id===latest.current.mission||!!progress.progress.missions[id]))){const player={pickup:pickupAudio,dash:dashAudio,success:successAudio,caught:caughtAudio,decoy:decoyAudio,spot:spotAudio,switch:switchAudio}[kind];player.seekTo(0).then(()=>{if(soundAllowed.current){player.volume=settingsRef.current.volume*({pickup:1,dash:.7,success:.9,caught:.8,decoy:.7,spot:.65,switch:.7}[kind]);player.play();}}).catch(()=>{});}
-   if(!settingsRef.current.haptics)return;
-   if(Platform.OS!=='web'&&kind==='caught')Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning).catch(()=>{});
-   else if(Platform.OS!=='web')Haptics.impactAsync(kind==='success'?Haptics.ImpactFeedbackStyle.Medium:Haptics.ImpactFeedbackStyle.Light).catch(()=>{});
- },[pickupAudio,dashAudio,successAudio,decoyAudio,caughtAudio,spotAudio,switchAudio,timedRun,progress.progress]);
+   haptic(kind);
+ },[pickupAudio,dashAudio,successAudio,decoyAudio,caughtAudio,spotAudio,switchAudio,timedRun,progress.progress,haptic]);
  useEffect(()=>{if(paused){for(const p of [pickupAudio,dashAudio,successAudio,decoyAudio,caughtAudio,spotAudio,switchAudio])p.pause();}},[paused]);
  const [recoveryReady,setRecoveryReady]=useState(!paidEntry),[recoveryError,setRecoveryError]=useState(''),[deadlinePassed,setDeadlinePassed]=useState(false),[submissionSeconds,setSubmissionSeconds]=useState(0);
  const alive=useRef(true);
@@ -185,7 +191,7 @@ export function Game({rankTicket,paidPlay,dailyReturn,paidReturn,onRankStart,onR
  },[suspended,input,game,timedRun,paidEntry,checkpoint,recording,recoveryReady,recoveryError,deadlinePassed]);
  const leavePaid=useCallback(async()=>{if(!paidEntry)return;suspended.value=true;setPaused(true);try{await persistPaid({version:(combatMode?2:1) as 1|2,chunks:recording.value.map(c=>({...c}))});onPaidExit();}catch{/* Keep the screen and input log available for a save retry. */}},[paidEntry,suspended,persistPaid,recording,onPaidExit]);
  const leaveRank=useCallback(async()=>{if(!rankTicket)return;if(rankTicket.practice){onRankExit();return;}if(Platform.OS==='web'&&rankTicket.manifest.contract){const {abandonLocal}=await import('./league/local');abandonLocal();onRankExit();return;}try{if(game.value.status==='playing'){const session=await account.session(false);if(session.wallet===rankTicket.wallet)await rankedApi.abandon(session.token,rankTicket.id);}else if(!rankResolved.current)await savePending(rankTicket,{version:(combatMode?2:1) as 1|2,chunks:recording.value.map(c=>({...c}))});}catch{/* The daily screen can recover the server ticket after an outage. */}finally{onRankExit();}},[rankTicket,game,recording,account.session,onRankExit]);
- const restart=useCallback((next:MissionId=game.value.mission)=>{if(trial.active){trial.finish();return;}if(paidEntry){void leavePaid();return;}if(rankTicket){void leaveRank();return;}recording.value=[];setCompletedReplay(undefined);setEarnedNotice('');recorded.current=false;setMission(next);const fresh=guide.start(next)??initialState(next,combatMode?combatLevel(next):undefined);game.value=fresh;input.value=idleInput();accumulator.value=0;alpha.value=0;clock.value=0;samples.value=[];frameTotal.value=0;slowTotal.value=0;reportClock.value=0;hudClock.value=0;setHud(fresh);latest.current=fresh;suspended.value=false;setPaused(false);setStats(zeroStats);},[game,input,accumulator,alpha,clock,samples,frameTotal,slowTotal,reportClock,hudClock,suspended,rankTicket,leaveRank,recording,paidEntry,leavePaid,trial,guide.start]);
+ const restart=useCallback((next:MissionId=game.value.mission)=>{if(trial.active){trial.finish();return;}if(paidEntry){void leavePaid();return;}if(rankTicket){void leaveRank();return;}recording.value=[];setCompletedReplay(undefined);rewardEpoch.current++;setEarnedNotice('');setCreditReward({amount:null});setRewardClaimed(false);recorded.current=false;setMission(next);const fresh=guide.start(next)??initialState(next,combatMode?combatLevel(next):undefined);game.value=fresh;input.value=idleInput();accumulator.value=0;alpha.value=0;clock.value=0;samples.value=[];frameTotal.value=0;slowTotal.value=0;reportClock.value=0;hudClock.value=0;setHud(fresh);latest.current=fresh;suspended.value=false;setPaused(false);setStats(zeroStats);},[game,input,accumulator,alpha,clock,samples,frameTotal,slowTotal,reportClock,hudClock,suspended,rankTicket,leaveRank,recording,paidEntry,leavePaid,trial,guide.start]);
  useEffect(()=>{const subscription=AppState.addEventListener('change',state=>{if(state!=='active'){finaleAudio.pause();objectiveAudio.pause();if(game.value.status==='playing')pause(true);}});return()=>subscription.remove();},[pause,game,finaleAudio,objectiveAudio]);
  useEffect(()=>{
    if(Platform.OS!=='web')return;
@@ -257,7 +263,7 @@ export function Game({rankTicket,paidPlay,dailyReturn,paidReturn,onRankStart,onR
    {!!progress.error&&<Pressable accessibilityRole="button" onPress={()=>void progress.retrySave()} style={s.saveError}><Text style={s.contextText}>{progress.error}</Text></Pressable>}
 
  </View>
- {(paused||hud.status!=='playing')&&<ResultSheet bottom={insets.bottom} celebration={finaleVisible} primarySide={!paused&&hud.status!=='won'?'left':'right'}
+ {!claimVisible&&(paused||hud.status!=='playing')&&<ResultSheet bottom={insets.bottom} celebration={finaleVisible} primarySide={!paused&&hud.status!=='won'?'left':'right'}
   art={paused?(recoveryError?'recovery':!recoveryReady?'pending':'pause'):hud.status==='won'?'success':hud.status==='caught'?'caught':'timeout'}
   eyebrow={finaleVisible?'12 / 12 HEISTS':paused?(recoveryError?'SAVE NEEDS ATTENTION':'RUN PAUSED'):hud.status==='won'?'HEIST COMPLETE':hud.status==='caught'?'PATROL '+(hud.caughtBy+1):'TIME LIMIT'}
   title={finaleVisible?'Every Seeker. Secured.':paused?(recoveryError?'Save interrupted.':'Take a breather.'):hud.status==='won'?'Seeker secured.':hud.status==='caught'?combatMode?'Out of health.':'They spotted you.':'Out of time.'}
@@ -267,7 +273,9 @@ export function Game({rankTicket,paidPlay,dailyReturn,paidReturn,onRankStart,onR
   primary={finaleVisible?{label:'Share card ↗',accessibilityLabel:'Share campaign completion card on X',disabled:!shareReady,onPress:()=>void shareAction.current?.()}:{label:trial.active&&!paused?'View campaign pass':paused?'Resume':paidEntry?'Back to entry':rankTicket?(rankTicket.manifest.contract?'Weekly league':'Back to daily'):hud.status==='won'?(nextMission?'Next mission ↗':'Missions'):'Retry ↗',accessibilityLabel:trial.active&&!paused?'Finish free trial':paused?'Resume run':paidEntry?'Back to paid challenge':rankTicket?(rankTicket.manifest.contract?'Back to weekly league':'Back to daily challenge'):hud.status==='won'?(nextMission?'View next mission':'View missions'):'Retry level',disabled:!!paidEntry&&paused&&(!recoveryReady||!!recoveryError||deadlinePassed),onPress:()=>trial.active&&!paused?trial.finish():paused?pause(false):hud.status==='won'&&!timedRun?(nextMission?restart(nextMission):(pause(true),setHideoutOpen(true))):restart()}}
   secondary={trial.active?undefined:paused?{label:paidEntry?'Save & leave':'Restart',accessibilityLabel:paidEntry?'Save and leave paid attempt':'Restart level',onPress:()=>restart()}:!timedRun?{label:hud.status==='won'?'Replay':'Missions',accessibilityLabel:hud.status==='won'?'Retry level':'View missions',onPress:()=>hud.status==='won'?restart():(pause(true),setHideoutOpen(true))}:undefined}
   utility={finaleVisible?{label:'Back to missions',onPress:()=>{pause(true);setHideoutOpen(true);}}:paused&&combatMode&&!timedRun?{label:'Replay tutorial',accessibilityLabel:'Replay combat tutorial',onPress:()=>{guide.replay();restart('practice');}}:paused?(recoveryError?{label:'Retry save',accessibilityLabel:'Retry save',onPress:()=>checkpoint({version:(combatMode?2:1) as 1|2,chunks:recording.value.map(c=>({...c}))})}:{label:'Settings',accessibilityLabel:'Open settings',onPress:()=>setSettingsOpen(true)}):undefined}
- >{finaleVisible&&<CompletionCard data={completionData} reduced={!!settings.reducedEffects} registerShare={registerShare}/>} {paused&&<Pressable accessibilityRole="button" accessibilityLabel="Toggle frame statistics" onPress={()=>setDetails(!details)}><Text style={s.stats}>{details?`${Math.round(stats.fps)} FPS · p95 ${stats.p95.toFixed(1)}ms · ${stats.slow} slow frames`:'Performance details'}</Text></Pressable>}{!testMission&&!trial.active&&!timedRun&&!guide.active&&guide.retries===0&&hud.status==='won'&&completedReplay&&!paused&&<CampaignSubmission state={hud} replay={completedReplay} quiet={finaleVisible}/>} {paidEntry&&completedReplay&&!paused&&<PaidSubmission entry={paidEntry} replay={completedReplay}/>}{rankTicket&&completedReplay&&!paused&&<RunSubmission ticket={rankTicket} replay={completedReplay} onResolved={()=>{rankResolved.current=true;}}/>}</ResultSheet>}
+ >{finaleVisible&&<CompletionCard data={completionData} reduced={!!settings.reducedEffects} registerShare={registerShare}/>} {paused&&<Pressable accessibilityRole="button" accessibilityLabel="Toggle frame statistics" onPress={()=>setDetails(!details)}><Text style={s.stats}>{details?`${Math.round(stats.fps)} FPS · p95 ${stats.p95.toFixed(1)}ms · ${stats.slow} slow frames`:'Performance details'}</Text></Pressable>} {paidEntry&&completedReplay&&!paused&&<PaidSubmission entry={paidEntry} replay={completedReplay}/>}{rankTicket&&completedReplay&&!paused&&<RunSubmission ticket={rankTicket} replay={completedReplay} onResolved={()=>{rankResolved.current=true;}}/>}</ResultSheet>}
+ {!testMission&&!trial.active&&!timedRun&&!guide.active&&guide.retries===0&&hud.status==='won'&&completedReplay&&!paused&&<View style={{position:'absolute',bottom:insets.bottom+3,zIndex:46}}><CampaignSubmission state={hud} replay={completedReplay} quiet onReward={economy.local?undefined:rewardResolved}/></View>}
+ {claimVisible&&<CreditClaim reward={creditReward} balance={economy.balance} onRetry={economy.local&&creditReward.message?.startsWith('Credit save failed')?saveLocalReward:undefined} stars={starsFor(hud)} mission={level.title} onDone={()=>setRewardClaimed(true)}/>}
  {finaleVisible&&<CampaignConfetti reduced={!!settings.reducedEffects}/>}
  <Animated.View pointerEvents="none" testID="alarm-wash" style={[StyleSheet.absoluteFill,{backgroundColor:'#FF253E'},alarmWash]}/><Animated.View pointerEvents="none" testID="alarm-border" style={[StyleSheet.absoluteFill,{borderWidth:7,borderColor:'#FF4255'},alarmBorder]}/><View pointerEvents="none" style={StyleSheet.absoluteFill}><Animated.Image testID="damage-glow" source={require('../assets/ui/damage-vignette.png')} resizeMode="stretch" style={[StyleSheet.absoluteFill,{width:'100%',height:'100%'},damageStyle]}/></View></SafeAreaView>;
 }

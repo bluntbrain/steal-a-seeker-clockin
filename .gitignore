@@ -55,3 +55,6 @@ devnet-treasury.json
 
 # Regenerated campaign celebration preview
 design/visual-v2/completion-options/preview.js
+
+# Generated credit claim review bundle
+design/visual-v2/credit-claim/preview.js

@@ -1,0 +1,42 @@
+import React,{useEffect,useRef,useState} from 'react';
+import {Animated,AppState,Easing,Pressable,StyleSheet,Text,View} from 'react-native';
+import {useSafeAreaInsets} from 'react-native-safe-area-context';
+import {useSettings} from '../settings/SettingsProvider';
+import {useGameAudio} from '../audio/useGameAudio';
+import {useHaptics} from '../feedback/useHaptics';
+export type CreditReward={amount:number|null;message?:string};
+export function CreditCoin({size=40}:{size?:number}){return <View style={{width:size,height:size,borderRadius:size/2,backgroundColor:'#B8E6D3',borderWidth:2,borderTopColor:'#F2FFF5',borderLeftColor:'#E3FFEE',borderBottomColor:'#4C8B76',borderRightColor:'#699F86',alignItems:'center',justifyContent:'center'}}><View style={{width:size*.77,height:size*.77,borderRadius:size/2,borderWidth:1,borderColor:'#579C83',alignItems:'center',justifyContent:'center',backgroundColor:'#9DD2BA'}}><Text style={{fontSize:size*.47,fontWeight:'900',color:'#244B3D',lineHeight:size*.63}}>◈</Text></View></View>;}
+const COUNT=12;
+/** Presentation only: the award is persisted before this screen can say Claim. */
+export default function CreditClaim({reward,balance,stars,mission,onDone,onRetry}:{reward:CreditReward;balance:number;stars:number;mission:string;onDone:()=>void;onRetry?:()=>void}){
+ const {settings}=useSettings(),insets=useSafeAreaInsets(),haptic=useHaptics(),audio=useGameAudio(require('../../assets/audio-rewards/coin-collect.wav'));
+ const [bounds,setBounds]=useState({width:390,height:800}),[phase,setPhase]=useState<'ready'|'flying'|'done'>('ready'),[landed,setLanded]=useState(0),[slow,setSlow]=useState(false);
+ const flights=useRef(Array.from({length:COUNT},()=>new Animated.Value(0))).current,pulse=useRef(new Animated.Value(1)).current;
+ const busy=useRef(false),alive=useRef(true),timer=useRef<ReturnType<typeof setTimeout>|undefined>(undefined),done=useRef(onDone);done.current=onDone;
+ const amount=Math.max(0,reward.amount??0),base=Math.max(0,balance-amount),shown=phase==='done'?balance:base+Math.floor(amount*landed/COUNT);
+ const waiting=reward.amount===null&&!reward.message&&!slow;
+ useEffect(()=>{const t=setTimeout(()=>setSlow(true),8000);return()=>clearTimeout(t);},[]);
+ const target={x:bounds.width-78,y:insets.top+43},source={x:bounds.width/2,y:bounds.height*.42};
+ useEffect(()=>{alive.current=true;return()=>{alive.current=false;clearTimeout(timer.current);flights.forEach(f=>f.stopAnimation());pulse.stopAnimation();audio.pause();};},[audio,flights,pulse]);
+ useEffect(()=>{if(!settings.sound)audio.pause();},[settings.sound,audio]);
+ useEffect(()=>{const sub=AppState.addEventListener('change',state=>{if(state!=='active'){audio.pause();clearTimeout(timer.current);if(busy.current){flights.forEach(f=>f.stopAnimation());setLanded(COUNT);setPhase('done');}}});return()=>sub.remove();},[audio,flights]);
+ function finish(){if(!alive.current)return;setLanded(COUNT);setPhase('done');haptic('confirm');timer.current=setTimeout(()=>done.current(),450);}
+ function claim(){if(busy.current)return;if(!amount){done.current();return;}busy.current=true;setPhase('flying');haptic('claim');
+  if(settings.sound){audio.volume=settings.volume*.75;void audio.seekTo(settings.reducedEffects?0.75:0).then(()=>{if(alive.current&&AppState.currentState!=='background')audio.play();}).catch(()=>{});}
+  if(settings.reducedEffects){timer.current=setTimeout(finish,350);return;}
+  flights.forEach((value,i)=>{Animated.sequence([Animated.delay(i*42),Animated.timing(value,{toValue:1,duration:820,easing:Easing.inOut(Easing.cubic),useNativeDriver:true})]).start(({finished})=>{if(!finished||!alive.current)return;setLanded(n=>n+1);haptic('coin');pulse.setValue(1.12);Animated.timing(pulse,{toValue:1,duration:130,useNativeDriver:true}).start();if(i===COUNT-1)finish();});});
+ }
+ return <View testID="credit-claim-screen" accessibilityViewIsModal onLayout={e=>setBounds(e.nativeEvent.layout)} style={s.screen}>
+  <Text style={[s.brand,{top:insets.top+30}]}>HEIST COMPLETE</Text>
+  <Animated.View testID="claim-credit-balance" accessibilityLabel={`${shown} credits`} style={[s.balance,{top:insets.top+16,transform:[{scale:pulse}]}]}><CreditCoin size={25}/><View><Text style={s.balanceNumber}>{shown.toLocaleString()}</Text><Text style={s.micro}>CREDITS</Text></View></Animated.View>
+  <View style={[s.center,{top:source.y-154}]}><Text style={s.stars}>{'★'.repeat(stars)}<Text style={{color:'#3B5047'}}>{'★'.repeat(3-stars)}</Text></Text><Text style={s.title}>Seeker secured.</Text><Text style={s.subtitle}>{mission}</Text>
+   <View style={s.pile} accessibilityElementsHidden><View style={{position:'absolute',left:34,top:24,transform:[{rotate:'-24deg'}]}}><CreditCoin size={72}/></View><View style={{position:'absolute',right:31,top:17,transform:[{rotate:'22deg'}]}}><CreditCoin size={76}/></View><CreditCoin size={94}/></View>
+   <Text testID="claim-earned-amount" style={s.amount}>{reward.amount===null?'…':`+${amount}`}</Text><Text style={s.label}>{reward.amount===null?(waiting?'CHECKING REWARD':'SYNC PENDING'):'CREDITS EARNED'}</Text>
+   <Text accessibilityLiveRegion="polite" style={s.explanation}>{reward.message||(reward.amount===null?'Your reward is being saved.':amount>0?'New gear is getting closer.':'Credits already earned. Improve your stars to earn more.')}</Text>
+   {!!onRetry&&<Pressable accessibilityRole="button" accessibilityLabel="Retry credit save" onPress={onRetry} style={{padding:12}}><Text style={{color:'#DCF7E5',fontWeight:'800'}}>Retry save</Text></Pressable>}
+  </View>
+  <View style={[s.footer,{bottom:insets.bottom+24}]}><Pressable testID="claim-credits" accessibilityRole="button" accessibilityLabel={phase==='done'?'Continue':amount>0?'Claim credits':'Continue'} disabled={phase==='flying'||waiting} onPress={phase==='done'?onDone:claim} style={[s.button,(phase==='flying'||waiting)&&{opacity:.7}]}><Text style={s.buttonText}>{waiting?'Saving reward…':phase==='flying'?'Collecting…':phase==='done'?'Collected ✓':amount>0?`Claim ${amount} credits`:'Continue'}</Text></Pressable><Text style={s.saved}>{reward.amount===null?'Your run stays saved while credits sync.':'Credits buy outfits and effects in the Hideout.'}</Text></View>
+  {phase==='flying'&&!settings.reducedEffects&&flights.map((value,i)=>{const spread=(i%4-1.5)*30,yOffset=Math.floor(i/4)*14;return <Animated.View key={i} testID={`claim-coin-${i}`} pointerEvents="none" style={{position:'absolute',left:source.x-17,top:source.y-17,opacity:value.interpolate({inputRange:[0,.06,.92,1],outputRange:[0,1,1,0]}),transform:[{translateX:value.interpolate({inputRange:[0,.26,1],outputRange:[0,spread,target.x-source.x]})},{translateY:value.interpolate({inputRange:[0,.26,1],outputRange:[0,-48-yOffset,target.y-source.y]})},{scale:value.interpolate({inputRange:[0,.22,1],outputRange:[.6,1,.6]})},{rotate:value.interpolate({inputRange:[0,1],outputRange:['0deg',`${i%2?260:-260}deg`]})}]}}><CreditCoin size={34}/></Animated.View>;})}
+ </View>;
+}
+const s=StyleSheet.create({screen:{...StyleSheet.absoluteFillObject,zIndex:45,backgroundColor:'#0E1B18'},brand:{position:'absolute',left:22,color:'#9DBCAE',fontWeight:'800',fontSize:10,letterSpacing:1.5},balance:{position:'absolute',right:22,width:112,height:54,borderRadius:16,borderWidth:1,borderColor:'#4B7161',backgroundColor:'#1D352C',flexDirection:'row',alignItems:'center',justifyContent:'center',gap:8},balanceNumber:{fontSize:19,fontWeight:'800',color:'#E4F8EC',fontVariant:['tabular-nums']},micro:{fontSize:7,letterSpacing:1.5,color:'#A0C4B1'},center:{position:'absolute',left:20,right:20,alignItems:'center'},stars:{fontSize:28,letterSpacing:8,color:'#E9DDA4',marginBottom:10},title:{fontSize:31,fontWeight:'900',color:'#E4F8EC',letterSpacing:-1},subtitle:{color:'#9FBCAD',fontSize:13,marginTop:7},pile:{width:210,height:125,alignItems:'center',justifyContent:'center',marginTop:22},amount:{fontSize:66,lineHeight:76,fontWeight:'900',color:'#D7F3E5',fontVariant:['tabular-nums']},label:{fontSize:11,letterSpacing:2,color:'#B1D7C4',fontWeight:'800'},explanation:{fontSize:12,lineHeight:18,textAlign:'center',color:'#91B09F',marginTop:18,maxWidth:285},footer:{position:'absolute',left:24,right:24,alignItems:'center'},button:{width:'100%',maxWidth:370,height:54,borderRadius:18,backgroundColor:'#C5E8D8',alignItems:'center',justifyContent:'center'},buttonText:{fontSize:16,fontWeight:'800',color:'#183C2E'},saved:{fontSize:10,color:'#89A898',textAlign:'center',marginTop:13}});

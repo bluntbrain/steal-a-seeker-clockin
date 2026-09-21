@@ -1,3 +1,4 @@
+import {useHaptics} from '../feedback/useHaptics';
 import React,{useState} from 'react';
 import {Image,Pressable,StyleSheet,Text,View} from 'react-native';
 import {Canvas,Path} from '@shopify/react-native-skia';
@@ -14,6 +15,7 @@ const districts=[
 ] as const;
 
 export default function CampaignDistricts({progress,onSelect}:{progress:Progress;onSelect:(mission:MissionId)=>void}){
+ const haptic=useHaptics();
  const [bounds,setBounds]=useState({width:0,height:0});
  const rowHeight=bounds.height/3;
  const next=CAMPAIGN_IDS.find(id=>!progress.missions[id]);
@@ -32,7 +34,7 @@ export default function CampaignDistricts({progress,onSelect}:{progress:Progress
    {[0,1].map(index=>{const from=point(index,3),to=scenes[index+1]!,y=(index+1)*rowHeight+to.top+to.height*.18;return <Path key={`bridge-${index}`} path={`M${from.x} ${from.y+diameter/2} L${from.x} ${y}`} color="#739B8D" opacity={.45} style="stroke" strokeWidth={1.6}/>;})}
   </Canvas>}
   {bounds.width>0&&CAMPAIGN_IDS.map((id,index)=>{const level=combatLevel(id),open=unlocked(progress,id),best=progress.missions[id],current=id===next,p=point(Math.floor(index/4),index%4);
-   return <Pressable key={id} testID={`mission-node-${level.number}`} accessibilityRole="button" accessibilityLabel={`Mission ${level.number}: ${level.title}${open?'':'. Locked'}`} accessibilityState={{selected:current}} onPress={()=>onSelect(id)} style={({pressed})=>[s.target,{width:touch,height:touch+9,left:p.x-touch/2,top:p.y-diameter/2-4,opacity:pressed?.7:1}]}>
+   return <Pressable key={id} testID={`mission-node-${level.number}`} accessibilityRole="button" accessibilityLabel={`Mission ${level.number}: ${level.title}${open?'':'. Locked'}`} accessibilityState={{selected:current}} onPress={()=>{haptic('select');onSelect(id);}} style={({pressed})=>[s.target,{width:touch,height:touch+9,left:p.x-touch/2,top:p.y-diameter/2-4,opacity:pressed?.7:1}]}>
     <View style={[s.node,{width:diameter,height:diameter,borderRadius:diameter/2},open&&s.open,current&&s.current]}><Text maxFontSizeMultiplier={1.15} style={[s.number,current&&{color:'#142F28'},!open&&{color:'#9FAEA9'}]}>{String(level.number).padStart(2,'0')}</Text></View>
     {best?<Text maxFontSizeMultiplier={1} style={s.stars}>{'★'.repeat(best.stars)}<Text style={{color:'#65736C'}}>{'★'.repeat(3-best.stars)}</Text></Text>:current?<Text maxFontSizeMultiplier={1} style={s.play}>PLAY</Text>:!open?<Canvas pointerEvents="none" style={{width:10,height:10,marginTop:2}}><Path path="M3 4 V3 A2 2 0 0 1 7 3 V4 M2 4 H8 V9 H2 Z" color="#ADBAB2" style="stroke" strokeWidth={1.25} strokeJoin="round"/></Canvas>:null}
    </Pressable>;

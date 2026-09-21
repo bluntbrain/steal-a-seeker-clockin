@@ -1,3 +1,4 @@
+import {useHaptics} from '../feedback/useHaptics';
 import {NETWORK_NAME,IS_MAINNET,SKR_LABEL,NETWORK_LABEL} from '../wallet/config';
 import React,{useEffect,useRef,useState} from 'react';
 import {Linking,Share,Pressable,Text,View,useWindowDimensions} from 'react-native';
@@ -17,9 +18,11 @@ import CourierArt from '../components/CourierArt';
 const pendingKey=(wallet:string)=>`seeker.order.${NETWORK_NAME}.${wallet}`;
 const label=(c:PaymentCurrency)=>currencyLabel(c,IS_MAINNET);
 export default function CommerceSection({sku='campaign',onComplete}:{sku?:ProductId;onComplete?:()=>void}){
+ const haptic=useHaptics(),confirmedOrder=useRef<string|null>(null);
  const {height,fontScale}=useWindowDimensions(),[index,setIndex]=useState(0);
  const [currency,setCurrency]=useState<PaymentCurrency>('SKR'),[prices,setPrices]=useState<ProductPricing>(),[priceError,setPriceError]=useState(''),[refreshPrice,setRefreshPrice]=useState(0),[now,setNow]=useState(Date.now());
  const wallet=useMobileWallet(),identity=useAccount(),{account,session,update}=identity,[order,setOrder]=useState<Order>(),[busy,setBusy]=useState(false),[message,setMessage]=useState('');const current=useRef(wallet.account?.address);current.current=wallet.account?.address;const alive=useRef(true),busyLock=useRef(false);
+ useEffect(()=>{if(order?.status==='fulfilled'&&confirmedOrder.current!==order.id){confirmedOrder.current=order.id;haptic('confirm');}},[order?.status,order?.id,haptic]);
  useEffect(()=>{alive.current=true;return()=>{alive.current=false;};},[]);
  useEffect(()=>{setOrder(undefined);setMessage('');},[wallet.account?.address]);
  async function action(run:()=>Promise<void>){if(busyLock.current)return;busyLock.current=true;setBusy(true);setMessage('');try{await run();}catch(e){walletFailure('commerce.action',e);if(alive.current)setMessage(e instanceof Error?e.message:'Could not finish. Restore purchases before paying again.');}finally{busyLock.current=false;if(alive.current)setBusy(false);}}

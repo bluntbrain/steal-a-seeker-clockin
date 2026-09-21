@@ -1,10 +1,11 @@
+import type {HapticCue} from '../feedback/haptic-policy';
 import {useEffect,useRef} from 'react';
 import {playImpact} from './impact-feedback';
 import {useGameAudio} from './useGameAudio';
 import {combatSoundEvents,type CombatSoundCounters} from './combat-events';
 import type {GameState} from '../game/simulation';
 const zero:CombatSoundCounters={shots:0,enemyShots:0,hitEvents:0,damageTaken:0,kills:0,aimEvents:0,commandSeen:0};
-export function useCombatAudio(state:GameState,enabled:boolean,volume:number,onDamage?:()=>void,feedbackEnabled=enabled){
+export function useCombatAudio(state:GameState,enabled:boolean,volume:number,onDamage?:()=>void,feedbackEnabled=enabled,onHaptic?:(cue:HapticCue)=>void){
  const shotA=useGameAudio(require('../../assets/audio-combat-v3/shot-a.wav'));
  const shotB=useGameAudio(require('../../assets/audio-combat-v3/shot-b.wav'));
  const enemyA=useGameAudio(require('../../assets/audio-combat-v3/enemy-a.wav'));
@@ -21,6 +22,7 @@ export function useCombatAudio(state:GameState,enabled:boolean,volume:number,onD
   const players=[shotA,shotB,enemyA,enemyB,hit,damage,knockout,aim];
   if(!enabled||state.ticks<lastTick.current){epoch.current++;for(const p of players)p.pause();}
   const c=state.combat??zero,events=combatSoundEvents(previous.current,c);
+  if(feedbackEnabled&&state.ticks>=lastTick.current&&!events.includes('damage')){if(events.includes('knockout'))onHaptic?.('kill');else if(events.includes('shot'))onHaptic?.('shot');}
   if(!enabled&&feedbackEnabled&&state.ticks>=lastTick.current&&events.includes('damage'))damageFeedback.current?.();
   if(enabled&&state.ticks>=lastTick.current){
    for(const cue of events){
@@ -36,5 +38,5 @@ export function useCombatAudio(state:GameState,enabled:boolean,volume:number,onD
   }
   if(state.ticks<lastTick.current)lastAim.current=-100;
   previous.current={shots:c.shots,enemyShots:c.enemyShots,hitEvents:c.hitEvents,damageTaken:c.damageTaken,kills:c.kills,aimEvents:c.aimEvents,commandSeen:c.commandSeen};lastTick.current=state.ticks;
- },[state,enabled,volume,feedbackEnabled,shotA,shotB,enemyA,enemyB,hit,damage,knockout,aim]);
+ },[state,enabled,volume,feedbackEnabled,onHaptic,shotA,shotB,enemyA,enemyB,hit,damage,knockout,aim]);
 }
