@@ -27,7 +27,7 @@ export class CoinbasePriceFeed implements PriceFeed{
  private cached?:Rates;private pending?:Promise<Rates>;
  constructor(private fetcher:typeof fetch=fetch,private now=Date.now){}
  async rates():Promise<Rates>{
-  if(this.cached&&this.now()-this.cached.at<60000)return this.cached;
+  if(this.cached&&this.now()-this.cached.at<45000)return this.cached;
   if(this.pending)return this.pending;
   this.pending=(async()=>{const at=this.now();const values=await Promise.all((['SKR','SOL'] as const).map(async currency=>{
    const r=await this.fetcher(`https://api.coinbase.com/v2/prices/${currency}-USD/spot`,{signal:AbortSignal.timeout(8000)});

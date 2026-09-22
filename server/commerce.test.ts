@@ -628,3 +628,13 @@ test('changed credit prices reject stale and old-client requests before debit; r
   const debit=await pool.query("SELECT delta FROM credit_ledger WHERE wallet=$1 AND source='redeem:night-courier'",[u.wallet]);assert.equal(debit.rows.length,1);assert.equal(Number(debit.rows[0].delta),-350);
  }finally{await api.close();}
 });
+test('RPC outage creates no order or credits and exposes safe readiness diagnostics',async()=>{
+ const u=await login(),ready=chain.ready;chain.ready=async()=>{throw new Error('private-provider-key must not leak');};
+ try{
+  const response=await app.inject({method:'POST',url:'/orders',headers:u.headers,payload:{sku:'credits-500',idempotencyKey:randomUUID()}});
+  assert.equal(response.statusCode,503);assert.match(response.json().error,/No payment was requested/);assert(!response.body.includes('private-provider'));
+  assert.equal((await service.orders(u.wallet)).length,0);assert.equal((await service.me(u.wallet)).credits,0);
+  assert.equal((await app.inject({method:'GET',url:'/health/payments'})).statusCode,503);
+ }finally{chain.ready=ready;}
+ const order=await quote(u,'credits-500');assert.equal(order.status,'quoted');assert.equal((await service.me(u.wallet)).credits,0);
+});

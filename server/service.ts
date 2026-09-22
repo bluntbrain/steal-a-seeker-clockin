@@ -12,8 +12,8 @@ import {verifySignIn} from '@solana/wallet-standard-util';
 import {PRODUCTS,type ProductId,type Order,type AccountState,type SignInChallenge} from '../shared/commerce';
 import {transaction} from './db';
 import {mergeProgress,type SyncedProgress} from './progress';
-import {TOKEN_PROGRAM,SYSTEM_PROGRAM,type PaymentChain,type Verification} from './chain';
-export class ServiceError extends Error{constructor(public status:number,message:string){super(message);}}
+import {TOKEN_PROGRAM,SYSTEM_PROGRAM,RpcError,type PaymentChain,type Verification} from './chain';
+export class ServiceError extends Error{constructor(public status:number,message:string,public diagnostic?:string){super(message);}}
 export type CommerceConfig={creditPackPrices?:Record<string,number>;storeCreditPrices?:Record<string,number>;passSkr?:number;testPricing?:boolean;cluster?:SolanaCluster;shopPrices?:Record<string,string>;priceDivisor?:number;campaignUsdCents?:number;rebateSkr?:number;allowlist?:string[];allowAllWallets?:boolean;identityUri:string;mint:string;recipient:string;decimals:number;destination:string;campaignOffer?:boolean;usdPricing?:boolean};
 const hash=(s:string)=>createHash('sha256').update(s).digest('hex');
 const iso=(d:Date|string)=>new Date(d).toISOString();
@@ -21,6 +21,12 @@ function orderFromRow(r:Record<string,any>):Order{return {id:r.id,wallet:r.walle
 export class CommerceService {
  campaignReturns?:ReturnService;
  constructor(public pool:Pool,public chain:PaymentChain,public config:CommerceConfig,private prices:PriceFeed=new CoinbasePriceFeed()){}
+ async paymentReady(){
+  try{await this.chain.ready();}catch(error){
+   const diagnostic=error instanceof RpcError?error.message:'Payment network, mint or treasury readiness check failed.';
+   throw new ServiceError(503,'The payment network is temporarily unavailable. No payment was requested. Please try again shortly.',diagnostic);
+  }
+ }
  async pricing(sku:ProductId){try{return {...await productPricing(sku,this.prices,this.config.decimals,this.config.priceDivisor??1,this.config.campaignUsdCents,this.config.shopPrices,this.config.passSkr,this.config.creditPackPrices),...(sku==='campaign'?{campaignOffer:{testPricing:this.config.testPricing??false,usdCents:this.config.campaignUsdCents??1000/(this.config.priceDivisor??1),rebateSkr:this.config.rebateSkr??25,missions:12,cluster:this.config.cluster??'solana:devnet'}}:{})};}catch{throw new ServiceError(503,'Live prices are unavailable. Refresh prices before paying.');}}
  async challenge(wallet:string):Promise<SignInChallenge>{
   address(wallet);if(this.config.cluster==='solana:mainnet'&&!this.config.allowAllWallets&&!this.config.allowlist?.includes(wallet))throw new ServiceError(403,'This Mainnet test is limited to the configured tester wallet.');const now=new Date(),expires=new Date(now.getTime()+5*60_000),id=randomUUID();
@@ -45,7 +51,7 @@ export class CommerceService {
   if(RETIRED_ITEMS.includes(sku))throw new ServiceError(400,'This item is no longer for sale.');
   if(currency==='SOL'&&!this.config.usdPricing)throw new ServiceError(503,'SOL payments are not enabled.');
   const existing=await this.pool.query('SELECT * FROM orders WHERE wallet=$1 AND idempotency_key=$2',[wallet,key]);if(existing.rowCount){if(existing.rows[0].sku!==sku||(existing.rows[0].currency??'SKR')!==currency)throw new ServiceError(409,'This request key belongs to another product.');return orderFromRow(existing.rows[0]);}
-  try{await this.chain.ready();}catch{throw new ServiceError(503,'Payments are not ready. No payment has been requested.');}
+  await this.paymentReady();
   let snapshot;try{snapshot=this.config.usdPricing?priceProduct(sku,currency,await this.prices.rates(),this.config.decimals,Date.now(),this.config.priceDivisor??1,this.config.campaignUsdCents,this.config.shopPrices,this.config.passSkr,this.config.creditPackPrices):undefined;}catch{throw new ServiceError(503,'Live prices are unavailable. Refresh prices before paying.');}
   const native=currency==='SOL',mint=native?SYSTEM_PROGRAM:this.config.mint,program=native?SYSTEM_PROGRAM:TOKEN_PROGRAM,decimals=native?9:this.config.decimals,destination=native?this.config.recipient:this.config.destination;
   const [tokenSource]=await findAssociatedTokenPda({owner:address(wallet),mint:address(this.config.mint),tokenProgram:address(TOKEN_PROGRAM)});

@@ -1,0 +1,36 @@
+{
+  "at": "2026-09-22T09:45:04.136Z",
+  "checks": [
+    {
+      "sku": "campaign",
+      "currency": "SKR",
+      "amount": "1000000",
+      "error": null,
+      "units": 19448
+    },
+    {
+      "sku": "campaign",
+      "currency": "SOL",
+      "amount": "900000",
+      "error": null,
+      "units": 19418
+    },
+    {
+      "sku": "credits-500",
+      "currency": "SKR",
+      "amount": "480000",
+      "error": null,
+      "units": 19448
+    },
+    {
+      "sku": "credits-500",
+      "currency": "SOL",
+      "amount": "100000",
+      "error": null,
+      "units": 19418
+    }
+  ],
+  "limitations": [
+    "Unsigned simulation only. No transfer signed or broadcast. Does not test the physical Phantom UI."
+  ]
+}

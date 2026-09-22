@@ -1,0 +1,81 @@
+{
+  "at": "2026-09-22T09:40:40.337Z",
+  "api": "https://seeker-api-production-41b3.up.railway.app",
+  "checks": [
+    {
+      "sku": "campaign",
+      "currency": "SKR",
+      "quote": true,
+      "idempotency": true,
+      "prepared": true,
+      "unsigned": true,
+      "unpaidGrantsNothing": true
+    },
+    {
+      "sku": "campaign",
+      "currency": "SOL",
+      "quote": true,
+      "idempotency": true,
+      "prepared": true,
+      "unsigned": true,
+      "unpaidGrantsNothing": true
+    },
+    {
+      "sku": "credits-500",
+      "currency": "SKR",
+      "quote": true,
+      "idempotency": true,
+      "prepared": true,
+      "unsigned": true,
+      "unpaidGrantsNothing": true
+    },
+    {
+      "sku": "credits-500",
+      "currency": "SOL",
+      "quote": true,
+      "idempotency": true,
+      "prepared": true,
+      "unsigned": true,
+      "unpaidGrantsNothing": true
+    },
+    {
+      "sku": "credits-1500",
+      "currency": "SKR",
+      "quote": true,
+      "idempotency": true,
+      "prepared": false,
+      "unsigned": true,
+      "unpaidGrantsNothing": true
+    },
+    {
+      "sku": "credits-1500",
+      "currency": "SOL",
+      "quote": true,
+      "idempotency": true,
+      "prepared": false,
+      "unsigned": true,
+      "unpaidGrantsNothing": true
+    },
+    {
+      "sku": "credits-3500",
+      "currency": "SKR",
+      "quote": true,
+      "idempotency": true,
+      "prepared": false,
+      "unsigned": true,
+      "unpaidGrantsNothing": true
+    },
+    {
+      "sku": "credits-3500",
+      "currency": "SOL",
+      "quote": true,
+      "idempotency": true,
+      "prepared": false,
+      "unsigned": true,
+      "unpaidGrantsNothing": true
+    }
+  ],
+  "limitations": [
+    "No transfer signed or broadcast. Physical Phantom approval and live settlement require a user test."
+  ]
+}

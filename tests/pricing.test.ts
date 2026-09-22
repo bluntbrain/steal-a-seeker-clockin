@@ -21,3 +21,8 @@ test('rate provider caches fresh results, rejects mismatched currency, never ser
  await Promise.all([feed.rates(),feed.rates()]);assert.equal(calls,2);await feed.rates();assert.equal(calls,2);now+=61000;fail=true;await assert.rejects(feed.rates(),/offline/);
  const bad=new CoinbasePriceFeed((async()=>new Response(JSON.stringify({data:{base:'BTC',currency:'USD',amount:'100'}}))) as typeof fetch);await assert.rejects(bad.rates(),/Invalid/);
 });
+test('preview refresh fetches new rates before the old one-minute quote expires',async()=>{
+ let now=Date.now(),calls=0;
+ const feed=new CoinbasePriceFeed((async url=>{calls++;return Response.json({data:{base:String(url).includes('SKR')?'SKR':'SOL',currency:'USD',amount:'1'}});}) as typeof fetch,()=>now);
+ const first=await feed.rates();now+=46000;const refreshed=await feed.rates();assert.equal(calls,4);assert(refreshed.at>first.at);
+});

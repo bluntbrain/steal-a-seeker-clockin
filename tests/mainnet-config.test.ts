@@ -17,7 +17,7 @@ test('Mainnet requires explicit enablement and tester allowlist; devnet remains 
  assert.throws(()=>networkConfig({SOLANA_NETWORK:'mainnet'}),/explicit enablement/);
  assert.throws(()=>networkConfig({SOLANA_NETWORK:'mainnet',MAINNET_TEST_ENABLED:'1'}),/tester wallets/);
  const n=networkConfig({SOLANA_NETWORK:'mainnet',MAINNET_TEST_ENABLED:'1',MAINNET_TEST_WALLETS:'wallet',SHOP_PRICE_DIVISOR:'10',GAME_PASS_USD_CENTS:'100',DEVNET_TEST_MINT:'wrong-mint',DEVNET_SIGNER_JSON:'devnet-key'});
- assert.equal(n.mint,MAINNET_SKR_MINT);assert.equal(n.decimals,6);assert.equal(n.signerJson,undefined);assert.equal(n.priceDivisor,10);assert.equal(n.rpcUrl,'https://api.mainnet-beta.solana.com');assert.notEqual(GENESIS[n.cluster],GENESIS['solana:devnet']);
+ assert.equal(n.mint,MAINNET_SKR_MINT);assert.equal(n.decimals,6);assert.equal(n.signerJson,undefined);assert.equal(n.priceDivisor,10);assert.equal(n.rpcUrl,'https://api.mainnet.solana.com');assert.notEqual(GENESIS[n.cluster],GENESIS['solana:devnet']);
 });
 test('Mainnet test pass is one dollar in either token, cosmetics are ten times cheaper',()=>{
  const now=Date.now(),rates={SKR:'0.02',SOL:'100',at:now};

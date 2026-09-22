@@ -54,13 +54,41 @@ export function verifyPayment(order:TransferBinding,signature:string,value:unkno
  }
  return {state:'invalid',detail:'No matching transfer with the quoted mint, amount, buyer, recipient and reference.'};
 }
-export async function rpc<T>(url:string,method:string,params:unknown[]=[]):Promise<T>{const response=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({jsonrpc:'2.0',id:1,method,params}),signal:AbortSignal.timeout(12000)});if(!response.ok)throw new Error(`RPC unavailable (${response.status})`);const body=await response.json() as {error?:{message:string};result:T};if(body.error)throw new Error('RPC request could not be completed.');return body.result;}
+/** Safe diagnostics: never include provider URLs, API keys, or RPC payloads. */
+export class RpcError extends Error {
+ constructor(public method:string,public code:number|string){super(`Solana RPC ${method} failed (${code}).`);}
+}
+export async function rpc<T>(url:string,method:string,params:unknown[]=[],fetcher:typeof fetch=fetch):Promise<T>{
+ for(let attempt=0;attempt<2;attempt++){
+  let failure:RpcError;
+  try{
+   const response=await fetcher(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({jsonrpc:'2.0',id:1,method,params}),signal:AbortSignal.timeout(5000)});
+   if(!response.ok)throw new RpcError(method,response.status);
+   const body=await response.json() as {error?:{code:number};result:T};
+   if(body.error)throw new RpcError(method,body.error.code);
+   if(!Object.hasOwn(body,'result'))throw new RpcError(method,'invalid-response');
+   return body.result;
+  }catch(error){failure=error instanceof RpcError?error:new RpcError(method,'network');}
+  // Retry transient read failures once. Never automatically rebroadcast a payment.
+  const retryable=[429,500,502,503,504,-32005,-32016,-32029,'network'].includes(failure.code);
+  if(attempt||!method.startsWith('get')||!retryable)throw failure;
+  await new Promise(resolve=>setTimeout(resolve,400));
+ }
+ throw new RpcError(method,'unavailable');
+}
 export class DevnetChain implements PaymentChain{
- constructor(private config:{rpcUrl:string;mint:string;recipient:string;decimals:number;destination:string;cluster?:SolanaCluster}){}
+ private readyUntil=0;private checking?:Promise<void>;
+ constructor(private config:{rpcUrl:string;mint:string;recipient:string;decimals:number;destination:string;cluster?:SolanaCluster},private now=Date.now){}
  async ready(){
+  if(this.now()<this.readyUntil)return;
+  if(this.checking)return this.checking;
+  this.checking=this.checkReady().then(()=>{this.readyUntil=this.now()+15000;});
+  try{await this.checking;}finally{this.checking=undefined;}
+ }
+ private async checkReady(){
   if(await rpc<string>(this.config.rpcUrl,'getGenesisHash')!==GENESIS[this.config.cluster??'solana:devnet'])throw new Error('Payment RPC network does not match this deployment.');
   const result=await rpc<{value:{owner:string;data:{parsed:{type:string;info:{decimals:number}}}}|null}>(this.config.rpcUrl,'getAccountInfo',[this.config.mint,{encoding:'jsonParsed',commitment:'finalized'}]);
-  if(!result.value||result.value.owner!==TOKEN_PROGRAM||result.value.data.parsed.type!=='mint'||result.value.data.parsed.info.decimals!==this.config.decimals)throw new Error('The configured devnet mint is not ready.');
+  if(!result.value||result.value.owner!==TOKEN_PROGRAM||result.value.data.parsed.type!=='mint'||result.value.data.parsed.info.decimals!==this.config.decimals)throw new Error('The configured payment mint is not ready.');
   const account=await rpc<{value:{owner:string;data:{parsed:{info:{owner:string;mint:string;state:string}}}}|null}>(this.config.rpcUrl,'getAccountInfo',[this.config.destination,{encoding:'jsonParsed',commitment:'finalized'}]);
   if(!account.value||account.value.owner!==TOKEN_PROGRAM||account.value.data.parsed.info.owner!==this.config.recipient||account.value.data.parsed.info.mint!==this.config.mint||account.value.data.parsed.info.state!=='initialized')throw new Error('The treasury token account is not ready.');
  }
