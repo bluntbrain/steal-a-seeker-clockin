@@ -1,7 +1,7 @@
 // Review-only fixtures. Never imported by the game or written to its storage.
 import React,{useState} from 'react';
 const {createRoot}=require('react-dom/client') as {createRoot:(element:HTMLElement)=>{render:(node:React.ReactNode)=>void}};
-import {Pressable,Text,View,useWindowDimensions} from 'react-native';
+import {Pressable,ScrollView,Text,View,useWindowDimensions} from 'react-native';
 import WeeklyStandings from '../src/league/WeeklyStandings';
 import BottomTabs from '../src/components/BottomTabs';
 import type {LeagueEntry,LeagueSummary} from '../shared/league';
@@ -19,7 +19,7 @@ function Preview(){
   <View style={{height:34,justifyContent:'center'}}><Text style={{fontSize:11,fontWeight:'800',letterSpacing:2,color:'#BDD6CC'}}>STEAL A SEEKER</Text></View>
   <View style={{height:64,flexDirection:'row',justifyContent:'space-between',alignItems:'center'}}><View style={{gap:4}}><Text style={{fontSize:9,color:'#AFD1C6',letterSpacing:1}}>REVIEW FIXTURE · {state.toUpperCase()}</Text><Text style={{fontSize:25,fontWeight:'900',color:'#DEEEEA'}}>WEEKLY LEAGUE</Text></View><Text style={{fontSize:10,color:'#9FBAB1'}}>3d 12h left ↻</Text></View>
   <View style={{height:43,flexDirection:'row',marginBottom:8,borderBottomWidth:1,borderColor:'#35423D'}}>{['Rankings','Missions','History'].map((v,i)=><View key={v} style={{flex:1,justifyContent:'center',alignItems:'center',borderBottomWidth:3,borderBottomColor:i===0?'#B8E1D8':'transparent'}}><Text style={{fontSize:12,color:i===0?'#DDF0E8':'#7F9B90',fontWeight:'700'}}>{v}</Text></View>)}</View>
-  {action?<View style={{flex:1,justifyContent:'center',alignItems:'center',gap:20}}><Text style={{fontSize:15,color:'#DDF0E8',textAlign:'center'}}>{action} callback fired. This gallery has no gameplay or sharing side effects.</Text><Pressable accessibilityRole="button" onPress={()=>setAction('')}><Text style={{color:'#ACE2D0'}}>Back to fixture</Text></Pressable></View>:<WeeklyStandings data={state==='unavailable'||state==='loading'?undefined:data} local={local} loading={state==='loading'} onPlay={()=>setAction('Play weekly missions')} onShare={()=>setAction('Share Courier Card')}/>}
+  {action?<View style={{flex:1,justifyContent:'center',alignItems:'center',gap:20}}><Text style={{fontSize:15,color:'#DDF0E8',textAlign:'center'}}>{action} callback fired. This gallery has no gameplay or sharing side effects.</Text><Pressable accessibilityRole="button" onPress={()=>setAction('')}><Text style={{color:'#ACE2D0'}}>Back to fixture</Text></Pressable></View>:<ScrollView style={{flex:1}}><WeeklyStandings data={state==='unavailable'||state==='loading'?undefined:data} local={local} loading={state==='loading'} onPlay={()=>setAction('Play weekly missions')} onShare={()=>setAction('Share Courier Card')}/></ScrollView>}
   <Text style={{fontSize:9,color:'#718C81',textAlign:'center',marginTop:8}}>Weekly token prizes are not active.</Text>
   <BottomTabs compact={height<760} selected="leaderboard" onChange={()=>setAction('Bottom navigation')}/>
  </View>;

@@ -33,7 +33,7 @@ A real HTTP quote request reproduced the original 503 before the fix. Treasury a
 
 Signed APK: `releases/steal-a-seeker-mainnet-v0.3.6-code9.apk`.
 Package: `com.bluntbrain.stealaseeker`.
-SHA-256: `7c4e8fe6f114513758feb1d895fa47c0029eb8e655234e7096642c442ef9ea1d`.
+SHA-256: `e363b5c2b3e65dea7473083cfe143effe4a2edc3af2a98cbf8fb61cb3c74c714`.
 Rebuilt later the same day with Practice buttons commented out and a full-width ranked action.
 Signing certificate SHA-256: `4fa3e9942238f110824fb67dc99438fc1d70ef48a273e4a79331d5f8a1e1e913` (same as the original release).
 

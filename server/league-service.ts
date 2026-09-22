@@ -5,7 +5,7 @@ import {ServiceError} from './service';
 import {RankedService} from './ranked-service';
 import {makeCombatContracts,CONTRACT_ATTEMPTS,type Contract} from '../shared/contracts';
 import {weekWindow} from '../shared/weekly';
-import {practiceTicket,type LeagueBoard,type LeagueEntry,type LeagueSummary} from '../shared/league';
+import {leagueRun,practiceTicket,type LeagueRun,type LeagueBoard,type LeagueEntry,type LeagueSummary} from '../shared/league';
 import rules from '../shared/rules-manifest.json';
 import engine from '../shared/weekly-engine.json';
 const rankedSQL=`WITH scored AS (
@@ -39,15 +39,17 @@ export class LeagueService{
  async summary(wallet?:string):Promise<LeagueSummary>{
   const manifest=await this.manifest();await this.archive();const board=await this.board(manifest.week,wallet);
   if(wallet&&board.personal?.cleared===3)await this.pool.query('INSERT INTO league_achievements(wallet,week) VALUES($1,$2) ON CONFLICT DO NOTHING',[wallet,manifest.week]);
-  const attempts:Record<string,number>={};let history:LeagueBoard[]=[],earned=false,domain:string|null=null,active=null;
+  const attempts:Record<string,number>={};let history:LeagueBoard[]=[],recentRuns:LeagueRun[]=[],earned=false,domain:string|null=null,active=null;
   if(wallet){const rows=await this.pool.query("SELECT manifest->'contract'->>'id' AS id,count(*)::integer AS n FROM ranked_runs WHERE manifest ? 'contract' AND wallet=$1 AND manifest->'contract'->>'week'=$2 GROUP BY 1",[wallet,manifest.week]);for(const r of rows.rows)attempts[r.id]=r.n;
+   const recent=await this.pool.query("SELECT id,manifest,status,result,issued_at,expires_at FROM ranked_runs WHERE wallet=$1 AND manifest ? 'contract' ORDER BY issued_at DESC,id DESC LIMIT 30",[wallet]);
+   recentRuns=recent.rows.map(r=>leagueRun({id:r.id,wallet,manifest:r.manifest,status:r.status,result:r.result,issuedAt:new Date(r.issued_at).toISOString(),expiresAt:new Date(r.expires_at).toISOString(),detail:null},this.now().getTime())).filter((r):r is LeagueRun=>r!==null);
    const past=await this.pool.query('SELECT week::text FROM league_history WHERE wallet=$1 ORDER BY week DESC LIMIT 20',[wallet]);history=await Promise.all(past.rows.map(r=>this.board(r.week,wallet,true)));
    earned=!!(await this.pool.query('SELECT 1 FROM league_achievements WHERE wallet=$1 LIMIT 1',[wallet])).rowCount;
    // Display only a recently verified owner-selected name; stale names fall back to wallet.
    domain=(await this.pool.query("SELECT domain FROM league_identity WHERE wallet=$1 AND checked_at>now()-interval '1 hour'",[wallet])).rows[0]?.domain??null;
    active=await this.ranked.current(wallet);
   }
-  return {...manifest,authenticated:!!wallet,attempts,board,history,earned,domain,active};
+  return {...manifest,authenticated:!!wallet,attempts,board,history,recentRuns,earned,domain,active};
  }
  async start(wallet:string,input:{contractId:string;rulesHash:string;requestKey:string}){
   const manifest=await this.manifest(),contract=manifest.contracts.find(c=>c.id===input.contractId);if(!contract||manifest.rulesHash!==input.rulesHash)throw new ServiceError(409,'Contract or rules changed. Refresh the league.');
@@ -56,10 +58,10 @@ export class LeagueService{
    const lockedWeek=(await db.query('SELECT manifest FROM league_weeks WHERE week=$1 FOR UPDATE',[manifest.week])).rows[0]?.manifest;
    if(lockedWeek?.rulesHash!==manifest.rulesHash||!lockedWeek.contracts.some((c:Contract)=>c.id===contract.id))throw new ServiceError(409,'Weekly missions changed. Refresh before starting.');
    const prior=await db.query('SELECT id,manifest FROM ranked_runs WHERE wallet=$1 AND request_key=$2',[wallet,input.requestKey]);if(prior.rowCount){if(prior.rows[0].manifest.contract?.id!==contract.id)throw new ServiceError(409,'Request key belongs to another contract.');return this.ranked.get(wallet,prior.rows[0].id);}
-   if(!(await db.query("SELECT 1 FROM entitlements WHERE wallet=$1 AND sku='campaign'",[wallet])).rowCount)throw new ServiceError(403,'Game Pass required for ranked weekly play. Practice is free.');
+   if(!(await db.query("SELECT 1 FROM entitlements WHERE wallet=$1 AND sku='campaign'",[wallet])).rowCount)throw new ServiceError(403,'Game Pass required for ranked weekly play.');
    await db.query("UPDATE ranked_runs SET status='rejected',detail='Ranked attempt expired.' WHERE wallet=$1 AND status='issued' AND expires_at<=$2",[wallet,this.now()]);
    if((await db.query("SELECT 1 FROM ranked_runs WHERE wallet=$1 AND status IN ('issued','verifying')",[wallet])).rowCount)throw new ServiceError(409,'Finish or close your previous ranked attempt first.');
-   const used=(await db.query("SELECT count(*)::integer AS n FROM ranked_runs WHERE wallet=$1 AND manifest->'contract'->>'id'=$2",[wallet,contract.id])).rows[0].n;if(used>=CONTRACT_ATTEMPTS)throw new ServiceError(409,'All five ranked attempts used. Practice is still unlimited.');
+   const used=(await db.query("SELECT count(*)::integer AS n FROM ranked_runs WHERE wallet=$1 AND manifest->'contract'->>'id'=$2",[wallet,contract.id])).rows[0].n;if(used>=CONTRACT_ATTEMPTS)throw new ServiceError(409,'All five chances used. New missions arrive next Monday.');
    const finalized=(await db.query('SELECT finalized_at FROM league_weeks WHERE week=$1',[manifest.week])).rows[0]?.finalized_at;const now=this.now();if(finalized||now.getTime()>=Date.parse(manifest.endsAt))throw new ServiceError(409,'This week has ended.');
    const ticket=practiceTicket(contract,manifest.rulesHash,wallet);ticket.practice=false;ticket.id=randomUUID();ticket.issuedAt=now.toISOString();ticket.expiresAt=new Date(Math.min(now.getTime()+(contract.level.hardLimitSeconds+120)*1000,Date.parse(manifest.endsAt))).toISOString();
    await db.query('INSERT INTO daily_manifests(day,manifest) VALUES($1,$2) ON CONFLICT DO NOTHING',[contract.week,ticket.manifest]);

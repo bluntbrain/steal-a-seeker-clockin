@@ -1,0 +1,182 @@
+[
+  {
+    "edition": "frost",
+    "frames": 18,
+    "frameSize": [
+      512,
+      640
+    ],
+    "atlasSize": [
+      3072,
+      1920
+    ],
+    "bytes": 127190,
+    "glbBytes": 2981236,
+    "nodes": 132
+  },
+  {
+    "edition": "graphite",
+    "frames": 18,
+    "frameSize": [
+      512,
+      640
+    ],
+    "atlasSize": [
+      3072,
+      1920
+    ],
+    "bytes": 104114,
+    "glbBytes": 2981244,
+    "nodes": 132
+  },
+  {
+    "edition": "tide",
+    "frames": 18,
+    "frameSize": [
+      512,
+      640
+    ],
+    "atlasSize": [
+      3072,
+      1920
+    ],
+    "bytes": 140092,
+    "glbBytes": 2981232,
+    "nodes": 132
+  },
+  {
+    "edition": "static",
+    "frames": 18,
+    "frameSize": [
+      512,
+      640
+    ],
+    "atlasSize": [
+      3072,
+      1920
+    ],
+    "bytes": 145248,
+    "glbBytes": 2981232,
+    "nodes": 132
+  },
+  {
+    "edition": "mist",
+    "frames": 18,
+    "frameSize": [
+      512,
+      640
+    ],
+    "atlasSize": [
+      3072,
+      1920
+    ],
+    "bytes": 134450,
+    "glbBytes": 2981232,
+    "nodes": 132
+  },
+  {
+    "edition": "orbit",
+    "frames": 18,
+    "frameSize": [
+      512,
+      640
+    ],
+    "atlasSize": [
+      3072,
+      1920
+    ],
+    "bytes": 125218,
+    "glbBytes": 2981244,
+    "nodes": 132
+  },
+  {
+    "edition": "pearl",
+    "frames": 18,
+    "frameSize": [
+      512,
+      640
+    ],
+    "atlasSize": [
+      3072,
+      1920
+    ],
+    "bytes": 136274,
+    "glbBytes": 2981232,
+    "nodes": 132
+  },
+  {
+    "edition": "circuit",
+    "frames": 18,
+    "frameSize": [
+      512,
+      640
+    ],
+    "atlasSize": [
+      3072,
+      1920
+    ],
+    "bytes": 133008,
+    "glbBytes": 2981244,
+    "nodes": 132
+  },
+  {
+    "edition": "relic",
+    "frames": 18,
+    "frameSize": [
+      512,
+      640
+    ],
+    "atlasSize": [
+      3072,
+      1920
+    ],
+    "bytes": 139168,
+    "glbBytes": 2981232,
+    "nodes": 132
+  },
+  {
+    "edition": "flux",
+    "frames": 18,
+    "frameSize": [
+      512,
+      640
+    ],
+    "atlasSize": [
+      3072,
+      1920
+    ],
+    "bytes": 142768,
+    "glbBytes": 2981232,
+    "nodes": 132
+  },
+  {
+    "edition": "archive",
+    "frames": 18,
+    "frameSize": [
+      512,
+      640
+    ],
+    "atlasSize": [
+      3072,
+      1920
+    ],
+    "bytes": 105128,
+    "glbBytes": 2981240,
+    "nodes": 132
+  },
+  {
+    "edition": "ghost",
+    "frames": 18,
+    "frameSize": [
+      512,
+      640
+    ],
+    "atlasSize": [
+      3072,
+      1920
+    ],
+    "bytes": 122432,
+    "glbBytes": 2981236,
+    "nodes": 132
+  }
+]

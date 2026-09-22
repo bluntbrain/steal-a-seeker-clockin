@@ -7,7 +7,7 @@ import CollectiblePhone from '../three/CollectiblePhone';
 import PhoneTurntable from './PhoneTurntable';
 const presets={Front:[0,0],Back:[0,Math.PI],Left:[0,Math.PI/2],Right:[0,-Math.PI/2],Top:[Math.PI/2,0],Bottom:[-Math.PI/2,0]} as const;
 function LivePhoneStage({index,height}:{index:number;height:number}){
- const [pose,setPose]=useState<[number,number]>([-.13,-.42]),[ready,setReady]=useState(false);
+ const [pose,setPose]=useState<[number,number]>([-.13,Math.PI-.4]),[ready,setReady]=useState(false);
  const live=useRef(pose),start=useRef(pose);live.current=pose;
  const set=useCallback((v:readonly[number,number])=>{const next:[number,number]=[v[0],v[1]];live.current=next;setPose(next);},[]);
  const gesture=useRef(PanResponder.create({onStartShouldSetPanResponder:()=>true,onMoveShouldSetPanResponder:()=>true,onPanResponderGrant:()=>{start.current=[...live.current];},onPanResponderMove:(_,g)=>set([Math.max(-Math.PI/2,Math.min(Math.PI/2,start.current[0]+g.dy*.012)),start.current[1]+g.dx*.015])})).current;

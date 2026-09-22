@@ -1,5 +1,7 @@
-# Phone turntables
+# Native Seeker turntables
 
-Rendered from our existing CollectiblePhone geometry and phone atlas. No new character art or external model.
+Rendered from the shared `src/three/seekerPhone.ts` geometry. Every edition has 18 views: 16 yaw angles in 22.5° steps, followed by top and bottom. Each frame is **512 × 640**, packed into a six-column, three-row **3072 × 1920** WebP.
 
-Each WebP contains 18 views: 16 yaw angles in 22.5 degree steps, then top and bottom. Six columns × three rows; each frame is 384 × 472 pixels. Native displays one frame at a time, avoiding an Expo GL context. Rebuild with scripts/render-phone-turntables.cjs while the web preview serves PhoneStage.web.tsx.
+Android displays one frame at a time without opening a live GL context. Dragging and Front/Back/Left/Right/Top/Bottom presets remain available. The default rear three-quarter view shows the actual Seeker camera arrangement, Seed Vault panel and Solana logo.
+
+Follow `assets/phone-models/README.md` to regenerate. The older browser-capture scripts predate this model pipeline and should not overwrite these assets.

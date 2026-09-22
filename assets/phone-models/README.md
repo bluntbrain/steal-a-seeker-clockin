@@ -1,19 +1,17 @@
-# Collectible phone models
+# Seeker collectible models
 
-Twelve self-contained GLB files, exported from the same procedural model shown in the collection viewer. Each contains mesh geometry, materials and an embedded display texture. These are stylized game collectibles, not manufacturer CAD or verified Seeker hardware replicas. Back panels, cameras, edge controls and ports are authored game designs.
+All twelve editions share the Seeker hardware silhouette from the supplied phone reference sheet: a separate upper camera, a vertical lower two-sensor pill, adjacent flash, left-side Seed Vault panel and a low rear Solana logo. Edition colors and screen artwork remain distinct. These are stylized reference-matched game models, not manufacturer CAD.
 
-## In the app
-Tap a rack slot, the selected phone card, or the phone card in a mission briefing. Drag to rotate horizontally and vertically. Front, Back, Left, Right, Top and Bottom buttons provide exact views. Close returns to the previous screen without changing progress.
+The source is `src/three/seekerPhone.ts`. `CollectiblePhone.tsx` attaches the edition texture for the browser. Android uses rendered turntables to avoid the earlier native GL crashes. Exported GLBs include mesh geometry, materials and the display texture; they are not all loaded into the game.
 
-The model uses a rounded chassis, bezel, textured screen, back panel, camera lenses, flash, side keys, antenna bands, USB-C detail and speaker holes. Editions share geometry; shell colors and display artwork vary. Gameplay stays 2D.
+Regenerate using Node 22, Blender and Python Pillow:
 
-## Source and exports
-- Source: src/three/CollectiblePhone.tsx.
-- Viewer: src/components/PhoneStage.tsx; lazily loaded by PhoneInspector.tsx.
-- Crop metadata: assets/world-v3/phones.frames.json. The generated source is not an equal 256 × 512 grid.
-- Runtime builds one model on demand from a shared texture atlas. These exported GLBs are reusable production assets and are not all loaded into the app.
-- To regenerate exports, run the web preview and scripts/playtest-phone-viewer.cjs with the documented Playwright dependency path. It opens an isolated profile, checks all twelve models and writes their GLBs. The local ?phoneModelExport=1 flag enables this export function; ordinary gameplay does not expose it.
+```
+npx tsx scripts/export-seeker-geometry.ts
+/Applications/Blender.app/Contents/MacOS/Blender -b -t 4 --python scripts/render-seeker-models.py
+python3 scripts/pack-seeker-turntables.py
+```
 
-[Three.js GLTFExporter documentation](https://threejs.org/docs/pages/GLTFExporter.html) describes the binary glTF export used here. For this small viewer, React Native PanResponder controls model rotation directly; a larger scene could use [OrbitControls](https://threejs.org/docs/pages/OrbitControls.html) on web.
+The scripts write temporary geometry/frames under `/tmp`, twelve self-contained GLBs here, and eighteen-view WebP atlases under `assets/phone-turntables`. Rear labels and the Solana logo are geometry rather than a mirrored decal. The opening pose now shows the rear cameras and markings.
 
-Validation: verification/phone-viewer/checks.json and glb-validation.json. Chrome web tested at 320×568, 390×844 and 430×932. Shared native code typechecks; physical Android rendering and gestures remain untested.
+Validation outputs: `verification/seeker-hardware/assets.json` and `all-backs.jpg`. Physical-device validation remains pending.

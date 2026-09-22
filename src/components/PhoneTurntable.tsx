@@ -7,9 +7,9 @@ const sheets=[require('../../assets/phone-turntables/frost.webp'),require('../..
 const presets={Front:0,Back:8,Left:4,Right:12,Top:16,Bottom:17};
 /** Rendered views of the real model, without a live GPU context on Android. */
 export default function PhoneStage({index,height}:{index:number;height:number}){
- const {width}=useWindowDimensions(),[frame,setFrame]=useState(15),[failed,setFailed]=useState(false);
+ const {width}=useWindowDimensions(),[frame,setFrame]=useState(7),[failed,setFailed]=useState(false);
  const live=useRef(frame),start=useRef(frame);live.current=frame;
- const scale=Math.min(Math.min(width-24,430)/384,height/472),frameW=384*scale,frameH=472*scale;
+ const scale=Math.min(Math.min(width-24,430)/512,height/640),frameW=512*scale,frameH=640*scale;
  const gesture=useRef(PanResponder.create({onStartShouldSetPanResponder:()=>true,onMoveShouldSetPanResponder:()=>true,onPanResponderGrant:()=>{start.current=live.current<16?live.current:0;},onPanResponderMove:(_,g)=>setFrame(turntableFrame(start.current,g.dx))})).current;
  return <View style={{gap:12}}><View testID="phone-turntable" accessibilityLabel={`Interactive ${PHONE_EDITIONS[index]!.name} phone model`} style={{height,alignItems:'center',justifyContent:'center',borderRadius:20,overflow:'hidden',backgroundColor:'#101A21'}} {...gesture.panHandlers}>
  {failed?<PhoneArt index={index} height={Math.min(height-40,300)}/>:<View pointerEvents="none" style={{width:frameW,height:frameH,overflow:'hidden'}}><Image source={sheets[index]} onError={()=>{console.warn('[SeekerRecovery] phone-turntable image unavailable',index);setFailed(true);}} style={{position:'absolute',width:frameW*6,height:frameH*3,left:-(frame%6)*frameW,top:-Math.floor(frame/6)*frameH}} resizeMode="stretch"/></View>}
