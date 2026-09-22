@@ -1,7 +1,8 @@
+import {HapticPressable as Pressable} from '../feedback/HapticPressable';
 import {useHaptics} from '../feedback/useHaptics';
 import {NETWORK_NAME,IS_MAINNET,SKR_LABEL,NETWORK_LABEL} from '../wallet/config';
 import React,{useEffect,useRef,useState} from 'react';
-import {AppState,Linking,Share,Pressable,Text,View,useWindowDimensions} from 'react-native';
+import {AppState,Linking,Share,Text,View,useWindowDimensions} from 'react-native';
 import * as SecureStore from 'expo-secure-store';
 import {useLoggedWallet as useMobileWallet} from '../wallet/useLoggedWallet';
 import {walletFailure,walletReport,walletLog} from '../wallet/diagnostics';

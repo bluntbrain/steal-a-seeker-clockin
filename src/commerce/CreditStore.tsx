@@ -1,5 +1,6 @@
+import {HapticPressable as Pressable} from '../feedback/HapticPressable';
 import React from 'react';
-import {Modal,Pressable,Text,View,useWindowDimensions} from 'react-native';
+import {Modal,Text,View,useWindowDimensions} from 'react-native';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {CREDIT_PACKS,creditReward,type CreditPackId} from '../../shared/store';
 import {useEconomy} from './EconomyProvider';

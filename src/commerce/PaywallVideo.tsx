@@ -1,5 +1,6 @@
+import {HapticPressable as Pressable} from '../feedback/HapticPressable';
 import React,{useEffect,useState} from 'react';
-import {AppState,Image,Pressable,StyleSheet,Text,View} from 'react-native';
+import {AppState,Image,StyleSheet,Text,View} from 'react-native';
 import {useVideoPlayer,VideoView} from 'expo-video';
 import RecoveryBoundary from '../components/RecoveryBoundary';
 const clips=[require('../../assets/paywall-video/close-call.mp4'),require('../../assets/paywall-video/last-second.mp4')];

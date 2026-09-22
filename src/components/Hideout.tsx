@@ -1,3 +1,4 @@
+import {HapticPressable as Pressable} from '../feedback/HapticPressable';
 import {useEconomy} from '../commerce/EconomyProvider';
 import HideoutStore from './HideoutStore';
 import CreditBalance from './CreditBalance';
@@ -5,7 +6,7 @@ import {combatLevel} from '../game/combat-levels';
 import {IS_MAINNET} from '../wallet/config';
 import {environmentFor} from '../game/environment';
 import React,{useEffect,useState} from 'react';
-import {Image,Modal,Pressable,StyleSheet,Text,View,useWindowDimensions} from 'react-native';
+import {Image,Modal,StyleSheet,Text,View,useWindowDimensions} from 'react-native';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {useAccount} from '../commerce/account-context';
 import {CAMPAIGN_IDS,getLevel,type MissionId} from '../game/level';

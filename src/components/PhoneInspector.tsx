@@ -1,6 +1,7 @@
+import {HapticPressable as Pressable} from '../feedback/HapticPressable';
 import CreditBalance from './CreditBalance';
 import React,{lazy,Suspense} from 'react';
-import {Modal,Pressable,Text,View,useWindowDimensions} from 'react-native';
+import {Modal,Text,View,useWindowDimensions} from 'react-native';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import RecoveryBoundary from './RecoveryBoundary';
 import PhoneArt from './PhoneArt';

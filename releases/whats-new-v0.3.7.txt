@@ -1,0 +1,1 @@
+Fixed the selected bottom-tab highlight on Android. Added consistent haptic feedback to navigation, back and close buttons, settings, weekly league tabs, Play for score and credit-store actions. Improved compatibility with older Android haptic support. Includes recent weekly-run history and the updated Seeker collectible models.

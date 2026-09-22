@@ -1,6 +1,7 @@
+import {HapticPressable as Pressable} from '../feedback/HapticPressable';
 import {useEconomy} from '../commerce/EconomyProvider';
 import React,{useState} from 'react';
-import {Modal,Pressable,Text,View,useWindowDimensions} from 'react-native';
+import {Modal,Text,View,useWindowDimensions} from 'react-native';
 import {CREDIT_PACKS} from '../../shared/store';
 import type {ProductId} from '../../shared/commerce';
 import PaywallVideo from '../commerce/PaywallVideo';

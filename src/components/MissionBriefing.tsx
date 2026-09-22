@@ -1,5 +1,6 @@
+import {HapticPressable as Pressable} from '../feedback/HapticPressable';
 import React,{useState} from 'react';
-import {Pressable,StyleSheet,Text,View} from 'react-native';
+import {StyleSheet,Text,View} from 'react-native';
 import {Canvas,Path} from '@shopify/react-native-skia';
 import {combatLevel} from '../game/combat-levels';
 import {phoneEdition} from '../game/collection';
@@ -23,7 +24,7 @@ export default function MissionBriefing({mission,available,onBack,onPlay}:{missi
   <View style={s.details}>
    <View style={s.stats}><View style={s.stat}><StatIcon kind="guards"/><View><Text style={s.value}>{initial}</Text><Text style={s.label}>Patrol guards</Text></View></View><View style={s.stat}><StatIcon kind="clock"/><View><Text style={s.value}>{target}</Text><Text style={s.label}>Target time</Text></View></View></View>
    <View style={s.stats}><View style={s.stat}><StatIcon kind="reserve"/><View><Text style={s.value}>{reserves}</Text><Text style={s.label}>Alarm reinforcements</Text></View></View><View style={s.stat}><StatIcon kind="phone"/><View style={{flex:1}}><Text style={[s.value,{fontSize:12}]} numberOfLines={1}>{edition.name}</Text><Text style={s.label}>{level.targets?.length??1} phone{(level.targets?.length??1)>1?'s':''} · reach the exit</Text></View></View></View>
-   <Pressable accessibilityRole="button" accessibilityLabel={`Start ${level.title}`} disabled={!available} onPress={onPlay} style={({pressed})=>[s.play,!available&&s.locked,pressed&&{opacity:.8}]}><Text style={[s.playText,!available&&{color:'#96A7A1'}]}>{available?'PLAY  →':'LOCKED'}</Text></Pressable>
+   <Pressable accessibilityRole="button" accessibilityLabel={`Start ${level.title}`} disabled={!available} hapticCue="start" onPress={onPlay} style={({pressed})=>[s.play,!available&&s.locked,pressed&&{opacity:.8}]}><Text style={[s.playText,!available&&{color:'#96A7A1'}]}>{available?'PLAY  →':'LOCKED'}</Text></Pressable>
    <Text numberOfLines={2} style={s.footnote}>{available?(level.switches?.length?'Tap the power switch to open the locked gate. Then take the Seeker and escape.':level.briefing):'Clear the previous mission to unlock this heist.'}</Text>
   </View>
  </View>;

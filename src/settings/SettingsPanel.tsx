@@ -1,6 +1,8 @@
+import {useHaptics} from '../feedback/useHaptics';
+import {HapticPressable as Pressable} from '../feedback/HapticPressable';
 import PlaytestControls from '../telemetry/PlaytestControls';
-import React from 'react';
-import {Alert, Linking, Modal, Platform, Pressable, ScrollView, StyleSheet, Switch, Text, View} from 'react-native';
+import React,{useEffect,useRef} from 'react';
+import {Alert, Linking, Modal, Platform, ScrollView, StyleSheet, Switch, Text, View} from 'react-native';
 import {useSettings} from './SettingsProvider';
 import app from '../../app.json';
 import {IS_MAINNET} from '../wallet/config';
@@ -8,9 +10,11 @@ import type {MissionId} from '../game/level';
 
 export default function SettingsPanel({visible, onClose, mission, onReplayTips}: {visible: boolean; onClose: () => void; mission?:MissionId;onReplayTips?:()=>void}) {
   const {settings, ready, error, update, retry} = useSettings();
+  const haptic=useHaptics(),previewWhenEnabled=useRef(false);
+  useEffect(()=>{if(settings.haptics&&previewWhenEnabled.current){previewWhenEnabled.current=false;haptic('select');}},[settings.haptics,haptic]);
   const toggle = (label: string, detail: string, checked: boolean, onChange: (on: boolean) => void) =>
     <View style={styles.row}><View style={{flex: 1, gap: 5}}><Text style={styles.label}>{label}</Text><Text style={styles.detail}>{detail}</Text></View>
-      <Switch accessibilityLabel={label} disabled={!ready} value={checked} onValueChange={onChange} trackColor={{false: '#42584e', true: '#8abfad'}} thumbColor="#e1eee6"/>
+      <Switch accessibilityLabel={label} disabled={!ready} value={checked} onValueChange={on=>{if(label==='Vibration')previewWhenEnabled.current=on;else haptic('select');onChange(on);}} trackColor={{false: '#42584e', true: '#8abfad'}} thumbColor="#e1eee6"/>
     </View>;
   return <Modal visible={visible} transparent animationType={settings.reducedEffects ? 'none' : 'slide'} onRequestClose={onClose}>
     <View style={styles.scrim}><View style={styles.panel}><ScrollView style={{flexGrow:0,flexShrink:1}} contentContainerStyle={{padding: 24, gap: 22}}>

@@ -1,5 +1,6 @@
+import {HapticPressable as Pressable} from '../feedback/HapticPressable';
 import React,{Suspense,useCallback,useRef,useState} from 'react';
-import {PanResponder,Pressable,Text,View} from 'react-native';
+import {PanResponder,Text,View} from 'react-native';
 import {installModelExport} from '../three/model-export';
 import {Canvas} from '../three/Canvas';
 import {PHONE_EDITIONS} from '../game/collection';

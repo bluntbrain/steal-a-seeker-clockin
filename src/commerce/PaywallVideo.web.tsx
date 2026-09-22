@@ -1,6 +1,7 @@
+import {HapticPressable as Pressable} from '../feedback/HapticPressable';
 import React,{useEffect,useRef,useState} from 'react';
 import {Asset} from 'expo-asset';
-import {Image,Pressable,StyleSheet,Text,View} from 'react-native';
+import {Image,StyleSheet,Text,View} from 'react-native';
 const clips=[require('../../assets/paywall-video/close-call.mp4'),require('../../assets/paywall-video/last-second.mp4')];
 export default function PaywallVideo({active=true}:{active?:boolean}){
  const [index,setIndex]=useState(0),[paused,setPaused]=useState(false),[failed,setFailed]=useState(false),video=useRef<HTMLVideoElement>(null);

@@ -1,9 +1,10 @@
+import {HapticPressable as Pressable} from '../feedback/HapticPressable';
 import {useEconomy} from '../commerce/EconomyProvider';
 import type {ProductId} from '../../shared/commerce';
 import PaywallVideo from '../commerce/PaywallVideo';
 import {IS_MAINNET,NETWORK_LABEL} from './config';
 import React,{useEffect,useRef,useState} from 'react';
-import {Modal,Share,Pressable,StyleSheet,Text,View,useWindowDimensions} from 'react-native';
+import {Modal,Share,StyleSheet,Text,View,useWindowDimensions} from 'react-native';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {useLoggedWallet as useMobileWallet} from './useLoggedWallet';
 import {walletErrorMessage,walletReport,walletStep,walletLog} from './diagnostics';

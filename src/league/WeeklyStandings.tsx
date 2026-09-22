@@ -1,5 +1,6 @@
+import {HapticPressable as Pressable} from '../feedback/HapticPressable';
 import React,{useState} from 'react';
-import {Image,Pressable,StyleSheet,Text,View,useWindowDimensions} from 'react-native';
+import {Image,StyleSheet,Text,View,useWindowDimensions} from 'react-native';
 import type {LeagueSummary,LeagueEntry} from '../../shared/league';
 import {leagueLeaders,leagueRows,rivalLabel} from './presentation';
 import {shortWallet} from './card';

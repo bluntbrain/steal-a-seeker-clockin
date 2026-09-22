@@ -1,3 +1,4 @@
+import {HapticPressable as Pressable} from './feedback/HapticPressable';
 import {CAMPAIGN_IDS} from './game/level';
 import EconomyProvider,{useEconomy} from './commerce/EconomyProvider';
 import CreditBalance from './components/CreditBalance';
@@ -22,7 +23,7 @@ import {useTrial} from './commerce/TrialContext';
 import RewardsPanel from './campaign/RewardsPanel';
 import CampaignSubmission from './campaign/CampaignSubmission';
 import React,{useCallback,useEffect,useMemo,useRef,useState} from 'react';
-import {AppState,Platform,Pressable,StyleSheet,Text,View,useWindowDimensions} from 'react-native';
+import {AppState,Platform,StyleSheet,Text,View,useWindowDimensions} from 'react-native';
 import {StatusBar} from 'expo-status-bar';
 import {SafeAreaProvider,SafeAreaView,useSafeAreaInsets} from 'react-native-safe-area-context';
 import {Gesture,GestureDetector,GestureHandlerRootView} from 'react-native-gesture-handler';
@@ -255,7 +256,7 @@ export function Game({rankTicket,paidPlay,dailyReturn,paidReturn,onRankStart,onR
     {guide.active&&hud.status==='playing'&&<View pointerEvents="none" style={StyleSheet.absoluteFill}><View testID="tutorial-target" style={{position:'absolute',left:(teachingTarget?.x??0)*size/12-23,top:(teachingTarget?.y??0)*size/12-23,width:46,height:46,borderRadius:23,borderWidth:3,borderColor:'#DEFFD9',backgroundColor:'#BCECCB30'}}/><View style={{position:'absolute',bottom:8,left:8,right:8,padding:9,borderRadius:12,backgroundColor:'#142923F5'}}><Text testID="tutorial-instruction" style={[s.contextText,{fontSize:12,fontWeight:'700'}]}>{GUIDE_STEPS[guide.stage]!.text}</Text></View></View>}
     {guide.active&&<Pressable accessibilityRole="button" accessibilityLabel="Skip combat tutorial" onPress={guide.dismiss} style={{position:'absolute',top:36,right:8,padding:10,backgroundColor:'#142923EC',borderRadius:10}}><Text style={s.contextText}>Skip guide</Text></Pressable>}
    </View></GestureDetector>
-    {CAMERA_CONFIG.enabled&&!guide.active&&!settings.reducedEffects&&<Pressable testID="camera-toggle" accessibilityRole="button" accessibilityLabel={overview?'Follow courier':'Show full map'} onPress={()=>{haptic('select');setOverview(v=>!v);}} style={{position:'absolute',top:8,left:8,minHeight:36,minWidth:62,paddingHorizontal:10,justifyContent:'center',alignItems:'center',borderRadius:10,borderWidth:1,borderColor:'#526C64',backgroundColor:'#12221FED'}}><Text style={{color:'#CEE9DF',fontSize:11,fontWeight:'800'}}>{overview?'＋ Follow':'− Map'}</Text></Pressable>}
+    {CAMERA_CONFIG.enabled&&!guide.active&&!settings.reducedEffects&&<Pressable testID="camera-toggle" accessibilityRole="button" accessibilityLabel={overview?'Follow courier':'Show full map'} onPress={()=>{setOverview(v=>!v);}} style={{position:'absolute',top:8,left:8,minHeight:36,minWidth:62,paddingHorizontal:10,justifyContent:'center',alignItems:'center',borderRadius:10,borderWidth:1,borderColor:'#526C64',backgroundColor:'#12221FED'}}><Text style={{color:'#CEE9DF',fontSize:11,fontWeight:'800'}}>{overview?'＋ Follow':'− Map'}</Text></Pressable>}
    </View>
    {!combatMode&&<View testID="game-controls" style={[s.controls,{width:Math.max(size,300)}]}>
     <View testID="power-controls" style={s.powerControls}>

@@ -1,5 +1,6 @@
+import {HapticPressable as Pressable} from '../feedback/HapticPressable';
 import React,{useRef,useState} from 'react';
-import {Image,PanResponder,Pressable,Text,View,useWindowDimensions} from 'react-native';
+import {Image,PanResponder,Text,View,useWindowDimensions} from 'react-native';
 import {PHONE_EDITIONS} from '../game/collection';
 import PhoneArt from './PhoneArt';
 import {turntableFrame} from './phoneRotation';

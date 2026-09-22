@@ -1,9 +1,10 @@
+import {HapticPressable as Pressable} from '../feedback/HapticPressable';
 import PaywallVideo from './PaywallVideo';
 import {IS_MAINNET,NETWORK_LABEL,SKR_LABEL} from '../wallet/config';
 import React,{useEffect,useState} from 'react';
 import {commerceApi} from './client';
 import type {ProductPricing} from '../../shared/pricing';
-import {Pressable,ScrollView,StyleSheet,Text,View,useWindowDimensions} from 'react-native';
+import {ScrollView,StyleSheet,Text,View,useWindowDimensions} from 'react-native';
 import {usdLabel} from '../../shared/pricing';
 import {CAMPAIGN_OFFER} from '../../shared/economy';
 

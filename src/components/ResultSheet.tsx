@@ -1,14 +1,13 @@
-import {useHaptics} from '../feedback/useHaptics';
+import {HapticPressable as Pressable} from '../feedback/HapticPressable';
 import React,{type ReactNode} from 'react';
-import {Image,Pressable,StyleSheet,Text,View,useWindowDimensions} from 'react-native';
+import {Image,StyleSheet,Text,View,useWindowDimensions} from 'react-native';
 export type MessageArt='success'|'caught'|'timeout'|'pause'|'recovery'|'pending';
 // One identity, distinct expressions for every outcome. Generated from the courier reference.
 export const messageArt:Record<MessageArt,ReturnType<typeof require>>={success:require('../../assets/messages/success.png'),caught:require('../../assets/messages/caught.png'),timeout:require('../../assets/messages/timeout.png'),pause:require('../../assets/messages/pause.png'),recovery:require('../../assets/messages/recovery.png'),pending:require('../../assets/messages/pending.png')};
 type Action={label:string;accessibilityLabel?:string;onPress:()=>void;disabled?:boolean};
 export default function ResultSheet({art,eyebrow,title,detail,stats,stars,primary,secondary,utility,children,bottom=0,celebration=false,primarySide='right'}:{art:MessageArt;eyebrow:string;title:string;detail?:string;stats?:string;stars?:string;primary:Action;secondary?:Action;utility?:Action;children?:ReactNode;bottom?:number;celebration?:boolean;primarySide?:'left'|'right'}){
- const haptic=useHaptics();
  const {width,height}=useWindowDimensions(),small=width<370||height<720;
- const button=(action:Action,main=false)=><Pressable accessibilityRole="button" accessibilityLabel={action.accessibilityLabel??action.label} disabled={action.disabled} onPress={()=>{haptic('select');action.onPress();}} style={[s.button,main?s.primary:s.secondary,action.disabled&&{opacity:.45}]}><Text style={[s.buttonText,{color:main?'#173337':'#CFE6E4'}]}>{action.label}</Text></Pressable>;
+ const button=(action:Action,main=false)=><Pressable accessibilityRole="button" accessibilityLabel={action.accessibilityLabel??action.label} disabled={action.disabled} onPress={()=>{action.onPress();}} style={[s.button,main?s.primary:s.secondary,action.disabled&&{opacity:.45}]}><Text style={[s.buttonText,{color:main?'#173337':'#CFE6E4'}]}>{action.label}</Text></Pressable>;
  return <View testID="result-backdrop" style={[s.backdrop,{paddingBottom:bottom}]}><View testID="result-sheet" accessibilityViewIsModal style={[s.sheet,celebration&&{borderColor:'#5C796A',backgroundColor:'#14211E'}]}>
  <View style={s.handle}/>{!celebration&&<View style={s.body}>{!celebration&&<Image testID={`message-art-${art}`} source={messageArt[art]} style={{width:small?88:120,height:small?96:126}} resizeMode="contain" accessible={false}/>}<View style={s.copy}><Text style={s.eyebrow}>{eyebrow}</Text><Text style={[s.title,small&&{fontSize:21}]}>{title}</Text>{!!stars&&<Text style={s.stars}>{stars}</Text>}{!!stats&&<Text style={s.stats}>{stats}</Text>}{!!detail&&<Text style={s.detail}>{detail}</Text>}</View></View>}
  {!!children&&<View style={[s.status,celebration&&{borderTopWidth:0,paddingTop:0,marginTop:0}]}>{children}</View>}<View style={s.actions}>{primarySide==='left'?<>{button(primary,true)}{!!secondary&&button(secondary)}</>:<>{!!secondary&&button(secondary)}{button(primary,true)}</>}</View>{!!utility&&<Pressable accessibilityRole="button" accessibilityLabel={utility.accessibilityLabel??utility.label} onPress={utility.onPress} style={s.utility}><Text style={s.utilityText}>{utility.label}</Text></Pressable>}
