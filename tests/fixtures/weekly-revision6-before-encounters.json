@@ -1,0 +1,621 @@
+{
+  "rulesHash": "7f90be28b3c04449c9b16ad06de65b5bc688aac1c0de36b2e727dd04f394a55b",
+  "engineHash": "cd6dd46f097d3872f3a8e90c4b80a082febef88da20832ab2099ee8c3062e75a",
+  "contracts": [
+    {
+      "id": "2026-09-21:0:combat-v2",
+      "week": "2026-09-21",
+      "slot": 0,
+      "name": "Ghost Freight",
+      "district": "Warehouse",
+      "modifier": "Double haul",
+      "objective": "Bring back both phones. Your health must last.",
+      "level": {
+        "id": "combat-v2:2026-09-21:0",
+        "width": 12,
+        "height": 20,
+        "spawn": {
+          "x": 10,
+          "y": 2.5
+        },
+        "phone": {
+          "x": 2.4000000000000004,
+          "y": 17.6
+        },
+        "exit": {
+          "x": 9.2,
+          "y": 1.6999999999999986,
+          "w": 1.6,
+          "h": 1.4
+        },
+        "targetSeconds": 150,
+        "hardLimitSeconds": 150,
+        "blockers": [
+          {
+            "x": 0,
+            "y": 0,
+            "w": 12,
+            "h": 0.7,
+            "kind": "wall"
+          },
+          {
+            "x": 0,
+            "y": 19.3,
+            "w": 12,
+            "h": 0.7,
+            "kind": "wall"
+          },
+          {
+            "x": 0,
+            "y": 0,
+            "w": 0.7,
+            "h": 20,
+            "kind": "wall"
+          },
+          {
+            "x": 11.3,
+            "y": 0,
+            "w": 0.7,
+            "h": 20,
+            "kind": "wall"
+          },
+          {
+            "x": 5.3,
+            "y": 12.2,
+            "w": 2,
+            "h": 2.8,
+            "kind": "rack"
+          },
+          {
+            "x": 6.1,
+            "y": 5.5,
+            "w": 2,
+            "h": 3,
+            "kind": "rack"
+          },
+          {
+            "x": 9,
+            "y": 10.1,
+            "w": 1.8,
+            "h": 1.4,
+            "kind": "crate"
+          },
+          {
+            "x": 1.4999999999999993,
+            "y": 9.1,
+            "w": 1.7,
+            "h": 1.5,
+            "kind": "crate"
+          },
+          {
+            "x": 2.5999999999999996,
+            "y": 2.999999999999999,
+            "w": 2,
+            "h": 1.2,
+            "kind": "crate"
+          },
+          {
+            "x": 9,
+            "y": 15.4,
+            "w": 1.5,
+            "h": 1.1,
+            "kind": "crate"
+          }
+        ],
+        "mission": "practice",
+        "title": "Ghost Freight",
+        "number": 1,
+        "briefing": "Bring back both phones. Your health must last.",
+        "patrols": [
+          {
+            "route": [
+              {
+                "x": 4.4,
+                "y": 12.6
+              },
+              {
+                "x": 1.5999999999999996,
+                "y": 12.6
+              },
+              {
+                "x": 1.5999999999999996,
+                "y": 13.8
+              },
+              {
+                "x": 4.4,
+                "y": 13.8
+              }
+            ],
+            "speed": 1.2,
+            "range": 4.5,
+            "halfAngle": 0.9817477042468103,
+            "spotSeconds": 1.1,
+            "pauseSeconds": 0.4,
+            "investigates": true,
+            "combatRole": "sentry"
+          },
+          {
+            "route": [
+              {
+                "x": 5.1,
+                "y": 15.6
+              },
+              {
+                "x": 1.5999999999999996,
+                "y": 15.6
+              }
+            ],
+            "speed": 1.45,
+            "range": 4.5,
+            "halfAngle": 0.9817477042468103,
+            "spotSeconds": 1.1,
+            "pauseSeconds": 0.4,
+            "investigates": true,
+            "combatRole": "scout"
+          },
+          {
+            "route": [
+              {
+                "x": 2,
+                "y": 2.5
+              },
+              {
+                "x": 2,
+                "y": 2.1
+              }
+            ],
+            "speed": 1.45,
+            "range": 4.5,
+            "halfAngle": 0.9817477042468103,
+            "spotSeconds": 1.1,
+            "pauseSeconds": 0.4,
+            "investigates": true,
+            "combatRole": "scout",
+            "reserveAfter": 2
+          },
+          {
+            "route": [
+              {
+                "x": 2,
+                "y": 2.5
+              },
+              {
+                "x": 2,
+                "y": 2.1
+              }
+            ],
+            "speed": 1.45,
+            "range": 4.5,
+            "halfAngle": 0.9817477042468103,
+            "spotSeconds": 1.1,
+            "pauseSeconds": 0.4,
+            "investigates": true,
+            "combatRole": "scout",
+            "reserveAfter": 4.2
+          }
+        ],
+        "floorColor": "#253A37",
+        "decoys": 0,
+        "combat": {
+          "version": 2,
+          "revision": 6
+        },
+        "targets": [
+          {
+            "x": 2.4000000000000004,
+            "y": 17.6
+          },
+          {
+            "x": 9.9,
+            "y": 17.6
+          }
+        ]
+      }
+    },
+    {
+      "id": "2026-09-21:1:combat-v2",
+      "week": "2026-09-21",
+      "slot": 1,
+      "name": "Skyline Relay",
+      "district": "Rooftops",
+      "modifier": "Exit window",
+      "objective": "Take the Seeker. The exit opens for 4 seconds every 8 seconds.",
+      "level": {
+        "id": "combat-v2:2026-09-21:1",
+        "mission": "sweep-window",
+        "title": "Skyline Relay",
+        "number": 5,
+        "width": 12,
+        "height": 20,
+        "spawn": {
+          "x": 10,
+          "y": 17.5
+        },
+        "phone": {
+          "x": 2.4000000000000004,
+          "y": 2.4
+        },
+        "exit": {
+          "x": 1.7999999999999996,
+          "y": 16.900000000000002,
+          "w": 1.6,
+          "h": 1.4
+        },
+        "targetSeconds": 90,
+        "hardLimitSeconds": 120,
+        "briefing": "Take the Seeker. The exit opens for 4 seconds every 8 seconds.",
+        "floorColor": "#253649",
+        "blockers": [
+          {
+            "x": 0,
+            "y": 0,
+            "w": 12,
+            "h": 0.7,
+            "kind": "wall"
+          },
+          {
+            "x": 0,
+            "y": 19.3,
+            "w": 12,
+            "h": 0.7,
+            "kind": "wall"
+          },
+          {
+            "x": 0,
+            "y": 0,
+            "w": 0.7,
+            "h": 20,
+            "kind": "wall"
+          },
+          {
+            "x": 11.3,
+            "y": 0,
+            "w": 0.7,
+            "h": 20,
+            "kind": "wall"
+          },
+          {
+            "x": 4.9,
+            "y": 5,
+            "w": 2,
+            "h": 2.8,
+            "kind": "rack"
+          },
+          {
+            "x": 6.5,
+            "y": 11.5,
+            "w": 2,
+            "h": 3,
+            "kind": "rack"
+          },
+          {
+            "x": 9,
+            "y": 8.5,
+            "w": 1.8,
+            "h": 1.4,
+            "kind": "crate"
+          },
+          {
+            "x": 1.4999999999999993,
+            "y": 9.8,
+            "w": 1.7,
+            "h": 1.5,
+            "kind": "crate"
+          },
+          {
+            "x": 2.5999999999999996,
+            "y": 15.8,
+            "w": 2,
+            "h": 1.2,
+            "kind": "crate"
+          },
+          {
+            "x": 9,
+            "y": 3.5,
+            "w": 1.5,
+            "h": 1.1,
+            "kind": "crate"
+          }
+        ],
+        "patrols": [
+          {
+            "route": [
+              {
+                "x": 4.4,
+                "y": 7.9
+              },
+              {
+                "x": 1.5999999999999996,
+                "y": 7.9
+              },
+              {
+                "x": 1.5999999999999996,
+                "y": 6.7
+              },
+              {
+                "x": 4.4,
+                "y": 6.7
+              }
+            ],
+            "speed": 1.2,
+            "range": 4.5,
+            "halfAngle": 0.9817477042468103,
+            "spotSeconds": 1.1,
+            "pauseSeconds": 0.4,
+            "investigates": true,
+            "combatRole": "sentry"
+          },
+          {
+            "route": [
+              {
+                "x": 5.1,
+                "y": 4.4
+              },
+              {
+                "x": 1.5999999999999996,
+                "y": 4.4
+              }
+            ],
+            "speed": 1.45,
+            "range": 4.5,
+            "halfAngle": 0.9817477042468103,
+            "spotSeconds": 1.1,
+            "pauseSeconds": 0.4,
+            "investigates": true,
+            "combatRole": "scout"
+          },
+          {
+            "route": [
+              {
+                "x": 2,
+                "y": 17.5
+              },
+              {
+                "x": 2,
+                "y": 17.1
+              }
+            ],
+            "speed": 1.45,
+            "range": 4.5,
+            "halfAngle": 0.9817477042468103,
+            "spotSeconds": 1.1,
+            "pauseSeconds": 0.4,
+            "investigates": true,
+            "combatRole": "scout",
+            "reserveAfter": 2
+          },
+          {
+            "route": [
+              {
+                "x": 2,
+                "y": 17.5
+              },
+              {
+                "x": 2,
+                "y": 17.1
+              }
+            ],
+            "speed": 1.45,
+            "range": 4.5,
+            "halfAngle": 0.9817477042468103,
+            "spotSeconds": 1.1,
+            "pauseSeconds": 0.4,
+            "investigates": true,
+            "combatRole": "scout",
+            "reserveAfter": 4.2
+          }
+        ],
+        "decoys": 0,
+        "combat": {
+          "version": 2,
+          "revision": 6
+        },
+        "exitWindow": {
+          "period": 8,
+          "openSeconds": 4,
+          "phase": 1.5
+        }
+      }
+    },
+    {
+      "id": "2026-09-21:2:combat-v2",
+      "week": "2026-09-21",
+      "slot": 2,
+      "name": "Pulse Vault",
+      "district": "Powerworks",
+      "modifier": "Blackout",
+      "objective": "Short guard sight. Take the Seeker and escape.",
+      "level": {
+        "id": "combat-v2:2026-09-21:2",
+        "mission": "power-trade",
+        "title": "Pulse Vault",
+        "number": 9,
+        "width": 12,
+        "height": 20,
+        "spawn": {
+          "x": 10,
+          "y": 17.5
+        },
+        "phone": {
+          "x": 2.4000000000000004,
+          "y": 2.7
+        },
+        "exit": {
+          "x": 1.7999999999999996,
+          "y": 16.900000000000002,
+          "w": 1.6,
+          "h": 1.4
+        },
+        "targetSeconds": 90,
+        "hardLimitSeconds": 120,
+        "briefing": "Short guard sight. Take the Seeker and escape.",
+        "floorColor": "#343D40",
+        "blockers": [
+          {
+            "x": 0,
+            "y": 0,
+            "w": 12,
+            "h": 0.7,
+            "kind": "wall"
+          },
+          {
+            "x": 0,
+            "y": 19.3,
+            "w": 12,
+            "h": 0.7,
+            "kind": "wall"
+          },
+          {
+            "x": 0,
+            "y": 0,
+            "w": 0.7,
+            "h": 20,
+            "kind": "wall"
+          },
+          {
+            "x": 11.3,
+            "y": 0,
+            "w": 0.7,
+            "h": 20,
+            "kind": "wall"
+          },
+          {
+            "x": 4.9,
+            "y": 5,
+            "w": 2,
+            "h": 2.8,
+            "kind": "rack"
+          },
+          {
+            "x": 6.5,
+            "y": 11.5,
+            "w": 2,
+            "h": 3,
+            "kind": "rack"
+          },
+          {
+            "x": 9,
+            "y": 8.5,
+            "w": 1.8,
+            "h": 1.4,
+            "kind": "crate"
+          },
+          {
+            "x": 1.4999999999999993,
+            "y": 9.8,
+            "w": 1.7,
+            "h": 1.5,
+            "kind": "crate"
+          },
+          {
+            "x": 2.5999999999999996,
+            "y": 15.8,
+            "w": 2,
+            "h": 1.2,
+            "kind": "crate"
+          },
+          {
+            "x": 9,
+            "y": 3.5,
+            "w": 1.5,
+            "h": 1.1,
+            "kind": "crate"
+          }
+        ],
+        "patrols": [
+          {
+            "route": [
+              {
+                "x": 4.4,
+                "y": 7.9
+              },
+              {
+                "x": 1.5999999999999996,
+                "y": 7.9
+              },
+              {
+                "x": 1.5999999999999996,
+                "y": 6.7
+              },
+              {
+                "x": 4.4,
+                "y": 6.7
+              }
+            ],
+            "speed": 1.2,
+            "range": 3,
+            "halfAngle": 0.9817477042468103,
+            "spotSeconds": 1.1,
+            "pauseSeconds": 0.4,
+            "investigates": true,
+            "combatRole": "sentry"
+          },
+          {
+            "route": [
+              {
+                "x": 5.1,
+                "y": 4.4
+              },
+              {
+                "x": 1.5999999999999996,
+                "y": 4.4
+              }
+            ],
+            "speed": 1.45,
+            "range": 3,
+            "halfAngle": 0.9817477042468103,
+            "spotSeconds": 1.1,
+            "pauseSeconds": 0.4,
+            "investigates": true,
+            "combatRole": "scout"
+          },
+          {
+            "route": [
+              {
+                "x": 2,
+                "y": 17.5
+              },
+              {
+                "x": 2,
+                "y": 17.1
+              }
+            ],
+            "speed": 1.45,
+            "range": 3,
+            "halfAngle": 0.9817477042468103,
+            "spotSeconds": 1.1,
+            "pauseSeconds": 0.4,
+            "investigates": true,
+            "combatRole": "scout",
+            "reserveAfter": 2
+          },
+          {
+            "route": [
+              {
+                "x": 2,
+                "y": 17.5
+              },
+              {
+                "x": 2,
+                "y": 17.1
+              }
+            ],
+            "speed": 1.45,
+            "range": 3,
+            "halfAngle": 0.9817477042468103,
+            "spotSeconds": 1.1,
+            "pauseSeconds": 0.4,
+            "investigates": true,
+            "combatRole": "scout",
+            "reserveAfter": 4.2
+          }
+        ],
+        "decoys": 0,
+        "combat": {
+          "version": 2,
+          "revision": 6
+        }
+      }
+    }
+  ]
+}

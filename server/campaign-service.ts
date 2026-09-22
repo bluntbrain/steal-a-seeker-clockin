@@ -1,5 +1,6 @@
 import {creditReward} from '../shared/store';
 import {combatLevel} from '../src/game/combat-levels';
+import {campaignCreditTarget} from './campaign-credit-versions';
 import {createHash,randomUUID} from 'node:crypto';
 import type {Pool} from 'pg';
 import {CAMPAIGN_IDS,type MissionId} from '../src/game/level';
@@ -25,9 +26,9 @@ export class CampaignService{
   await transaction(this.pool,async db=>{
    const locked=await db.query('SELECT credits FROM wallets WHERE address=$1 FOR UPDATE',[wallet]);creditBalance=Number(locked.rows[0].credits);
    await db.query('INSERT INTO campaign_runs(id,wallet,mission,rules_hash,replay_hash,replay,result) VALUES($1,$2,$3,$4,$5,$6,$7) ON CONFLICT DO NOTHING',[randomUUID(),wallet,mission,rulesHash,hash,replay,result]);
-   // Credits are progression rewards, never ranked points or cash. Grant only
-   // current campaign replays; archived engines remain valid for legacy records.
-   if(rulesHash===rules.rulesHash){const stars=1+Number(result.battery>=60)+Number(result.ticks<=combatLevel(mission).targetSeconds*30),old=await db.query('SELECT stars FROM campaign_credit_stars WHERE wallet=$1 AND mission=$2',[wallet,mission]),delta=creditReward(stars)-creditReward(old.rows[0]?.stars??0);
+   // Versioned thresholds preserve the previous release during the app rollout.
+   const targetSeconds=campaignCreditTarget(rulesHash,mission);
+   if(targetSeconds!==undefined){const stars=1+Number(result.battery>=60)+Number(result.ticks<=targetSeconds*30),old=await db.query('SELECT stars FROM campaign_credit_stars WHERE wallet=$1 AND mission=$2',[wallet,mission]),delta=creditReward(stars)-creditReward(old.rows[0]?.stars??0);
     if(delta>0){awardedCredits=delta;creditBalance+=delta;const b=await db.query('UPDATE wallets SET credits=credits+$2 WHERE address=$1 RETURNING credits',[wallet,delta]);await db.query('INSERT INTO campaign_credit_stars(wallet,mission,stars) VALUES($1,$2,$3) ON CONFLICT(wallet,mission) DO UPDATE SET stars=$3',[wallet,mission,stars]);await db.query('INSERT INTO credit_ledger(id,wallet,source,delta,balance_after) VALUES($1,$2,$3,$4,$5)',[randomUUID(),wallet,`mission:${mission}:stars:${stars}`,delta,b.rows[0].credits]);}
    }
   });

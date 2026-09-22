@@ -33,6 +33,7 @@ import {useGameAudio as useAudioPlayer} from './audio/useGameAudio';
 import {useHaptics} from './feedback/useHaptics';
 import CreditClaim,{type CreditReward} from './components/CreditClaim';
 import GameCanvas from './components/GameCanvas';
+import CleanCombo from './components/CleanCombo';
 import {CAMERA_CONFIG,useFollowCamera} from './camera/useFollowCamera';
 import {screenToWorld} from './camera/geometry';
 import RecoveryBoundary from './components/RecoveryBoundary';
@@ -287,6 +288,7 @@ export function Game({rankTicket,paidPlay,dailyReturn,paidReturn,onRankStart,onR
     <View pointerEvents="none" style={StyleSheet.absoluteFill}><Text style={[s.mapLabel,{top:size/12*(level.exit.y+.23),left:size/12*level.exit.x,width:size/12*level.exit.w,color:'#d6f4e4'}]}>EXIT</Text></View>
     </Animated.View>
     {!guide.active&&hud.status==='playing'&&<PhoneObjectivePill state={hud} total={level.targets?.length??1} level={level}/>}
+    <CleanCombo state={hud} run={`${mission}:${sceneVersion}`} active={gameplayVisible&&!guide.active} sound={settings.sound} volume={settings.volume} reduced={!!settings.reducedEffects}/>
 
 
     {!!(contextHint||coach.text)&&!paused&&hud.status==='playing'&&<View pointerEvents="none" testID="security-banner" accessibilityLiveRegion="polite" style={[s.contextToast,alarmOn&&{backgroundColor:'#3A171FEF'}]}><Text style={s.contextText} numberOfLines={2}>{contextHint||coach.text}</Text></View>}

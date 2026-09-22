@@ -57,7 +57,22 @@ function enemies(s:GameState,dt:number,l:LevelDefinition){
   if(g.hp<=0){g.active=false;g.seesPlayer=false;continue;}
   if(spec.reserveAfter!==undefined&&!g.spawned){g.active=s.securityAlarm&&s.alarmSeconds>=spec.reserveAfter&&Math.hypot(s.x-g.x,s.y-g.y)>1.25;if(!g.active)continue;g.spawned=true;}
   g.active=true;g.clock+=dt;g.flash=Math.max(0,g.flash-dt);g.range=spec.range+(tacticalCombat(l)&&s.securityAlarm?.8:0);
-  if(g.combatRole==='drone'){g.seesPlayer=false;g.exposure=0;continue;}
+  if(g.combatRole==='drone'){
+   // Revision 7 campaign scouts patrol and report only to their nearby pair.
+   // The tutorial and all older published replays retain stationary drones.
+   if((l.combat?.revision??0)<7){g.seesPlayer=false;g.exposure=0;continue;}
+   const p=spec.route[g.target];
+   if(g.wait>0)g.wait=Math.max(0,g.wait-dt);
+   else if(p){const dx=p.x-g.x,dy=p.y-g.y;if(Math.hypot(dx,dy)>.01)turnToward(g,Math.atan2(dy,dx),dt);
+    if(walkActor(g,p,spec.speed,dt,l)&&Math.hypot(g.x-p.x,g.y-p.y)<.02){g.target=(g.target+1)%spec.route.length;g.wait=spec.pauseSeconds;}}
+   g.seesPlayer=sees(g,s.x,s.y,l);
+   g.exposure=g.seesPlayer?Math.min(1,g.exposure+dt/Math.max(.5,spec.spotSeconds)):Math.max(0,g.exposure-dt*3);
+   if(g.exposure>=1&&g.clock>=g.nextReport){
+    s.spotted=true;g.lastSeen={x:s.x,y:s.y};g.nextReport=g.clock+2;
+    for(const other of s.guards)if(other!==g&&other.active&&other.hp>0&&other.combatRole!=='drone'&&Math.hypot(other.x-g.x,other.y-g.y)<=4.5&&!other.seesPlayer)reactToNoise(other,g.lastSeen,l);
+   }
+   continue;
+  }
   if(fairAmbush(l)&&g.reactionTicks>0){g.reactionTicks--;g.seesPlayer=false;g.exposure=0;continue;}
   const seen=sees(g,s.x,s.y,l);if(tacticalCombat(l)&&g.seesPlayer&&!seen){g.path=findPath(g,g.lastSeen,l);g.pathIndex=0;g.mode='investigate';g.nextReport=g.clock+1.4;}g.seesPlayer=seen;g.exposure=seen?1:0;if(seen){s.spotted=true;g.lastSeen={x:s.x,y:s.y};if(fairAmbush(l))g.alerted=true;}
   if(g.gunPhase==='aim'){

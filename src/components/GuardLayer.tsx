@@ -28,7 +28,7 @@ export default function GuardLayer({game,alpha,index,clock,reduced=false}:Props)
  const sparks=useDerivedValue(()=>{const p=Skia.Path.Make();if(live.value||fx.value.burst<=0)return p;const r=fx.value.radius;for(let i=0;i<6;i++){const a=i*Math.PI/3+index*.7;p.moveTo(Math.cos(a)*r,Math.sin(a)*r);p.lineTo(Math.cos(a)*(r+.10),Math.sin(a)*(r+.10));}return p;});
  const aim=useDerivedValue(()=>{const p=Skia.Path.Make(),g=game.value.guards[index];if(!game.value.combat||!g?.active||g.hp<=0||g.gunPhase!=='aim')return p;const d=sightDistance(g.x,g.y,Math.cos(g.shotAngle),Math.sin(g.shotAngle),g.range,{...stateLevel(game.value),blockers:game.value.blockers});p.moveTo(g.x,g.y);p.lineTo(g.x+Math.cos(g.shotAngle)*d,g.y+Math.sin(g.shotAngle)*d);return p;});
  const color=useDerivedValue(()=>!live.value?'#31424A':game.value.guards[index]?.seesPlayer?'#ff8169':'#dba961');
- const opacity=useDerivedValue(()=>game.value.combat&&role==='drone'?0:game.value.guards[index]?.active?.14+(game.value.guards[index]?.exposure??0)*.25:0);
+ const opacity=useDerivedValue(()=>game.value.combat&&role==='drone'&&(game.value.definition?.combat?.revision??0)<7?0:game.value.guards[index]?.active?.14+(game.value.guards[index]?.exposure??0)*.25:0);
  const width=useDerivedValue(()=>game.value.combat?(game.value.guards[index]?.hp??0)/(game.value.guards[index]?.maxHp??1)*.9:(game.value.guards[index]?.exposure??0)*.9);
  const hitFlash=useDerivedValue(()=>live.value?Math.min(1,(game.value.guards[index]?.flash??0)*5):fx.value.flash);
  const bar=useDerivedValue(()=>{const g=game.value.guards[index];return [{translateX:(g?.x??0)-.45},{translateY:(g?.y??0)-.72}];});

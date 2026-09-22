@@ -590,6 +590,18 @@ test('free campaign grants verified credits once; forged progress and invalid re
  const balance=(await service.me(u.wallet)).credits!;assert(balance>=50&&balance<=60);assert.equal(receipts.reduce((n,r)=>n+r.creditAward.credits,0),balance);assert.equal((await campaign.submit(u.wallet,'practice',rules.rulesHash,replay)).creditAward.credits,0);assert.equal((await service.me(u.wallet)).credits,balance);assert(receipts.every(r=>r.creditAward.balance===balance));assert.equal((await campaign.submit(u.wallet,'practice',rules.rulesHash,replay)).creditAward.balance,balance);assert(!(await service.me(u.wallet)).entitlements.includes('campaign'));
 });
 
+test('the previous APK can still earn verified credits without double claiming after update',async()=>{
+ const {CampaignService}=await import('./campaign-service'),{PRE_SCOUT_RULES}=await import('./campaign-credit-versions'),rules=(await import('../shared/rules-manifest.json')).default;
+ const u=await login(),campaign=new CampaignService(pool,new ReturnService(pool,undefined,{mint:service.config.mint,treasury:service.config.recipient,source:service.config.destination,decimals:6}));
+ // The tutorial is unchanged between these releases; the archived worker still
+ // verifies the old hash independently before the same per-mission credit lock.
+ const replay=fixtureReplay().replay;
+ const old=await campaign.submit(u.wallet,'practice',PRE_SCOUT_RULES,replay);
+ assert(old.creditAward.credits>=50&&old.creditAward.credits<=60);
+ const updated=await campaign.submit(u.wallet,'practice',rules.rulesHash,replay);
+ assert.equal(updated.creditAward.credits,0);assert.equal(updated.creditAward.balance,old.creditAward.balance);
+});
+
 
 test('retired gear cannot be sold; new outfit credits do not alter gameplay entitlements',async()=>{
  const u=await login();

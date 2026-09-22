@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import frozen from './fixtures/weekly-2026-09-14.json';
+import frozen6 from './fixtures/weekly-revision6-before-encounters.json';
 import engine from '../shared/weekly-engine.json';
 import rules from '../shared/rules-manifest.json';
 import {isWeeklyCompatible,LEGACY_WEEKLY_ENGINES,PRESERVED_REVISION_3_ENGINE,type WeeklyCompatibility} from '../shared/weekly-compatibility';
@@ -42,4 +43,20 @@ test('the frozen active week has identical winning and delayed outcomes in its a
    assert.deepEqual(verifyReplay(c.level.mission,replay,c.level),archived.verifyReplay(c.level.mission,replay,c.level),`${c.name}: delay ${delay}`);
   }
  }
+});
+
+test('scout encounters preserve revision-6 weekly wins and delayed replay outcomes',async()=>{
+ const week=frozen6 as unknown as WeeklyCompatibility;
+ assert(isWeeklyCompatible(week));
+ const archived=await import((await checkRuleBundle(week.rulesHash)).href);
+ for(const c of week.contracts){
+  const win=solveCombat(c.level);assert(win);
+  for(const delay of [0,15,60,120]){
+   const state=initialState(c.level.mission,c.level),replay:Replay={version:2,chunks:[]};
+   for(const chunk of [...(delay?[{ticks:delay,command:undefined}]:[]),...win.replay.chunks])for(let i=0;i<chunk.ticks&&state.status==='playing';i++)recordStep(state,{...idleInput(),command:chunk.command},replay.chunks);
+   assert.deepEqual(verifyReplay(c.level.mission,replay,c.level),archived.verifyReplay(c.level.mission,replay,c.level));
+  }
+ }
+ const unsupported=JSON.parse(JSON.stringify(week));unsupported.contracts[0].level.combat.revision=7;
+ assert(!isWeeklyCompatible(unsupported),'An old engine must not accept the new drone mechanics');
 });

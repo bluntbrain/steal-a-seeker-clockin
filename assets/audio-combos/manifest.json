@@ -1,0 +1,13 @@
+{
+  "file": "clean-chain.wav",
+  "source": "Original procedural ascending three-tone cue",
+  "sampleRate": 32000,
+  "duration": 0.38,
+  "peakDbFS": -6,
+  "notesHz": [
+    880,
+    1108.73,
+    1318.51
+  ],
+  "sha256": "011fb0a3c608e92d5de5a3c2c44fd2003253f4e651a62f52f83d1eb4eed856de"
+}

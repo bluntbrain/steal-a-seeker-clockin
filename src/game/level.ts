@@ -4,7 +4,7 @@ export type Point = {x:number;y:number};
 export type GuardSpec = {combatRole?:import('./combat-levels').EnemyRole;reserveAfter?:number;route:Point[];speed:number;range:number;halfAngle:number;spotSeconds:number;pauseSeconds:number;kind?:'scanner'|'warden';investigates?:boolean;hearing?:number;activePower?:0|1;alertAfterDelivery?:boolean;sweep?:{angle:number;amplitude:number;period:number}};
 export type GateSpec={box:Box;period:number;openSeconds:number;phase:number;mode?:'power'|'relay';power?:0|1;relay?:number};
 export type SwitchSpec=Point & {kind:'power'|'relay';channel?:number;duration?:number};
-export type LevelDefinition = {combat?:{version:2;revision?:3|4|5|6};id:string;mission:MissionId;title:string;number:number;briefing:string;width:number;height:number;spawn:Point;phone:Point;exit:Point & {w:number;h:number};targetSeconds:number;hardLimitSeconds:number;blockers:Box[];patrols:GuardSpec[];floorColor:string;gates?:GateSpec[];decoys?:number;switches?:SwitchSpec[];targets?:Point[];exitWindow?:{period:number;openSeconds:number;phase:number}};
+export type LevelDefinition = {combat?:{version:2;revision?:3|4|5|6|7};id:string;mission:MissionId;title:string;number:number;briefing:string;width:number;height:number;spawn:Point;phone:Point;exit:Point & {w:number;h:number};targetSeconds:number;hardLimitSeconds:number;blockers:Box[];patrols:GuardSpec[];floorColor:string;gates?:GateSpec[];decoys?:number;switches?:SwitchSpec[];targets?:Point[];exitWindow?:{period:number;openSeconds:number;phase:number}};
 export const PATROLS = [
   [{x:3.7,y:10.5},{x:6.6,y:10.5},{x:6.6,y:7.6},{x:4.3,y:7.6},{x:4.3,y:10.5}],
   [{x:7.3,y:4.2},{x:10.5,y:4.2},{x:10.5,y:7.1},{x:7.3,y:7.1}],

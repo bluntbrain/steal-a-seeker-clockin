@@ -278,6 +278,50 @@ function applyDenseLayout(l:LevelDefinition,n:number){
  l.targetSeconds=n===8?100:n>=9?80:65;l.hardLimitSeconds=n===8?180:n>=9?150:120;
 }
 
+// Free campaign encounters: approach a pair, use its island, then regroup behind
+// the middle baffles. Frozen weekly definitions never pass through this authoring.
+export const SCOUT_ENCOUNTER_POCKETS=[{x:1.5,y:11.9},{x:6,y:18}];
+function applyScoutEncounters(l:LevelDefinition,n:number){
+ 'worklet';
+ const mirror=n===3||n===5;
+ const point=(x:number,y:number):Point=>({x:mirror?12-x:x,y});
+ const box=(x:number,y:number,w:number,h:number,kind:Box['kind']='wall'):Box=>({x:mirror?12-x-w:x,y,w,h,kind});
+ const upperX=n===4?4.6:4,lowerX=n===5?4.5:4;
+ l.blockers=[...l.blockers.slice(0,4),
+  box(lowerX,13.2,2.7,2),box(upperX,6,2.7,2),
+  box(1,10,3.5,1.2),box(7.5,10,3.5,1.2),box(2.3,11.2,.4,1.9),
+  box(4.2,17,3.2,.6),
+  box(1,2,2,2),box(8.6,2,2.4,2),box(5,2,1.4,1.8),
+  box(1,6,1.3,2),box(9.5,6,1.5,2),box(1,16,1.5,1),
+  box(9.2,12,1.8,1.2),box(9.2,16.8,1.6,1,'crate'),
+ ];
+ if(n===4)l.blockers.push(box(1,4.7,1.2,.6,'crate'));
+ if(n===5)l.blockers.push(box(9.6,4.7,1.2,.6,'crate'));
+ if(n===6)l.blockers.push(box(1,4.7,1.2,.6,'crate'));
+ const enemy=(role:EnemyRole,route:number[][],speed:number):GuardSpec=>({
+  combatRole:role,route:route.map(([x,y])=>point(x!,y!)),speed,
+  range:role==='drone'?2.8:role==='heavy'?3.1:2.9,halfAngle:Math.PI/3.5,
+  spotSeconds:.8,pauseSeconds:role==='drone'?.55:.85,investigates:true,
+  ...(role==='drone'?{kind:'scanner' as const}:{}),
+ });
+ // Each patrol stays in its encounter before an alarm or audible shot.
+ const lowerDrone=enemy('drone',[[3.2,12.4],[3.2,15.9],[8,15.9],[8,12.4]],n<=3?.85:1);
+ const lowerGuard=enemy('scout',[[8.5,16],[8.5,14]],.70);
+ const upperLeft=enemy(n>=4?'drone':'scout',n>=4?[[3.2,5.2],[3.2,8.8],[8.1,8.8],[8.1,5.2]]:[[3.2,8.8],[3.2,6]],n>=4?1:.65);
+ const upperRight=enemy(n===6?'heavy':'scout',[[8.4,8.8],[8.4,6]],n===6?.48:.65);
+ l.patrols=[lowerDrone,lowerGuard,upperLeft,upperRight];
+ if(n===6){
+  l.patrols.push(enemy('scout',[[3.8,1.5],[3.8,3.8]],.70),enemy('sentry',[[7.6,3.8],[7.6,1.5]],.60));
+ }
+ // Replace the old reserve count rather than adding another crowd on top.
+ const reserves=n===2?0:n===6?1:2;
+ for(let i=0;i<reserves;i++)l.patrols.push({...enemy('scout',[[i?10.5:1.6,18.6],[i?8:3.4,18.6]],.7),reserveAfter:12+i*5});
+ l.spawn=point(6,18);l.phone=point(n===4?7.5:4,1.3);
+ l.exit={x:(mirror?12-9.8:9.8)-.55,y:18,w:1.1,h:1};
+ l.targets=undefined;l.combat={version:2,revision:7};
+ l.briefing=n===2?'Clear the pair. Use cover. Take the Seeker and escape.':n===6?'Two patrols, then the Heavy. Use the cover between encounters.':'Clear one patrol pair at a time. Take cover before the next.';
+}
+
 export function combatLevel(mission:MissionId):LevelDefinition{
  'worklet';const old=getLevel(mission),n=Math.max(1,old.number),i=n-1;
  const wall:Box[]=[{x:0,y:0,w:12,h:.65,kind:'wall'},{x:0,y:19.35,w:12,h:.65,kind:'wall'},{x:0,y:0,w:.65,h:20,kind:'wall'},{x:11.35,y:0,w:.65,h:20,kind:'wall'}];
@@ -330,5 +374,6 @@ export function combatLevel(mission:MissionId):LevelDefinition{
   level.hardLimitSeconds+=n<=4?60:30;
   if(n===10)level.exitWindow={period:8,openSeconds:5,phase:0};
  }
+ if(n>=2&&n<=6)applyScoutEncounters(level,n);
  return level;
 }
