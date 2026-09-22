@@ -26,3 +26,8 @@ test('celebration export fits its own dimensions and preserves equipped outfits'
  assert.equal(new Set(COSTUMES.map(c=>cardPortrait({...d,outfit:c.id}))).size,6,'equipped outfit remains distinct in the finale');
  assert.deepEqual(cardLayout({...d,outfit:'night-courier'}),cardLayout(d),'outfit cannot alter earned stats');
 });
+
+test('replaying earlier missions after campaign completion never opens the finale',()=>{
+ let p=freshProgress();for(const id of CAMPAIGN_IDS){const s=initialState(id);s.status='won';p=recordWin(p,s);}
+ for(const id of CAMPAIGN_IDS){const s=initialState(id);s.status='won';assert.equal(completedCampaign(p,s),id==='last-vault');s.status='playing';assert.equal(completedCampaign(p,s),false);}
+});

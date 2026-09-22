@@ -51,3 +51,14 @@ test('edge markers only appear outside the cropped map and stay inside the scree
   const m=edgeMarker(p.x,p.y,360,c)!;assert(m);assert(m.x>=15&&m.x<=345&&m.y>=15&&m.y<=585);
  }
 });
+
+test('full-height phone viewports keep map edges, tap projection and markers aligned',()=>{
+ for(const [width,height] of ([[358,710],[388,794],[430,850],[768,900]] as const)){
+  for(const target of [{x:.7,y:.7},{x:11.3,y:19.3},{x:6,y:10}]){
+   const c=frameCourier(target.x,target.y,1.3,height*12/width),p=worldToScreen(target.x,target.y,width,c),q=screenToWorld(p.x,p.y,width,c);
+   assert(c.x>=0&&c.y>=0);assert(c.x+12/c.zoom<=12+1e-9);assert(c.y+height*12/width/c.zoom<=20+1e-9);
+   assert(p.x>=0&&p.x<=width&&p.y>=0&&p.y<=height);close(q.x,target.x);close(q.y,target.y);
+   const marker=edgeMarker(12-target.x,20-target.y,width,c,height);if(marker){assert(marker.x>=15&&marker.x<=width-15);assert(marker.y>=15&&marker.y<=height-15);}
+  }
+ }
+});
