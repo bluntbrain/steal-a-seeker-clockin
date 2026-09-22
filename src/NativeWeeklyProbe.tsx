@@ -15,7 +15,7 @@ import {weekWindow} from '../shared/weekly';
 import type {RunTicket} from '../shared/ranked';
 import rules from '../shared/rules-manifest.json';
 const wallet='11111111111111111111111111111111',unavailable=async():Promise<never>=>{throw Error('Synthetic QA: no wallet session.');};
-const account:AccountContextValue={wallet,loading:false,preview:true,notice:'Synthetic QA',session:unavailable,refresh:unavailable,update:async()=>{}};
+const account:AccountContextValue={wallet,loading:false,preview:true,notice:'Synthetic QA',connect:unavailable,session:unavailable,refresh:unavailable,update:async()=>{}};
 export default function NativeWeeklyProbe(){
  const [mode,setMode]=useState<'weekly'|'campaign'|'paywall'>('weekly');
  const [ticket,setTicket]=useState<RunTicket>(),[attempts,setAttempts]=useState<Record<string,number>>({});

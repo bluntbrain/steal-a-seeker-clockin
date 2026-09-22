@@ -74,5 +74,5 @@ export default function AccountProvider({children}:{children:ReactNode}){
  },[mobile,update,syncGuest]);
  const refresh=useCallback(async(interactive=true)=>{const s=await session(interactive),a=await commerceApi.me(s.token);if(a.wallet!==s.wallet)throw new Error('Account mismatch.');await update(a);return a;},[session,update]);
  // Account state from a previous wallet is never exposed during a render/effect gap.
- return <AccountContext.Provider value={{wallet,account:state?.wallet===wallet?state:undefined,loading,preview:false,notice,session,update,refresh}}>{children}</AccountContext.Provider>;
+ return <AccountContext.Provider value={{wallet,account:state?.wallet===wallet?state:undefined,loading,preview:false,notice,connect:async()=>{await mobile.connect();},session,update,refresh}}>{children}</AccountContext.Provider>;
 }

@@ -17,7 +17,7 @@ import rules from '../shared/rules-manifest.json';
 // No code here is selected in normal builds. It never authorizes a payment.
 const key='seeker.diagnostic.recovery.fixture.v1',wallet='11111111111111111111111111111111';
 const unavailable=async():Promise<never>=>{throw new Error('Diagnostic fixture has no wallet session or payment access.');};
-const account:AccountContextValue={wallet,loading:false,preview:true,notice:'Diagnostic only',session:unavailable,refresh:unavailable,update:async()=>{}};
+const account:AccountContextValue={wallet,loading:false,preview:true,notice:'Diagnostic only',connect:unavailable,session:unavailable,refresh:unavailable,update:async()=>{}};
 async function fixture(){
  const id=crypto.randomUUID(),now=new Date().toISOString();
  const entry:PaidEntry={id,wallet,status:'ready',manifest:{mission:'battery-dash',rulesHash:rules.rulesHash,levelHash:rules.levelHashes['battery-dash'],seed:0,loadout:'standard',hardLimitSeconds:240},readyUntil:new Date(Date.now()+86400000).toISOString(),run:null,return:null,detail:'Synthetic diagnostic; no payment exists.',quote:{id,wallet,cluster:'solana:devnet',mint:wallet,tokenProgram:wallet,decimals:6,amount:'10000000',recipient:wallet,source:wallet,destination:wallet,reference:wallet,memo:`diagnostic:${id}`,createdAt:now,expiresAt:now,signature:null,detail:null}};

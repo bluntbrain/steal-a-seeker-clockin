@@ -13,3 +13,12 @@ test('old upload cannot erase a newer win on the same mission',async()=>{let res
 test('disk cleanup failure does not discard the confirmed award',async()=>{const {queue,fail}=setup(async()=>({credits:60})),run={mission:'01',replay:1};await queue.enqueue('wallet',run);fail();assert.equal((await queue.submit('wallet','token',run)).credits,60);});
 test('failed historical replay does not block submitting the current win',async()=>{const {queue,disk}=setup(async(_,run)=>{if(run.replay===1)throw Error('Old rules');return {credits:55};});await queue.enqueue('wallet',{mission:'01',replay:1});const fresh={mission:'02',replay:2};await queue.enqueue('wallet',fresh);assert.equal((await queue.submit('wallet','token',fresh)).credits,55);assert.deepEqual(disk.get('wallet'),[{mission:'01',replay:1}]);});
 test('uploads and receipts never cross wallet/session boundaries',async()=>{let calls=0;const {queue}=setup(async()=>({credits:++calls})),run={mission:'01',replay:1};assert.equal((await queue.submit('a','token-a',run)).credits,1);assert.equal((await queue.submit('b','token-b',run)).credits,2);assert.equal((await queue.submit('a','new-token',run)).credits,3);});
+
+test('connecting during a guest import shares the award and clears both queues',async()=>{
+ let calls=0,resolve!:()=>void;const wait=new Promise<void>(r=>resolve=r),{queue,disk}=setup(async()=>{calls++;await wait;return {credits:60};}),run={mission:'01',replay:99};
+ await queue.enqueue('guest',run);await queue.enqueue('wallet',run);
+ const importing=queue.submit('guest','same-session',run),claim=queue.submit('wallet','same-session',run);
+ resolve();assert.deepEqual(await importing,{credits:60});assert.deepEqual(await claim,{credits:60});assert.equal(calls,1);
+ assert.deepEqual(disk.get('guest'),[]);assert.deepEqual(disk.get('wallet'),[]);
+ await queue.enqueue('wallet',run);assert.equal((await queue.submit('wallet','same-session',run)).credits,60);assert.equal(calls,1);assert.deepEqual(disk.get('wallet'),[]);
+});

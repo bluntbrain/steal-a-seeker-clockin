@@ -9,7 +9,7 @@ import type {GameState} from '../game/simulation';
 import type {Replay} from '../../shared/replay';
 export default function CampaignSubmission({state,replay,quiet=false,onReward,retrySignal=0}:{state:GameState;replay:Replay;quiet?:boolean;onReward?:(amount:number|null,message?:string)=>void;retrySignal?:number}){
  const account=useAccount(),latest=useRef({account,onReward});latest.current={account,onReward};
- const lastRetry=useRef(retrySignal);
+ const lastRetry=useRef(0);
  const [message,setMessage]=useState('Verifying your mission…'),[retry,setRetry]=useState(0),[failed,setFailed]=useState(false);
  useEffect(()=>{
   if(state.status!=='won')return;
@@ -21,7 +21,7 @@ export default function CampaignSubmission({state,replay,quiet=false,onReward,re
    let saved=false;
    try{
     await enqueue(wallet,state.mission,replay);saved=true;
-    // Guest credits are awarded locally by EconomyProvider. Keep the replay for import.
+    // Keep guest wins durable until the player connects to claim.
     if(wallet==='guest')return;
     const session=await latest.current.account.session(interactive&&attempts===1);
     if(!valid())return;
@@ -42,7 +42,7 @@ export default function CampaignSubmission({state,replay,quiet=false,onReward,re
     if(!valid())return;
     const auth=error instanceof ApiError&&error.status===401||error instanceof Error&&/Sign in|Connect your wallet/.test(error.message);
     const permanent=error instanceof ApiError&&error.status>=400&&error.status<500&&error.status!==429;
-    const text=!saved?'Could not save this run. Retry before leaving.':auth?'Run saved. Tap Sync with wallet to sign in.':permanent?(error as Error).message:'Run saved on this device. We’ll retry when the connection returns.';
+    const text=!saved?'Could not save this run. Retry before leaving.':auth?'Run saved. Tap Claim to sign in and sync.':permanent?(error as Error).message:'Run saved on this device. We’ll retry when the connection returns.';
     setMessage(text);setFailed(!saved);latest.current.onReward?.(null,text);
     if(!auth&&!permanent&&attempts<3)timer=setTimeout(()=>void run(),attempts*5000);
    }finally{running=false;}
