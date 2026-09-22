@@ -4,6 +4,7 @@ import EconomyProvider,{useEconomy} from './commerce/EconomyProvider';
 import CreditBalance from './components/CreditBalance';
 import {localTestMission} from './playtest/mission';
 import {combatLevel} from './game/combat-levels';
+import {isDuplicateTap,tapReady,TAP_INTERVAL_MS,type PendingTap} from './controls/tapQueue';
 import {assistedCombatTap} from './controls/tapDestination';
 import {PhoneObjectivePill,SecurityEntrances,MechanismLabels} from './components/ObjectiveSignals';
 import CampaignConfetti from './components/CampaignConfetti';
@@ -23,7 +24,7 @@ import {useTrial} from './commerce/TrialContext';
 import RewardsPanel from './campaign/RewardsPanel';
 import CampaignSubmission from './campaign/CampaignSubmission';
 import React,{useCallback,useEffect,useMemo,useRef,useState} from 'react';
-import {AppState,Platform,StyleSheet,Text,View,useWindowDimensions} from 'react-native';
+import {ActivityIndicator,AppState,Platform,StyleSheet,Text,View,useWindowDimensions} from 'react-native';
 import {StatusBar} from 'expo-status-bar';
 import {SafeAreaProvider,SafeAreaView,useSafeAreaInsets} from 'react-native-safe-area-context';
 import {Gesture,GestureDetector,GestureHandlerRootView} from 'react-native-gesture-handler';
@@ -65,7 +66,6 @@ import {initialState,idleInput,step,nearPhone,nearSwitch,exitOpen,stateLevel,typ
 import {LEVEL,getLevel,TUNING,MISSIONS,type MissionId} from './game/level';
 type Stats={fps:number;p95:number;frames:number;slow:number};
 const zeroStats={fps:0,p95:0,frames:0,slow:0};
-const emptyState=initialState();
 const time=(n:number)=>`${Math.floor(n/60).toString().padStart(2,'0')}:${Math.floor(n%60).toString().padStart(2,'0')}`;
 export default function GameScreen(){return <GestureHandlerRootView style={{flex:1}}><SafeAreaProvider><WalletProvider><AccountProvider><SettingsProvider><EconomyProvider><CampaignGate><WalletGame/></CampaignGate></EconomyProvider></SettingsProvider></AccountProvider></WalletProvider></SafeAreaProvider></GestureHandlerRootView>;}
 function WalletGame(){
@@ -87,13 +87,17 @@ export function Game({rankTicket,paidPlay,dailyReturn,paidReturn,onRankStart,onR
  const size=Math.max(144,Math.min(width-16,(height-insets.top-insets.bottom-(combatMode?64:174))*.6,480));
  const homeFirst=!testMission&&!trial.active&&!timedRun&&!dailyReturn&&!paidReturn;
  const [walletOpen,setWalletOpen]=useState(false),[mapOpen,setMapOpen]=useState(false),[hideoutOpen,setHideoutOpen]=useState(homeFirst||dailyReturn),[dailyOpen,setDailyOpen]=useState(false),[settingsOpen,setSettingsOpen]=useState(false),[paidOpen,setPaidOpen]=useState(paidReturn);
+ const initial=useMemo(()=>initialState(startMission,rankTicket?.manifest.contract?.level??(combatMode?combatLevel(startMission):undefined)),[]);
+ const sceneEpoch=useRef(0),[sceneVersion,setSceneVersion]=useState(0),[sceneLoading,setSceneLoading]=useState(true),[sceneError,setSceneError]=useState('');
+ const sceneReady=useSharedValue(false),simulationEpoch=useSharedValue(0);
+ const pendingTap=useSharedValue<PendingTap|null>(null),previousTap=useSharedValue<PendingTap|null>(null),tapElapsed=useSharedValue(TAP_INTERVAL_MS);
  const recording=useSharedValue<ReplayChunk[]>(paidPlay?.replay.chunks.map(c=>({...c}))??[]),[completedReplay,setCompletedReplay]=useState<Replay>();
- const game=useSharedValue(initialState(startMission,rankTicket?.manifest.contract?.level??(combatMode?combatLevel(startMission):undefined))),input=useSharedValue(idleInput()),alpha=useSharedValue(0),clock=useSharedValue(0),accumulator=useSharedValue(0),suspended=useSharedValue(!!paidEntry||dailyReturn||paidReturn||homeFirst),saveClock=useSharedValue(0);
+ const game=useSharedValue(initial),input=useSharedValue(idleInput()),alpha=useSharedValue(0),clock=useSharedValue(0),accumulator=useSharedValue(0),suspended=useSharedValue(!!paidEntry||dailyReturn||paidReturn||homeFirst),saveClock=useSharedValue(0);
  const samples=useSharedValue<number[]>([]),reportClock=useSharedValue(0),hudClock=useSharedValue(0),frameTotal=useSharedValue(0),slowTotal=useSharedValue(0);
- const [hud,setHud]=useState<GameState>(()=>initialState(startMission,rankTicket?.manifest.contract?.level??(combatMode?combatLevel(startMission):undefined))),[stats,setStats]=useState<Stats>(zeroStats),[paused,setPaused]=useState(!!paidEntry||dailyReturn||paidReturn||homeFirst),[details,setDetails]=useState(false),[mission,setMission]=useState<MissionId>(startMission);
+ const [hud,setHud]=useState<GameState>(()=>JSON.parse(JSON.stringify(initial))),[stats,setStats]=useState<Stats>(zeroStats),[paused,setPaused]=useState(!!paidEntry||dailyReturn||paidReturn||homeFirst),[details,setDetails]=useState(false),[mission,setMission]=useState<MissionId>(startMission);
  useRunTelemetry(hud,paused,paidEntry?'paid':rankTicket?'daily':trial.active?'trial':'campaign',stats);
  const coach=useCoach(hud,!timedRun&&!combatMode);
- const guide=useCombatGuide(hud,!timedRun);
+ const guide=useCombatGuide(hud,!timedRun),beginGuide=guide.begin;
  const guideWaiting=useSharedValue(true),guideStage=useSharedValue(-1);
  useEffect(()=>{if(guide.active&&guide.resume){const saved=JSON.parse(JSON.stringify(guide.resume.state));game.value=saved;setHud(saved);recording.value=[];input.value=idleInput();guide.consumeResume();}},[guide.active,guide.resume]);
  useEffect(()=>{guideWaiting.value=!guide.ready||(guide.active&&guide.waiting);guideStage.value=guide.active?guide.stage:-1;},[guide.ready,guide.active,guide.waiting,guide.stage]);
@@ -104,10 +108,10 @@ export function Game({rankTicket,paidPlay,dailyReturn,paidReturn,onRankStart,onR
  const worldOverlayStyle=useAnimatedStyle(()=>{const c=camera.value,scale=size/12*c.zoom;return {transform:[{translateX:(c.zoom-1)*size/2-c.x*scale},{translateY:(c.zoom-1)*size*20/12/2-c.y*scale},{scale:c.zoom}]};});
  const damagePulse=useSharedValue(0);
  const showDamage=useCallback(()=>{haptic('damage');damagePulse.value=settingsRef.current.reducedEffects?.45:1;damagePulse.value=withTiming(0,{duration:settingsRef.current.reducedEffects?160:280});},[damagePulse,haptic]);
- const gameplayVisible=!paused&&!hideoutOpen&&!walletOpen&&!mapOpen&&!settingsOpen&&!dailyOpen&&!paidOpen&&!rewardsOpen;
+ const gameplayVisible=!sceneLoading&&!paused&&!hideoutOpen&&!walletOpen&&!mapOpen&&!settingsOpen&&!dailyOpen&&!paidOpen&&!rewardsOpen;
  useCombatAudio(hud,settings.sound&&gameplayVisible,settings.volume,showDamage,gameplayVisible,haptic);
  useEffect(()=>{if(!gameplayVisible||hud.ticks===0)damagePulse.value=0;},[gameplayVisible,hud.ticks===0,damagePulse]);
- useFootstepAudio(hud,settings.sound&&!paused&&!hideoutOpen&&!walletOpen&&!mapOpen&&!settingsOpen&&!dailyOpen&&!paidOpen&&!rewardsOpen&&!(guide.active&&guide.waiting),settings.volume);
+ useFootstepAudio(hud,settings.sound&&!sceneLoading&&!paused&&!hideoutOpen&&!walletOpen&&!mapOpen&&!settingsOpen&&!dailyOpen&&!paidOpen&&!rewardsOpen&&!(guide.active&&guide.waiting),settings.volume);
  const level=useMemo(()=>rankTicket?.manifest.contract?.level??(combatMode?combatLevel(mission):getLevel(mission)),[rankTicket?.manifest.contract?.level,combatMode,mission]);
  useLevelMusic(level.number,settings.sound&&gameplayVisible&&hud.status==='playing'&&!(guide.active&&guide.waiting),settings.volume,hud.securityAlarm);
  const boardHeight=size*20/12;
@@ -116,12 +120,12 @@ export function Game({rankTicket,paidPlay,dailyReturn,paidReturn,onRankStart,onR
  const rewardEpoch=useRef(0);
  useEffect(()=>()=>{rewardEpoch.current++;},[]);
  const [creditReward,setCreditReward]=useState<CreditReward>({amount:null}),[rewardClaimed,setRewardClaimed]=useState(false);
- const claimVisible=!timedRun&&!trial.active&&!testMission&&hud.status==='won'&&!paused&&!hideoutOpen&&!walletOpen&&!settingsOpen&&!rewardClaimed;
+ const claimVisible=!sceneLoading&&!timedRun&&!trial.active&&!testMission&&hud.status==='won'&&!paused&&!hideoutOpen&&!walletOpen&&!settingsOpen&&!rewardClaimed;
  const [rewardRetry,setRewardRetry]=useState(0);
  const rewardResolved=useCallback((amount:number|null,message?:string)=>setCreditReward({amount,message}),[]);
  const saveLocalReward=()=>{const epoch=rewardEpoch.current;rewardResolved(null);void economy.earn(hud.mission,starsFor(hud)).then(n=>{if(epoch!==rewardEpoch.current)return;setEarnedNotice(n>0?`+${n} credits`:'');rewardResolved(n);}).catch(()=>{if(epoch===rewardEpoch.current)rewardResolved(null,'Credit save failed. Tap Retry save.');});};
  const campaignFinished=!timedRun&&!trial.active&&!testMission&&completedCampaign(progress.progress,hud);
- const finaleVisible=campaignFinished&&!claimVisible&&!paused&&!hideoutOpen&&!walletOpen&&!settingsOpen;
+ const finaleVisible=!sceneLoading&&campaignFinished&&!claimVisible&&!paused&&!hideoutOpen&&!walletOpen&&!settingsOpen;
  const nextMission=nextCampaignMission(mission);
  const shareAction=useRef<(()=>Promise<void>)|null>(null),[shareReady,setShareReady]=useState(false);
  const registerShare=useCallback((fn:(()=>Promise<void>)|null)=>{shareAction.current=fn;setShareReady(!!fn);},[]);
@@ -133,11 +137,11 @@ export function Game({rankTicket,paidPlay,dailyReturn,paidReturn,onRankStart,onR
 
  useEffect(()=>{if(!testMission&&!trial.active&&!timedRun&&hud.status==='won'&&!recorded.current&&progress.ready&&economy.ready){recorded.current=true;progress.complete(hud);if(economy.local)saveLocalReward();else if(guide.retries>0)rewardResolved(0,'Tutorial checkpoint run. Replay the mission to earn verified credits.');}},[hud,progress.ready,progress.complete,timedRun,trial.active,economy.ready,economy.local,rewardResolved]);
  useEffect(()=>{if(hud.status!=='playing'&&!completedReplay)setCompletedReplay({version:(combatMode?2:1) as 1|2,chunks:recording.value.map(c=>({...c}))});},[hud.status,completedReplay,recording]);
- const latest=useRef<GameState>(initialState(startMission,rankTicket?.manifest.contract?.level??(combatMode?combatLevel(startMission):undefined))),latestStats=useRef<Stats>(zeroStats);
+ const latest=useRef<GameState>(hud),latestStats=useRef<Stats>(zeroStats);
  const alarmAudio=useAudioPlayer(require('../assets/audio-combat-v3/alarm.wav'));
  const pickupAudio=useAudioPlayer(require('../assets/audio-combat-v3/pickup.wav')),dashAudio=useAudioPlayer(require('../assets/audio-v3/dash.wav')),successAudio=useAudioPlayer(require('../assets/audio-combat-v3/escape.wav'));
  const decoyAudio=useAudioPlayer(require('../assets/audio-v3/decoy.wav')),caughtAudio=useAudioPlayer(require('../assets/audio-combat-v3/caught.wav')),spotAudio=useAudioPlayer(require('../assets/audio-v3/spot.wav')),switchAudio=useAudioPlayer(require('../assets/audio-v3/switch.wav'));
- const publish=useCallback((snapshot:GameState)=>{latest.current=snapshot;setHud(snapshot);onSnapshot?.(snapshot);},[onSnapshot]);
+ const publish=useCallback((snapshot:GameState,epoch?:number)=>{if(epoch!==undefined&&epoch!==sceneEpoch.current)return;latest.current=snapshot;setHud(snapshot);onSnapshot?.(snapshot);},[onSnapshot]);
  const publishStats=useCallback((value:Stats)=>{latestStats.current=value;setStats(value);},[]);
  useEffect(()=>{for(const player of [pickupAudio,dashAudio,successAudio,decoyAudio,caughtAudio,spotAudio,switchAudio]){player.volume=settings.sound?settings.volume:0;if(!settings.sound)player.pause();}},[settings.sound,settings.volume,pickupAudio,dashAudio,successAudio,decoyAudio,caughtAudio,spotAudio,switchAudio]);
  useEffect(()=>{alarmAudio.loop=true;alarmAudio.volume=settings.sound?settings.volume*.12:0;if(settings.sound&&hud.securityAlarm&&hud.status==='playing'&&!paused)alarmAudio.play();else alarmAudio.pause();return()=>alarmAudio.pause();},[alarmAudio,settings.sound,settings.volume,hud.securityAlarm,hud.status,paused]);
@@ -167,7 +171,16 @@ export function Game({rankTicket,paidPlay,dailyReturn,paidReturn,onRankStart,onR
  useEffect(()=>{if(!paidEntry?.run)return;const check=()=>{const left=Math.max(0,Math.ceil((new Date(paidEntry.run!.expiresAt).getTime()-Date.now())/1000));setSubmissionSeconds(left);if(left===0){setDeadlinePassed(true);suspended.value=true;if(game.value.status==='playing')setPaused(true);}};check();const timer=setInterval(check,1000);return()=>clearInterval(timer);},[paidEntry,suspended,game]);
  useFrameCallback(frame=>{
    const raw=frame.timeSincePreviousFrame;if(raw===null)return;
-   if(suspended.value||guideWaiting.value){accumulator.value=0;return;}
+   if(suspended.value||!sceneReady.value){pendingTap.value=null;accumulator.value=0;return;}
+   tapElapsed.value+=raw;
+   if(tapReady(pendingTap.value,tapElapsed.value)&&game.value.status==='playing'){
+    const point=pendingTap.value!;pendingTap.value=null;tapElapsed.value=0;
+    const seq=Math.max(game.value.combat?.commandSeen??0,input.value.command?.seq??0)+1;
+    const tapped=assistedCombatTap(game.value,point.x,point.y,seq);
+    const command=guideStage.value>=0?guideCommand(guideStage.value,tapped):tapped;
+    if(command){input.modify(v=>{v.command=command;return v;});if(guideWaiting.value){guideWaiting.value=false;runOnJS(beginGuide)();}}
+   }
+   if(guideWaiting.value){accumulator.value=0;return;}
    const dt=Math.min(raw/1000,.1);clock.value+=dt;
    frameTotal.value++;if(raw>25)slowTotal.value++;
    samples.modify(v=>{v.push(raw);if(v.length>120)v.shift();return v;});reportClock.value+=raw;
@@ -175,31 +188,31 @@ export function Game({rankTicket,paidPlay,dailyReturn,paidReturn,onRankStart,onR
      const sorted=[...samples.value].sort((a,b)=>a-b);const mean=samples.value.reduce((a,b)=>a+b,0)/Math.max(1,samples.value.length);
      runOnJS(publishStats)({fps:1000/mean,p95:sorted[Math.max(0,Math.ceil(sorted.length*.95)-1)]??0,frames:frameTotal.value,slow:slowTotal.value});reportClock.value=0;
    }
-   const previousDamage=game.value.combat?.damageTaken??0,previousDecoys=game.value.decoysLeft,previousAlert=game.value.alert,previousPower=game.value.power,previousRelays=game.value.relayTimers.join(),previousCarry=game.value.carrying,previousDashes=game.value.dashes,previousTool=game.value.toolSeen,previousStatus=game.value.status;
+   const previousDamage=game.value.combat?.damageTaken??0,previousDecoys=game.value.decoysLeft,previousAlert=game.value.alert,previousPower=game.value.power,previousRelays=[...game.value.relayTimers],previousCarry=game.value.carrying,previousDashes=game.value.dashes,previousTool=game.value.toolSeen,previousStatus=game.value.status;
    accumulator.value=Math.min(accumulator.value+dt,TUNING.step*3);
-   game.modify(s=>{while(accumulator.value+1e-9>=TUNING.step){const controls=input.value;recording.modify(chunks=>{recordStep(s,controls,chunks);return chunks;});accumulator.value-=TUNING.step;}return s;},true);
+   if(accumulator.value+1e-9>=TUNING.step)game.modify(s=>{recording.modify(chunks=>{while(accumulator.value+1e-9>=TUNING.step){recordStep(s,input.value,chunks);accumulator.value-=TUNING.step;}return chunks;});return s;},true);
    alpha.value=accumulator.value/TUNING.step;
    if(paidEntry){saveClock.value+=dt;if(saveClock.value>=1||previousStatus!==game.value.status){saveClock.value=0;runOnJS(checkpoint)({version:(combatMode?2:1) as 1|2,chunks:recording.value.map(c=>({...c}))});}}
    if(game.value.decoysLeft<previousDecoys)runOnJS(event)('decoy');
    if(!combatMode&&previousAlert<=0&&game.value.alert>0)runOnJS(event)('spot');
-   if(game.value.power!==previousPower||game.value.relayTimers.some((v,i)=>v>Number(previousRelays.split(',')[i]??0)))runOnJS(event)('switch');
+   if(game.value.power!==previousPower||game.value.relayTimers.some((v,i)=>v>(previousRelays[i]??0)))runOnJS(event)('switch');
    if(game.value.carrying&&!previousCarry)runOnJS(event)('pickup');
    if(game.value.dashes>previousDashes)runOnJS(event)('dash');
    if(game.value.status==='won'&&previousStatus!=='won')runOnJS(event)('success');
    if(game.value.status==='caught'&&previousStatus!=='caught')runOnJS(event)('caught');
    hudClock.value+=dt;
-   if(hudClock.value>=.12||previousDamage!==(game.value.combat?.damageTaken??0)||previousTool!==game.value.toolSeen||previousCarry!==game.value.carrying||previousStatus!==game.value.status||previousDashes!==game.value.dashes){runOnJS(publish)({...game.value});hudClock.value=0;}
+   if(hudClock.value>=.12||previousDamage!==(game.value.combat?.damageTaken??0)||previousTool!==game.value.toolSeen||previousCarry!==game.value.carrying||previousStatus!==game.value.status||previousDashes!==game.value.dashes){runOnJS(publish)({...game.value},simulationEpoch.value);hudClock.value=0;}
  });
  const pause=useCallback((value:boolean)=>{
   if(!value&&paidEntry&&(!recoveryReady||recoveryError||deadlinePassed))return;
-  suspended.value=value;
+  suspended.value=value;pendingTap.value=null;previousTap.value=null;
   if(timedRun){input.value={...idleInput(),dash:game.value.dashSeen,tool:game.value.toolSeen};if(value&&paidEntry)checkpoint({version:(combatMode?2:1) as 1|2,chunks:recording.value.map(c=>({...c}))});}
   else{input.value=idleInput();game.modify(s=>{'worklet';s.vx=0;s.vy=0;s.px=s.x;s.py=s.y;s.dashSeen=0;s.toolSeen=0;return s;});}
   setPaused(value);
  },[suspended,input,game,timedRun,paidEntry,checkpoint,recording,recoveryReady,recoveryError,deadlinePassed]);
  const leavePaid=useCallback(async()=>{if(!paidEntry)return;suspended.value=true;setPaused(true);try{await persistPaid({version:(combatMode?2:1) as 1|2,chunks:recording.value.map(c=>({...c}))});onPaidExit();}catch{/* Keep the screen and input log available for a save retry. */}},[paidEntry,suspended,persistPaid,recording,onPaidExit]);
  const leaveRank=useCallback(async()=>{if(!rankTicket)return;if(rankTicket.practice){onRankExit();return;}if(Platform.OS==='web'&&rankTicket.manifest.contract){const {abandonLocal}=await import('./league/local');abandonLocal();onRankExit();return;}try{if(game.value.status==='playing'){const session=await account.session(false);if(session.wallet===rankTicket.wallet)await rankedApi.abandon(session.token,rankTicket.id);}else if(!rankResolved.current)await savePending(rankTicket,{version:(combatMode?2:1) as 1|2,chunks:recording.value.map(c=>({...c}))});}catch{/* The daily screen can recover the server ticket after an outage. */}finally{onRankExit();}},[rankTicket,game,recording,account.session,onRankExit]);
- const restart=useCallback((next:MissionId=game.value.mission)=>{if(trial.active){trial.finish();return;}if(paidEntry){void leavePaid();return;}if(rankTicket){void leaveRank();return;}recording.value=[];setCompletedReplay(undefined);rewardEpoch.current++;setEarnedNotice('');setCreditReward({amount:null});setRewardClaimed(false);recorded.current=false;setOverview(false);setMission(next);const fresh=guide.start(next)??initialState(next,combatMode?combatLevel(next):undefined);game.value=fresh;input.value=idleInput();accumulator.value=0;alpha.value=0;clock.value=0;samples.value=[];frameTotal.value=0;slowTotal.value=0;reportClock.value=0;hudClock.value=0;setHud(fresh);latest.current=fresh;suspended.value=false;setPaused(false);setStats(zeroStats);},[game,input,accumulator,alpha,clock,samples,frameTotal,slowTotal,reportClock,hudClock,suspended,rankTicket,leaveRank,recording,paidEntry,leavePaid,trial,guide.start]);
+ const restart=useCallback((next:MissionId=game.value.mission)=>{if(trial.active){trial.finish();return;}if(paidEntry){void leavePaid();return;}if(rankTicket){void leaveRank();return;}sceneReady.value=false;suspended.value=true;pendingTap.value=null;previousTap.value=null;tapElapsed.value=TAP_INTERVAL_MS;simulationEpoch.value=++sceneEpoch.current;setSceneVersion(sceneEpoch.current);setSceneLoading(true);setSceneError('');recording.value=[];setCompletedReplay(undefined);rewardEpoch.current++;setEarnedNotice('');setCreditReward({amount:null});setRewardClaimed(false);recorded.current=false;setOverview(false);setMission(next);const fresh=guide.start(next)??initialState(next,combatMode?combatLevel(next):undefined);game.value=fresh;input.value=idleInput();accumulator.value=0;alpha.value=0;clock.value=0;samples.value=[];frameTotal.value=0;slowTotal.value=0;reportClock.value=0;hudClock.value=0;setHud(fresh);latest.current=fresh;suspended.value=false;setPaused(false);setStats(zeroStats);},[game,input,accumulator,alpha,clock,samples,frameTotal,slowTotal,reportClock,hudClock,suspended,rankTicket,leaveRank,recording,paidEntry,leavePaid,trial,guide.start]);
  useEffect(()=>{const subscription=AppState.addEventListener('change',state=>{if(state!=='active'){finaleAudio.pause();objectiveAudio.pause();if(game.value.status==='playing')pause(true);}});return()=>subscription.remove();},[pause,game,finaleAudio,objectiveAudio]);
  useEffect(()=>{
    if(Platform.OS!=='web')return;
@@ -214,8 +227,21 @@ export function Game({rankTicket,paidPlay,dailyReturn,paidReturn,onRankStart,onR
    (window as unknown as {__SEEKER_MVP__:unknown}).__SEEKER_MVP__={renderer:'2d-skia',rulesHash:rulesManifest.rulesHash,snapshot:()=>({...game.value,guards:game.value.guards.map(g=>({...g}))}),metrics:()=>({...latestStats.current}),replay:()=>({version:(combatMode?2:1) as 1|2,chunks:recording.value.map(c=>({...c}))}),get level(){return stateLevel(game.value);}};
    return()=>{window.removeEventListener('keydown',down);window.removeEventListener('keyup',up);window.removeEventListener('blur',blur);document.removeEventListener('visibilitychange',visibility);};
  },[input,pause,restart,suspended,recording,walletOpen,hideoutOpen,mapOpen,settingsOpen,dailyOpen,paidOpen,rewardsOpen]);
- const beginGuide=guide.begin,teachingTarget=guideTarget(guide.stage,hud);
- const tapBoard=Gesture.Tap().maxDuration(650).onBegin(e=>{'worklet';if(suspended.value||!game.value.combat)return;const seq=Math.max(game.value.combat.commandSeen,input.value.command?.seq??0)+1;const point=screenToWorld(e.x-1,e.y-1,size,camera.value);const tapped=assistedCombatTap(game.value,Math.round(point.x*100)/100,Math.round(point.y*100)/100,seq);const command=guideStage.value>=0?guideCommand(guideStage.value,tapped):tapped;if(!command)return;input.modify(v=>{v.command=command;return v;});if(guideWaiting.value){guideWaiting.value=false;runOnJS(beginGuide)();}});
+ const teachingTarget=guideTarget(guide.stage,hud);
+ const tapBoard=useMemo(()=>Gesture.Tap().maxDuration(650).onBegin(e=>{
+  'worklet';if(suspended.value||!sceneReady.value||!game.value.combat||game.value.status!=='playing')return;
+  const point=screenToWorld(e.x-1,e.y-1,size,camera.value),tap={x:Math.round(point.x*100)/100,y:Math.round(point.y*100)/100,at:Date.now()};
+  if(isDuplicateTap(previousTap.value,tap))return;
+  previousTap.value=tap;pendingTap.value=tap;
+ }),[size,camera,suspended,sceneReady,game,pendingTap,previousTap]);
+ const sceneLoaded=useCallback(()=>{
+  const expected=sceneVersion;if(sceneEpoch.current!==expected)return;
+  setSceneLoading(false);setSceneError('');
+  runOnUI(()=>{'worklet';if(simulationEpoch.value===expected){accumulator.value=0;sceneReady.value=true;}})();
+ },[sceneVersion,sceneReady,simulationEpoch,accumulator]);
+ const sceneFailed=useCallback(()=>{if(sceneEpoch.current===sceneVersion)setSceneError('Could not load the map. Try again.');},[sceneVersion]);
+ useEffect(()=>{if(!sceneLoading)return;const timer=setTimeout(()=>setSceneError('The map is taking longer to load. Retry to reload its artwork.'),12000);return()=>clearTimeout(timer);},[sceneLoading,sceneVersion]);
+ const appearance=useMemo(()=>({...economy.equipment,reducedEffects:settings.reducedEffects}),[economy.equipment.outfit,economy.equipment.trail,economy.equipment.frame,economy.equipment.rack,settings.reducedEffects]);
  const joystick=Gesture.Pan().minDistance(0).onBegin(e=>{const dx=(e.x-54)/36,dy=(e.y-54)/36,m=Math.max(1,Math.hypot(dx,dy));input.modify(v=>{v.x=dx/m;v.y=dy/m;return v;});}).onUpdate(e=>{const dx=(e.x-54)/36,dy=(e.y-54)/36,m=Math.max(1,Math.hypot(dx,dy));input.modify(v=>{v.x=dx/m;v.y=dy/m;return v;});}).onFinalize(()=>{input.modify(v=>{v.x=0;v.y=0;return v;});});
  const take=Gesture.LongPress().minDuration(0).maxDistance(100).onBegin(()=>{input.modify(v=>{v.interact=true;return v;});}).onFinalize(()=>{input.modify(v=>{v.interact=false;return v;});});
  const dash=Gesture.Tap().onBegin(()=>{input.modify(v=>{v.dash++;return v;});});
@@ -243,7 +269,7 @@ export function Game({rankTicket,paidPlay,dailyReturn,paidReturn,onRankStart,onR
     <Pressable accessibilityRole="button" accessibilityLabel={paused?'Resume game':'Pause game'} onPress={()=>pause(!paused)} style={s.iconButton}><Text style={s.iconText}>{paused?'▷':'Ⅱ'}</Text></Pressable>
    </View>
    <View style={{width:size+2,height:boardHeight+2}}><GestureDetector gesture={combatMode?tapBoard:Gesture.Tap().enabled(false)}><View testID="game-board" style={[s.board,{width:size+2,height:boardHeight+2}]}>
-    <GameCanvas camera={camera} size={size} input={input} game={game} alpha={alpha} clock={clock} level={level} appearance={{...economy.equipment,reducedEffects:settings.reducedEffects}}/>
+    <GameCanvas key={sceneVersion} onReady={sceneLoaded} onLoadError={sceneFailed} camera={camera} size={size} input={input} game={game} alpha={alpha} clock={clock} level={level} appearance={appearance}/>
     <Animated.View pointerEvents="none" testID="camera-world-overlays" style={[{position:'absolute',left:0,top:0,width:size,height:boardHeight},worldOverlayStyle]}>
     {combatMode&&<SecurityEntrances level={level} state={hud} size={size} reduced={!!settings.reducedEffects}/>}
     <MechanismLabels level={level} state={hud} size={size}/>
@@ -276,7 +302,7 @@ export function Game({rankTicket,paidPlay,dailyReturn,paidReturn,onRankStart,onR
    {!!progress.error&&<Pressable accessibilityRole="button" onPress={()=>void progress.retrySave()} style={s.saveError}><Text style={s.contextText}>{progress.error}</Text></Pressable>}
 
  </View>
- {!claimVisible&&(paused||hud.status!=='playing')&&<ResultSheet bottom={insets.bottom} celebration={finaleVisible} primarySide={!paused&&hud.status!=='won'?'left':'right'}
+ {!sceneLoading&&!claimVisible&&(paused||hud.status!=='playing')&&<ResultSheet bottom={insets.bottom} celebration={finaleVisible} primarySide={!paused&&hud.status!=='won'?'left':'right'}
   art={paused?(recoveryError?'recovery':!recoveryReady?'pending':'pause'):hud.status==='won'?'success':hud.status==='caught'?'caught':'timeout'}
   eyebrow={finaleVisible?'12 / 12 HEISTS':paused?(recoveryError?'SAVE NEEDS ATTENTION':'RUN PAUSED'):hud.status==='won'?'HEIST COMPLETE':hud.status==='caught'?'PATROL '+(hud.caughtBy+1):'TIME LIMIT'}
   title={finaleVisible?'Every Seeker. Secured.':paused?(recoveryError?'Save interrupted.':'Take a breather.'):hud.status==='won'?'Seeker secured.':hud.status==='caught'?combatMode?'Out of health.':'They spotted you.':'Out of time.'}
@@ -289,6 +315,13 @@ export function Game({rankTicket,paidPlay,dailyReturn,paidReturn,onRankStart,onR
  >{finaleVisible&&<CompletionCard data={completionData} reduced={!!settings.reducedEffects} registerShare={registerShare}/>} {paused&&<Pressable accessibilityRole="button" accessibilityLabel="Toggle frame statistics" onPress={()=>setDetails(!details)}><Text style={s.stats}>{details?`${Math.round(stats.fps)} FPS · p95 ${stats.p95.toFixed(1)}ms · ${stats.slow} slow frames`:'Performance details'}</Text></Pressable>} {paidEntry&&completedReplay&&!paused&&<PaidSubmission entry={paidEntry} replay={completedReplay}/>}{rankTicket&&completedReplay&&!paused&&<RunSubmission ticket={rankTicket} replay={completedReplay} onResolved={()=>{rankResolved.current=true;}}/>}</ResultSheet>}
  {!testMission&&!trial.active&&!timedRun&&!guide.active&&guide.retries===0&&hud.status==='won'&&completedReplay&&!paused&&<View style={{position:'absolute',bottom:insets.bottom+3,zIndex:46}}><CampaignSubmission state={hud} replay={completedReplay} quiet retrySignal={rewardRetry} onReward={economy.local?undefined:rewardResolved}/></View>}
  {claimVisible&&<CreditClaim reward={creditReward} balance={economy.balance} onRetry={creditReward.amount===null&&creditReward.message?(economy.local?saveLocalReward:()=>{rewardResolved(null);setRewardRetry(n=>n+1);}):undefined} stars={starsFor(hud)} mission={level.title} onDone={()=>setRewardClaimed(true)}/>}
+ {sceneLoading&&!hideoutOpen&&!walletOpen&&!settingsOpen&&!dailyOpen&&!paidOpen&&!rewardsOpen&&<View testID="mission-loading" accessibilityViewIsModal style={[StyleSheet.absoluteFill,{zIndex:80,backgroundColor:'#0C1412',justifyContent:'center',alignItems:'center',padding:28,gap:16}]}>
+  <Text style={{color:'#9FBBAD',fontSize:11,fontWeight:'800',letterSpacing:2}}>MISSION {String(level.number).padStart(2,'0')}</Text>
+  <Text style={{color:'#E2F2E9',fontSize:27,fontWeight:'900',textAlign:'center'}}>{level.title}</Text>
+  {!sceneError&&<ActivityIndicator size="large" color="#CFE6E4"/>}
+  <Text accessibilityLiveRegion="polite" style={{color:'#AAC5B7',fontSize:13,textAlign:'center'}}>{sceneError||'Preparing your escape…'}</Text>
+  {!!sceneError&&<Pressable accessibilityRole="button" accessibilityLabel="Retry loading mission" onPress={()=>{sceneReady.value=false;simulationEpoch.value=++sceneEpoch.current;setSceneVersion(sceneEpoch.current);setSceneError('');}} style={{padding:16,borderRadius:14,backgroundColor:'#CFE6E4'}}><Text style={{fontWeight:'800',color:'#15352A'}}>Retry loading</Text></Pressable>}
+ </View>}
  {finaleVisible&&<CampaignConfetti reduced={!!settings.reducedEffects}/>}
  <Animated.View pointerEvents="none" testID="alarm-wash" style={[StyleSheet.absoluteFill,{backgroundColor:'#FF253E'},alarmWash]}/><Animated.View pointerEvents="none" testID="alarm-border" style={[StyleSheet.absoluteFill,{borderWidth:7,borderColor:'#FF4255'},alarmBorder]}/><View pointerEvents="none" style={StyleSheet.absoluteFill}><Animated.Image testID="damage-glow" source={require('../assets/ui/damage-vignette.png')} resizeMode="stretch" style={[StyleSheet.absoluteFill,{width:'100%',height:'100%'},damageStyle]}/></View></SafeAreaView>;
 }

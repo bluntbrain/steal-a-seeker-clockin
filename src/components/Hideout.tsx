@@ -5,7 +5,7 @@ import CreditBalance from './CreditBalance';
 import {combatLevel} from '../game/combat-levels';
 import {IS_MAINNET} from '../wallet/config';
 import {environmentFor} from '../game/environment';
-import React,{useEffect,useState} from 'react';
+import React,{useEffect,useMemo,useState} from 'react';
 import {Image,Modal,StyleSheet,Text,View,useWindowDimensions} from 'react-native';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {useAccount} from '../commerce/account-context';
@@ -32,7 +32,7 @@ export default function Hideout({onContractStart,initialTab='map',visible,onClos
  const weekly=useWeekly(visible);
  const [tab,setTab]=useState<'rack'|'map'|'leaderboard'|'briefing'|'complete'>(initialTab),[selected,setSelected]=useState<MissionId>('practice');
  useEffect(()=>{if(visible){setSelected(next);setInspection(null);}},[visible,completed]);
- const level=combatLevel(selected),edition=phoneEdition(selected),best=progress.missions[selected],available=unlocked(progress,selected);
+ const level=useMemo(()=>combatLevel(selected),[selected]),nextLevel=useMemo(()=>combatLevel(next),[next]),edition=phoneEdition(selected),best=progress.missions[selected],available=unlocked(progress,selected);
  const action=(label:string,name:string,onPress:()=>void,primary=false,disabled=false,fluid=false)=><Pressable accessibilityRole="button" accessibilityLabel={name} onPress={onPress} disabled={disabled} style={[s.button,fluid&&{flexGrow:1,flexBasis:0,minWidth:0},primary&&s.primary,disabled&&{opacity:.4}]}><Text style={[s.buttonText,primary&&{color:'#173739'}]}>{label}</Text></Pressable>;
  return <Modal visible={visible} transparent animationType="none" onRequestClose={onClose}><View style={[s.overlay,{paddingTop:insets.top+8,paddingBottom:insets.bottom+8}]}><View style={{width:w,flex:1,maxHeight:980}}>
  {tab==='map'&&<View style={s.mapHeader}>
@@ -43,8 +43,8 @@ export default function Hideout({onContractStart,initialTab='map',visible,onClos
  {tab==='rack'&&<View style={{height:53,flexDirection:'row',alignItems:'center',justifyContent:'space-between',marginBottom:8}}><Text style={{fontSize:25,color:'#D5EDE0',fontWeight:'900',letterSpacing:2}}>HIDEOUT</Text><CreditBalance/></View>}
  {(tab==='briefing'||tab==='complete')&&<View style={{alignItems:'flex-end',height:38}}><CreditBalance compact/></View>}
  {tab==='leaderboard'?<WeeklyBoard onDetailChange={setWeeklyDetail} showStandings={initialTab==='leaderboard'} state={weekly} onStart={onContractStart}/>:tab==='complete'?<View testID="campaign-complete" style={{flex:1,justifyContent:'center',alignItems:'center',gap:16}}><Image source={require('../../assets/messages/success.png')} style={{width:Math.min(w*.7,210),height:Math.min(w*.7,210),borderRadius:24}}/><Text style={[s.title,{fontSize:28,textAlign:'center'}]}>Twelve phones. One courier.</Text><Text style={[s.small,{textAlign:'center'}]}>You cleared every heist across all three districts.{'\n'}{Object.values(progress.missions).reduce((n,b)=>n+(b?.stars??0),0)} / 36 stars earned. Your collection stays here.</Text>{action('VIEW YOUR COLLECTION ↗','View completed collection',()=>setTab('rack'),true)}{action('CLIMB THE WEEKLY BOARD','Open weekly leaderboard after campaign',()=>setTab('leaderboard'))}{action('IMPROVE YOUR STARS','Replay completed missions',()=>setTab('map'))}</View>:tab==='rack'?<HideoutStore progress={progress} onInspect={setInspection} ghostEarned={!!weekly.data?.earned} onEquipGhost={async()=>{await weekly.equip();await economy.syncGhost();}} onOpenWeekly={()=>setTab('leaderboard')}/>:tab==='map'?<View style={{flex:1,minHeight:0}}><CampaignDistricts progress={progress} onSelect={id=>{setSelected(id);setTab('briefing');}}/>
- <Pressable accessibilityRole="button" accessibilityLabel={completed===12?'View campaign ending':`Continue · ${combatLevel(next).title}`} onPress={()=>completed===12?setTab('complete'):onStart(next)} style={({pressed})=>[s.mapContinue,usable<700&&{height:46},pressed&&{opacity:.75}]}>
-  <View style={s.passMark}><Text style={{fontSize:23,color:'#B8E3D0'}}>◈</Text></View><View style={{flex:1,gap:3}}><Text style={s.continueEyebrow}>{completed===12?'ALL PHONES RECOVERED':'FREE CAMPAIGN'}</Text><Text numberOfLines={1} style={s.continueTitle}>{completed===12?'View your collection':`${String(combatLevel(next).number).padStart(2,'0')} · ${combatLevel(next).title}`}</Text></View><Text style={s.continueArrow}>→</Text>
+ <Pressable accessibilityRole="button" accessibilityLabel={completed===12?'View campaign ending':`Continue · ${nextLevel.title}`} onPress={()=>completed===12?setTab('complete'):onStart(next)} style={({pressed})=>[s.mapContinue,usable<700&&{height:46},pressed&&{opacity:.75}]}>
+  <View style={s.passMark}><Text style={{fontSize:23,color:'#B8E3D0'}}>◈</Text></View><View style={{flex:1,gap:3}}><Text style={s.continueEyebrow}>{completed===12?'ALL PHONES RECOVERED':'FREE CAMPAIGN'}</Text><Text numberOfLines={1} style={s.continueTitle}>{completed===12?'View your collection':`${String(nextLevel.number).padStart(2,'0')} · ${nextLevel.title}`}</Text></View><Text style={s.continueArrow}>→</Text>
  </Pressable></View>:<MissionBriefing mission={selected} available={available} onBack={()=>setTab('map')} onPlay={()=>onStart(selected)}/>}
  {tab==='rack'&&!!syncStatus&&<Pressable accessibilityRole="button" accessibilityLabel="Sync progress" onPress={onSync}><Text numberOfLines={1} style={s.small}>{syncStatus} · Retry sync ↻</Text></Pressable>}
  <BottomTabs compact={usable<760&&(tab==='map'||tab==='briefing'||tab==='leaderboard')} selected={tab==='leaderboard'?'leaderboard':tab==='rack'||tab==='complete'?'rack':'map'} onChange={nextTab=>{if(nextTab!==tab){setWeeklyDetail(false);setTab(nextTab);economy.setTab(nextTab);}}}/>

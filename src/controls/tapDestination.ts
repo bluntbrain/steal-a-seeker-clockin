@@ -29,6 +29,18 @@ export function nearestReachableFloor(from:Point,tap:Point,l:LevelDefinition):Po
    visited[next]=true;queue.push(next);
   }
  }
+ // The flood above already proves which grid cells are reachable. Connecting
+ // an edge candidate to one of those cells avoids a fresh full-map BFS for
+ // every candidate around every wall.
+ const reachable=(p:Point)=>{
+  if(walkableSegment(from,p,l))return true;
+  const x=Math.round(p.x*2),y=Math.round(p.y*2);
+  for(let yy=y-1;yy<=y+1;yy++)for(let xx=x-1;xx<=x+1;xx++){
+   if(xx<0||yy<0||xx>=width||yy>=height||!visited[yy*width+xx])continue;
+   if(walkableSegment(p,{x:xx/2,y:yy/2},l))return true;
+  }
+  return false;
+ };
  // Refine the half-tile result at wall edges, so a tap lands beside cover,
  // rather than in a visibly distant grid cell. Never cross a sealed gate.
  const clamp=(v:number,a:number,b:number)=>Math.max(a,Math.min(b,v));
@@ -36,7 +48,7 @@ export function nearestReachableFloor(from:Point,tap:Point,l:LevelDefinition):Po
  for(const b of l.blockers){const left=b.x-.34,right=b.x+b.w+.34,top=b.y-.34,bottom=b.y+b.h+.34;
   candidates.push({x:left,y:clamp(tap.y,top,bottom)},{x:right,y:clamp(tap.y,top,bottom)},{x:clamp(tap.x,left,right),y:top},{x:clamp(tap.x,left,right),y:bottom});
  }
- for(const p of candidates){const d=Math.hypot(tap.x-p.x,tap.y-p.y);if(d<distance&&valid(p,l)&&findPath(from,p,l).length){best=p;distance=d;}}
+ for(const p of candidates){const d=Math.hypot(tap.x-p.x,tap.y-p.y);if(d<distance&&valid(p,l)&&reachable(p)){best=p;distance=d;}}
  return {x:Math.round(best.x*10000)/10000,y:Math.round(best.y*10000)/10000};
 }
 export function assistedCombatTap(s:GameState,x:number,y:number,seq:number):CombatCommand{
