@@ -1,0 +1,30 @@
+[
+  {
+    "file": "guard-a.wav",
+    "prompt": "One isolated arcade game defeat sound, less than one second, instant attack. A tight punchy metal snap, followed immediately by a small toy security robot tipping over with two dry metal clacks and a tiny pleasant ascending electronic pip. Playful and satisfying, dry close recording, clean transient, no speech, no screams, no music, no reverb, no long tail, no background ambience. All action completes within 0.7 seconds.",
+    "provider": "ElevenLabs",
+    "model": "eleven_text_to_sound_v2",
+    "sha256": "35848c7d1ce0bac9a07e90be2c81b1e49256de18e37d5065ee925022b799be89"
+  },
+  {
+    "file": "guard-b.wav",
+    "prompt": "One isolated arcade game defeat sound, less than one second, instant attack. A crisp compressed armor crack, followed by a small security robot collapsing with a quick rattle and a short bright electronic chirp. Different from a gunshot. Playful and satisfying, dry close recording, clean transient, no speech, no screams, no music, no reverb, no long tail, no background ambience. All action completes within 0.7 seconds.",
+    "provider": "ElevenLabs",
+    "model": "eleven_text_to_sound_v2",
+    "sha256": "b6ef6866f40655960f6c558c96acdae64362334a01cdf1afb6f1cc22ead3207b"
+  },
+  {
+    "file": "heavy.wav",
+    "prompt": "One isolated arcade game defeat sound, less than one second, instant attack. A punchy low metallic armor crunch, then a heavy compact robot body landing with one satisfying thud and a very short metal rattle. Playful and satisfying, dry close recording, clean transient, no speech, no screams, no music, no reverb, no long tail, no background ambience. All action completes within 0.7 seconds.",
+    "provider": "ElevenLabs",
+    "model": "eleven_text_to_sound_v2",
+    "sha256": "f60db9c6c03387e0e447b5c7cf5fe1e1276d4e9a65e630316b4309cf70b19efb"
+  },
+  {
+    "file": "drone.wav",
+    "prompt": "One isolated arcade game defeat sound, less than one second, instant attack. A tiny security drone gets disabled: immediate sharp electric zap, a fast descending motor chirp, two bright sparks and one dry pop. Playful and satisfying, dry close recording, clean transient, no speech, no screams, no music, no reverb, no long tail, no background ambience. All action completes within 0.7 seconds.",
+    "provider": "ElevenLabs",
+    "model": "eleven_text_to_sound_v2",
+    "sha256": "7e10960fde7cbcd956f7e3d8b539bd83e27fdee25a7e055eab13b43086131c13"
+  }
+]
