@@ -133,11 +133,19 @@ export class CommerceService {
   });
  }
  async reconcile(id:string){const r=await this.pool.query('SELECT * FROM orders WHERE id=$1',[id]);if(!r.rowCount)return;const order=orderFromRow(r.rows[0]);if(order.status==='fulfilled')return;
-  const attempts=await this.pool.query("SELECT signature FROM order_attempts WHERE order_id=$1 AND state='pending'",[id]);const signatures=new Set<string>(attempts.rows.map(r=>r.signature));if(order.signature)signatures.add(order.signature);for(const sig of await this.chain.find(order.reference))signatures.add(sig);
-  for(const sig of signatures)await this.check(order,sig);
-  // Settle a lost wallet callback as soon as its blockhash expires, even if
-  // the price quote is still valid. Never generate a new approval on Restore.
-  if(order.payment&&order.status!=='needs_review')await this.preparePayment(order.wallet,id,true);
+  // A prepared approval already needs a finalized reference scan and expiry
+  // proof in preparePayment. Do it once, not two scans per background poll.
+  if(order.payment&&order.status!=='needs_review'){
+   const attempts=await this.pool.query("SELECT signature FROM order_attempts WHERE order_id=$1 AND state='pending'",[id]);
+   const signatures=new Set<string>(attempts.rows.map(r=>r.signature));if(order.signature)signatures.add(order.signature);
+   for(const sig of signatures)await this.check(order,sig);
+   await this.preparePayment(order.wallet,id,true);
+  }else{
+   const attempts=await this.pool.query("SELECT signature FROM order_attempts WHERE order_id=$1 AND state='pending'",[id]);
+   const signatures=new Set<string>(attempts.rows.map(r=>r.signature));if(order.signature)signatures.add(order.signature);
+   for(const sig of await this.chain.find(order.reference))signatures.add(sig);
+   for(const sig of signatures)await this.check(order,sig);
+  }
   await this.pool.query('UPDATE orders SET checked_at=now() WHERE id=$1',[id]);
  }
  async releaseUnpaidCampaignReservations(limit=4){

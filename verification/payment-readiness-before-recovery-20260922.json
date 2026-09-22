@@ -1,0 +1,30 @@
+{
+  "at": "2026-09-22T13:49:22.894Z",
+  "api": "https://seeker-api-production-41b3.up.railway.app",
+  "checks": [
+    {
+      "sku": "campaign",
+      "currency": "SKR",
+      "quote": true,
+      "idempotency": true,
+      "prepared": true,
+      "unsigned": true,
+      "unpaidGrantsNothing": true
+    },
+    {
+      "sku": "campaign",
+      "currency": "SOL",
+      "quote": true,
+      "idempotency": true,
+      "prepared": true,
+      "unsigned": true,
+      "unpaidGrantsNothing": true
+    },
+    {
+      "error": "/orders/fc27028e-79fc-43fb-9c6f-61da74be5b52/prepare: 503 {\"error\":\"Service temporarily unavailable. Your payment will be reconciled; do not pay again.\"}\n\n503 !== 200\n"
+    }
+  ],
+  "limitations": [
+    "No transfer signed or broadcast. Physical Phantom approval and live settlement require a user test."
+  ]
+}

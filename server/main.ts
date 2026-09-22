@@ -1,3 +1,5 @@
+import {reconcileOrders} from './order-worker';
+import {paymentDiagnostic} from './payment-errors';
 import {networkConfig,bindDatabaseNetwork} from './network';
 import {address} from '@solana/kit';
 import {findAssociatedTokenPda} from '@solana-program/token';
@@ -30,7 +32,7 @@ async function main(){
  const paidEnabled=false; // v2 sells campaign access once; legacy entries still reconcile.
  if(paidEnabled&&!returns.chain)throw new Error('Paid entries require the devnet return worker and dedicated signer.');
  const paid=new PaidService(pool,chain,config,returns,{enabled:paidEnabled}),app=await createApp(service,ranked,paid);
- let working=false;const timer=setInterval(async()=>{if(working)return;working=true;try{const rows=await pool.query("SELECT id FROM orders WHERE status IN ('quoted','verifying') AND created_at>now()-interval '2 days' ORDER BY checked_at NULLS FIRST LIMIT 8");for(const row of rows.rows){try{await service.reconcile(row.id);}catch{app.log.warn('Payment reconciliation will retry.');}}await service.releaseUnpaidCampaignReservations();}catch{app.log.warn('Reconciliation database unavailable; will retry.');}finally{working=false;}},15000);
+ let working=false;const timer=setInterval(async()=>{if(working)return;working=true;try{await reconcileOrders(service,(fields,message)=>app.log.warn(fields,message));await service.releaseUnpaidCampaignReservations();}catch(error){app.log.warn({diagnostic:paymentDiagnostic(error)},'Reconciliation worker will retry.');}finally{working=false;}},15000);
  let verifying=false;const gameTimer=setInterval(async()=>{if(verifying)return;verifying=true;try{const results=await Promise.allSettled([ranked.process(1),paid.process()]);if(results.some(r=>r.status==='rejected'))app.log.warn('Game verification will retry.');}catch{app.log.warn('Game verification will retry.');}finally{verifying=false;}},1000);
  let settling=false;const returnTimer=setInterval(async()=>{if(settling||!returns)return;settling=true;try{await returns.process();}catch{app.log.warn('Return reconciliation will retry.');}finally{settling=false;}},1000);
  let entriesWorking=false;const entryTimer=setInterval(async()=>{if(entriesWorking)return;entriesWorking=true;try{const rows=await pool.query("SELECT id,wallet FROM paid_entries WHERE status IN ('quoted','verifying_payment') OR (status='expired' AND created_at>now()-interval '7 days') ORDER BY checked_at NULLS FIRST LIMIT 8");for(const row of rows.rows){try{await paid.reconcile(row.wallet,row.id);}catch{await pool.query('UPDATE paid_entries SET checked_at=now() WHERE id=$1',[row.id]);app.log.warn('Paid-entry payment reconciliation will retry.');}}}catch{app.log.warn('Paid-entry queue will retry.');}finally{entriesWorking=false;}},15000);

@@ -26,10 +26,10 @@ async function main(){
     const idempotencyKey=randomUUID(),order:Order=await api('/orders',token,{sku,currency,idempotencyKey});assert.equal(order.cluster,'solana:mainnet');assert.equal(order.currency,currency);assert(BigInt(order.amount)>0n);
     const duplicate=await api('/orders',token,{sku,currency,idempotencyKey});assert.equal(duplicate.id,order.id);
     let prepared=false;
-    if(sku==='campaign'||sku==='credits-500'){
+    {
      const p=await api(`/orders/${order.id}/prepare`,token,{});assert(p.payment?.blockhash);assert(!p.signature);prepared=true;
      const repeat=await api(`/orders/${order.id}/prepare`,token,{});assert.deepEqual(repeat.payment,p.payment);
-    }else await api(`/orders/${order.id}/cancel`,token,{});
+    }
     const account=await api('/me',token);assert.equal(account.credits,0);assert.equal(account.entitlements.length,0);
     report.checks.push({sku,currency,quote:true,idempotency:true,prepared,unsigned:true,unpaidGrantsNothing:true});console.log(`PASS ${sku} ${currency}: quote, ${prepared?'unsigned approval, ':''}idempotency, no unpaid grant`);
    }finally{await api('/auth/logout',token,{});}

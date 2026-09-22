@@ -60,10 +60,13 @@ export class RpcError extends Error {
 }
 export async function rpc<T>(url:string,method:string,params:unknown[]=[],fetcher:typeof fetch=fetch):Promise<T>{
  for(let attempt=0;attempt<2;attempt++){
-  let failure:RpcError;
+  let failure:RpcError,retryDelay=400;
   try{
    const response=await fetcher(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({jsonrpc:'2.0',id:1,method,params}),signal:AbortSignal.timeout(5000)});
-   if(!response.ok)throw new RpcError(method,response.status);
+   if(!response.ok){
+    if(response.status===429){const seconds=Number(response.headers.get('retry-after'));retryDelay=Number.isFinite(seconds)&&seconds>0?Math.min(3000,seconds*1000):1500;}
+    throw new RpcError(method,response.status);
+   }
    const body=await response.json() as {error?:{code:number};result:T};
    if(body.error)throw new RpcError(method,body.error.code);
    if(!Object.hasOwn(body,'result'))throw new RpcError(method,'invalid-response');
@@ -72,7 +75,7 @@ export async function rpc<T>(url:string,method:string,params:unknown[]=[],fetche
   // Retry transient read failures once. Never automatically rebroadcast a payment.
   const retryable=[429,500,502,503,504,-32005,-32016,-32029,'network'].includes(failure.code);
   if(attempt||!method.startsWith('get')||!retryable)throw failure;
-  await new Promise(resolve=>setTimeout(resolve,400));
+  await new Promise(resolve=>setTimeout(resolve,retryDelay));
  }
  throw new RpcError(method,'unavailable');
 }

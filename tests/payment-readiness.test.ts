@@ -1,3 +1,4 @@
+import {paymentDiagnostic,unavailableMessage} from '../server/payment-errors';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {DevnetChain,rpc,RpcError,TOKEN_PROGRAM} from '../server/chain';
@@ -31,4 +32,13 @@ test('readiness refuses an RPC for the wrong chain',async t=>{
  t.mock.method(globalThis,'fetch',async()=>Response.json({result:GENESIS['solana:devnet']}));
  const chain=new DevnetChain({rpcUrl:'https://rpc.invalid',mint:'mint',recipient:'treasury',destination:'ata',decimals:6,cluster:'solana:mainnet'});
  await assert.rejects(chain.ready(),/network does not match/);
+});
+
+test('payment diagnostics never include provider credentials or arbitrary exception messages',async()=>{
+ assert.deepEqual(paymentDiagnostic(new RpcError('getSignaturesForAddress',429)),{kind:'rpc',method:'getSignaturesForAddress',code:429});
+ assert(!JSON.stringify(paymentDiagnostic(new Error('https://provider.invalid?api-key=secret'))).includes('secret'));
+ assert.match(unavailableMessage('/orders/:id/prepare'),/No new payment was requested/);
+ assert.doesNotMatch(unavailableMessage('/orders'),/will be reconciled/);
+ assert.match(unavailableMessage('/orders/:id/transaction'),/Do not send another payment/);
+ assert.match(unavailableMessage('/orders/:id/reconcile'),/Check payment/);
 });

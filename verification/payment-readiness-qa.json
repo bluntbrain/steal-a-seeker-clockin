@@ -1,5 +1,5 @@
 {
-  "at": "2026-09-22T09:40:40.337Z",
+  "at": "2026-09-22T13:59:32.037Z",
   "api": "https://seeker-api-production-41b3.up.railway.app",
   "checks": [
     {
@@ -43,7 +43,7 @@
       "currency": "SKR",
       "quote": true,
       "idempotency": true,
-      "prepared": false,
+      "prepared": true,
       "unsigned": true,
       "unpaidGrantsNothing": true
     },
@@ -52,7 +52,7 @@
       "currency": "SOL",
       "quote": true,
       "idempotency": true,
-      "prepared": false,
+      "prepared": true,
       "unsigned": true,
       "unpaidGrantsNothing": true
     },
@@ -61,7 +61,7 @@
       "currency": "SKR",
       "quote": true,
       "idempotency": true,
-      "prepared": false,
+      "prepared": true,
       "unsigned": true,
       "unpaidGrantsNothing": true
     },
@@ -70,7 +70,7 @@
       "currency": "SOL",
       "quote": true,
       "idempotency": true,
-      "prepared": false,
+      "prepared": true,
       "unsigned": true,
       "unpaidGrantsNothing": true
     }

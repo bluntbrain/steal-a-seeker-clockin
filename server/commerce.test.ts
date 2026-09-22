@@ -638,3 +638,16 @@ test('RPC outage creates no order or credits and exposes safe readiness diagnost
  }finally{chain.ready=ready;}
  const order=await quote(u,'credits-500');assert.equal(order.status,'quoted');assert.equal((await service.me(u.wallet)).credits,0);
 });
+
+test('background reconciliation backs off failed quotes and prioritizes prepared payments',async()=>{
+ const {reconcileOrders}=await import('./order-worker');
+ const user=await login(),o=await quote(user);const prepared=await service.preparePayment(user.wallet,o.id);
+ await pool.query('UPDATE orders SET checked_at=now()');
+ await pool.query("UPDATE orders SET checked_at=now()-interval '1 minute' WHERE id=$1",[o.id]);
+ const warnings:object[]=[];chainUnavailable=true;
+ try{await reconcileOrders(service,fields=>warnings.push(fields));assert.equal(warnings.length,1);await reconcileOrders(service,fields=>warnings.push(fields));assert.equal(warnings.length,1,'Failure must not immediately reenter the poll batch');}finally{chainUnavailable=false;}
+ assert.deepEqual((await service.getOrder(user.wallet,o.id)).payment,prepared.payment,'RPC failure preserves original authorization');
+ const another=await login(),unpaid=await quote(another);await pool.query("UPDATE orders SET checked_at=now()-interval '1 minute' WHERE id=$1",[unpaid.id]);
+ await reconcileOrders(service,fields=>warnings.push(fields));
+ assert((Date.now()-new Date((await pool.query('SELECT checked_at FROM orders WHERE id=$1',[unpaid.id])).rows[0].checked_at).getTime())>50000,'Unprepared quotes wait five minutes');
+});
