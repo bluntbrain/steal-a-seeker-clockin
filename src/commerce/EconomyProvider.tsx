@@ -4,7 +4,7 @@ import {commerceApi,ApiError,type StoreCatalog} from './client';
 import {AppState} from 'react-native';
 import {readSave,writeSave} from '../progress/storage';
 import {NETWORK_NAME} from '../wallet/config';
-import {emptyInventory,earnCredits,redeemCredits,STORE_ITEMS,type LocalInventory,type StoreItemId} from '../../shared/store';
+import {CREDIT_PACKS,emptyInventory,earnCredits,redeemCredits,STORE_ITEMS,type LocalInventory,type StoreItemId} from '../../shared/store';
 import {CAMPAIGN_IDS} from '../game/level';
 import CreditStore from './CreditStore';
 import WalletPanel from '../wallet/WalletPanel';
@@ -35,5 +35,5 @@ export default function EconomyProvider({children}:{children:ReactNode}){
  // The native wallet can change while checkout is open. The checkout itself
  // reconciles the wallet-bound order; a browser purchase is explicitly a demo.
  const value:Economy={items,catalog,syncGhost:async()=>{if(account.preview)await mutate(s=>({...s,equipment:{...s.equipment,outfit:'ghost-courier'}}));},tab,setTab,balance:local?saved.balance:account.account?.credits??0,ready:local?ready:!!account.account,local,owned,equipment,notice,redeem,equip,unequip,earn,openCredits:()=>setCreditsOpen(true),openPass:()=>setCheckout('campaign')};
- return <Context.Provider value={value}>{children}<CreditStore visible={creditsOpen} onClose={()=>setCreditsOpen(false)} onBuy={sku=>setCheckout(sku)}/>{checkout&&<WalletPanel key={checkout} visible checkout sku={checkout} fullScreen onClose={()=>setCheckout(null)} onDemoComplete={async credits=>{if(!account.preview)throw Error('Demo top-ups are unavailable in the Android app.');if(credits)await mutate(s=>({...s,balance:s.balance+credits}));else changePlaytest(s=>({...s,owned:[...new Set([...s.owned,'campaign' as const])]}));}}/>}</Context.Provider>;
+ return <Context.Provider value={value}>{children}<CreditStore visible={creditsOpen} onClose={()=>setCreditsOpen(false)} onDemoPurchase={async sku=>{if(!account.preview)throw Error('Demo top-ups are unavailable in the Android app.');const pack=CREDIT_PACKS.find(p=>p.id===sku)!;await mutate(s=>({...s,balance:s.balance+pack.credits}));}}/>{checkout&&<WalletPanel key={checkout} visible checkout sku={checkout} fullScreen onClose={()=>setCheckout(null)} onDemoComplete={async credits=>{if(!account.preview)throw Error('Demo top-ups are unavailable in the Android app.');if(credits)await mutate(s=>({...s,balance:s.balance+credits}));else changePlaytest(s=>({...s,owned:[...new Set([...s.owned,'campaign' as const])]}));}}/>}</Context.Provider>;
 }

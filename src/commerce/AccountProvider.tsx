@@ -1,3 +1,4 @@
+import {AppState} from 'react-native';
 import {importGuestInventory} from '../campaign/client';
 import {CHAIN} from '../wallet/config';
 import React,{useCallback,useEffect,useRef,useState,type ReactNode} from 'react';
@@ -25,7 +26,7 @@ export default function AccountProvider({children}:{children:ReactNode}){
   if(syncingGuest.current.has(s.wallet)||current.current!==s.wallet)return;
   syncingGuest.current.add(s.wallet);
   // Replay verification is background work, never part of the payment approval path.
-  void importGuestInventory(s.wallet,s.token).then(()=>commerceApi.me(s.token)).then(update).catch(()=>{syncingGuest.current.delete(s.wallet);walletLog('credits.guest-sync.pending');});
+  void importGuestInventory(s.wallet,s.token).then(()=>commerceApi.me(s.token)).then(update).catch(()=>{walletLog('credits.guest-sync.pending');}).finally(()=>syncingGuest.current.delete(s.wallet));
  },[update]);
  useEffect(()=>{
   let cancelled=false;setState(undefined);setNotice('');setLoading(true);
@@ -42,10 +43,11 @@ export default function AccountProvider({children}:{children:ReactNode}){
     const raw=await SecureStore.getItemAsync(sessionKey(wallet));if(!raw)return;
     const s=JSON.parse(raw) as Session;if(s.wallet!==wallet||new Date(s.expiresAt).getTime()<=Date.now())return;
     const account=await commerceApi.me(s.token);if(account.wallet!==wallet)throw new Error('Account mismatch.');
-    if(!cancelled)await update(account);
+    if(!cancelled){await update(account);syncGuest(s);}
    }catch(e){if(e instanceof ApiError&&e.status===401)await SecureStore.deleteItemAsync(sessionKey(wallet));else if(!cancelled)setNotice('Offline. Your saved purchases are available; sync will retry when you restore.');}
   })();return()=>{cancelled=true;};
- },[wallet,update]);
+ },[wallet,update,syncGuest]);
+ useEffect(()=>{const sub=AppState.addEventListener('change',status=>{if(status!=='active'||!wallet)return;void SecureStore.getItemAsync(sessionKey(wallet)).then(raw=>{if(!raw)return;const s=JSON.parse(raw) as Session;if(s.wallet===wallet&&new Date(s.expiresAt).getTime()>Date.now())syncGuest(s);}).catch(()=>{});});return()=>sub.remove();},[wallet,syncGuest]);
  const session=useCallback(async(interactive=true):Promise<Session>=>{
   const selected=mobile.account;if(!selected)throw new Error('Connect your wallet first.');
   if(!API_URL)throw new Error('The purchase service is not configured in this build.');

@@ -587,7 +587,7 @@ test('free campaign grants verified credits once; forged progress and invalid re
  await service.syncProgress(u.wallet,{version:1,missions:{practice:{stars:3,seconds:1,score:99999,battery:100,completions:999}}});assert.equal((await service.me(u.wallet)).credits,0);
  await assert.rejects(campaign.submit(u.wallet,'practice',rules.rulesHash,{version:1,chunks:[{ticks:1,x:0,y:0,buttons:0}]}),/extraction/);
  const replay=fixtureReplay().replay;const receipts=await Promise.all([campaign.submit(u.wallet,'practice',rules.rulesHash,replay),campaign.submit(u.wallet,'practice',rules.rulesHash,replay)]);assert.equal(receipts.filter(r=>r.creditAward.credits>0).length,1);assert(receipts.every(r=>r.creditAward.mission==='practice'));assert(receipts.some(r=>r.creditAward.credits===0));
- const balance=(await service.me(u.wallet)).credits!;assert(balance>=50&&balance<=60);assert.equal(receipts.reduce((n,r)=>n+r.creditAward.credits,0),balance);assert.equal((await campaign.submit(u.wallet,'practice',rules.rulesHash,replay)).creditAward.credits,0);assert.equal((await service.me(u.wallet)).credits,balance);assert(!(await service.me(u.wallet)).entitlements.includes('campaign'));
+ const balance=(await service.me(u.wallet)).credits!;assert(balance>=50&&balance<=60);assert.equal(receipts.reduce((n,r)=>n+r.creditAward.credits,0),balance);assert.equal((await campaign.submit(u.wallet,'practice',rules.rulesHash,replay)).creditAward.credits,0);assert.equal((await service.me(u.wallet)).credits,balance);assert(receipts.every(r=>r.creditAward.balance===balance));assert.equal((await campaign.submit(u.wallet,'practice',rules.rulesHash,replay)).creditAward.balance,balance);assert(!(await service.me(u.wallet)).entitlements.includes('campaign'));
 });
 
 

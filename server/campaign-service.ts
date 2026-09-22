@@ -16,22 +16,22 @@ export class CampaignService{
  async submit(wallet:string,mission:MissionId,rulesHash:string,input:unknown){
   if(!CAMPAIGN_IDS.includes(mission))throw new ServiceError(409,'Update the game before recording a campaign reward run.');
   const replay=replayInput.parse(input),hash=createHash('sha256').update(JSON.stringify(replay)).digest('hex');
-  const prior=await this.pool.query('SELECT id FROM campaign_runs WHERE wallet=$1 AND mission=$2 AND rules_hash=$3 AND replay_hash=$4',[wallet,mission,rulesHash,hash]);
+  const prior=await this.pool.query('SELECT result FROM campaign_runs WHERE wallet=$1 AND mission=$2 AND rules_hash=$3 AND replay_hash=$4',[wallet,mission,rulesHash,hash]);
   // Even an older verified replay may not have a credit award yet.
 
-  const result=await verifyReplayInWorker(mission,replay,{rulesHash});
+  const result=prior.rows[0]?.result??await verifyReplayInWorker(mission,replay,{rulesHash});
   if(result.status!=='won')throw new ServiceError(400,'A completed extraction is required. This run does not earn campaign credit.');
-  let awardedCredits=0;
+  let awardedCredits=0,creditBalance=0;
   await transaction(this.pool,async db=>{
-   await db.query('SELECT address FROM wallets WHERE address=$1 FOR UPDATE',[wallet]);
+   const locked=await db.query('SELECT credits FROM wallets WHERE address=$1 FOR UPDATE',[wallet]);creditBalance=Number(locked.rows[0].credits);
    await db.query('INSERT INTO campaign_runs(id,wallet,mission,rules_hash,replay_hash,replay,result) VALUES($1,$2,$3,$4,$5,$6,$7) ON CONFLICT DO NOTHING',[randomUUID(),wallet,mission,rulesHash,hash,replay,result]);
    // Credits are progression rewards, never ranked points or cash. Grant only
    // current campaign replays; archived engines remain valid for legacy records.
    if(rulesHash===rules.rulesHash){const stars=1+Number(result.battery>=60)+Number(result.ticks<=combatLevel(mission).targetSeconds*30),old=await db.query('SELECT stars FROM campaign_credit_stars WHERE wallet=$1 AND mission=$2',[wallet,mission]),delta=creditReward(stars)-creditReward(old.rows[0]?.stars??0);
-    if(delta>0){awardedCredits=delta;const b=await db.query('UPDATE wallets SET credits=credits+$2 WHERE address=$1 RETURNING credits',[wallet,delta]);await db.query('INSERT INTO campaign_credit_stars(wallet,mission,stars) VALUES($1,$2,$3) ON CONFLICT(wallet,mission) DO UPDATE SET stars=$3',[wallet,mission,stars]);await db.query('INSERT INTO credit_ledger(id,wallet,source,delta,balance_after) VALUES($1,$2,$3,$4,$5)',[randomUUID(),wallet,`mission:${mission}:stars:${stars}`,delta,b.rows[0].credits]);}
+    if(delta>0){awardedCredits=delta;creditBalance+=delta;const b=await db.query('UPDATE wallets SET credits=credits+$2 WHERE address=$1 RETURNING credits',[wallet,delta]);await db.query('INSERT INTO campaign_credit_stars(wallet,mission,stars) VALUES($1,$2,$3) ON CONFLICT(wallet,mission) DO UPDATE SET stars=$3',[wallet,mission,stars]);await db.query('INSERT INTO credit_ledger(id,wallet,source,delta,balance_after) VALUES($1,$2,$3,$4,$5)',[randomUUID(),wallet,`mission:${mission}:stars:${stars}`,delta,b.rows[0].credits]);}
    }
   });
-  return {...await this.summary(wallet),creditAward:{mission,credits:awardedCredits}};
+  return {...await this.summary(wallet),creditAward:{mission,credits:awardedCredits,balance:creditBalance}};
  }
  async performances(wallet:string):Promise<CampaignPerformance[]>{const rows=await this.pool.query('SELECT mission,result FROM campaign_runs WHERE wallet=$1',[wallet]);const best=new Map<string,CampaignPerformance>();for(const row of rows.rows){const run={mission:row.mission,...row.result} as CampaignPerformance,old=best.get(run.mission);if(!old||compareRun(run,old)<0)best.set(run.mission,run);}return [...best.values()];}
  async summary(wallet:string):Promise<CampaignSummary>{
