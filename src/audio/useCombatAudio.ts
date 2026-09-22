@@ -6,8 +6,8 @@ import {combatSoundEvents,type CombatSoundCounters} from './combat-events';
 import type {GameState} from '../game/simulation';
 const zero:CombatSoundCounters={shots:0,enemyShots:0,hitEvents:0,damageTaken:0,kills:0,aimEvents:0,commandSeen:0};
 export function useCombatAudio(state:GameState,enabled:boolean,volume:number,onDamage?:()=>void,feedbackEnabled=enabled,onHaptic?:(cue:HapticCue)=>void){
- const shotA=useGameAudio(require('../../assets/audio-combat-v3/shot-a.wav'));
- const shotB=useGameAudio(require('../../assets/audio-combat-v3/shot-b.wav'));
+ const shotA=useGameAudio(require('../../assets/audio-shots-v4/shot-a.wav'));
+ const shotB=useGameAudio(require('../../assets/audio-shots-v4/shot-b.wav'));
  const enemyA=useGameAudio(require('../../assets/audio-combat-v3/enemy-a.wav'));
  const enemyB=useGameAudio(require('../../assets/audio-combat-v3/enemy-b.wav'));
  const hit=useGameAudio(require('../../assets/audio-combat-v3/hit.wav'));
@@ -34,7 +34,7 @@ export function useCombatAudio(state:GameState,enabled:boolean,volume:number,onD
     const defeated=state.guards.filter((g,i)=>g.hp<=0&&(previousHP.current[i]??0)>0);
     const finish=defeated.some(g=>g.combatRole==='heavy'||g.combatRole==='warden')?heavyKO:defeated.some(g=>g.combatRole==='drone')?droneKO:c.kills%2?knockout:knockoutB;
     const player={shot:c.shots%2?shotA:shotB,enemy:heavy?enemyB:enemyA,hit,damage,knockout:finish,aim}[cue];
-    player.volume=volume*({shot:.48,enemy:.36,hit:.28,damage:.58,knockout:.68,aim:.48}[cue]);
+    player.volume=volume*({shot:.58,enemy:.36,hit:.28,damage:.58,knockout:.68,aim:.48}[cue]);
     const run=epoch.current;
     if(cue==='damage')void playImpact(player,()=>allowed.current&&epoch.current===run,()=>damageFeedback.current?.()).catch(()=>{});
     else void player.seekTo(0).then(()=>{if(allowed.current&&epoch.current===run)player.play();}).catch(()=>{});

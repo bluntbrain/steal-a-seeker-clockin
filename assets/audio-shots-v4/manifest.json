@@ -1,0 +1,24 @@
+[
+  {
+    "file": "shot-a.wav",
+    "prompt": "Exactly ONE isolated single firearm shot, close perspective, immediate attack. A sharp dry pistol report: crisp explosive CRACK with a solid low-mid punch and a tiny mechanical slide clack. Real gunpowder percussion, satisfying action game weapon sound. Fast decay, all action within 0.3 seconds. No silencer, no laser, no sci-fi chirp, no ricochet, no shell dropping, no additional shots, no echo, no long reverb, no speech, no music, no ambience.",
+    "provider": "ElevenLabs",
+    "model": "eleven_text_to_sound_v2",
+    "durationSeconds": 0.35,
+    "sourceOnsetSeconds": 0.0,
+    "peakDbFS": -3,
+    "rmsDbFS": -24.18,
+    "sha256": "107289e2dab1c3fb43d84a479a85748bdd62c1907273f28eac4005999fe4e840"
+  },
+  {
+    "file": "shot-b.wav",
+    "prompt": "One isolated single pistol gunshot. Sharp dry explosive crack with a solid low mid punch. Close recording, immediate attack, rapid decay within 0.3 seconds. No speech, no music, no ambience, no echo.",
+    "provider": "ElevenLabs",
+    "model": "eleven_text_to_sound_v2",
+    "durationSeconds": 0.35,
+    "sourceOnsetSeconds": 0.0,
+    "peakDbFS": -3,
+    "rmsDbFS": -20.17,
+    "sha256": "b980a7d655eb627a76ffb34bc3cf9b5884719f5b844a2cbda49942b0eba380d6"
+  }
+]
