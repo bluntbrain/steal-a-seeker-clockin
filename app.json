@@ -2,7 +2,7 @@
   "expo": {
     "name": "Steal a Seeker",
     "slug": "steal-a-seeker-mvp",
-    "version": "0.3.15",
+    "version": "0.3.16",
     "icon": "./assets/app-icon.png",
     "orientation": "portrait",
     "userInterfaceStyle": "dark",
@@ -13,7 +13,7 @@
         "foregroundImage": "./assets/app-icon-adaptive.png",
         "backgroundColor": "#08A899"
       },
-      "versionCode": 18,
+      "versionCode": 19,
       "blockedPermissions": [
         "android.permission.RECORD_AUDIO",
         "android.permission.READ_EXTERNAL_STORAGE",

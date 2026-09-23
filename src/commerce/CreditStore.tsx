@@ -7,7 +7,7 @@ import {useEconomy} from './EconomyProvider';
 import CreditCheckout from './CreditCheckout';
 export default function CreditStore({visible,onClose,onDemoPurchase}:{visible:boolean;onClose:()=>void;onDemoPurchase:(sku:CreditPackId)=>Promise<void>}){
  const e=useEconomy(),safe=useSafeAreaInsets(),[selected,setSelected]=useState<CreditPackId>('credits-1500');
- return <Modal visible={visible} animationType="fade" onRequestClose={onClose}><View style={[s.screen,{paddingTop:safe.top+8,paddingBottom:safe.bottom+8}]}><View style={s.container}>
+ return <Modal visible={visible} animationType="fade" onRequestClose={onClose}><View testID="credit-store-screen" style={[s.screen,{paddingTop:safe.top+8,paddingBottom:safe.bottom+8}]}><View style={s.container}>
   <View style={s.header}><Pressable accessibilityRole="button" accessibilityLabel="Back from credit store" onPress={onClose} style={s.back}><Text style={{fontSize:28,color:'#CFE6E4'}}>‹</Text></Pressable><View style={s.balance}><Text style={s.balanceText}>◈ {e.balance.toLocaleString()}</Text><Text style={s.micro}>CREDITS</Text></View></View>
   <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{flexGrow:1,paddingBottom:12,gap:14}}><View style={{gap:6,marginTop:12}}><Text style={s.title}>ADD CREDITS</Text><Text style={s.subtitle}>Your next look starts here.</Text></View>
   {visible&&<CreditCheckout selected={selected} onSelect={setSelected} onClose={onClose} onDemoPurchase={onDemoPurchase}/>}
