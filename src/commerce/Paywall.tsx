@@ -1,3 +1,4 @@
+import {welcomeOffer} from './welcome-offer';
 import React,{useEffect,useState} from 'react';
 import {ScrollView,StyleSheet,Text,View,useWindowDimensions} from 'react-native';
 import {HapticPressable as Pressable} from '../feedback/HapticPressable';
@@ -10,8 +11,9 @@ type Props={local:boolean;mediaActive?:boolean;onBuy:()=>void;onSkip:()=>void};
 export default function Paywall({local,mediaActive=true,onBuy,onSkip}:Props){
  const {height,fontScale}=useWindowDimensions(),compact=height<720;
  const [price,setPrice]=useState<{skr:number;usdCents:number;test:boolean}>();
- useEffect(()=>{if(local)return;let active=true;void commerceApi.catalog().then(c=>{const p=c.products.find(p=>p.id==='campaign');if(active&&p?.skrPrice&&p.usdCents)setPrice({skr:Number(p.skrPrice),usdCents:p.usdCents,test:!!c.testPricing});}).catch(()=>{});return()=>{active=false;};},[local]);
- const scroll=height<620||fontScale>1.2;
+ useEffect(()=>{let active=true;void commerceApi.catalog().then(c=>{const p=c.products.find(p=>p.id==='campaign');if(active&&p?.skrPrice&&p.usdCents)setPrice({skr:Number(p.skrPrice),usdCents:p.usdCents,test:!!c.testPricing});}).catch(()=>{});return()=>{active=false;};},[local]);
+ const offer=price?welcomeOffer(price.skr,price.usdCents):null;
+ const scroll=height<680||fontScale>1.2;
  const body=<View style={[s.card,scroll&&{minHeight:690}]}>
   <View style={[s.art,{minHeight:compact?140:200}]}>
    <PaywallVideo active={mediaActive}/>
@@ -19,10 +21,10 @@ export default function Paywall({local,mediaActive=true,onBuy,onSkip}:Props){
    <View pointerEvents="none" style={s.caption}><Text style={s.captionText}>CONCEPT TRAILER</Text></View>
   </View>
   <View style={[s.content,{gap:compact?12:18}]}>
-   <Text style={s.eyebrow}>THE WEEKLY LEAGUE</Text>
+   <Text style={s.eyebrow}>WELCOME OFFER · GAME PASS</Text>
    <View><Text accessibilityRole="header" style={[s.title,{fontSize:compact?32:39,lineHeight:compact?35:42}]}>Your next heist.{'\n'}Your name on top.</Text><Text style={s.subtitle}>Get the Game Pass. Make every escape count.</Text></View>
    <View style={s.stats}>{[['3','weekly missions'],['5','chances each'],['1','best run counts*']].map(([value,label],i)=><View key={value} style={[s.stat,i>0&&s.divider]}><Text style={s.number}>{value}</Text><Text style={s.statLabel}>{label}</Text></View>)}</View>
-   <View style={s.pass}><View style={{flex:1}}><Text style={s.passTitle}>Game Pass</Text><Text style={s.passNote}>Buy once · Compete every week</Text></View><View style={{alignItems:'flex-end'}}><Text style={s.price}>{local?'SKR / SOL':price?`${price.skr} SKR`:'SKR / SOL'}</Text><Text style={s.passNote}>{local?'Android checkout':price?`or ≈ ${usdLabel(price.usdCents)} in SOL`:'Live price at checkout'}</Text></View></View>
+   <View style={s.pass}><View style={{flex:1}}><Text style={s.passTitle}>Game Pass</Text><Text style={s.passNote}>Buy once · Compete every week</Text></View><View style={{alignItems:'flex-end'}}>{offer&&<><Text style={[s.passNote,{fontSize:9}]}>Planned regular price</Text><Text accessibilityLabel={`Planned regular price: ${offer.plannedSkr} SKR or ${usdLabel(offer.plannedUsdCents)} in SOL`} style={[s.passNote,{textDecorationLine:'line-through'}]}>{offer.plannedSkr} SKR / {usdLabel(offer.plannedUsdCents)}</Text></>}<Text style={s.price}>{offer?`${offer.skr} SKR`:'SKR / SOL'}</Text><Text style={s.passNote}>{offer?`or ≈ ${usdLabel(offer.usdCents)} in SOL`:'Live price at checkout'}</Text></View></View>
    <Text style={s.detail}>*Your best escape on each mission adds to your rank. New missions every Monday. Clear all three to earn an outfit.</Text>
    <View style={{gap:8}}><Pressable accessibilityRole="button" onPress={onBuy} style={s.primary}><Text style={s.primaryText}>{local?'Preview Game Pass':'Get Game Pass'}  →</Text></Pressable><Text style={s.free}>All 12 campaign missions are free. Skip to play.</Text><Text style={s.fine}>{local?'Browser demo · No real payment':`${price?.test?'Test price · ':''}Pay in SKR or SOL · Network fee extra`}{'\n'}Weekly token prizes are not active.</Text></View>
   </View>

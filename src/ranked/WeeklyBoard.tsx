@@ -1,3 +1,5 @@
+import MissionIntro from '../components/MissionIntro';
+import {weeklyLesson} from '../onboarding/mission-lessons';
 import {HapticPressable as Pressable} from '../feedback/HapticPressable';
 import {useAccount} from '../commerce/account-context';
 import {useEconomy} from '../commerce/EconomyProvider';
@@ -23,6 +25,7 @@ export function WeeklyCard({state,onPress}:{state:ReturnType<typeof useWeekly>;o
 export default function WeeklyBoard({state,onStart,showStandings=true,onDetailChange}:{onDetailChange?:(open:boolean)=>void;showStandings?:boolean;state:ReturnType<typeof useWeekly>;onStart:(ticket:RunTicket)=>void}){
  const account=useAccount(),economy=useEconomy(),hasPass=!!account.account?.entitlements.includes('campaign');
  const {data,local,busy,error,now}=state,{width,height}=useWindowDimensions(),[section,setSection]=useState<'contracts'|'standings'|'history'>('standings'),[contract,setContract]=useState<Contract|null>(null),[help,setHelp]=useState(false),[message,setMessage]=useState(''),[working,setWorking]=useState(false),[card,setCard]=useState<LeagueBoard|null>(null),[domain,setDomain]=useState(''),cardRef=useRef<View>(null),lock=useRef(false);
+ const [intro,setIntro]=useState<{contract:Contract;practice:boolean}|null>(null);
  const [cardReady,setCardReady]=useState(false),[identityOpen,setIdentityOpen]=useState(false);
  const openCard=(board:LeagueBoard)=>{setCardReady(false);setIdentityOpen(false);setCard(board);};
  const [stageSize,setStageSize]=useState({width:0,height:0});
@@ -31,7 +34,8 @@ export default function WeeklyBoard({state,onStart,showStandings=true,onDetailCh
  const chances=contract?Math.max(0,5-(data?.attempts[contract.id]??0)):5;
  async function act(fn:()=>Promise<void>){if(lock.current)return;lock.current=true;setWorking(true);setMessage('');try{await fn();}catch(e){console.warn('[SeekerLeague] action.failed',e instanceof Error?e.message:'Unknown error');setMessage(e instanceof Error?e.message:'Please try again.');}finally{lock.current=false;setWorking(false);}}
  const button=(text:string,fn:()=>void,primary=false,disabled=false)=><Pressable accessibilityRole="button" disabled={disabled||working} hapticCue={primary?'start':'select'} onPress={fn} style={[s.button,primary&&s.primary,(disabled||working)&&{opacity:.45}]}><Text style={[s.buttonText,primary&&{color:'#193B36'}]}>{text}</Text></Pressable>;
- const start=(c:Contract,practice:boolean)=>{if(!practice&&!hasPass){economy.openPass();return;}void act(async()=>{const ticket=await state.start(c,practice);onStart(ticket);});};
+ const start=(c:Contract,practice:boolean)=>{if(!practice&&!hasPass){economy.openPass();return;}setMessage('');setIntro({contract:c,practice});};
+ const launchIntro=()=>{if(!intro)return;void act(async()=>{const ticket=await state.start(intro.contract,intro.practice);setIntro(null);onStart(ticket);});};
  const personal=data?.board.personal;
 
  let cardData:CourierCardData|undefined;if(card)cardData={week:card.week,rank:card.personal?.rank??null,participants:card.participants,points:card.personal?.points??0,cleared:card.personal?.cleared??0,ticks:card.personal?.ticks??0,domain:data?.domain??null,wallet:card.personal?.wallet??'browser-playtest',final:card.final,local,earned:card.personal?.cleared===3,outfit:economy.equipment.outfit,frame:economy.equipment.frame};
@@ -64,6 +68,7 @@ export default function WeeklyBoard({state,onStart,showStandings=true,onDetailCh
    <Text style={[s.muted,{fontSize:9,textAlign:'center',color:'#718C81'}]}>Weekly token prizes are not active.</Text>
    </>}
   </ScrollView>}
+  {intro&&<MissionIntro lesson={weeklyLesson(intro.contract)} busy={working} error={message} onPlay={launchIntro} onBack={()=>setIntro(null)}/>}
   {!!(message||error)&&<Text accessibilityLiveRegion="polite" style={s.error}>{message||error}</Text>}
  </View>;
 }
