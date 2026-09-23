@@ -1,78 +1,36 @@
+import React,{useEffect,useState} from 'react';
+import {ScrollView,StyleSheet,Text,View,useWindowDimensions} from 'react-native';
 import {HapticPressable as Pressable} from '../feedback/HapticPressable';
 import PaywallVideo from './PaywallVideo';
-import {IS_MAINNET,NETWORK_LABEL,SKR_LABEL} from '../wallet/config';
-import React,{useEffect,useState} from 'react';
 import {commerceApi} from './client';
-import type {ProductPricing} from '../../shared/pricing';
-import {ScrollView,StyleSheet,Text,View,useWindowDimensions} from 'react-native';
 import {usdLabel} from '../../shared/pricing';
-import {CAMPAIGN_OFFER} from '../../shared/economy';
 
-type Props={mediaActive?:boolean;local:boolean;stage:'offer'|'review'|'cancelled';trialAvailable:boolean;busy?:boolean;message?:string;onBuy:()=>void;onCancel:()=>void;onTrial:()=>void;onBack:()=>void};
-
-export default function Paywall({mediaActive=true,local,stage,trialAvailable,busy,message,onBuy,onCancel,onTrial,onBack}:Props){
- const [offer,setOffer]=useState<ProductPricing['campaignOffer']>(),[offerError,setOfferError]=useState(''),[refreshOffer,setRefreshOffer]=useState(0);
- useEffect(()=>{if(local)return;let active=true;setOfferError('');void commerceApi.pricing('campaign').then(p=>{if(!p.campaignOffer)throw new Error('Update required');if(active)setOffer(p.campaignOffer);}).catch(()=>{if(active)setOfferError('Could not load the pass price. Tap below to retry.');});return()=>{active=false;};},[local,refreshOffer]);
- const passPrice=offer?usdLabel(offer.usdCents):'…',rebate=local?0:offer?.rebateSkr;
- const priceLoading=!local&&!offer&&!offerError;
- const {height,fontScale}=useWindowDimensions();
- const compact=height<720, cancelled=stage==='cancelled', review=stage==='review';
- const currency=local?'test credits':SKR_LABEL;
- // Normal phone layouts fit without scrolling. Large accessibility text and very
- // short landscape windows retain access to every term and control.
- const needsScroll=height<500||fontScale>1.2;
- const primaryLabel=cancelled?(trialAvailable?'Play free trial':'Back to campaign'):review?(local?`Confirm campaign · ${CAMPAIGN_OFFER.price} ${currency}`:'Review payment method'):local?`Buy campaign · ${CAMPAIGN_OFFER.price} playtest credits`:`Continue · ${passPrice} in SKR or SOL`;
- const body=<View style={[s.card,needsScroll&&{minHeight:700}]}>
-  <View style={[s.art,{maxHeight:cancelled?360:310,...(compact&&message?{display:'none' as const}:{})}]}>
-   <PaywallVideo active={mediaActive&&!(compact&&!!message)}/>
-   <View pointerEvents="none" style={s.topline}><Text style={s.brand}>STEAL A SEEKER</Text><View style={s.testBadge}><Text style={s.testLabel}>{local?'LOCAL TEST':NETWORK_LABEL}</Text></View></View>
-   <View pointerEvents="none" style={s.artCaption}><Text style={s.captionText}>CONCEPT TRAILER</Text></View>
+type Props={local:boolean;mediaActive?:boolean;onBuy:()=>void;onSkip:()=>void};
+/** Optional weekly offer. No wallet connection, order or entitlement is created here. */
+export default function Paywall({local,mediaActive=true,onBuy,onSkip}:Props){
+ const {height,fontScale}=useWindowDimensions(),compact=height<720;
+ const [price,setPrice]=useState<{skr:number;usdCents:number;test:boolean}>();
+ useEffect(()=>{if(local)return;let active=true;void commerceApi.catalog().then(c=>{const p=c.products.find(p=>p.id==='campaign');if(active&&p?.skrPrice&&p.usdCents)setPrice({skr:Number(p.skrPrice),usdCents:p.usdCents,test:!!c.testPricing});}).catch(()=>{});return()=>{active=false;};},[local]);
+ const scroll=height<620||fontScale>1.2;
+ const body=<View style={[s.card,scroll&&{minHeight:690}]}>
+  <View style={[s.art,{minHeight:compact?140:200}]}>
+   <PaywallVideo active={mediaActive}/>
+   <View style={s.top}><Text style={s.brand}>STEAL A SEEKER</Text><Pressable accessibilityRole="button" accessibilityLabel="Skip Game Pass and play free" onPress={onSkip} style={s.skip}><Text style={s.skipText}>Skip ›</Text></Pressable></View>
+   <View pointerEvents="none" style={s.caption}><Text style={s.captionText}>CONCEPT TRAILER</Text></View>
   </View>
-  <View style={[s.content,{paddingHorizontal:compact?20:24,gap:compact?8:15,paddingTop:compact?12:20}]}>
-   <View><Text accessibilityRole="header" style={[s.title,{fontSize:compact?30:39,lineHeight:compact?32:41}]}>{cancelled?(trialAvailable?'One run.\nSee if you like it.':'Ready for\nanother heist?'):review?'Ready for\nyour first heist?':'Steal the phone.\nEscape the guards.'}</Text>
-    <Text style={[s.subtitle,{marginTop:compact?5:8}]}>{cancelled?(trialAvailable?'Try the first mission before you buy.':'Your free attempt is used. The full campaign is still here.'):review?'Check your pass. Then start the first mission.':'Play 12 heists. Then climb the weekly leaderboard.'}</Text>
-   </View>
-   {cancelled?<View style={s.trialCard}><Text style={s.trialTitle}>{trialAvailable?'1 training heist. No payment required.':local?'Campaign pass · '+CAMPAIGN_OFFER.price+' '+currency:`Game pass · ${passPrice}`}</Text><Text style={s.detail}>{trialAvailable?'Guided play with checkpoint retries. Training does not affect your rank.':'All 12 missions and unlimited retries. Buy once to keep playing.'}</Text></View>:<>
-    <View style={s.benefits}>{[['12','missions'],['∞','campaign retries'],['Weekly','competition']].map(([value,label],i)=><View key={label} style={[s.benefit,i>0&&s.benefitBorder]}><Text style={[s.stat,{fontSize:compact?18:22}]}>{value}</Text><Text style={s.statLabel}>{label}</Text></View>)}</View>
-    <View style={[s.pass,{padding:compact?13:17}]}><View style={s.passName}><Text style={s.passTitle}>Game pass</Text><Text style={s.passNote}>Pay once. No subscription.</Text></View><View style={s.priceBlock}><Text style={[s.price,{fontSize:compact?30:36}]}>{local?CAMPAIGN_OFFER.price:passPrice}</Text><Text style={s.currency}>{local?currency:'PAY IN SKR OR SOL'}</Text></View></View>
-    {(rebate??0)>0&&<View style={s.rebate}><Text style={s.rebateIcon}>↳</Text><View style={{flex:1}}><Text style={s.rebateTitle}>Clear all 12. Earn {rebate} {currency}.</Text><Text style={s.detail}>{local?`Pay ${CAMPAIGN_OFFER.price}; earn ${CAMPAIGN_OFFER.rebate} back once.`:`One ${SKR_LABEL} reward after all 12 wins are verified, whether you pay in SKR or SOL.`}</Text></View></View>}
-   </>}
-   {!!(message||offerError)&&<Text accessibilityLiveRegion="polite" style={s.error}>{message||offerError}</Text>}
-   <View style={s.checkout}>
-    <Text style={s.fineprint}>{local?'Browser credits only. No real money or wallet payments.':IS_MAINNET?`${offer?.testPricing?'Reduced test price. ':''}Real SOL or SKR will leave your wallet. Review the amount and network fee in Phantom.`:'Devnet test tokens only. USD is a market reference. Exact token amount and network fee shown before approval.'} Outfits sold separately.</Text>
-    <Pressable accessibilityRole="button" accessibilityLabel={primaryLabel} accessibilityState={{disabled:!!busy,busy:!!busy}} disabled={busy||(!cancelled&&priceLoading)} onPress={cancelled?(trialAvailable?onTrial:onBack):!local&&!offer?()=>setRefreshOffer(n=>n+1):onBuy} style={({pressed})=>[s.primary,pressed&&{backgroundColor:'#9AE5C0',transform:[{scale:.985}]},busy&&{opacity:.55}]}><Text style={s.primaryText}>{busy?'Please wait…':cancelled?(trialAvailable?'Play training heist':'Back to campaign'):priceLoading?'Loading price…':!local&&!offer?'Retry loading price':review?(local?`Confirm · ${CAMPAIGN_OFFER.price} ${currency}`:'Choose SKR or SOL'):local?`Unlock game · ${CAMPAIGN_OFFER.price} credits`:`Continue · ${passPrice} in SKR or SOL`}</Text><Text style={s.arrow}>{busy?'…':'→'}</Text></Pressable>
-    <Pressable accessibilityRole="button" accessibilityLabel={cancelled?'Back to campaign offer':review?'Cancel payment':'Not now'} onPress={cancelled?onBack:onCancel} disabled={busy} style={s.secondaryButton}><Text style={s.secondary}>{cancelled?'Back to campaign offer':review?'Cancel payment':'Not now'}</Text></Pressable>
-   </View>
+  <View style={[s.content,{gap:compact?12:18}]}>
+   <Text style={s.eyebrow}>THE WEEKLY LEAGUE</Text>
+   <View><Text accessibilityRole="header" style={[s.title,{fontSize:compact?32:39,lineHeight:compact?35:42}]}>Your next heist.{'\n'}Your name on top.</Text><Text style={s.subtitle}>Get the Game Pass. Make every escape count.</Text></View>
+   <View style={s.stats}>{[['3','weekly missions'],['5','chances each'],['1','best run counts*']].map(([value,label],i)=><View key={value} style={[s.stat,i>0&&s.divider]}><Text style={s.number}>{value}</Text><Text style={s.statLabel}>{label}</Text></View>)}</View>
+   <View style={s.pass}><View style={{flex:1}}><Text style={s.passTitle}>Game Pass</Text><Text style={s.passNote}>Buy once · Compete every week</Text></View><View style={{alignItems:'flex-end'}}><Text style={s.price}>{local?'SKR / SOL':price?`${price.skr} SKR`:'SKR / SOL'}</Text><Text style={s.passNote}>{local?'Android checkout':price?`or ≈ ${usdLabel(price.usdCents)} in SOL`:'Live price at checkout'}</Text></View></View>
+   <Text style={s.detail}>*Your best escape on each mission adds to your rank. New missions every Monday. Clear all three to earn an outfit.</Text>
+   <View style={{gap:8}}><Pressable accessibilityRole="button" onPress={onBuy} style={s.primary}><Text style={s.primaryText}>{local?'Preview Game Pass':'Get Game Pass'}  →</Text></Pressable><Text style={s.free}>All 12 campaign missions are free. Skip to play.</Text><Text style={s.fine}>{local?'Browser demo · No real payment':`${price?.test?'Test price · ':''}Pay in SKR or SOL · Network fee extra`}{'\n'}Weekly token prizes are not active.</Text></View>
   </View>
  </View>;
- return <View style={s.page}>{needsScroll?<ScrollView style={{width:'100%'}} contentContainerStyle={{alignItems:'center'}}>{body}</ScrollView>:body}</View>;
+ return <View style={s.page}>{scroll?<ScrollView contentContainerStyle={{alignItems:'center'}} style={{width:'100%'}}>{body}</ScrollView>:body}</View>;
 }
 const s=StyleSheet.create({
- page:{flex:1,backgroundColor:'#050E0D',alignItems:'center',justifyContent:'center'},
- card:{width:'100%',maxWidth:460,flex:1,maxHeight:900,backgroundColor:'#091917',overflow:'hidden'},
- art:{flex:1,minHeight:72,overflow:'hidden',backgroundColor:'#091917',justifyContent:'space-between'},
- topline:{flexDirection:'row',justifyContent:'space-between',alignItems:'center',paddingHorizontal:20,paddingTop:16},
- brand:{color:'#E6F8EE',fontSize:10,letterSpacing:2,fontWeight:'900',textShadowColor:'#000',textShadowRadius:6},
- testBadge:{borderRadius:20,backgroundColor:'#091917CC',borderWidth:1,borderColor:'#86B4A36B',paddingVertical:5,paddingHorizontal:8},
- testLabel:{color:'#BEDBCF',fontSize:8,letterSpacing:1.2,fontWeight:'700'},
- artCaption:{alignSelf:'flex-start',margin:16,marginBottom:0,paddingHorizontal:9,paddingVertical:5,borderRadius:5,backgroundColor:'#091917DE'},
- captionText:{color:'#D1E7DD',fontWeight:'800',fontSize:8,letterSpacing:2},
- content:{paddingBottom:4,flexShrink:0,backgroundColor:'#091917'},
- title:{color:'#EFF6DF',fontWeight:'900',letterSpacing:-1.6},
- subtitle:{fontSize:12,lineHeight:17,color:'#ADCCC0'},
- benefits:{flexDirection:'row',paddingVertical:2},
- benefit:{flex:1,alignItems:'center',gap:2},
- benefitBorder:{borderLeftWidth:1,borderLeftColor:'#264039'},
- stat:{fontWeight:'800',color:'#DCF3E6'},statLabel:{fontSize:11,color:'#A7C3B7'},
- pass:{flexDirection:'row',alignItems:'center',justifyContent:'space-between',gap:8,backgroundColor:'#E9F0D9',borderRadius:17},
- passName:{flex:1},passTitle:{color:'#172D25',fontWeight:'800',fontSize:16},passNote:{color:'#4C6658',fontSize:10,lineHeight:15,marginTop:4},
- priceBlock:{alignItems:'flex-end'},price:{color:'#15352A',fontWeight:'900',letterSpacing:-1,lineHeight:36},currency:{color:'#425F51',fontSize:10,fontWeight:'600'},
- rebate:{flexDirection:'row',gap:10,alignItems:'flex-start'},rebateIcon:{color:'#AADABB',fontSize:24,lineHeight:23},
- rebateTitle:{color:'#D2E8D5',fontSize:12,fontWeight:'700',lineHeight:17},detail:{color:'#A3BDB1',fontSize:10,lineHeight:15,marginTop:3},
- fineprint:{color:'#9CB9AC',fontSize:10,lineHeight:14,textAlign:'center'},
- checkout:{gap:8},primary:{minHeight:52,backgroundColor:'#C4F7DC',borderRadius:15,paddingHorizontal:18,paddingVertical:14,flexDirection:'row',alignItems:'center',justifyContent:'space-between',gap:8,borderBottomWidth:3,borderBottomColor:'#7FB69A'},
- primaryText:{fontSize:14,fontWeight:'800',color:'#133229',flexShrink:1},arrow:{color:'#173E2D',fontSize:23,lineHeight:23},
- secondaryButton:{minHeight:44,justifyContent:'center',alignItems:'center'},secondary:{color:'#AFCCBD',fontSize:12},
- trialCard:{padding:17,backgroundColor:'#142D26',borderWidth:1,borderColor:'#315443',borderRadius:15},trialTitle:{color:'#DEF2D7',fontSize:14,fontWeight:'700'},
- error:{color:'#FFCBAC',fontSize:11,lineHeight:15,padding:8,borderRadius:8,backgroundColor:'#3D241C'}
+ page:{flex:1,backgroundColor:'#071311',alignItems:'center'},card:{flex:1,width:'100%',maxWidth:480,maxHeight:1000,backgroundColor:'#091917'},
+ art:{flex:1,maxHeight:390,overflow:'hidden',backgroundColor:'#142A25'},top:{flexDirection:'row',justifyContent:'space-between',alignItems:'center',paddingLeft:20,paddingRight:10,paddingTop:8},brand:{color:'#E6F8EE',fontSize:10,fontWeight:'900',letterSpacing:2,textShadowColor:'#000',textShadowRadius:5},skip:{minWidth:58,minHeight:44,justifyContent:'center',alignItems:'center',backgroundColor:'#091917DD',borderRadius:22},skipText:{fontSize:12,color:'#E0EDE6',fontWeight:'700'},caption:{position:'absolute',left:18,bottom:14,backgroundColor:'#091917CC',padding:6,borderRadius:5},captionText:{color:'#C6D9D2',fontSize:8,letterSpacing:1.4},
+ content:{padding:22,paddingTop:20},eyebrow:{color:'#A7DBC6',fontSize:10,fontWeight:'800',letterSpacing:2},title:{color:'#F0F6E8',fontWeight:'900',letterSpacing:-1.3},subtitle:{color:'#ADC5BA',fontSize:12,lineHeight:18,marginTop:8},stats:{flexDirection:'row',paddingVertical:4},stat:{flex:1,alignItems:'center',gap:4},divider:{borderLeftWidth:1,borderLeftColor:'#345044'},number:{fontSize:28,fontWeight:'900',color:'#D9F3E4'},statLabel:{fontSize:10,color:'#ADC5BA'},pass:{padding:16,backgroundColor:'#E6EFD7',borderRadius:17,flexDirection:'row',alignItems:'center',gap:8},passTitle:{color:'#173A2C',fontSize:17,fontWeight:'800'},passNote:{color:'#4C6658',fontSize:10,lineHeight:15,marginTop:3},price:{color:'#173A2C',fontSize:21,fontWeight:'900'},detail:{color:'#A5BFB2',fontSize:11,lineHeight:17},primary:{minHeight:54,backgroundColor:'#C4F7DC',borderRadius:16,alignItems:'center',justifyContent:'center'},primaryText:{color:'#173A2C',fontSize:16,fontWeight:'900'},free:{color:'#D9E7DE',fontSize:11,lineHeight:17,textAlign:'center'},fine:{color:'#92AEA0',fontSize:10,lineHeight:15,textAlign:'center'}
 });
