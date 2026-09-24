@@ -1,6 +1,6 @@
 {
   "name": "steal-a-seeker-mvp",
-  "version": "0.3.17",
+  "version": "0.3.23",
   "private": true,
   "main": "index.ts",
   "scripts": {
@@ -18,7 +18,9 @@
     "rules:check": "tsx scripts/rules-manifest.ts --check",
     "build:judge": "node scripts/build-release.cjs judge",
     "signing:init": "node scripts/create-signing.cjs",
-    "icons:build": "node scripts/build-app-icons.cjs"
+    "icons:build": "node scripts/build-app-icons.cjs",
+    "postinstall": "patch-package",
+    "models:mobile": "node scripts/optimize-phone-models.mjs"
   },
   "dependencies": {
     "@fastify/rate-limit": "^11.2.0",
@@ -49,6 +51,7 @@
     "react": "19.2.0",
     "react-dom": "19.2.0",
     "react-native": "0.83.10",
+    "react-native-filament": "1.11.0",
     "react-native-gesture-handler": "~2.30.0",
     "react-native-nitro-modules": "^0.37.1",
     "react-native-quick-crypto": "^1.1.7",
@@ -57,14 +60,23 @@
     "react-native-view-shot": "4.0.3",
     "react-native-web": "^0.21.0",
     "react-native-worklets": "0.7.4",
+    "react-native-worklets-core": "1.6.3",
     "three": "0.180.0",
     "zod": "^4.6.2"
   },
   "devDependencies": {
+    "@babel/plugin-proposal-nullish-coalescing-operator": "7.18.6",
+    "@babel/plugin-proposal-optional-chaining": "7.21.0",
+    "@babel/plugin-transform-parameters": "7.29.7",
+    "@gltf-transform/core": "4.5.0",
+    "@gltf-transform/extensions": "4.5.0",
+    "@gltf-transform/functions": "4.5.0",
     "@types/pg": "^8.23.1",
     "@types/react": "~19.2.0",
     "@types/three": "^0.180.0",
     "esbuild": "0.28.2",
+    "patch-package": "8.0.1",
+    "sharp": "0.34.5",
     "tsx": "^4.20.0",
     "typescript": "~5.9.2"
   }

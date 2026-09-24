@@ -1,0 +1,210 @@
+[
+  {
+    "mission": 1,
+    "title": "First Pickup",
+    "revision": 6,
+    "tapIntervalTicks": 30,
+    "status": "won",
+    "hp": 100,
+    "seconds": 12.6,
+    "kills": 0,
+    "shots": 0,
+    "enemyShots": 1,
+    "damage": 0,
+    "commands": {
+      "phone": 1,
+      "exit": 1
+    }
+  },
+  {
+    "mission": 2,
+    "title": "Blind Corner",
+    "revision": 9,
+    "tapIntervalTicks": 30,
+    "status": "won",
+    "hp": 85,
+    "seconds": 11.6,
+    "kills": 0,
+    "shots": 0,
+    "enemyShots": 2,
+    "damage": 15,
+    "commands": {
+      "phone": 1,
+      "exit": 2
+    }
+  },
+  {
+    "mission": 3,
+    "title": "Crossfire",
+    "revision": 9,
+    "tapIntervalTicks": 30,
+    "status": "won",
+    "hp": 85,
+    "seconds": 16.6,
+    "kills": 0,
+    "shots": 0,
+    "enemyShots": 1,
+    "damage": 15,
+    "commands": {
+      "attack": 5,
+      "phone": 1,
+      "exit": 2
+    }
+  },
+  {
+    "mission": 4,
+    "title": "Loading Lockdown",
+    "revision": 9,
+    "tapIntervalTicks": 30,
+    "status": "won",
+    "hp": 100,
+    "seconds": 13.1,
+    "kills": 0,
+    "shots": 0,
+    "enemyShots": 0,
+    "damage": 0,
+    "commands": {
+      "phone": 1,
+      "exit": 2
+    }
+  },
+  {
+    "mission": 5,
+    "title": "Skybridge",
+    "revision": 9,
+    "tapIntervalTicks": 30,
+    "status": "won",
+    "hp": 100,
+    "seconds": 13.2,
+    "kills": 0,
+    "shots": 0,
+    "enemyShots": 2,
+    "damage": 0,
+    "commands": {
+      "phone": 1,
+      "exit": 2
+    }
+  },
+  {
+    "mission": 6,
+    "title": "Heavy Watch",
+    "revision": 9,
+    "tapIntervalTicks": 30,
+    "status": "won",
+    "hp": 100,
+    "seconds": 21.7,
+    "kills": 0,
+    "shots": 0,
+    "enemyShots": 0,
+    "damage": 0,
+    "commands": {
+      "attack": 10,
+      "phone": 1,
+      "exit": 2
+    }
+  },
+  {
+    "mission": 7,
+    "title": "Split Route",
+    "revision": 9,
+    "tapIntervalTicks": 30,
+    "status": "won",
+    "hp": 82,
+    "seconds": 14.2,
+    "kills": 0,
+    "shots": 0,
+    "enemyShots": 1,
+    "damage": 18,
+    "commands": {
+      "attack": 1,
+      "phone": 1,
+      "exit": 2
+    }
+  },
+  {
+    "mission": 8,
+    "title": "Twin Relay",
+    "revision": 9,
+    "tapIntervalTicks": 30,
+    "status": "won",
+    "hp": 28,
+    "seconds": 27.1,
+    "kills": 0,
+    "shots": 0,
+    "enemyShots": 6,
+    "damage": 72,
+    "commands": {
+      "phone": 2,
+      "exit": 4
+    }
+  },
+  {
+    "mission": 9,
+    "title": "Dark Circuit",
+    "revision": 9,
+    "tapIntervalTicks": 30,
+    "status": "won",
+    "hp": 46,
+    "seconds": 14.8,
+    "kills": 0,
+    "shots": 0,
+    "enemyShots": 5,
+    "damage": 54,
+    "commands": {
+      "switch": 1,
+      "phone": 1,
+      "exit": 2
+    }
+  },
+  {
+    "mission": 10,
+    "title": "Vault Window",
+    "revision": 9,
+    "tapIntervalTicks": 30,
+    "status": "won",
+    "hp": 10,
+    "seconds": 17.2,
+    "kills": 0,
+    "shots": 0,
+    "enemyShots": 10,
+    "damage": 90,
+    "commands": {
+      "phone": 1,
+      "exit": 6
+    }
+  },
+  {
+    "mission": 11,
+    "title": "Security Grid",
+    "revision": 9,
+    "tapIntervalTicks": 30,
+    "status": "won",
+    "hp": 64,
+    "seconds": 11.9,
+    "kills": 0,
+    "shots": 0,
+    "enemyShots": 2,
+    "damage": 36,
+    "commands": {
+      "phone": 1,
+      "exit": 2
+    }
+  },
+  {
+    "mission": 12,
+    "title": "Last Seeker",
+    "revision": 9,
+    "tapIntervalTicks": 30,
+    "status": "won",
+    "hp": 64,
+    "seconds": 13.1,
+    "kills": 0,
+    "shots": 0,
+    "enemyShots": 6,
+    "damage": 36,
+    "commands": {
+      "phone": 1,
+      "exit": 2
+    }
+  }
+]

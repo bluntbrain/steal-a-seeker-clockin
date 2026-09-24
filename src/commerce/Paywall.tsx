@@ -3,6 +3,7 @@ import React,{useEffect,useState} from 'react';
 import {ScrollView,StyleSheet,Text,View,useWindowDimensions} from 'react-native';
 import {HapticPressable as Pressable} from '../feedback/HapticPressable';
 import PaywallVideo from './PaywallVideo';
+import BrandWordmark from '../components/BrandWordmark';
 import {commerceApi} from './client';
 import {usdLabel} from '../../shared/pricing';
 
@@ -17,7 +18,7 @@ export default function Paywall({local,mediaActive=true,onBuy,onSkip}:Props){
  const body=<View style={[s.card,scroll&&{minHeight:690}]}>
   <View style={[s.art,{minHeight:compact?140:200}]}>
    <PaywallVideo active={mediaActive}/>
-   <View style={s.top}><Text style={s.brand}>STEAL A SEEKER</Text><Pressable accessibilityRole="button" accessibilityLabel="Skip Game Pass and play free" onPress={onSkip} style={s.skip}><Text style={s.skipText}>Skip ›</Text></Pressable></View>
+   <View style={s.top}><BrandWordmark/><Pressable accessibilityRole="button" accessibilityLabel="Skip Game Pass and play free" onPress={onSkip} style={s.skip}><Text style={s.skipText}>Skip ›</Text></Pressable></View>
    <View pointerEvents="none" style={s.caption}><Text style={s.captionText}>CONCEPT TRAILER</Text></View>
   </View>
   <View style={[s.content,{gap:compact?12:18}]}>
@@ -33,6 +34,6 @@ export default function Paywall({local,mediaActive=true,onBuy,onSkip}:Props){
 }
 const s=StyleSheet.create({
  page:{flex:1,backgroundColor:'#071311',alignItems:'center'},card:{flex:1,width:'100%',maxWidth:480,maxHeight:1000,backgroundColor:'#091917'},
- art:{flex:1,maxHeight:390,overflow:'hidden',backgroundColor:'#142A25'},top:{flexDirection:'row',justifyContent:'space-between',alignItems:'center',paddingLeft:20,paddingRight:10,paddingTop:8},brand:{color:'#E6F8EE',fontSize:10,fontWeight:'900',letterSpacing:2,textShadowColor:'#000',textShadowRadius:5},skip:{minWidth:58,minHeight:44,justifyContent:'center',alignItems:'center',backgroundColor:'#091917DD',borderRadius:22},skipText:{fontSize:12,color:'#E0EDE6',fontWeight:'700'},caption:{position:'absolute',left:18,bottom:14,backgroundColor:'#091917CC',padding:6,borderRadius:5},captionText:{color:'#C6D9D2',fontSize:8,letterSpacing:1.4},
+ art:{flex:1,maxHeight:390,overflow:'hidden',backgroundColor:'#142A25'},top:{flexDirection:'row',justifyContent:'space-between',alignItems:'center',paddingLeft:20,paddingRight:10,paddingTop:8},skip:{minWidth:58,minHeight:44,justifyContent:'center',alignItems:'center',backgroundColor:'#091917DD',borderRadius:22},skipText:{fontSize:12,color:'#E0EDE6',fontWeight:'700'},caption:{position:'absolute',left:18,bottom:14,backgroundColor:'#091917CC',padding:6,borderRadius:5},captionText:{color:'#C6D9D2',fontSize:8,letterSpacing:1.4},
  content:{padding:22,paddingTop:20},eyebrow:{color:'#A7DBC6',fontSize:10,fontWeight:'800',letterSpacing:2},title:{color:'#F0F6E8',fontWeight:'900',letterSpacing:-1.3},subtitle:{color:'#ADC5BA',fontSize:12,lineHeight:18,marginTop:8},stats:{flexDirection:'row',paddingVertical:4},stat:{flex:1,alignItems:'center',gap:4},divider:{borderLeftWidth:1,borderLeftColor:'#345044'},number:{fontSize:28,fontWeight:'900',color:'#D9F3E4'},statLabel:{fontSize:10,color:'#ADC5BA'},pass:{padding:16,backgroundColor:'#E6EFD7',borderRadius:17,flexDirection:'row',alignItems:'center',gap:8},passTitle:{color:'#173A2C',fontSize:17,fontWeight:'800'},passNote:{color:'#4C6658',fontSize:10,lineHeight:15,marginTop:3},price:{color:'#173A2C',fontSize:21,fontWeight:'900'},detail:{color:'#A5BFB2',fontSize:11,lineHeight:17},primary:{minHeight:54,backgroundColor:'#C4F7DC',borderRadius:16,alignItems:'center',justifyContent:'center'},primaryText:{color:'#173A2C',fontSize:16,fontWeight:'900'},free:{color:'#D9E7DE',fontSize:11,lineHeight:17,textAlign:'center'},fine:{color:'#92AEA0',fontSize:10,lineHeight:15,textAlign:'center'}
 });

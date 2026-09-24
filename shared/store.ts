@@ -9,12 +9,19 @@ export const STORE_ITEMS=[
  {id:'signal-runner',name:'Frost Runner',price:400,kind:'outfit',description:'Snowflake hood. Mint winter trim.'},
  {id:'circuit-scout',name:'Circuit Scout',price:500,kind:'outfit',description:'Mint circuit stripes on charcoal.'},
  {id:'archive-keeper',name:'Archive Keeper',price:600,kind:'outfit',description:'Cream jacket and tan satchel straps.'},
+ {id:'solana-toly',name:'Toly',price:3000,kind:'outfit',description:'Premium character skin. Same gameplay stats.'},
+ {id:'solana-mert',name:'Mert',price:3000,kind:'outfit',description:'Premium character skin. Same gameplay stats.'},
+ {id:'solana-chase',name:'Chase',price:3000,kind:'outfit',description:'Premium character skin. Same gameplay stats.'},
+ {id:'solana-lily',name:'Lily',price:3000,kind:'outfit',description:'Premium character skin. Same gameplay stats.'},
+ {id:'solana-vibhu',name:'Vibhu',price:3000,kind:'outfit',description:'Premium character skin. Same gameplay stats.'},
+ {id:'solana-akshay',name:'Akshay Rajan',price:3000,kind:'outfit',description:'Premium character skin. Same gameplay stats.'},
+ {id:'solana-beeman',name:'Beeman',price:3000,kind:'outfit',description:'Premium character skin. Same gameplay stats.'},
  {id:'escape-trail',name:'Escape trail',price:300,kind:'trail',description:'Mint light follows you while carrying the phone. No speed boost.'},
  {id:'profile-frame',name:'Courier frame',price:150,kind:'frame',description:'A mint finish for your profile.'},
  {id:'rack-theme',name:'Vault finish',price:250,kind:'rack',description:'A mint-lit finish for your collection.'},
 ] as const;
 export type StoreItemId=typeof STORE_ITEMS[number]['id'];
-export const RETIRED_ITEMS:readonly string[]=['profile-frame','rack-theme'];
+export const RETIRED_ITEMS:readonly string[]=['escape-trail','profile-frame','rack-theme'];
 export const isStoreItemForSale=(id:string)=>STORE_ITEMS.some(i=>i.id===id)&&!RETIRED_ITEMS.includes(id);
 export type CreditPackId=typeof CREDIT_PACKS[number]['id'];
 // The 300-credit starter outfit takes five perfect clears or six basic clears.

@@ -16,14 +16,21 @@ export function useCombatAudio(state:GameState,enabled:boolean,volume:number,onD
  const knockoutB=useGameAudio(require('../../assets/audio-defeats/guard-b.wav')),heavyKO=useGameAudio(require('../../assets/audio-defeats/heavy.wav')),droneKO=useGameAudio(require('../../assets/audio-defeats/drone.wav'));
  const previousHP=useRef<number[]>([]);
  const aim=useGameAudio(require('../../assets/audio-combat-v3/aim.wav'));
+ const grate=useGameAudio(require('../../assets/audio/switch.wav')),lastGrate=useRef(0);
  const previous=useRef<CombatSoundCounters>(zero),lastTick=useRef(0),lastAim=useRef(-100),epoch=useRef(0),allowed=useRef(enabled);
  const damageFeedback=useRef(onDamage);damageFeedback.current=onDamage;
  allowed.current=enabled;
  useEffect(()=>()=>{allowed.current=false;epoch.current++;},[]);
  useEffect(()=>{
-  const players=[shotA,shotB,enemyA,enemyB,hit,damage,knockout,knockoutB,heavyKO,droneKO,aim];
+  const players=[shotA,shotB,enemyA,enemyB,hit,damage,knockout,knockoutB,heavyKO,droneKO,aim,grate];
   if(!enabled||state.ticks<lastTick.current){epoch.current++;for(const p of players)p.pause();}
   const c=state.combat??zero,events=combatSoundEvents(previous.current,c);
+  const grateId=state.combat?.grateNoise?.id??0;
+  if(state.ticks>=lastTick.current&&grateId>lastGrate.current){
+   if(feedbackEnabled)onHaptic?.('switch');
+   if(enabled){grate.volume=volume*.42;const run=epoch.current;void grate.seekTo(0).then(()=>{if(allowed.current&&epoch.current===run)grate.play();}).catch(()=>{});}
+  }
+  lastGrate.current=grateId;
   if(feedbackEnabled&&state.ticks>=lastTick.current&&!events.includes('damage')){if(events.includes('knockout'))onHaptic?.('kill');else if(events.includes('shot'))onHaptic?.('shot');}
   if(!enabled&&feedbackEnabled&&state.ticks>=lastTick.current&&events.includes('damage'))damageFeedback.current?.();
   if(enabled&&state.ticks>=lastTick.current){
@@ -43,5 +50,5 @@ export function useCombatAudio(state:GameState,enabled:boolean,volume:number,onD
   if(state.ticks<lastTick.current)lastAim.current=-100;
   previousHP.current=state.guards.map(g=>g.hp);
   previous.current={shots:c.shots,enemyShots:c.enemyShots,hitEvents:c.hitEvents,damageTaken:c.damageTaken,kills:c.kills,aimEvents:c.aimEvents,commandSeen:c.commandSeen};lastTick.current=state.ticks;
- },[state,enabled,volume,feedbackEnabled,onHaptic,shotA,shotB,enemyA,enemyB,hit,damage,knockout,knockoutB,heavyKO,droneKO,aim]);
+ },[state,enabled,volume,feedbackEnabled,onHaptic,shotA,shotB,enemyA,enemyB,hit,damage,knockout,knockoutB,heavyKO,droneKO,aim,grate]);
 }

@@ -1,43 +1,44 @@
 import {HapticPressable as Pressable} from '../feedback/HapticPressable';
 import React,{useState} from 'react';
-import {Image,StyleSheet,Text,View,useWindowDimensions} from 'react-native';
+import {Image,StyleSheet,Text,View} from 'react-native';
 import type {LeagueSummary,LeagueEntry} from '../../shared/league';
-import {leagueLeaders,leagueRows,rivalLabel} from './presentation';
+import {leagueStandings,rivalLabel} from './presentation';
 import {shortWallet} from './card';
+import {LeagueSurface,RankMedal} from './LeagueVisuals';
 
-const podium=require('../../assets/leaderboard-v2/podium.webp');
 const portrait=require('../../assets/leaderboard-v2/courier-avatar.png');
-type Props={data?:LeagueSummary;local:boolean;loading:boolean;onPlay:()=>void;onShare:()=>void};
-export default function WeeklyStandings({data,local,loading,onPlay,onShare}:Props){
- const {height}=useWindowDimensions(),compact=height<760,short=height<700,[nearby,setNearby]=useState(false);
- const heroHeight=short?72:compact?92:112;
- const board=data?.board,personal=board?.personal??null,leaders=board?leagueLeaders(board):[];
- const rows=board?(nearby?board.nearby:leagueRows(board)):[],hasRivals=!local&&!!personal&&(board?.nearby.length??0)>1;
- const playerName=(p:LeagueEntry)=>p.wallet===personal?.wallet?(data?.domain??'YOU'):shortWallet(p.wallet);
- const hint=local?'Local score · not a live rank':rivalLabel(personal,board?.rival??null)??(personal?`${personal.cleared}/3 missions cleared`:'Finish a scored run to join');
- return <View style={s.root} testID="weekly-standings-v2">
-  <View style={s.content}>
-   <View style={[s.hero,{height:heroHeight}]} accessibilityElementsHidden importantForAccessibility="no-hide-descendants"><Image source={podium} resizeMode="contain" style={[s.heroArt,!leaders.length&&{opacity:.5}]}/></View>
-   {leaders.length>0?<View style={[s.leaders,{maxWidth:heroHeight*2.5,alignSelf:'center',width:'100%'},short&&{paddingBottom:6}]} accessibilityLabel={local?'Local test scores':'Top three couriers'}>{[1,0,2].map((position)=>{const p=leaders[position];return <View key={position} style={[s.leader,short&&{gap:2}]}>
-    <Text style={[s.leaderRank,short&&{fontSize:18,lineHeight:22},position===0&&s.gold]}>{p?(local?'TEST':`#${p.rank}`):'—'}</Text>
-    <Text style={s.leaderName} numberOfLines={1}>{p?playerName(p):'Open place'}</Text>
-    <Text style={s.leaderScore}>{p?p.points.toLocaleString():'—'}</Text>
-   </View>;})}</View>:<View style={s.empty} testID="weekly-empty"><Text style={s.emptyTitle}>{loading?'Loading this week…':data?'The board is open.':'League unavailable'}</Text><Text style={s.muted}>{loading?'Fetching verified scores':data?'Be the first courier to finish.':'Refresh to try again.'}</Text></View>}
-  <View style={s.footer}>
-   <View style={s.position} testID="weekly-your-position"><Text style={s.positionRank}>{personal?(local?'·':`#${personal.rank}`):'—'}</Text><View style={s.nameCell}><Text style={s.positionLabel}>{local?'YOUR TEST SCORE':'YOUR POSITION'}</Text><Text numberOfLines={2} style={s.positionHint}>{hint}</Text></View><View style={{alignItems:'flex-end',gap:3}}><Text style={s.positionPoints}>{personal?personal.points.toLocaleString():'—'}</Text>{personal&&<Pressable accessibilityRole="button" accessibilityLabel="Share my Courier Card" onPress={onShare} style={s.share}><Text style={s.shareText}>SHARE ↗</Text></Pressable>}</View></View>
-   <Pressable accessibilityRole="button" accessibilityLabel="Play weekly missions" disabled={!data||loading} onPress={onPlay} style={({pressed})=>[s.play,(!data||loading||pressed)&&{opacity:.55}]} testID="weekly-play-missions"><Text style={s.playLabel}>PLAY WEEKLY MISSIONS</Text><Text style={s.arrow}>→</Text></Pressable>
+type Props={data?:LeagueSummary;local:boolean;loading:boolean;onShare:()=>void};
+export default function WeeklyStandings({data,local,loading,onShare}:Props){
+ const [nearby,setNearby]=useState(false),board=data?.board,personal=board?.personal??null;
+ const hasRivals=!local&&!!personal&&(board?.nearby.length??0)>1;
+ const rows=board?leagueStandings(board,nearby&&hasRivals):[];
+ const playerName=(p:LeagueEntry)=>p.wallet===personal?.wallet?(data?.domain??'You'):shortWallet(p.wallet);
+ const remaining=personal?Math.max(0,3-personal.cleared):3;
+ const hint=local?'Local score · not a live rank':personal?(remaining===1?'One mission left to complete your week.':remaining>1?`${remaining} missions left to complete your week.`:rivalLabel(personal,board?.rival??null)??'All three cleared. Improve your best runs.'):'Finish a scored run to join the board.';
+ return <View style={s.root} testID="weekly-standings-v3">
+  <View style={s.position} testID="weekly-your-position">
+   <LeagueSurface/>
+   <View style={s.positionTop}>
+    <Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={.6} style={s.positionRank}>{personal?(local?'·':`#${personal.rank}`):'—'}</Text>
+    <View style={s.positionIdentity}><Text style={s.positionLabel}>{local?'Your test score':'Your position'}</Text><Text style={s.progress}>{data?(personal?.cleared??0):'—'} / 3 missions</Text></View>
+    <View style={s.scoreCell}><Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={.6} style={s.positionPoints}>{personal?personal.points.toLocaleString():'—'}</Text><Text style={s.pointsLabel}>POINTS</Text></View>
+   </View>
+   <View style={s.hintRow}><Text style={s.positionHint}>{loading?'Fetching verified scores…':!data?'Refresh to load your position.':hint}</Text>{personal&&<Pressable accessibilityRole="button" accessibilityLabel="Share my Courier Card" onPress={onShare} style={s.share}><Text style={s.shareText}>Share ↗</Text></Pressable>}</View>
   </View>
-   <View style={s.tableHeader}><View style={{flexDirection:'row',gap:16}}><Pressable accessibilityRole="button" accessibilityState={{selected:!nearby}} onPress={()=>setNearby(false)} style={s.listToggle}><Text style={[s.eyebrow,!nearby&&s.activeText]}>{local?'YOUR TEST RUNS':'TOP COURIERS'}</Text></Pressable>{hasRivals&&<Pressable accessibilityRole="button" accessibilityState={{selected:nearby}} onPress={()=>setNearby(true)} style={s.listToggle}><Text style={[s.eyebrow,nearby&&s.activeText]}>NEAR YOU</Text></Pressable>}</View><Text style={s.eyebrow}>POINTS</Text></View>
-   {rows.map(p=><View key={p.wallet} style={[s.row,p.wallet===personal?.wallet&&s.yourRow]} testID="weekly-ranking-row"><Text style={s.rowRank}>{local?'·':p.rank}</Text><Image source={portrait} style={s.avatar}/><View style={s.nameCell}><Text style={s.name} numberOfLines={1}>{playerName(p)}</Text><Text style={s.rowDetail}>{p.cleared}/3 · {(p.ticks/30).toFixed(1)}s</Text></View><Text style={s.points}>{p.points.toLocaleString()}</Text></View>)}
-   {!rows.length&&<Text style={s.emptyRows}>{local?'Weekly test results stay on this device.':leaders.length?'The next place is still open.':'No completed scores yet.'}</Text>}
-  </View>
-
+  <View style={s.tableHeader}><Text accessibilityRole="header" style={s.tableTitle}>{local?'Your test runs':nearby&&hasRivals?'Near you':'Top couriers'}</Text>{hasRivals&&<Pressable accessibilityRole="button" accessibilityLabel={nearby?'Show top couriers':'Show couriers near you'} onPress={()=>setNearby(!nearby)} style={s.listToggle}><Text style={s.toggleText}>{nearby?'Top couriers':'Near you'} <Text style={{fontSize:20}}>›</Text></Text></Pressable>}</View>
+  <View style={s.rows}>{rows.map(p=>{const yours=p.wallet===personal?.wallet,medal=!local&&p.rank<=3;return <View key={p.wallet} style={[s.row,!local&&p.rank===1&&s.goldRow,yours&&s.yourRow]} testID="weekly-ranking-row">
+   <LeagueSurface kind={yours?'mint':!local&&p.rank===1?'gold':'row'}/>
+   <View style={s.rankCell}>{medal&&<RankMedal rank={p.rank}/>}<Text numberOfLines={1} adjustsFontSizeToFit style={[s.rowRank,!medal&&{textAlign:'center'},!local&&p.rank===1&&{color:'#EEC875'},yours&&{color:'#C1F4E0'}]}>{local?'·':`#${p.rank}`}</Text></View>
+   <Image accessible={false} source={portrait} style={s.avatar}/>
+   <View style={s.nameCell}><Text style={[s.name,yours&&{color:'#BAEDDC'}]} numberOfLines={1}>{playerName(p)}</Text><Text style={s.rowDetail}>{p.cleared} / 3 cleared</Text></View>
+   <View style={s.rowScore}><Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={.65} style={s.points}>{p.points.toLocaleString()}</Text><Text style={s.rowPointsLabel}>POINTS</Text></View>
+  </View>;})}</View>
+  {!rows.length&&<View style={s.empty} testID="weekly-empty"><LeagueSurface kind="row"/><Image accessible={false} source={portrait} style={s.emptyAvatar}/><Text style={s.emptyTitle}>{loading?'Loading this week…':data?'The board is open.':'League unavailable'}</Text><Text style={s.emptyText}>{loading?'Fetching verified scores':data?'Be the first courier to finish a weekly mission.':'Refresh the league to try again.'}</Text></View>}
+  {local&&<Text style={s.localNote}>Weekly test results stay on this device.</Text>}
  </View>;
 }
 const s=StyleSheet.create({
- root:{gap:4},content:{paddingBottom:6},hero:{width:'100%',marginTop:2},heroArt:{width:'100%',height:'100%'},
- leaders:{flexDirection:'row',paddingHorizontal:'12%',paddingBottom:14,borderBottomWidth:1,borderBottomColor:'#35423D'},leader:{flex:1,alignItems:'center',gap:4},leaderRank:{fontSize:22,lineHeight:26,fontWeight:'900',color:'#C0D4D1'},gold:{color:'#DEC591'},leaderName:{fontSize:11,fontWeight:'700',color:'#E3EEEB',maxWidth:'95%'},leaderScore:{fontSize:16,fontWeight:'800',color:'#ACDFD5',fontVariant:['tabular-nums']},
- empty:{alignItems:'center',gap:6,paddingBottom:15},emptyTitle:{fontSize:19,fontWeight:'800',color:'#E4EEEB'},muted:{fontSize:12,color:'#92ACA6'},tableHeader:{flexDirection:'row',alignItems:'center',justifyContent:'space-between',borderBottomWidth:1,borderBottomColor:'#35423D',minHeight:42},eyebrow:{fontSize:10,fontWeight:'700',letterSpacing:1.1,color:'#809991'},activeText:{color:'#B6DCD2'},listToggle:{minHeight:42,justifyContent:'center'},
- row:{minHeight:48,flexDirection:'row',alignItems:'center',gap:10,borderBottomWidth:1,borderBottomColor:'#25322E',paddingHorizontal:8},yourRow:{backgroundColor:'#172923'},rowRank:{width:26,fontSize:17,fontWeight:'800',color:'#DEECE6',fontVariant:['tabular-nums']},avatar:{height:32,width:32,borderRadius:16,borderWidth:1,borderColor:'#536E65'},nameCell:{flex:1,minWidth:0,gap:3},name:{fontSize:12,fontWeight:'700',color:'#E0EDE6'},rowDetail:{fontSize:10,color:'#8DA69E'},points:{fontSize:14,fontWeight:'700',color:'#E1EBE6',fontVariant:['tabular-nums']},emptyRows:{paddingVertical:18,fontSize:12,color:'#7B938B'},
- footer:{gap:8,paddingVertical:8},position:{minHeight:68,flexDirection:'row',alignItems:'center',gap:10,borderLeftWidth:3,borderLeftColor:'#BDE9DC',padding:12,backgroundColor:'#192C27'},positionRank:{fontSize:24,fontWeight:'800',color:'#E5F0E9',minWidth:32,fontVariant:['tabular-nums']},positionLabel:{fontSize:10,fontWeight:'800',letterSpacing:1,color:'#BEDED4'},positionHint:{fontSize:11,lineHeight:16,color:'#9BB9AF'},positionPoints:{fontSize:20,fontWeight:'800',color:'#E8F2EC',fontVariant:['tabular-nums']},share:{minHeight:24,justifyContent:'center',paddingHorizontal:3},shareText:{fontSize:9,fontWeight:'800',letterSpacing:.6,color:'#A5D7C9'},play:{height:48,borderRadius:7,flexDirection:'row',alignItems:'center',justifyContent:'space-between',paddingHorizontal:19,backgroundColor:'#CFE6E4'},playLabel:{fontSize:12,fontWeight:'900',letterSpacing:1,color:'#18312A'},arrow:{fontSize:24,color:'#18312A'},
+ root:{gap:8,paddingTop:12,paddingHorizontal:2},position:{borderWidth:1.5,borderColor:'#A4EED4',borderRadius:14,overflow:'hidden',paddingHorizontal:12,paddingTop:13,paddingBottom:7,minHeight:99},positionTop:{flexDirection:'row',alignItems:'center',gap:9},positionRank:{flex:.8,fontSize:39,lineHeight:46,fontWeight:'900',letterSpacing:-1.6,color:'#A9F0D8',fontVariant:['tabular-nums']},positionIdentity:{flex:1.25,borderLeftWidth:1,borderRightWidth:1,borderColor:'#55796A',paddingHorizontal:10,gap:5},positionLabel:{fontSize:11,lineHeight:14,color:'#B8D2C5'},progress:{fontSize:12,lineHeight:17,fontWeight:'800',color:'#F2F6EC'},scoreCell:{flex:1.25,alignItems:'flex-end',gap:2},positionPoints:{fontSize:26,lineHeight:32,fontWeight:'900',color:'#BFF7E3',fontVariant:['tabular-nums'],letterSpacing:-.6,maxWidth:'100%'},pointsLabel:{fontSize:9,color:'#A7BFB1',letterSpacing:1.3},hintRow:{flexDirection:'row',alignItems:'center',gap:5,minHeight:28,marginTop:2},positionHint:{flex:1,fontSize:10,lineHeight:14,color:'#AECABB'},share:{minHeight:32,minWidth:42,alignItems:'flex-end',justifyContent:'center'},shareText:{fontSize:10,fontWeight:'700',color:'#BEECDA'},
+ tableHeader:{flexDirection:'row',alignItems:'center',justifyContent:'space-between',gap:8,minHeight:42,marginTop:7,paddingHorizontal:2},tableTitle:{fontSize:22,lineHeight:27,fontWeight:'800',letterSpacing:-.5,color:'#F4F3E9'},listToggle:{minHeight:40,justifyContent:'center',paddingLeft:8},toggleText:{fontSize:11,color:'#A7BFB1'},rows:{gap:6},row:{minHeight:62,borderRadius:11,borderWidth:1,borderColor:'#2B4638',overflow:'hidden',paddingHorizontal:9,paddingVertical:8,flexDirection:'row',alignItems:'center',gap:8},goldRow:{borderColor:'#726534'},yourRow:{borderWidth:1.5,borderColor:'#9DEBD0'},rankCell:{width:46,flexDirection:'row',alignItems:'center',gap:1},rowRank:{flex:1,fontSize:12,fontWeight:'800',color:'#A4B8AD',fontVariant:['tabular-nums']},avatar:{height:39,width:39,borderRadius:20,borderWidth:1,borderColor:'#647D6E'},nameCell:{flex:1,minWidth:0,gap:5},name:{fontSize:13,lineHeight:16,fontWeight:'800',color:'#F1F3EB'},rowDetail:{fontSize:10,color:'#B1C9BA'},rowScore:{width:66,alignItems:'flex-end',gap:4},points:{fontSize:17,lineHeight:20,fontWeight:'800',color:'#F1F5EC',fontVariant:['tabular-nums'],maxWidth:'100%'},rowPointsLabel:{fontSize:8,letterSpacing:1,color:'#8AA89A'},
+ empty:{borderWidth:1,borderColor:'#33533F',borderRadius:14,overflow:'hidden',alignItems:'center',padding:22,gap:8},emptyAvatar:{width:65,height:65,borderRadius:33,borderWidth:1,borderColor:'#86B6A2'},emptyTitle:{fontSize:21,fontWeight:'800',color:'#E7F0E8',textAlign:'center'},emptyText:{fontSize:12,lineHeight:19,color:'#A0BAAB',textAlign:'center'},localNote:{paddingVertical:12,color:'#829F8F',fontSize:10,lineHeight:15,textAlign:'center'},
 });

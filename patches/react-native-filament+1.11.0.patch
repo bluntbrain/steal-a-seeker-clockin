@@ -1,0 +1,90 @@
+diff --git a/node_modules/react-native-filament/src/hooks/useBuffer.ts b/node_modules/react-native-filament/src/hooks/useBuffer.ts
+index df1211c..6171bcf 100644
+--- a/node_modules/react-native-filament/src/hooks/useBuffer.ts
++++ b/node_modules/react-native-filament/src/hooks/useBuffer.ts
+@@ -34,6 +34,8 @@ export interface BufferProps {
+ export function useBuffer({ source: source, releaseOnUnmount = true }: BufferProps): FilamentBuffer | undefined {
+   const [buffer, setBuffer] = useState<FilamentBuffer | undefined>(undefined)
+ 
++  const [error, setError] = useState<Error>()
++
+   const uri = useMemo(() => {
+     if (typeof source === 'object') {
+       return source.uri
+@@ -52,20 +54,26 @@ export function useBuffer({ source: source, releaseOnUnmount = true }: BufferPro
+   // TODO: useDisposableResource
+   useEffect(() => {
+     let localBuffer: FilamentBuffer | undefined
+-    FilamentProxy.loadAsset(uri)
++    let mounted = true
++    setError(undefined)
++    Promise.resolve().then(() => FilamentProxy.loadAsset(uri))
+       .then((asset) => {
++        // A close/background/index change can finish before the file read.
++        if (!mounted) { asset.release(); return }
+         localBuffer = asset
+         setBuffer(asset)
+       })
+       .catch((error) => {
+-        console.error(`Failed to load asset: ${uri}`, error)
++        if (mounted) setError(error instanceof Error ? error : new Error(String(error)))
+       })
+-    return withCleanupScope(() => {
+-      if (releaseOnUnmount) {
+-        localBuffer?.release()
+-      }
+-    })
++    return () => {
++      mounted = false
++      withCleanupScope(() => {
++        if (releaseOnUnmount) localBuffer?.release()
++      })()
++    }
+   }, [releaseOnUnmount, uri])
+ 
++  if (error != null) throw error
+   return buffer
+ }
+diff --git a/node_modules/react-native-filament/src/hooks/useDisposableResource.ts b/node_modules/react-native-filament/src/hooks/useDisposableResource.ts
+index aaa02ef..8c4b02a 100644
+--- a/node_modules/react-native-filament/src/hooks/useDisposableResource.ts
++++ b/node_modules/react-native-filament/src/hooks/useDisposableResource.ts
+@@ -19,11 +19,15 @@ export const useDisposableResource = <T extends ReleasingResource>(
+   deps?: DependencyList
+ ): T | undefined => {
+   const [resource, setResource] = useState<T>()
++  const [error, setError] = useState<Error>()
+ 
+   useEffect(() => {
+     let isValid = true
+     let currentAsset: T | undefined
+-    initialize()?.then((a) => {
++    setError(undefined)
++    // Worklets Core returns a native thenable whose chained catch is incomplete.
++    // Assimilate it into a JS Promise before adding rejection handling.
++    Promise.resolve().then(initialize).then((a) => {
+       if (a == null) return
+ 
+       if (isValid) {
+@@ -34,11 +38,10 @@ export const useDisposableResource = <T extends ReleasingResource>(
+         // this useEffect has been unmounted already, drop the asset
+         a.release()
+       }
++    }).catch((cause) => {
++      // Surface async load failures through the nearest React recovery boundary.
++      if (isValid) setError(cause instanceof Error ? cause : new Error(String(cause)))
+     })
+-    // TODO: catch is broken
+-    // .catch((e) => {
+-    //   console.error('Error while loading resource', e)
+-    // })
+     return () => {
+       setResource(undefined)
+       isValid = false
+@@ -49,5 +52,6 @@ export const useDisposableResource = <T extends ReleasingResource>(
+     // eslint-disable-next-line react-hooks/exhaustive-deps
+   }, deps ?? emptyStaticArray)
+ 
++  if (error != null) throw error
+   return resource
+ }

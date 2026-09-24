@@ -1,0 +1,62 @@
+{
+  "researchDate": "2026-09-24",
+  "videos": [
+    {
+      "id": "iIOIT3dCy5w",
+      "url": "https://www.youtube.com/watch?v=iIOIT3dCy5w",
+      "title": "How To Think Like A Game Designer",
+      "channel": "Game Maker's Toolkit",
+      "durationSeconds": 786,
+      "captionType": "supplied English",
+      "captionSHA256": "838078bf88cf3a5b69b972337572c0e9713b3e4d3d46b3bd4a2ac69e3a1723c4",
+      "analysis": "Transcript read; not a full visual or audio review"
+    },
+    {
+      "id": "pF2LGYVRCwI",
+      "url": "https://www.youtube.com/watch?v=pF2LGYVRCwI",
+      "title": "5 Principles of Game Design",
+      "channel": "Field of View: The Art of Game Design",
+      "durationSeconds": 2387,
+      "captionType": "supplied English",
+      "captionSHA256": "baa6e719a518a74eae80437ebb57e1814db6fbcf7e8a5843effc6e2016125220",
+      "analysis": "Transcript read; not a full visual or audio review"
+    },
+    {
+      "id": "K0M1PuQaE8s",
+      "url": "https://www.youtube.com/watch?v=K0M1PuQaE8s",
+      "title": "Designing Addiction: The Twisted Psychology Of Game Design",
+      "channel": "goukigod",
+      "durationSeconds": 968,
+      "captionType": "automatic English",
+      "captionSHA256": "8e238cb2cbca7ac3cf2b717685ee807ecee96c2ed3b6c4d227b6a3679071faf2",
+      "analysis": "Transcript read; not a full visual or audio review"
+    },
+    {
+      "id": "d8EBjqWb5SA",
+      "url": "https://www.youtube.com/watch?v=d8EBjqWb5SA",
+      "title": "How to be a game designer",
+      "channel": "Luke Muscat",
+      "durationSeconds": 1092,
+      "captionType": "supplied English",
+      "captionSHA256": "084e4da8a32035529176b25d8db316a79bf02757213de7abc7d9be82ca6a26e3",
+      "analysis": "Transcript read; not a full visual or audio review"
+    }
+  ],
+  "workingTree": {
+    "head": "0fbf4444fe9143677c9630595fbdfc9ce0d72f25",
+    "scope": "Current local working tree with uncommitted changes, not a published APK audit",
+    "fileSHA256": {
+      "src/game/combat.ts": "8995261529cc04cdcd94194affdedec4a114892a5b32a39e5e11a63ef8ca6d53",
+      "src/game/campaign-layouts.ts": "ddc5fdb0e8a8a4ce82069b020b997ccdb05f5e5b3bd6e0e96a7e83811ae8c5e8",
+      "src/game/encounters.ts": "cd1d29d5100ceadb6f0c9ec4d42d0cf80d5220fa0796a295161258452a642fce",
+      "src/game/simulation.ts": "160542a4570ef24580690bfe20d04daa05c758f263c840cf5b262b080a837938",
+      "src/game/combat-levels.ts": "2ebb157a5f4eed7604af9db35db84ef862a6b41b91b6965a9566b3a9742c9098",
+      "src/game/level.ts": "cb83124d06ce3e49bd762b022bd1a544dfedfd8df713a21be26d5d76ad572eb0",
+      "src/game/navigation.ts": "e12ed1114c426bac92ef30d012b3bc3d9faf7edcb08f01a2dde3e609c5f166bc",
+      "src/audio/useLevelMusic.ts": "691daeeb7ffe8e45c87b9b84e323a15a9ad10e50adff1ae1c75aed7d5243a2fc",
+      "src/feedback/clean-combo.ts": "4a6f98c02447de626d0870de1a6b3c507910d68a4c1aa078431db0455db167b8",
+      "shared/store.ts": "3a1409d2ecdb116a0675717cc67ba2579ec180220af1817026807816c22ecfd8",
+      "shared/contracts.ts": "7a62a6e9031dc29b916c3641367722921a7f2e38dd54ee11a2734390ebe19343"
+    }
+  }
+}

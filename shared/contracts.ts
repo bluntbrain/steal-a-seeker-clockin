@@ -1,5 +1,5 @@
 import type {LevelDefinition,Box,GuardSpec,MissionId} from '../src/game/level';
-import {combatLevel} from '../src/game/combat-levels';
+import {legacyCombatLevel as combatLevel} from '../src/game/combat-levels';
 import {weekWindow} from './weekly';
 export type Contract={id:string;week:string;slot:number;name:string;district:string;modifier:string;objective:string;level:LevelDefinition};
 export const CONTRACT_ATTEMPTS=5;

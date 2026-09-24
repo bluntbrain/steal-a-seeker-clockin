@@ -1,5 +1,8 @@
 import {useHaptics} from '../feedback/useHaptics';
 import React from 'react';
-import {Pressable,Text,View} from 'react-native';
 import {useEconomy} from '../commerce/EconomyProvider';
-export default function CreditBalance({onPress,compact=false}:{onPress?:()=>void;compact?:boolean}){const e=useEconomy(),haptic=useHaptics();return <Pressable testID="credit-balance" accessibilityRole="button" accessibilityLabel={`${e.balance} credits. Buy credits`} onPress={()=>{haptic('select');(onPress??e.openCredits)();}} style={{minHeight:36,flexDirection:'row',alignItems:'center',gap:6,paddingHorizontal:8,borderWidth:1,borderColor:'#344C44',borderRadius:10,backgroundColor:'#14241E'}}><Text style={{color:'#A9DCCC',fontSize:compact?11:15}}>◈</Text><View><Text style={{color:'#E0F3E9',fontSize:compact?10:13,fontWeight:'800'}}>{e.ready?e.balance.toLocaleString():'…'}</Text>{!compact&&<Text style={{fontSize:7,color:'#93B5A8',letterSpacing:1}}>CREDITS</Text>}</View><Text style={{fontSize:18,color:'#AFDECD'}}>+</Text></Pressable>;}
+import CreditChip from './CreditChip';
+export default function CreditBalance({onPress,readOnly=false}:{onPress?:()=>void;readOnly?:boolean}){
+ const e=useEconomy(),haptic=useHaptics();
+ return <CreditChip balance={e.balance} ready={e.ready} onPress={readOnly?undefined:()=>{haptic('select');(onPress??e.openCredits)();}}/>;
+}

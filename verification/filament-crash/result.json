@@ -1,0 +1,58 @@
+{
+  "version": {
+    "package": "com.bluntbrain.stealaseeker",
+    "version": "0.3.21",
+    "versionCode": 24
+  },
+  "apk": "releases/steal-a-seeker-mainnet-v0.3.21-code24.apk",
+  "sha256": "6153588f2468d25c8229aefa5978c6e2376d881db7c7bf147a80f637ffbcd80e",
+  "rootCause": "Captured TUNING default argument evaluated before its worklet closure was initialized; Expo also added an unintended second worklet compiler.",
+  "typecheck": "pass",
+  "clientTests": {
+    "passed": 267,
+    "failed": 0
+  },
+  "rulesManifest": "unchanged and verified",
+  "nativeTutorialReplay": {
+    "passed": true,
+    "instructions": 8,
+    "status": "won",
+    "ticks": 535,
+    "score": 9821,
+    "hp": 100
+  },
+  "nativeFilament": {
+    "modelScreenshot": "filament-native.png",
+    "viewId": "phone-filament",
+    "fallbackObserved": false,
+    "lifecycle": {
+      "editions": [
+        0,
+        5,
+        11
+      ],
+      "durationSeconds": 55,
+      "returnedToTutorial": true,
+      "fatalException": false,
+      "loadTimeout": false,
+      "recoveryFallback": false
+    },
+    "limits": "Nonfatal emulator graphics/surface warnings remain. No physical GPU benchmark or long-session leak claim."
+  },
+  "apkSignature": "verified; existing release certificate",
+  "apkZipAlignment": "16 KiB verified",
+  "diagnosticsInRelease": false,
+  "device": "Pixel 9 Pro ARM64 Android API 36 emulator",
+  "touchDrivenEndToEnd": "not verified",
+  "physicalRealme": "not connected",
+  "publishedToStore": false,
+  "evidence": [
+    "native-before.log",
+    "native-after.log",
+    "native-lifecycle.log",
+    "signature.txt",
+    "tests.log",
+    "typecheck.log",
+    "build.log"
+  ]
+}

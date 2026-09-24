@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {CAMPAIGN_IDS,type LevelDefinition} from '../src/game/level';
-import {combatLevel,SCOUT_ENCOUNTER_POCKETS} from '../src/game/combat-levels';
+import {legacyCombatLevel as combatLevel,SCOUT_ENCOUNTER_POCKETS} from '../src/game/combat-levels';
 import {initialState,idleInput,step} from '../src/game/simulation';
 import {findPath,walkableSegment} from '../src/game/navigation';
 import {sees} from '../src/game/guards';

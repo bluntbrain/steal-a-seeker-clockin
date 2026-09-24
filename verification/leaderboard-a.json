@@ -1,0 +1,35 @@
+{
+  "date": "2026-09-24",
+  "concept": "A",
+  "checks": {
+    "typecheck": "pass",
+    "web_export": "pass",
+    "android_hermes_export": "pass",
+    "league_tests": "8 passed",
+    "responsive_layouts": [
+      "320x740 empty",
+      "360x640 long name with scrolling",
+      "390x844 populated"
+    ],
+    "browser_navigation": [
+      "standings to weekly missions",
+      "weekly history shows saved runs",
+      "How to play opens/closes",
+      "shared credits chip opens and returns",
+      "nearby standings",
+      "pinned play action after scroll"
+    ],
+    "fixtures": [
+      "empty",
+      "loading",
+      "unavailable",
+      "populated",
+      "long-name"
+    ]
+  },
+  "limits": [
+    "No APK built or installed",
+    "No physical Android rendering or haptic verification"
+  ],
+  "review": "/design/leaderboard-a/index.html"
+}

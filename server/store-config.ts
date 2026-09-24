@@ -21,7 +21,7 @@ export function storePricingConfig(env: Record<string, string | undefined>, test
   const ids = CREDIT_PACKS.map(p => p.id);
   const live = overrides(env, 'CREDIT_PACK_USD_CENTS_JSON', ids);
   const test = overrides(env, 'TEST_CREDIT_PACK_USD_CENTS_JSON', ids, true);
-  const storeCreditPrices = overrides(env, 'STORE_CREDIT_PRICES_JSON', STORE_ITEMS.filter(i => isStoreItemForSale(i.id)).map(i => i.id));
+  const storeCreditPrices = overrides(env, 'STORE_CREDIT_PRICES_JSON', STORE_ITEMS.filter(i => isStoreItemForSale(i.id)||i.id==='escape-trail').map(i => i.id));
   const creditPackPrices = testPricing ? test : live;
   return {creditPackPrices, storeCreditPrices};
 }

@@ -1,0 +1,25 @@
+{
+  "version": {
+    "package": "com.bluntbrain.stealaseeker",
+    "version": "0.3.18",
+    "versionCode": 21
+  },
+  "apkSha256": "4df725515217cbf1416d7b42f37b07a4ee19083f8ab59204c8bfa28347f0cd3b",
+  "apkBytes": 130860404,
+  "rulesHash": "2f1ddb3558e47bf719db7e44744192414fcce8f0f91d05c61f37996c6f4a5125",
+  "deploymentId": "c9965264-4ba2-4fb3-91b0-3d5540a26002",
+  "serviceId": "fc20fdcd-565e-4d68-a37a-8f6893baf8b2",
+  "tests": {
+    "gameClient": 250,
+    "backend": 78
+  },
+  "liveWeek": "2026-09-21",
+  "liveWeekRevision": 6,
+  "liveWeekCompatible": true,
+  "newCampaignRevision": 8,
+  "testPricing": true,
+  "skinTestSkr": "0.1",
+  "skinCreditPrice": 3000,
+  "usbDeviceConnected": false,
+  "realWalletPaymentTested": false
+}

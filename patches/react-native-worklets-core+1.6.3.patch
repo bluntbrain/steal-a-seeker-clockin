@@ -1,0 +1,18 @@
+diff --git a/node_modules/react-native-worklets-core/src/plugin/index.js b/node_modules/react-native-worklets-core/src/plugin/index.js
+index df4f07a..e52fb0f 100644
+--- a/node_modules/react-native-worklets-core/src/plugin/index.js
++++ b/node_modules/react-native-worklets-core/src/plugin/index.js
+@@ -184,10 +184,9 @@ class ClosureGenerator {
+   }
+ 
+   findPrefix(base, babelPath) {
+-    const purePath = [base];
+-    const node = babelPath.node;
+-    const upAns = this.findPrefixRec(babelPath.parentPath);
+-    return this.mergeAns([purePath, node], upAns);
++    // Preserve native HostObject identity. Partial capture constructs a new
++    // object on each render, retriggering Filament effects that free buffers.
++    return [[base], babelPath.node];
+   }
+ 
+   addPath(base, babelPath) {

@@ -1,0 +1,48 @@
+{
+  "generationTool": "built-in OpenAI image generation",
+  "source": "/Users/bluntbrain/.codex/generated_images/01a08ca4-ef03-7ee1-bab3-acb3d372ba17/exec-58e2687d-32e4-4218-be65-6ebeadc625ba.png",
+  "prompt": "courier-wave.prompt.txt",
+  "reference": "design/visual-v2/leaderboard-options/a.png",
+  "files": {
+    "bronze.png": {
+      "bytes": 3939,
+      "sha256": "63ed6b1b534b04e0d4fcf0455ad83e220170d916e63c60c6d70331198ab51b6f"
+    },
+    "button-mint.png": {
+      "bytes": 8028,
+      "sha256": "bb659ae48ff48ab09bcb8c70c1b0d27d48fb867f0b5924cd5f91435c07f5d2d4"
+    },
+    "card-mint.png": {
+      "bytes": 43429,
+      "sha256": "db1e9dfce2f6d12e0d091561a5f7662c462c5951b7b50955228542945cff1c7e"
+    },
+    "courier-wave-header.png": {
+      "bytes": 458455,
+      "sha256": "bf8e703e3665e14bad4717c9555c305bb1c5d2be9634b6e920a2cd20c6bb1686"
+    },
+    "courier-wave.png": {
+      "bytes": 425253,
+      "sha256": "7d8f556dda02f48353b686240b20f4760326ed92badb3d2227ec538ff15e4f8d"
+    },
+    "crown.png": {
+      "bytes": 2531,
+      "sha256": "a788c6bfb0c1fd9bca69e45e555ca471ad14d52957feced67d5f3969c48374fe"
+    },
+    "header-glow.png": {
+      "bytes": 48520,
+      "sha256": "a4501219f11aa88e5e63d89ce59c8681a7a18f03557c386f2631b47676deb372"
+    },
+    "row-dark.png": {
+      "bytes": 7645,
+      "sha256": "abe3141f9fd494c7b554d90299275974312952e25a911c8f19fa8699324a64ba"
+    },
+    "row-gold.png": {
+      "bytes": 7609,
+      "sha256": "91080e3dba93b0cfceab070d381bb0e33e653c711d41383f21aa52b0d079a8f8"
+    },
+    "silver.png": {
+      "bytes": 3855,
+      "sha256": "076016847eca984ecba5f821c47ddafe1c82d5f1f893f8f26d6721e613cd2fa4"
+    }
+  }
+}

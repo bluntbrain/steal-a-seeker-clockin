@@ -4,17 +4,17 @@ import type {Contract} from '../../shared/contracts';
 export type MissionLesson={id:string;kicker:string;title:string;body:string;cue:string;edition:number;collection:boolean;footer:string};
 const lessons=[
  ['Your first clean getaway','Tap the floor to move. Tap a guard to shoot. Take the phone, then reach the exit.','MOVE → TAKE → ESCAPE'],
- ['Twelve heists. Twelve phones.','Every campaign mission adds a different Seeker design to your collection. Find them in Hideout → Phones.','WIN → COLLECT → HIDEOUT'],
- ['Don’t let drones report you','Scout drones call nearby guards when they spot you. Get behind cover before their scan locks on.','BREAK THEIR LINE OF SIGHT'],
+ ['Twelve heists. Twelve phones.','Each win adds a Seeker to Hideout → Phones. This mission adds a scout drone: break sight or shoot it before its amber radio ring fills and every enemy joins the hunt.','BREAK SIGHT → COLLECT → ESCAPE'],
+ ['Choose the crossing','Paired guards watch different sides of cover. Wait for separation, take the longer flank, or break the drone’s sight before its radio ring fills.','WATCH → FLANK → CROSS'],
  ['Plan the way back','Taking the phone raises the alarm. Know your route to the exit before reinforcements arrive.','PHONE → COVER → EXIT'],
  ['Make the walls work for you','Walls stop shots. Move from one safe pocket to the next instead of crossing an open firing lane.','COVER → MOVE → COVER'],
- ['The Heavy takes more hits','A Heavy can outlast a straight shootout. Use corners and cover—or find a route around it.','DON’T TRADE HITS'],
+ ['Find the Heavy’s weak point','The gold front plate blocks most damage. Circle the cover island and shoot the mint panel on its back while it turns.','FRONT = ARMOR · REAR = WEAK POINT'],
  ['A shortcut is a choice','Watch the patrols before you cross. A longer route behind cover can be safer than the shortest path.','WATCH → CHOOSE → MOVE'],
- ['Two phones. One escape.','Recover both phones in this mission. Save enough health for the second trip.','TAKE BOTH → ESCAPE'],
- ['Switch first. Phone second.','Tap the power switch to open the gate. Then collect the phone and head for the exit.','SWITCH → GATE → PHONE'],
+ ['Two phones. Two trips.','Recover and extract each phone. The first pickup brings a response, so save health and use the middle pocket before your second trip.','TAKE → EXTRACT → REPEAT'],
+ ['Switch first. Quiet feet.','Follow the cable to open the vault gate. Striped metal grates make noise and draw guards; the covered detour stays quiet.','SWITCH → CHOOSE YOUR ROUTE → PHONE'],
  ['Watch the exit light','The exit opens and closes on a timer. Wait behind cover, then move when it opens.','COVER → GREEN LIGHT → GO'],
- ['Break up the crossfire','Don’t let two guards shoot at you together. Use a corner to face one firing lane at a time.','ONE ENEMY AT A TIME'],
- ['One last Seeker','The Warden stands between you and the final phone. Defeat it or slip past, then complete your collection.','FINAL PHONE → FULL COLLECTION'],
+ ['Lose them between rooms','A confirmed sighting sends every guard and drone after you. Walls break vision, but enemies keep searching. Change rooms before they reach your last sighting.','BREAK SIGHT → CHANGE ROUTE'],
+ ['One last Seeker','Flank the Warden’s armor and stop the drone report. Both security entrances respond when you take the final phone—plan your way out.','FLANK → TAKE → ESCAPE'],
 ] as const;
 export function campaignLesson(mission:MissionId):MissionLesson{
  const edition=CAMPAIGN_IDS.indexOf(mission),[title,body,cue]=lessons[edition]!;

@@ -7,7 +7,7 @@ import {walletFailure} from '../wallet/diagnostics';
 import {enqueue,submitCampaignRun} from './client';
 import type {GameState} from '../game/simulation';
 import type {Replay} from '../../shared/replay';
-export default function CampaignSubmission({state,replay,quiet=false,onReward,retrySignal=0}:{state:GameState;replay:Replay;quiet?:boolean;onReward?:(amount:number|null,message?:string)=>void;retrySignal?:number}){
+export default function CampaignSubmission({state,replay,quiet=false,onReward,retrySignal=0}:{state:GameState;replay:Replay;quiet?:boolean;onReward?:(amount:number|null,message?:string,saved?:boolean)=>void;retrySignal?:number}){
  const account=useAccount(),latest=useRef({account,onReward});latest.current={account,onReward};
  const lastRetry=useRef(0);
  const [message,setMessage]=useState('Verifying your mission…'),[retry,setRetry]=useState(0),[failed,setFailed]=useState(false);
@@ -21,6 +21,8 @@ export default function CampaignSubmission({state,replay,quiet=false,onReward,re
    let saved=false;
    try{
     await enqueue(wallet,state.mission,replay);saved=true;
+    if(!valid())return;
+    latest.current.onReward?.(null,wallet==='guest'?'Connect your wallet to save these credits to your account.':undefined,true);
     // Keep guest wins durable until the player connects to claim.
     if(wallet==='guest')return;
     const session=await latest.current.account.session(interactive&&attempts===1);
@@ -35,7 +37,7 @@ export default function CampaignSubmission({state,replay,quiet=false,onReward,re
     }
     if(!valid())return;
     setMessage('Mission verified. Credits saved.');
-    latest.current.onReward?.(award?.credits??0,award?undefined:'Mission verified. Your credits are saved.');
+    latest.current.onReward?.(award?.credits??0,award?undefined:'Mission verified. Your credits are saved.',true);
     void commerceApi.me(session.token).then(a=>{if(valid())return latest.current.account.update(a);}).catch(error=>walletFailure('campaign.balance.refresh',error));
    }catch(error){
     walletFailure('campaign.reward.sync',error);
@@ -43,7 +45,7 @@ export default function CampaignSubmission({state,replay,quiet=false,onReward,re
     const auth=error instanceof ApiError&&error.status===401||error instanceof Error&&/Sign in|Connect your wallet/.test(error.message);
     const permanent=error instanceof ApiError&&error.status>=400&&error.status<500&&error.status!==429;
     const text=!saved?'Could not save this run. Retry before leaving.':auth?'Run saved. Tap Claim to sign in and sync.':permanent?(error as Error).message:'Run saved on this device. We’ll retry when the connection returns.';
-    setMessage(text);setFailed(!saved);latest.current.onReward?.(null,text);
+    setMessage(text);setFailed(!saved);latest.current.onReward?.(null,text,saved);
     if(!auth&&!permanent&&attempts<3)timer=setTimeout(()=>void run(),attempts*5000);
    }finally{running=false;}
   }

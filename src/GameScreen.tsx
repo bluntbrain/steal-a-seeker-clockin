@@ -8,6 +8,7 @@ import {localTestMission} from './playtest/mission';
 import {combatLevel} from './game/combat-levels';
 import {isDuplicateTap,tapReady,TAP_INTERVAL_MS,type PendingTap} from './controls/tapQueue';
 import {assistedCombatTap} from './controls/tapDestination';
+import {encounterHint} from './controls/encounterHint';
 import {PhoneObjectivePill,SecurityEntrances,MechanismLabels} from './components/ObjectiveSignals';
 import CampaignConfetti from './components/CampaignConfetti';
 import CompletionCard from './campaign/CompletionCard';
@@ -35,6 +36,7 @@ import {useGameAudio as useAudioPlayer} from './audio/useGameAudio';
 import {useHaptics} from './feedback/useHaptics';
 import CreditClaim,{type CreditReward} from './components/CreditClaim';
 import GameCanvas from './components/GameCanvas';
+import MissionFocus from './components/MissionFocus';
 import CleanCombo from './components/CleanCombo';
 import {CAMERA_CONFIG,useFollowCamera} from './camera/useFollowCamera';
 import {screenToWorld} from './camera/geometry';
@@ -95,7 +97,7 @@ export function Game({rankTicket,paidPlay,dailyReturn,paidReturn,onRankStart,onR
  const [walletOpen,setWalletOpen]=useState(false),[mapOpen,setMapOpen]=useState(false),[hideoutOpen,setHideoutOpen]=useState(homeFirst||dailyReturn),[dailyOpen,setDailyOpen]=useState(false),[settingsOpen,setSettingsOpen]=useState(false),[paidOpen,setPaidOpen]=useState(paidReturn);
  const initial=useMemo(()=>initialState(startMission,rankTicket?.manifest.contract?.level??(combatMode?combatLevel(startMission):undefined)),[]);
  const sceneEpoch=useRef(0),[sceneVersion,setSceneVersion]=useState(0),[sceneLoading,setSceneLoading]=useState(true),[sceneError,setSceneError]=useState('');
- const sceneReady=useSharedValue(false),simulationEpoch=useSharedValue(0);
+ const sceneReady=useSharedValue(false),simulationEpoch=useSharedValue(0),focusProgress=useSharedValue(1);
  const pendingTap=useSharedValue<PendingTap|null>(null),previousTap=useSharedValue<PendingTap|null>(null),tapElapsed=useSharedValue(TAP_INTERVAL_MS);
  const recording=useSharedValue<ReplayChunk[]>(paidPlay?.replay.chunks.map(c=>({...c}))??[]),[completedReplay,setCompletedReplay]=useState<Replay>();
  const game=useSharedValue(initial),input=useSharedValue(idleInput()),alpha=useSharedValue(0),clock=useSharedValue(0),accumulator=useSharedValue(0),suspended=useSharedValue(!!paidEntry||dailyReturn||paidReturn||homeFirst),saveClock=useSharedValue(0);
@@ -137,7 +139,7 @@ export function Game({rankTicket,paidPlay,dailyReturn,paidReturn,onRankStart,onR
  const connectClaimPending=useRef(false);
  useEffect(()=>{if(account.wallet&&connectClaimPending.current){connectClaimPending.current=false;setCreditReward({amount:null});setRewardRetry(n=>n+1);}},[account.wallet]);
  async function connectToClaim(){if(connectClaimPending.current)return;connectClaimPending.current=true;setConnectingClaim(true);setAutoClaim(true);setCreditReward({amount:null});haptic('confirm');try{await account.connect();}catch{connectClaimPending.current=false;setAutoClaim(false);setCreditReward({amount:null,message:'Wallet connection was not completed. Try again to claim.'});}finally{setConnectingClaim(false);}}
- const rewardResolved=useCallback((amount:number|null,message?:string)=>setCreditReward({amount,message}),[]);
+ const rewardResolved=useCallback((amount:number|null,message?:string,saved=false)=>setCreditReward({amount,message,saved}),[]);
  const saveLocalReward=()=>{const epoch=rewardEpoch.current;rewardResolved(null);void economy.earn(hud.mission,starsFor(hud)).then(n=>{if(epoch!==rewardEpoch.current)return;setEarnedNotice(n>0?`+${n} credits`:'');rewardResolved(n);}).catch(()=>{if(epoch===rewardEpoch.current)rewardResolved(null,'Credit save failed. Tap Retry save.');});};
  const campaignFinished=!timedRun&&!trial.active&&!testMission&&completedCampaign(progress.progress,hud);
  const finaleVisible=!sceneLoading&&campaignFinished&&!claimVisible&&!paused&&!hideoutOpen&&!walletOpen&&!settingsOpen;
@@ -253,8 +255,9 @@ export function Game({rankTicket,paidPlay,dailyReturn,paidReturn,onRankStart,onR
  const sceneLoaded=useCallback(()=>{
   const expected=sceneVersion;if(sceneEpoch.current!==expected)return;
   setSceneLoading(false);setSceneError('');
-  runOnUI(()=>{'worklet';if(simulationEpoch.value===expected){accumulator.value=0;sceneReady.value=true;}})();
- },[sceneVersion,sceneReady,simulationEpoch,accumulator]);
+  const reduced=!!settingsRef.current.reducedEffects;
+  runOnUI(()=>{'worklet';if(simulationEpoch.value!==expected||sceneReady.value)return;accumulator.value=0;focusProgress.value=reduced?1:0;if(reduced){sceneReady.value=true;return;}focusProgress.value=withTiming(1,{duration:650},finished=>{if(finished&&simulationEpoch.value===expected){accumulator.value=0;sceneReady.value=true;}});})();
+ },[sceneVersion,sceneReady,simulationEpoch,accumulator,focusProgress]);
  const sceneFailed=useCallback(()=>{if(sceneEpoch.current===sceneVersion)setSceneError('Could not load the map. Try again.');},[sceneVersion]);
  useEffect(()=>{if(!sceneLoading)return;const timer=setTimeout(()=>setSceneError('The map is taking longer to load. Retry to reload its artwork.'),12000);return()=>clearTimeout(timer);},[sceneLoading,sceneVersion]);
  const appearance=useMemo(()=>({...economy.equipment,reducedEffects:settings.reducedEffects}),[economy.equipment.outfit,economy.equipment.trail,economy.equipment.frame,economy.equipment.rack,settings.reducedEffects]);
@@ -268,7 +271,7 @@ export function Game({rankTicket,paidPlay,dailyReturn,paidReturn,onRankStart,onR
  const lureMessage=decoyMessage(hud),alarmOn=hud.securityAlarm&&hud.status==='playing';
  const relaySeconds=Math.ceil(Math.max(0,...hud.relayTimers));
  const entranceOpening=alarmOn&&level.patrols.some((g,i)=>g.reserveAfter!==undefined&&!hud.guards[i]?.spawned&&g.reserveAfter-hud.alarmSeconds<=4);
- const contextHint=combatMode?(hud.combat?.feedbackLeft&&hud.combat.feedback==='ambush'?'AMBUSH · DOUBLE HIT':hud.combat?.feedbackLeft&&hud.combat.feedback==='blocked'?'Tap nearby floor to redirect':hud.combat?.feedbackLeft&&hud.combat.feedback==='cover'?'Behind cover · choose another position':level.exitWindow?`EXIT ${exitOpen(hud)?'OPEN':'WAIT'} · ${Math.ceil(level.exitWindow.period-(hud.elapsed+level.exitWindow.phase)%level.exitWindow.period)}s`:entranceOpening?'SECURITY DOOR OPENING · KEEP CLEAR':alarmOn?'PHONE TAKEN · GET OUT':''):level.exitWindow?`EXIT ${exitOpen(hud)?'OPEN':'LOCKED'} · ${Math.ceil(level.exitWindow.period-(hud.elapsed+level.exitWindow.phase)%level.exitWindow.period)}s cycle`:relaySeconds>0?`Relay door open · ${relaySeconds}s`:pad?(pad.kind==='relay'?`Stop · ACT opens door for ${pad.duration??9}s`:'Stop · ACT switches circuits'):activeTake&&!hud.carrying?'Stop · hold TAKE':lureMessage|| (hud.alert>0?'Spotted! Break their line of sight.':alarmOn?`PHONE TRACKED · guards +${alarmSpeedPercent(hud)}%`:'');
+ const contextHint=combatMode?(encounterHint(hud)??(hud.combat?.feedbackLeft&&hud.combat.feedback==='ambush'?'AMBUSH · DOUBLE HIT':hud.combat?.feedbackLeft&&hud.combat.feedback==='blocked'?'Tap nearby floor to redirect':hud.combat?.feedbackLeft&&hud.combat.feedback==='cover'?'Behind cover · choose another position':level.exitWindow?`EXIT ${exitOpen(hud)?'OPEN':'WAIT'} · ${Math.ceil(level.exitWindow.period-(hud.elapsed+level.exitWindow.phase)%level.exitWindow.period)}s`:entranceOpening?'SECURITY DOOR OPENING · KEEP CLEAR':alarmOn?'PHONE TAKEN · GET OUT':'')):level.exitWindow?`EXIT ${exitOpen(hud)?'OPEN':'LOCKED'} · ${Math.ceil(level.exitWindow.period-(hud.elapsed+level.exitWindow.phase)%level.exitWindow.period)}s cycle`:relaySeconds>0?`Relay door open · ${relaySeconds}s`:pad?(pad.kind==='relay'?`Stop · ACT opens door for ${pad.duration??9}s`:'Stop · ACT switches circuits'):activeTake&&!hud.carrying?'Stop · hold TAKE':lureMessage|| (hud.alert>0?'Spotted! Break their line of sight.':alarmOn?`PHONE TRACKED · guards +${alarmSpeedPercent(hud)}%`:'');
  const damageStyle=useAnimatedStyle(()=>({opacity:damagePulse.value}));
  const alarmWash=useAnimatedStyle(()=>({opacity:game.value.securityAlarm&&game.value.status==='playing'&&!suspended.value&&!settings.reducedEffects?.025+.04*(.5+.5*Math.sin(clock.value*2.5)):0}));
  const alarmBorder=useAnimatedStyle(()=>({opacity:game.value.securityAlarm&&game.value.status==='playing'&&!suspended.value?(settings.reducedEffects?.35:.4+.25*(.5+.5*Math.sin(clock.value*2.5))):0}));
@@ -281,11 +284,12 @@ export function Game({rankTicket,paidPlay,dailyReturn,paidReturn,onRankStart,onR
     {combatMode&&<Text accessibilityLabel={`Health ${hud.combat?.hp??100} of 100`} style={[s.charge,{color:(hud.combat?.hp??100)<40?'#FF9282':'#CFE6E4',minWidth:0,textAlign:'left'}]}>♥ {hud.combat?.hp??100}</Text>}
     {!combatMode&&hud.carrying&&<Text accessibilityLabel={`Phone charge ${hud.battery} percent`} style={s.charge}>{hud.battery}%</Text>}
     </View></View>
-    <CreditBalance compact onPress={()=>{pause(true);economy.openCredits();}}/>
+    <CreditBalance onPress={()=>{pause(true);economy.openCredits();}}/>
     <Pressable accessibilityRole="button" accessibilityLabel={paused?'Resume game':'Pause game'} onPress={()=>pause(!paused)} style={s.iconButton}><Text style={s.iconText}>{paused?'▷':'Ⅱ'}</Text></Pressable>
    </View>
    <View style={{width:size+2,height:boardHeight+2}}><GestureDetector gesture={combatMode?tapBoard:Gesture.Tap().enabled(false)}><View testID="game-board" style={[s.board,{width:size+2,height:boardHeight+2}]}>
     <GameCanvas key={sceneVersion} onReady={sceneLoaded} onLoadError={sceneFailed} camera={camera} size={size} height={boardHeight} input={input} game={game} alpha={alpha} clock={clock} level={level} appearance={appearance}/>
+    {!settings.reducedEffects&&<MissionFocus progress={focusProgress} game={game} camera={camera} width={size} height={boardHeight}/>}
     <Animated.View pointerEvents="none" testID="camera-world-overlays" style={[{position:'absolute',left:0,top:0,width:size,height:boardHeight},worldOverlayStyle]}>
     {combatMode&&<SecurityEntrances level={level} state={hud} size={size} reduced={!!settings.reducedEffects}/>}
     <MechanismLabels level={level} state={hud} size={size}/>

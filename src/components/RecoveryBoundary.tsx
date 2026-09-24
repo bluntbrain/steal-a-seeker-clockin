@@ -5,7 +5,7 @@ type Props={children:ReactNode;scope:string;fallback?:ReactNode};
 export default class RecoveryBoundary extends Component<Props,{failed:boolean;generation:number}>{
  state={failed:false,generation:0};
  static getDerivedStateFromError(){return {failed:true};}
- componentDidCatch(error:Error,info:ErrorInfo){console.error('[SeekerRecovery]',this.props.scope,error.name,error.message,info.componentStack);}
+ componentDidCatch(error:Error,info:ErrorInfo){console.error('[SeekerRecovery]',this.props.scope,error.name,error.message,error.stack,info.componentStack);}
  render(){
   if(!this.state.failed)return <React.Fragment key={this.state.generation}>{this.props.children}</React.Fragment>;
   if(this.props.fallback)return this.props.fallback;

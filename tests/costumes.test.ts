@@ -8,18 +8,21 @@ import {readAccount} from '../src/commerce/account-model';
 import {cardPortrait} from '../src/league/card';
 import frames from '../assets/costumes-v4/frames.json';
 import manifest from '../assets/costumes-v4/manifest.json';
+import premium from '../assets/solana-skins/manifest.json';
 import {CAMPAIGN_IDS} from '../src/game/level';
 import {combatLevel} from '../src/game/combat-levels';
 import {combatTap} from '../src/game/combat';
 import {initialState,idleInput,step} from '../src/game/simulation';
 
-test('all six costumes have distinct portraits, eight poses and stable old inventory IDs',()=>{
- assert.equal(COSTUMES.length,6);assert.equal(manifest.length,6);assert.equal(frames.length,8);
- for(const c of COSTUMES){const entry=manifest.find(m=>m.name===c.asset);assert(entry&&entry.frames===8);assert(readFileSync(`assets/costumes-v4/${c.asset}.png`).length>10000);assert.equal(createHash('sha256').update(readFileSync(`assets/costumes-v4/${c.asset}-atlas.png`)).digest('hex'),entry.sha256,`${c.asset} matches the validated atlas`);}
+test('all thirteen costumes have distinct portraits, eight poses and stable old inventory IDs',()=>{
+ assert.equal(COSTUMES.length,13);assert.equal(manifest.length,6);assert.equal(frames.length,8);
+ assert.deepEqual(premium.map(p=>p.name).sort(),COSTUMES.filter(c=>c.id.startsWith('solana-')).map(c=>c.id).sort(),'Every selectable Solana skin has a verified sprite atlas');
+ for(const c of COSTUMES.filter(c=>!c.id.startsWith('solana-'))){const entry=manifest.find(m=>m.name===c.asset);assert(entry&&entry.frames===8);assert(readFileSync(`assets/costumes-v4/${c.asset}.png`).length>10000);assert.equal(createHash('sha256').update(readFileSync(`assets/costumes-v4/${c.asset}-atlas.png`)).digest('hex'),entry.sha256,`${c.asset} matches the validated atlas`);}
+ for(const c of premium){const bytes=readFileSync(`assets/solana-skins/${c.file}`);assert.equal(createHash('sha256').update(bytes).digest('hex'),c.sha256);assert.equal(bytes.readUInt32BE(16),1024);assert.equal(bytes.readUInt32BE(20),768);assert.equal(c.frames,8);}
  assert.equal(costumeFor('signal-runner').name,'Frost Runner');assert.equal(costumeFor('ghost-courier').name,'Ghost Signal');
  assert.equal(costumeFor('unknown').id,'default');
  const base={week:'2026-09-14',rank:null,points:0,cleared:0,ticks:0,domain:null,wallet:'test',final:false,local:true,earned:false};
- assert.equal(new Set(COSTUMES.map(c=>cardPortrait({...base,outfit:c.id}))).size,6);
+ assert.equal(new Set(COSTUMES.map(c=>cardPortrait({...base,outfit:c.id}))).size,13);
 });
 test('courier direction indices and walking frame bounds match the atlas layout',()=>{
  assert.deepEqual([0,1,2,3].map(i=>costumeFrame(i,false)),[0,1,2,3]);
@@ -38,12 +41,12 @@ test('campaign spawn shows the backpack and real movement selects the correct vi
   assert.equal(costumeFrame(state.facing,true),view.frame+4,`${combat?'tap':'stick'} walking pose`);
  }
 });
-test('only implemented outfits and the escape trail are on sale, and wallet inventory restores new outfits',()=>{
- const items=STORE_ITEMS.filter(i=>isStoreItemForSale(i.id));assert.equal(items.length,5);
- for(const id of ['profile-frame','rack-theme'] as const)assert.throws(()=>redeemCredits({...emptyInventory(),balance:10000},id),/no longer/);
- let inventory={...emptyInventory(),balance:1800};
+test('only implemented outfits are on sale, and wallet inventory restores new outfits',()=>{
+ const items=STORE_ITEMS.filter(i=>isStoreItemForSale(i.id));assert.equal(items.length,11);
+ for(const id of ['profile-frame','rack-theme','escape-trail'] as const)assert.throws(()=>redeemCredits({...emptyInventory(),balance:10000},id),/no longer/);
+ let inventory={...emptyInventory(),balance:22800};
  for(const item of items.filter(i=>i.kind==='outfit'))inventory=redeemCredits(inventory,item.id);
- assert.equal(inventory.balance,0);assert.equal(inventory.equipment.outfit,'archive-keeper');
+ assert.equal(inventory.balance,0);assert.equal(inventory.equipment.outfit,'solana-beeman');
  const account=readAccount({wallet:'test',credits:0,entitlements:inventory.owned,equipment:inventory.equipment,progress:{}},'test');
- assert.equal(account?.equipment.outfit,'archive-keeper');assert(!account?.entitlements.includes('campaign'));
+ assert.equal(account?.equipment.outfit,'solana-beeman');assert(!account?.entitlements.includes('campaign'));
 });

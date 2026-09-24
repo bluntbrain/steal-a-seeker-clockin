@@ -1,0 +1,25 @@
+{
+  "tool": "Built-in OpenAI image generation",
+  "created": "2026-09-24",
+  "purpose": "Review-only UI concepts; all displayed data is sample",
+  "images": {
+    "a": {
+      "file": "a.png",
+      "source": "/Users/bluntbrain/.codex/generated_images/01a08ca4-ef03-7ee1-bab3-acb3d372ba17/exec-df68f16b-ab19-4462-9bb7-312e5a7886f9.png",
+      "prompt": "prompts/a.txt",
+      "sha256": "102cd627ae6de8b3b799fac695d3d99ada69aeae50b995887c7faa0674707110"
+    },
+    "b": {
+      "file": "b.png",
+      "source": "/Users/bluntbrain/.codex/generated_images/01a08ca4-ef03-7ee1-bab3-acb3d372ba17/exec-5a186763-b29d-49dd-a072-3d93b02f5624.png",
+      "prompt": "prompts/b.txt",
+      "sha256": "2a7cdc6f10a15a311851a51207553900eb10b402ae85f13d50b3751d1b7252fb"
+    },
+    "c": {
+      "file": "c.png",
+      "source": "/Users/bluntbrain/.codex/generated_images/01a08ca4-ef03-7ee1-bab3-acb3d372ba17/exec-96a73da3-af29-412d-b931-b5451545baa8.png",
+      "prompt": "prompts/c.txt",
+      "sha256": "6d0a33aee90629f0ca01fe3f0e7c7fcc2177ec46021813b3be54645a9fc16370"
+    }
+  }
+}

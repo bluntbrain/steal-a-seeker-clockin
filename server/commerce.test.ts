@@ -380,7 +380,13 @@ test('campaign v2 reserves before approval, verifies all missions and settles on
  await campaign.submit(h.other.wallet,'practice',rules.rulesHash,fixtureReplay().replay); // Free campaign requires no pass.
  await assert.rejects(campaign.submit(h.user.wallet,'practice',rules.rulesHash,{version:1,chunks:[{ticks:1,x:0,y:0,buttons:0}]}),/extraction/);
  for(const mission of CAMPAIGN_IDS){const {state,replay}=fixtureReplay(mission);assert.equal(state.status,'won',mission);await campaign.submit(h.user.wallet,mission,rules.rulesHash,replay);}
- await campaign.submit(h.user.wallet,'practice',rules.rulesHash,fixtureReplay().replay);assert.equal((await campaign.summary(h.user.wallet)).runs.length,12);
+ const completedBalance=(await commerce.me(h.user.wallet)).credits;
+ for(const mission of ['practice','last-vault'] as const){
+  const replayed=await campaign.submit(h.user.wallet,mission,rules.rulesHash,fixtureReplay(mission).replay);
+  assert.equal(replayed.creditAward.credits,0,'A replay after all twelve clears returns a resolved zero-credit reward');
+  assert.equal(replayed.creditAward.balance,completedBalance);
+ }
+ assert.equal((await campaign.summary(h.user.wallet)).runs.length,12);
  const [one,two]=await Promise.all([campaign.claim(h.user.wallet),campaign.claim(h.user.wallet)]);assert.equal(one.returnId,two.returnId);assert.equal(one.rebate,25);
  const board=await campaign.leaderboard();assert.equal(board.find(r=>r.wallet===h.user.wallet)?.cleared,12);
  await h.service.process();h.setInspection({state:'settled',slot:100});await h.retry();await new ReturnService(pool,h.chain,h.config).process();
@@ -602,6 +608,16 @@ test('the previous APK can still earn verified credits without double claiming a
  assert.equal(updated.creditAward.credits,0);assert.equal(updated.creditAward.balance,old.creditAward.balance);
 });
 
+test('0.3.18 roaming campaign credits survive the contact fix without allowing a second claim',async()=>{
+ const {CampaignService}=await import('./campaign-service'),old=(await import('../tests/fixtures/campaign-revision8.json')).default;
+ const rules=(await import('../shared/rules-manifest.json')).default,{solveCombat}=await import('../scripts/qa-combat'),{combatLevel}=await import('../src/game/combat-levels');
+ const u=await login(),campaign=new CampaignService(pool,new ReturnService(pool,undefined,{mint:service.config.mint,treasury:service.config.recipient,source:service.config.destination,decimals:6}));
+ const level=old.levels[1] as import('../src/game/level').LevelDefinition,win=solveCombat(level);assert(win);
+ const first=await campaign.submit(u.wallet,level.mission,old.rulesHash,win.replay);assert.equal(first.creditAward.credits,60);
+ const current=solveCombat(combatLevel(level.mission));assert(current);
+ const second=await campaign.submit(u.wallet,level.mission,rules.rulesHash,current.replay);assert.equal(second.creditAward.credits,0);assert.equal(second.creditAward.balance,60);
+});
+
 
 test('retired gear cannot be sold; new outfit credits do not alter gameplay entitlements',async()=>{
  const u=await login();
@@ -662,4 +678,35 @@ test('background reconciliation backs off failed quotes and prioritizes prepared
  const another=await login(),unpaid=await quote(another);await pool.query("UPDATE orders SET checked_at=now()-interval '1 minute' WHERE id=$1",[unpaid.id]);
  await reconcileOrders(service,fields=>warnings.push(fields));
  assert((Date.now()-new Date((await pool.query('SELECT checked_at FROM orders WHERE id=$1',[unpaid.id])).rows[0].checked_at).getTime())>50000,'Unprepared quotes wait five minutes');
+});
+
+for(const skin of ['solana-toly','solana-akshay','solana-beeman'] as const)test(`${skin} checkout preserves credits, grants exactly once after verified payment and survives restore`,async()=>{
+ const user=await login();await pool.query('UPDATE wallets SET credits=250 WHERE address=$1',[user.wallet]);
+ const o=await quote(user,skin),sig=b58(randomBytes(64));
+ assert.equal(o.amount,'100000000');
+ assert.equal((await app.inject({method:'PUT',url:'/me/equipment',headers:user.headers,payload:{sku:skin}})).statusCode,403);
+ assert(!(await service.me(user.wallet)).entitlements.includes(skin));
+ transactions.set(sig,paidTx(o,sig));await Promise.all([service.attach(user.wallet,o.id,sig),service.attach(user.wallet,o.id,sig)]);
+ const restored=await new CommerceService(pool,chain,service.config).me(user.wallet);
+ assert.equal(restored.credits,250);assert.equal(restored.entitlements.filter(id=>id===skin).length,1);assert(!restored.entitlements.includes('campaign'));
+ const result=await app.inject({method:'PUT',url:'/me/equipment',headers:user.headers,payload:{sku:skin}});assert.equal(result.statusCode,200,result.body);assert.equal(result.json().equipment.outfit,skin);
+ assert.equal((await app.inject({method:'POST',url:'/orders',headers:user.headers,payload:{sku:skin,idempotencyKey:randomUUID()}})).statusCode,409);
+});
+
+test('credit redemption and skin wallet checkout cannot spend both balances concurrently',async()=>{
+ const user=await login();await pool.query('UPDATE wallets SET credits=3100 WHERE address=$1',[user.wallet]);
+ const [q,r]=await Promise.allSettled([service.createOrder(user.wallet,'solana-mert',randomUUID()),service.redeem(user.wallet,'solana-mert',3000)]);
+ assert.equal([q,r].filter(v=>v.status==='fulfilled').length,1);
+ if(q.status==='fulfilled'){
+  assert.equal((await service.me(user.wallet)).credits,3100);
+  const prepared=await service.preparePayment(user.wallet,q.value.id);assert(prepared.payment);
+  await assert.rejects(service.redeem(user.wallet,'solana-mert',3000),/checkout/);
+  const sig=b58(randomBytes(64));transactions.set(sig,paidTx(prepared,sig));
+  await Promise.allSettled([service.attach(user.wallet,prepared.id,sig),service.redeem(user.wallet,'solana-mert',3000)]);
+  const state=await service.me(user.wallet);assert.equal(state.credits,3100);assert.equal(state.entitlements.filter(id=>id==='solana-mert').length,1);
+ }else{assert.equal((await service.me(user.wallet)).credits,100);assert.equal((await service.orders(user.wallet)).length,0);}
+ const other=await login();await pool.query('UPDATE wallets SET credits=3100 WHERE address=$1',[other.wallet]);
+ const unpaid=await service.createOrder(other.wallet,'solana-chase',randomUUID());await assert.rejects(service.redeem(other.wallet,'solana-chase',3000),/checkout/);
+ await service.cancelQuote(other.wallet,unpaid.id);await service.redeem(other.wallet,'solana-chase',3000);
+ assert.equal((await service.me(other.wallet)).credits,100);assert(!(await service.preparePayment(other.wallet,unpaid.id)).payment);
 });

@@ -1,0 +1,47 @@
+{
+  "checkedAt": "2026-09-24T14:31:01.796208+00:00",
+  "reference": "design/solana-store/ui-reference.png",
+  "preview": "http://127.0.0.1:8787/?build=hideout-polish",
+  "changes": [
+    "All seven Solana portraits retained unchanged",
+    "Centered mint hero and selection glows",
+    "Tall three-column character cards with 1px base and 2px selected borders",
+    "Fixed selected-skin details and action above navigation",
+    "Skin wording in unlock, equip and checkout copy",
+    "Official distinct SKR and Solana token marks",
+    "Hideout defaults to Solana on reopening",
+    "Bullseye Missions icon and active-tab dot"
+  ],
+  "verification": {
+    "typecheck": "passed",
+    "appTests": 288,
+    "serverTests": 81,
+    "webExport": "passed",
+    "androidJudgeBuild": "passed",
+    "gitDiffCheck": "passed",
+    "browserViewports": [
+      "390x844",
+      "360x740",
+      "normal viewport restored"
+    ],
+    "manualChecks": [
+      "All seven characters reachable by scrolling",
+      "Action stays visible during scrolling in both viewports",
+      "Switch Outfits to Missions to Hideout returns to Solana",
+      "SKR and SOL radio checked state changes correctly",
+      "Checkout footer remains visible when body scrolls",
+      "Credits badge opens Add Credits",
+      "Phones collection opens",
+      "No new browser console errors in final reload"
+    ]
+  },
+  "apk": {
+    "path": "releases/steal-a-seeker-judge-v0.3.21-code24.apk",
+    "sha256": "d2883e3d96001e52cf150b51398a48c9e6b03dff4cf257d77d86294a5561d786",
+    "cluster": "solana:devnet"
+  },
+  "limits": [
+    "Android compiled successfully; physical-device visual and wallet checks were not performed in this UI pass.",
+    "Browser checkout is explicitly a no-payment demo. No live transaction or release publishing was performed."
+  ]
+}

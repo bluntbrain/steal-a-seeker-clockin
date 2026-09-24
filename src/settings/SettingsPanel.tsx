@@ -5,6 +5,7 @@ import React,{useEffect,useRef} from 'react';
 import {Alert, Linking, Modal, Platform, ScrollView, StyleSheet, Switch, Text, View} from 'react-native';
 import {useSettings} from './SettingsProvider';
 import app from '../../app.json';
+import BrandWordmark from '../components/BrandWordmark';
 import {IS_MAINNET} from '../wallet/config';
 import type {MissionId} from '../game/level';
 
@@ -18,7 +19,7 @@ export default function SettingsPanel({visible, onClose, mission, onReplayTips}:
     </View>;
   return <Modal visible={visible} transparent animationType={settings.reducedEffects ? 'none' : 'slide'} onRequestClose={onClose}>
     <View style={styles.scrim}><View style={styles.panel}><ScrollView style={{flexGrow:0,flexShrink:1}} contentContainerStyle={{padding: 24, gap: 22}}>
-      <Text style={styles.eyebrow}>STEAL A SEEKER</Text><Text style={styles.title}>Make yourself comfortable.</Text>
+      <BrandWordmark/><Text style={styles.title}>Make yourself comfortable.</Text>
       {toggle('Game sound', 'Shots, hits, extraction and the theft alarm.', settings.sound, sound => update({sound}))}
       <View style={{gap: 10}}><Text style={styles.label}>Volume · {Math.round(settings.volume * 100)}%</Text>
         <View accessibilityRole="radiogroup" accessibilityLabel="Game volume" style={{flexDirection: 'row', gap: 8}}>{[.25, .5, .75, 1].map(volume => <Pressable key={volume} accessibilityRole="radio" accessibilityLabel={`Volume ${volume * 100}%`} accessibilityState={{checked: settings.volume === volume}} aria-checked={settings.volume === volume} disabled={!ready} onPress={() => update({volume})} style={[styles.volume, settings.volume === volume && {backgroundColor: '#415D60'}]}><Text style={styles.label}>{volume * 100}%</Text></Pressable>)}</View>
@@ -38,7 +39,6 @@ export default function SettingsPanel({visible, onClose, mission, onReplayTips}:
 const styles = StyleSheet.create({
   scrim: {flex: 1, backgroundColor: '#0C0C0E99', padding: 12, justifyContent: 'flex-end', alignItems: 'center'},
   panel: {width: '100%', maxWidth: 700, flexGrow: 0, maxHeight: '84%', borderRadius: 24, backgroundColor: '#161618'},
-  eyebrow: {color: '#a8ecd7', fontSize: 11, letterSpacing: 2},
   title: {color: '#edf2e8', fontSize: 28, fontWeight: '700'},
   row: {flexDirection: 'row', gap: 15, alignItems: 'center'},
   label: {color: '#dcece2', fontSize: 15, fontWeight: '600'},

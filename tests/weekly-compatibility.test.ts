@@ -2,6 +2,9 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import frozen from './fixtures/weekly-2026-09-14.json';
 import frozen6 from './fixtures/weekly-revision6-before-encounters.json';
+import campaign8 from './fixtures/campaign-revision8.json';
+import campaign9 from './fixtures/campaign-revision9.json';
+import type {LevelDefinition} from '../src/game/level';
 import engine from '../shared/weekly-engine.json';
 import rules from '../shared/rules-manifest.json';
 import {isWeeklyCompatible,LEGACY_WEEKLY_ENGINES,PRESERVED_REVISION_3_ENGINE,type WeeklyCompatibility} from '../shared/weekly-compatibility';
@@ -59,4 +62,40 @@ test('scout encounters preserve revision-6 weekly wins and delayed replay outcom
  }
  const unsupported=JSON.parse(JSON.stringify(week));unsupported.contracts[0].level.combat.revision=7;
  assert(!isWeeklyCompatible(unsupported),'An old engine must not accept the new drone mechanics');
+});
+
+test('revision 7 campaigns retain their archived verifier outcomes after roaming update',async()=>{
+ const hash='8c9a48902b47a267149ec1f46d37d25fa3df89f9b2ab1098f9ecaba151dfbae6';
+ const {legacyCombatLevel}=await import('../src/game/combat-levels');
+ const {CAMPAIGN_IDS}=await import('../src/game/level');
+ const archived=await import((await checkRuleBundle(hash)).href);
+ for(const mission of CAMPAIGN_IDS){const level=legacyCombatLevel(mission),win=solveCombat(level);assert(win);
+  for(const delay of [0,45,120]){const state=initialState(mission,level),replay:Replay={version:2,chunks:[]};
+   for(const chunk of [...(delay?[{ticks:delay,command:undefined}]:[]),...win.replay.chunks])for(let i=0;i<chunk.ticks&&state.status==='playing';i++)recordStep(state,{...idleInput(),command:chunk.command},replay.chunks);
+   assert.deepEqual(verifyReplay(mission,replay,level),archived.verifyReplay(mission,replay,level));
+  }
+ }
+});
+
+test('revision 8 replays keep their published outcomes after combat contact is fixed',async()=>{
+ const archived=await import((await checkRuleBundle(campaign8.rulesHash)).href);
+ for(const level of campaign8.levels as LevelDefinition[]){const win=solveCombat(level);assert(win);
+  for(const delay of [0,45,120]){const state=initialState(level.mission,level),replay:Replay={version:2,chunks:[]};
+   for(const chunk of [...(delay?[{ticks:delay,command:undefined}]:[]),...win.replay.chunks])for(let i=0;i<chunk.ticks&&state.status==='playing';i++)recordStep(state,{...idleInput(),command:chunk.command},replay.chunks);
+   assert.deepEqual(verifyReplay(level.mission,replay,level),archived.verifyReplay(level.mission,replay,level),`${level.title}: delay ${delay}`);
+  }
+ }
+});
+
+test('revision 9 campaign replays retain their published results after heist encounters',async()=>{
+ const archived=await import((await checkRuleBundle(campaign9.rulesHash)).href);
+ for(const level of campaign9.levels as LevelDefinition[]){const win=solveCombat(level);assert(win);
+  for(const delay of [0,45,120]){const state=initialState(level.mission,level),replay:Replay={version:2,chunks:[]};
+   for(const chunk of [...(delay?[{ticks:delay,command:undefined}]:[]),...win.replay.chunks])for(let i=0;i<chunk.ticks&&state.status==='playing';i++)recordStep(state,{...idleInput(),command:chunk.command},replay.chunks);
+   assert.deepEqual(verifyReplay(level.mission,replay,level),archived.verifyReplay(level.mission,replay,level),`${level.title}: delay ${delay}`);
+  }
+ }
+ const oldWeek=JSON.parse(JSON.stringify(manifest));oldWeek.rulesHash=campaign9.rulesHash;delete oldWeek.engineHash;
+ assert(isWeeklyCompatible(oldWeek));oldWeek.contracts[0].level.combat.revision=10;
+ assert(!isWeeklyCompatible(oldWeek),'The old engine cannot accept new heist mechanics');
 });

@@ -20,7 +20,7 @@ export default function CampaignDistricts({progress,onSelect}:{progress:Progress
  const rowHeight=bounds.height/3;
  const next=CAMPAIGN_IDS.find(id=>!progress.missions[id]);
  const scenes=districts.map(d=>{const h=Math.min(Math.max(0,rowHeight-8),bounds.width/d.ratio);return {width:h*d.ratio,height:h,left:(bounds.width-h*d.ratio)/2,top:rowHeight-h};});
- const point=(index:number,node:number):Point=>{const d=districts[index]!,scene=scenes[index]!,p=d.anchors[node]!;return {x:scene.left+p[0]*scene.width,y:index*rowHeight+scene.top+p[1]*scene.height};};
+ const point=(index:number,node:number):Point=>{const d=districts[index]!,scene=scenes[index]!,p=d.anchors[index%2===1?3-node:node]!;return {x:scene.left+p[0]*scene.width,y:index*rowHeight+scene.top+p[1]*scene.height};};
  const diameter=Math.max(29,Math.min(38,bounds.width*.103)),touch=rowHeight<140?44:48;
  return <View testID="mission-districts" style={s.list} onLayout={event=>{const {width,height}=event.nativeEvent.layout;setBounds(old=>old.width===width&&old.height===height?old:{width,height});}}>
   {bounds.width>0&&districts.map((district,index)=>{const scene=scenes[index]!,ids=CAMPAIGN_IDS.slice(index*4,index*4+4),cleared=ids.filter(id=>progress.missions[id]).length;
@@ -31,7 +31,14 @@ export default function CampaignDistricts({progress,onSelect}:{progress:Progress
   })}
   {bounds.width>0&&<Canvas pointerEvents="none" style={StyleSheet.absoluteFill}>
    {districts.flatMap((_,index)=>[0,1,2].map(n=>{const a=point(index,n),b=point(index,n+1),done=!!progress.missions[CAMPAIGN_IDS[index*4+n]!];return <Path key={`${index}-${n}`} path={`M${a.x} ${a.y} L${b.x} ${b.y}`} color={done?'#BAF1DC':'#758F87'} opacity={done?.95:.55} style="stroke" strokeWidth={done?2.5:1.6} strokeCap="round"/>;}))}
-   {[0,1].map(index=>{const from=point(index,3),to=scenes[index+1]!,y=(index+1)*rowHeight+to.top+to.height*.18;return <Path key={`bridge-${index}`} path={`M${from.x} ${from.y+diameter/2} L${from.x} ${y}`} color="#739B8D" opacity={.45} style="stroke" strokeWidth={1.6}/>;})}
+   {[0,1].map(index=>{
+    const from=point(index,3),to=point(index+1,0),startY=from.y+diameter/2+12,endY=to.y-diameter/2-3,midY=(startY+endY)/2;
+    // The left-hand bridge passes around the next district's caption.
+    const captionY=(index+1)*rowHeight,path=index===1
+     ?`M${from.x} ${startY} C${from.x} ${(startY+captionY-8)/2} 1 ${captionY-8} 1 ${captionY-8} L1 ${captionY+32} C1 ${(captionY+32+endY)/2} ${to.x} ${(captionY+32+endY)/2} ${to.x} ${endY}`
+     :`M${from.x} ${startY} C${from.x} ${midY} ${to.x} ${midY} ${to.x} ${endY}`;
+    return <Path key={`bridge-${index}`} path={path} color="#739B8D" opacity={.45} style="stroke" strokeWidth={1.6} strokeCap="round"/>;
+   })}
   </Canvas>}
   {bounds.width>0&&CAMPAIGN_IDS.map((id,index)=>{const level=combatLevel(id),open=unlocked(progress,id),best=progress.missions[id],current=id===next,p=point(Math.floor(index/4),index%4);
    return <Pressable key={id} testID={`mission-node-${level.number}`} accessibilityRole="button" accessibilityLabel={`Mission ${level.number}: ${level.title}${open?'':'. Locked'}`} accessibilityState={{selected:current}} onPress={()=>{haptic('select');onSelect(id);}} style={({pressed})=>[s.target,{width:touch,height:touch+9,left:p.x-touch/2,top:p.y-diameter/2-4,opacity:pressed?.7:1}]}>

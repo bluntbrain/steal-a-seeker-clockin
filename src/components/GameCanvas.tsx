@@ -14,6 +14,7 @@ import GuardLayer from './GuardLayer';
 import CameraSignals from './CameraSignals';
 import type {Camera} from '../camera/geometry';
 import CombatLayer from './CombatLayer';
+import EncounterFloor from './EncounterFloor';
 import {GateAsset,SwitchAsset,PowerCable} from './GateMechanism';
 type Props={onReady?:()=>void;onLoadError?:()=>void;camera?:SharedValue<Camera>;size:number;height?:number;input:SharedValue<Input>;game:SharedValue<GameState>;alpha:SharedValue<number>;clock:SharedValue<number>;level:LevelDefinition;appearance?:{outfit?:string;trail?:string;reducedEffects?:boolean}};
 function DecoyLayer({game,input,reduced}:{game:SharedValue<GameState>;input:SharedValue<Input>;reduced:boolean}){
@@ -79,6 +80,7 @@ export default memo(function GameCanvas({camera,size,height=size*20/12,input,gam
    {district==='warehouse'?Array.from({length:16},(_,i)=><Image key={i} image={floor} x={(i%4)*3} y={Math.floor(i/4)*5} width={3} height={5} fit="fill"/>):<Image image={floor} x={0} y={0} width={12} height={20} fit="fill"/>}
    <RoundedRect x={0} y={0} width={12} height={20} r={0} color={environment.tint}/>
    {world&&<Picture picture={world}/>}
+   {!!level.encounter&&<EncounterFloor level={level} game={game} reduced={reduced}/>}
    {level.gates?.map((_,index)=><PowerCable key={index} game={game} level={level} index={index} clock={clock} reduced={reduced}/>)}
    {level.gates?.map((_,index)=><GateAsset key={index} game={game} level={level} index={index} clock={clock} reduced={reduced}/>)}
    <RoundedRect x={level.exit.x} y={level.exit.y} width={level.exit.w} height={level.exit.h} r={.1} color="#b9e6d6" opacity={glow}/>

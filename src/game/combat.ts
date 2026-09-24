@@ -1,4 +1,6 @@
 import type {GameState,Input} from './simulation';
+import {updateEncounterGuards} from './encounters';
+import {updateHeistGuards,directionalArmor} from './heist-guards';
 import {TUNING,type LevelDefinition,type Point} from './level';
 import {findPath,walkableSegment} from './navigation';
 import {sightDistance,sees,type Guard} from './guards';
@@ -6,7 +8,7 @@ import {intersectsBox} from './geometry';
 import type {EnemyRole} from './combat-levels';
 export type CombatCommand={seq:number;kind:'move'|'attack'|'phone'|'exit'|'switch'|'stop';x:number;y:number;target:number};
 export type Projectile={id:number;x:number;y:number;px:number;py:number;vx:number;vy:number;left:number;owner:number;damage:number};
-export type CombatState={version:2;hp:number;commandSeen:number;order:CombatCommand|null;path:Point[];pathIndex:number;cooldown:number;invulnerable:number;shots:number;enemyShots:number;kills:number;damageTaken:number;aimEvents:number;hitEvents:number;feedback:'none'|'move'|'target'|'blocked'|'cover'|'ambush';feedbackLeft:number;projectiles:Projectile[];nextShot:number;noise:Point;noiseLeft:number;flash:number;repath:number;};
+export type CombatState={hunt?:{x:number;y:number;tick:number};grateNoise?:{id:number;x:number;y:number;until:number;nextAt:number};version:2;hp:number;commandSeen:number;order:CombatCommand|null;path:Point[];pathIndex:number;cooldown:number;invulnerable:number;shots:number;enemyShots:number;kills:number;damageTaken:number;aimEvents:number;hitEvents:number;feedback:'none'|'move'|'target'|'blocked'|'cover'|'ambush';feedbackLeft:number;projectiles:Projectile[];nextShot:number;noise:Point;noiseLeft:number;flash:number;repath:number;};
 export const COMBAT={damage:25,range:4,shotTicks:12,bulletSpeed:16,maxProjectiles:48,playerHP:100,damageGrace:6};
 export function freshCombat():CombatState{'worklet';return {version:2,hp:100,commandSeen:0,order:null,path:[],pathIndex:0,cooldown:0,invulnerable:0,shots:0,enemyShots:0,kills:0,damageTaken:0,aimEvents:0,hitEvents:0,feedback:'none',feedbackLeft:0,projectiles:[],nextShot:1,noise:{x:0,y:0},noiseLeft:0,flash:0,repath:0};}
 export function enemyStats(role:EnemyRole,hard=false){'worklet';if(hard)return role==='drone'?{hp:25,aim:0,damage:0,burst:0,recover:90}:role==='scout'?{hp:50,aim:21,damage:25,burst:2,recover:25}:role==='sentry'?{hp:75,aim:18,damage:20,burst:3,recover:30}:role==='heavy'?{hp:150,aim:30,damage:22,burst:3,recover:36}:{hp:200,aim:27,damage:25,burst:5,recover:33};return role==='drone'?{hp:25,aim:0,damage:0,burst:0,recover:90}:role==='scout'?{hp:50,aim:27,damage:20,burst:1,recover:33}:role==='sentry'?{hp:75,aim:24,damage:15,burst:2,recover:33}:role==='heavy'?{hp:150,aim:36,damage:10,burst:3,recover:42}:{hp:200,aim:42,damage:15,burst:3,recover:42};}
@@ -16,14 +18,17 @@ function turnToward(g:Guard,angle:number,dt:number){
  'worklet';const delta=Math.atan2(Math.sin(angle-g.angle),Math.cos(angle-g.angle));
  g.angle+=Math.max(-Math.PI*2*dt,Math.min(Math.PI*2*dt,delta));
 }
-function reactToNoise(g:Guard,point:Point,l:LevelDefinition){
- 'worklet';g.lastSeen={x:point.x,y:point.y};g.path=findPath(g,g.lastSeen,l);g.pathIndex=0;g.mode='investigate';
+function reactToNoise(g:Guard,point:Point,l:LevelDefinition,tick=0){
+ 'worklet';g.lastSeen={x:point.x,y:point.y};if((l.combat?.revision??0)>=8&&g.brain){g.brain.goal={...g.lastSeen};g.brain.plan=true;g.brain.alertUntil=tick+180;}else{g.path=findPath(g,g.lastSeen,l);g.pathIndex=0;}g.mode='investigate';
  if(!g.alerted){g.alerted=true;g.reactionTicks=9;}
 }
 function clearOrder(c:CombatState){'worklet';c.order=null;c.path=[];c.pathIndex=0;}
+// Worklet compilation captures helpers at module initialization. Keep this above
+// combatTap, which also needs visibility when selecting a target behind cover.
+function visible(a:Point,b:Point,level:LevelDefinition){'worklet';const d=Math.hypot(a.x-b.x,a.y-b.y);return d<1e-6||sightDistance(a.x,a.y,(b.x-a.x)/d,(b.y-a.y)/d,d,level)>=d-1e-7;}
 export function combatTap(s:GameState,x:number,y:number,seq:number):CombatCommand{
  'worklet';const level=s.definition!,radius=.85;let target=-1,best=radius;
- for(let i=0;i<s.guards.length;i++){const g=s.guards[i]!;if(!g.active||g.hp<=0)continue;const d=Math.hypot(x-g.x,y-g.y);if(d<best){target=i;best=d;}}
+ for(let i=0;i<s.guards.length;i++){const g=s.guards[i]!;if(!g.active||g.hp<=0)continue;const d=Math.hypot(x-g.x,y-g.y);if(d<best&&((level.combat?.revision??0)<10||visible(s,g,{...level,blockers:s.blockers}))){target=i;best=d;}}
  if(target>=0)return {seq,kind:'attack',target,x:s.guards[target]!.x,y:s.guards[target]!.y};
  const phone=level.targets?.[s.delivered]??level.phone;
  if(!s.carrying&&Math.hypot(x-phone.x,y-phone.y)<radius)return {seq,kind:'phone',target:s.delivered,x:phone.x,y:phone.y};
@@ -31,7 +36,6 @@ export function combatTap(s:GameState,x:number,y:number,seq:number):CombatComman
  for(let i=0;i<(level.switches?.length??0);i++){const p=level.switches![i]!;if(Math.hypot(x-p.x,y-p.y)<radius)return {seq,kind:'switch',target:i,x:p.x,y:p.y};}
  return {seq,kind:Math.hypot(x-s.x,y-s.y)<.5?'stop':'move',target:-1,x,y};
 }
-function visible(a:Point,b:Point,level:LevelDefinition){'worklet';const d=Math.hypot(a.x-b.x,a.y-b.y);return d<1e-6||sightDistance(a.x,a.y,(b.x-a.x)/d,(b.y-a.y)/d,d,level)>=d-1e-7;}
 function validPoint(p:Point,l:LevelDefinition){'worklet';return p.x>.65&&p.y>.65&&p.x<l.width-.65&&p.y<l.height-.65&&!l.blockers.some(b=>intersectsBox(p.x,p.y,b,.32));}
 function setPath(s:GameState,p:Point,l:LevelDefinition){'worklet';if(!validPoint(p,l))return false;const path=findPath(s,p,l);if(!path.length)return false;s.combat!.path=path;s.combat!.pathIndex=0;return true;}
 function attackApproach(s:GameState,g:Guard,l:LevelDefinition){
@@ -51,7 +55,7 @@ function walkActor(a:Point,p:Point,speed:number,dt:number,l:LevelDefinition){'wo
 function spawnShot(s:GameState,from:Point,angle:number,owner:number,damage:number){'worklet';const c=s.combat!;if(c.projectiles.length>=COMBAT.maxProjectiles)return;const speed=owner<0?(tacticalCombat(s.definition!)?18:16):tacticalCombat(s.definition!)?13:10;c.projectiles.push({id:c.nextShot++,x:from.x,y:from.y,px:from.x,py:from.y,vx:Math.cos(angle)*speed,vy:Math.sin(angle)*speed,left:owner<0?COMBAT.range:7,owner,damage});if(owner<0){c.shots++;c.noise={x:s.x,y:s.y};c.noiseLeft=tacticalCombat(s.definition!)?1.5:1.2;}else c.enemyShots++;}
 function gates(s:GameState){'worklet';const l=s.definition!;let changed=false;s.relayTimers=s.relayTimers.map(t=>Math.max(0,t-TUNING.step));for(let i=0;i<(l.gates?.length??0);i++){const g=l.gates![i]!,closed=g.mode==='power'?s.power!==g.power:g.mode==='relay'?(s.relayTimers[g.relay??0]??0)<=0:(s.elapsed+g.phase)%g.period>=g.openSeconds;const occupied=intersectsBox(s.x,s.y,g.box,.4)||s.guards.some(a=>a.active&&a.hp>0&&intersectsBox(a.x,a.y,g.box,.4));if((!closed||!occupied)&&s.closedGates[i]!==closed){s.closedGates[i]=closed;changed=true;}}if(changed)s.blockers=[...l.blockers,...(l.gates??[]).filter((_,i)=>s.closedGates[i]).map(g=>g.box)];}
 function enemies(s:GameState,dt:number,l:LevelDefinition){
- 'worklet';const c=s.combat!;
+ 'worklet';if((l.combat?.revision??0)>=10){updateHeistGuards(s,dt,l,spawnShot);return;}if((l.combat?.revision??0)>=8){updateEncounterGuards(s,dt,l,spawnShot);return;}const c=s.combat!;
  for(let i=0;i<s.guards.length;i++){
   const g=s.guards[i]!,spec=l.patrols[i]!,stats=enemyStats(g.combatRole,tacticalCombat(l));g.px=g.x;g.py=g.y;
   if(g.hp<=0){g.active=false;g.seesPlayer=false;continue;}
@@ -69,7 +73,7 @@ function enemies(s:GameState,dt:number,l:LevelDefinition){
    g.exposure=g.seesPlayer?Math.min(1,g.exposure+dt/Math.max(.5,spec.spotSeconds)):Math.max(0,g.exposure-dt*3);
    if(g.exposure>=1&&g.clock>=g.nextReport){
     s.spotted=true;g.lastSeen={x:s.x,y:s.y};g.nextReport=g.clock+2;
-    for(const other of s.guards)if(other!==g&&other.active&&other.hp>0&&other.combatRole!=='drone'&&Math.hypot(other.x-g.x,other.y-g.y)<=4.5&&!other.seesPlayer)reactToNoise(other,g.lastSeen,l);
+    for(const other of s.guards)if(other!==g&&other.active&&other.hp>0&&other.combatRole!=='drone'&&Math.hypot(other.x-g.x,other.y-g.y)<=4.5&&!other.seesPlayer)reactToNoise(other,g.lastSeen,l,s.ticks);
    }
    continue;
   }
@@ -88,7 +92,7 @@ function enemies(s:GameState,dt:number,l:LevelDefinition){
   if(seen&&!recovering){g.gunPhase='aim';g.gunTicks=stats.aim;g.shotAngle=Math.atan2(s.y-g.y,s.x-g.x);c.aimEvents++;continue;}
   if((s.securityAlarm&&g.clock>=g.nextReport)||(c.noiseLeft>0&&Math.hypot(c.noise.x-g.x,c.noise.y-g.y)<(fairAmbush(l)?3.5:tacticalCombat(l)?7:5)&&g.clock>=g.nextChase)){
    const source=s.securityAlarm?{x:s.x,y:s.y}:{...c.noise};
-   if(fairAmbush(l)){if(s.securityAlarm)g.alerted=true;reactToNoise(g,source,l);}else{g.lastSeen=source;g.path=findPath(g,g.lastSeen,l);g.pathIndex=0;g.mode='investigate';}
+   if(fairAmbush(l)){if(s.securityAlarm)g.alerted=true;reactToNoise(g,source,l,s.ticks);}else{g.lastSeen=source;g.path=findPath(g,g.lastSeen,l);g.pathIndex=0;g.mode='investigate';}
    g.nextReport=g.clock+(tacticalCombat(l)?1.4+(i%3)*.15:4);g.nextChase=g.clock+1.3;
    if(fairAmbush(l)&&g.reactionTicks>0)continue;
   }
@@ -103,11 +107,11 @@ function projectiles(s:GameState,dt:number,l:LevelDefinition){
  for(const p of c.projectiles){p.px=p.x;p.py=p.y;const travel=Math.min(p.left,Math.hypot(p.vx,p.vy)*dt),speed=Math.hypot(p.vx,p.vy),dx=p.vx/speed,dy=p.vy/speed;let distance=sightDistance(p.x,p.y,dx,dy,travel,l),hit=-2;
   const targets=p.owner<0?s.guards:[s];for(let i=0;i<targets.length;i++){const a=targets[i]!;if(p.owner<0&&(!(a as Guard).active||(a as Guard).hp<=0))continue;const ax=a.x-p.x,ay=a.y-p.y,along=ax*dx+ay*dy,perp=ax*ax+ay*ay-along*along,r=.38;if(perp>r*r||along+r<0)continue;const contact=Math.max(0,along-Math.sqrt(Math.max(0,r*r-perp)));if(contact<=distance){distance=contact;hit=i;}}
   p.x+=dx*distance;p.y+=dy*distance;p.left-=travel;
-  if(hit>=0){if(p.owner<0){const g=s.guards[hit]!;const ambush=p.damage>COMBAT.damage;const damage=p.damage;if(ambush){c.feedback='ambush';c.feedbackLeft=.65;}g.hp=Math.max(0,g.hp-damage);if(tacticalCombat(l)&&g.hp>0){
+  if(hit>=0){if(p.owner<0){const g=s.guards[hit]!;const ambush=p.damage>COMBAT.damage;const armor=(l.combat?.revision??0)>=10&&(g.combatRole==='heavy'||g.combatRole==='warden')?directionalArmor(g,p.vx,p.vy,p.damage):undefined;const damage=armor?.damage??p.damage;if(armor&&g.heist)g.heist.armorHit=armor.region;if(ambush){c.feedback='ambush';c.feedbackLeft=.65;}g.hp=Math.max(0,g.hp-damage);if(tacticalCombat(l)&&g.hp>0){
      g.lastSeen={x:s.x,y:s.y};
      if(fairAmbush(l)){
       // Only the opening ambush staggers armor. Repeated hits cannot stun-lock it.
-      reactToNoise(g,s,l);
+      reactToNoise(g,s,l,s.ticks);
       if(ambush){g.reactionTicks=Math.max(g.reactionTicks,12);g.gunPhase='ready';g.gunTicks=0;}
      }else if(visible(g,s,l)&&g.gunPhase!=='fire'&&g.gunPhase!=='aim'){g.angle=Math.atan2(s.y-g.y,s.x-g.x);g.shotAngle=g.angle;g.gunPhase='aim';g.gunTicks=enemyStats(g.combatRole,true).aim;c.aimEvents++;}
     }g.flash=.15;c.hitEvents++;if(!g.hp){g.active=false;g.seesPlayer=false;c.kills++;}}else if(c.invulnerable===0){const damage=Math.min(c.hp,p.damage);c.hp-=damage;c.damageTaken+=damage;c.invulnerable=COMBAT.damageGrace;c.flash=.2;if(!c.hp){s.status='caught';s.caughtBy=p.owner;}}continue;}
@@ -130,6 +134,7 @@ export function stepCombat(s:GameState,input:Input,dt=TUNING.step){
   else if(kind==='switch'){const pad=level.switches?.[c.order.target];if(pad&&Math.hypot(s.x-pad.x,s.y-pad.y)<.7){if(pad.kind==='power')s.power=s.power?0:1;else s.relayTimers[pad.channel??0]=pad.duration??9;s.activations++;}clearOrder(c);}
   else clearOrder(c);
  }
+ if((level.combat?.revision??0)>=10&&Math.hypot(s.vx,s.vy)>.1&&s.ticks>=(c.grateNoise?.nextAt??0)){for(const grate of level.encounter?.grates??[])if(intersectsBox(s.x,s.y,grate,.08)){c.grateNoise={id:(c.grateNoise?.id??0)+1,x:s.x,y:s.y,until:s.ticks+30,nextAt:s.ticks+45};break;}}
  enemies(s,dt,level);projectiles(s,dt,level);s.alert=s.guards.some(g=>g.active&&g.hp>0&&g.seesPlayer)?1:0;s.battery=c.hp;
  if(s.status!=='playing'){clearOrder(c);s.vx=0;s.vy=0;return;}
  const e=level.exit,w=level.exitWindow,open=!w||(s.elapsed+w.phase)%w.period<w.openSeconds;

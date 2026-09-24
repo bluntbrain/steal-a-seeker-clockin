@@ -23,7 +23,7 @@ test('celebration export fits its own dimensions and preserves equipped outfits'
  const svg=cardSvg(d);assert(svg.includes(`width="1080" height="1450"`));assert(svg.includes('Every Seeker. Secured.'));assert(svg.includes('05:30.73'));assert(!svg.includes('Replay'),'export contains achievement, not UI buttons');
  for(const b of cardLayout(d)){assert(b.x+b.width<=CARD_WIDTH);assert(b.y+b.size*1.18<cardHeight(d));}
  const p=cardPortraitRect(d);assert(p.x+p.width<=CARD_WIDTH);assert(p.y+p.height<cardHeight(d));
- assert.equal(new Set(COSTUMES.map(c=>cardPortrait({...d,outfit:c.id}))).size,6,'equipped outfit remains distinct in the finale');
+ assert.equal(new Set(COSTUMES.map(c=>cardPortrait({...d,outfit:c.id}))).size,13,'equipped outfit remains distinct in the finale');
  assert.deepEqual(cardLayout({...d,outfit:'night-courier'}),cardLayout(d),'outfit cannot alter earned stats');
 });
 

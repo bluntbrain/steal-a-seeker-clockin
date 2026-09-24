@@ -13,7 +13,7 @@ export function SecurityEntrances({level,state,size,reduced}:{level:LevelDefinit
  const animated=useAnimatedStyle(()=>({opacity:pulse.value}));
  return <>{level.patrols.map((g,i)=>{
   if(g.reserveAfter===undefined||state.guards[i]?.spawned)return null;
-  const opening=state.securityAlarm&&g.reserveAfter-state.alarmSeconds<=4;
+  const opening=(level.combat?.revision??0)>=10?state.thefts>=(g.pickupWave??1):state.securityAlarm&&g.reserveAfter-state.alarmSeconds<=4;
   return <View key={i} pointerEvents="none" accessible accessibilityLabel={opening?'Security door opening':'Security entrance'} testID={`security-entrance-${i}`} style={[s.entrance,{left:g.route[0]!.x*size/12-14,top:g.route[0]!.y*size/12-17}]}>
    {opening&&<Animated.View style={[s.warning,animated]}/>}
    <View style={[s.door,opening&&{borderColor:'#F5C36A'}]}><View style={s.seam}/><View style={[s.lamp,{backgroundColor:opening?'#F5C36A':'#749A91'}]}/><View style={s.handle}/></View>

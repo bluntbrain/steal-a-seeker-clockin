@@ -1,0 +1,37 @@
+{
+  "date": "2026-09-24",
+  "skin": "solana-beeman",
+  "checks": {
+    "appTests": 288,
+    "backendTests": 81,
+    "typecheck": "passed",
+    "webExport": "passed",
+    "atlas": "RGBA, eight padded 256x384 frames",
+    "browser": [
+      "390x844 store, checkout and equip",
+      "360x740 store fits above navigation",
+      "equipped skin persists across reload",
+      "mission spawn and movement show Beeman",
+      "no browser error logs"
+    ]
+  },
+  "apk": {
+    "path": "releases/steal-a-seeker-judge-v0.3.21-code24.apk",
+    "sha256": "c076d846681ff1b39fc418a6852ec67d1f9c0bc4f3cabde2ca04830d462fd70b",
+    "package": "com.bluntbrain.stealaseeker.judge",
+    "cluster": "solana:devnet",
+    "pixelVerifiedImages": {
+      "beeman-atlas.png": [
+        "res/0O.png"
+      ],
+      "beeman.png": [
+        "res/mP.png"
+      ]
+    }
+  },
+  "limits": [
+    "Browser checkout used the explicit no-payment demo.",
+    "No physical-device or live wallet purchase test.",
+    "No backend deployment or public store release."
+  ]
+}

@@ -1,0 +1,44 @@
+[
+  {
+    "name": "solana-mert",
+    "file": "mert-atlas.png",
+    "frames": 8,
+    "sha256": "2e9cb2081be995f3a1ff7664b9a79466c39a4fdf50e0792a6cd536e06eb93e1e"
+  },
+  {
+    "name": "solana-vibhu",
+    "file": "vibhu-atlas.png",
+    "frames": 8,
+    "sha256": "2fe981add1e9e25fa9fb4c1c4bab1f7f05d4c63ce2d096cff6cb3a8cc6f5e06e"
+  },
+  {
+    "name": "solana-chase",
+    "file": "chase-atlas.png",
+    "frames": 8,
+    "sha256": "69607ebd1436d144deae9edbe11f700193f25c983ed10f299f21556d1f5d9214"
+  },
+  {
+    "name": "solana-lily",
+    "file": "lily-atlas.png",
+    "frames": 8,
+    "sha256": "8eddc03a8b550f5dd3ad9a39b3344f111b368f2132ddb5156feca2255f79efbf"
+  },
+  {
+    "name": "solana-toly",
+    "file": "toly-atlas.png",
+    "frames": 8,
+    "sha256": "3eac2896cfd83c93ef88ec1e56fc840d9823d2a9afe05c35a4ec1be91f317805"
+  },
+  {
+    "name": "solana-akshay",
+    "file": "akshay-atlas.png",
+    "frames": 8,
+    "sha256": "b3cd2526294739bad04c46bf253b8d7d76a60310d59e27e7e5618710037d4b32"
+  },
+  {
+    "name": "solana-beeman",
+    "file": "beeman-atlas.png",
+    "frames": 8,
+    "sha256": "46353855214fe22830c2b74b1ba89b4853090d492f3860a198acb70b7cf6edf3"
+  }
+]

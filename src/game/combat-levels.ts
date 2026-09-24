@@ -1,3 +1,5 @@
+import {applyCampaignLayout} from './campaign-layouts';
+import {applyHeistLayout} from './heist-layouts';
 import {getLevel,type LevelDefinition,type MissionId,type GuardSpec,type Box,type Point} from './level';
 export type EnemyRole='drone'|'scout'|'sentry'|'heavy'|'warden';
 const names=['First Pickup','Blind Corner','Crossfire','Loading Lockdown','Skybridge','Heavy Watch','Split Route','Twin Relay','Dark Circuit','Vault Window','Security Grid','Last Seeker'];
@@ -322,7 +324,7 @@ function applyScoutEncounters(l:LevelDefinition,n:number){
  l.briefing=n===2?'Clear the pair. Use cover. Take the Seeker and escape.':n===6?'Two patrols, then the Heavy. Use the cover between encounters.':'Clear one patrol pair at a time. Take cover before the next.';
 }
 
-export function combatLevel(mission:MissionId):LevelDefinition{
+export function legacyCombatLevel(mission:MissionId):LevelDefinition{
  'worklet';const old=getLevel(mission),n=Math.max(1,old.number),i=n-1;
  const wall:Box[]=[{x:0,y:0,w:12,h:.65,kind:'wall'},{x:0,y:19.35,w:12,h:.65,kind:'wall'},{x:0,y:0,w:.65,h:20,kind:'wall'},{x:11.35,y:0,w:.65,h:20,kind:'wall'}];
  const cover=(x:number,y:number,w:number,h:number,kind:Box['kind']='crate'):Box=>({'x':x,y,w,h,kind});
@@ -376,4 +378,8 @@ export function combatLevel(mission:MissionId):LevelDefinition{
  }
  if(n>=2&&n<=6)applyScoutEncounters(level,n);
  return level;
+}
+
+export function combatLevel(mission:MissionId):LevelDefinition{
+ 'worklet';return applyHeistLayout(applyCampaignLayout(legacyCombatLevel(mission)));
 }

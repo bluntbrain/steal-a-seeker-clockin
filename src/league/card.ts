@@ -1,5 +1,7 @@
 import celebration from '../../assets/campaign-celebration/hero.embedded.json';
-import portraits from '../../assets/costumes-v4/portraits.embedded.json';
+import classicPortraits from '../../assets/costumes-v4/portraits.embedded.json';
+import solanaPortraits from '../../assets/solana-skins/portraits.embedded.json';
+const portraits={...classicPortraits,...solanaPortraits};
 import {costumeFor} from '../../shared/costumes';
 import background from '../../assets/courier-card-v3/background.embedded.json';
 export const CARD_WIDTH=1080,CARD_HEIGHT=1620,CARD_RATIO=CARD_HEIGHT/CARD_WIDTH;

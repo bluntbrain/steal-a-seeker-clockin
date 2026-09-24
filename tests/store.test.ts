@@ -34,3 +34,18 @@ test('guest redemption uses the displayed configured price and remains idempoten
  assert.equal(bought.balance,150);assert.strictEqual(redeemCredits(bought,'night-courier',400),bought);
  for(const p of [0,-1,1.5,NaN])assert.throws(()=>redeemCredits(funded,'night-courier',p),/Invalid store price/);
 });
+
+test('Solana skins cost at least five times a classic outfit and use existing credit ownership',()=>{
+ const regular=STORE_ITEMS.filter(i=>i.kind==='outfit'&&!i.id.startsWith('solana-')),skins=STORE_ITEMS.filter(i=>i.id.startsWith('solana-'));
+ assert.equal(skins.length,7);
+ for(const skin of skins){assert(skin.price>=Math.max(...regular.map(i=>i.price))*5);const state={...emptyInventory(),balance:3100};const bought=redeemCredits(state,skin.id);assert.equal(bought.balance,100);assert.equal(bought.equipment.outfit,skin.id);assert.strictEqual(redeemCredits(bought,skin.id),bought);}
+ assert.equal(isStoreItemForSale('escape-trail'),false);
+ const owned={...emptyInventory(),owned:['escape-trail' as const],equipment:{trail:'escape-trail'}};assert.strictEqual(redeemCredits(owned,'escape-trail'),owned);
+});
+test('premium direct checkout has configurable SKR and converted SOL prices, independent of credits',()=>{
+ const now=Date.now(),rates={SKR:'0.02',SOL:'100',at:now};
+ assert.equal(priceProduct('solana-toly','SKR',rates,6,now).amount,'100000000');
+ assert.equal(priceProduct('solana-toly','SOL',rates,6,now).amount,'20000000');
+ assert.equal(priceProduct('solana-mert','SKR',rates,6,now,1,undefined,{'solana-mert':'125'}).amount,'125000000');
+ assert.equal(networkConfig({STORE_CREDIT_PRICES_JSON:'{"solana-chase":3200}'}).storeCreditPrices['solana-chase'],3200);
+});

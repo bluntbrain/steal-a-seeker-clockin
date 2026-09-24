@@ -7,6 +7,12 @@ android/build/
 android/local.properties
 *.log
 releases/*.apk
+verification/filament-crash/*.apk
+verification/filament-crash/*.idsig
+verification/filament-crash/*.hbc
+verification/filament-crash/*.map
+verification/filament-crash/tutorial-probe.js
+verification/filament-crash/phone-transformed-before.js
 __pycache__/
 
 # Local credentials and distribution signing material
@@ -40,6 +46,10 @@ design/visual-v2/leaderboard-v2/preview.js
 design/visual-v2/leaderboard-v2/preview.html
 design/visual-v2/leaderboard-v2/screen-reference.png
 design/visual-v2/leaderboard-v2/assets/
+
+# Rebuilt leaderboard A component gallery
+design/visual-v2/leaderboard-a/preview.js
+design/visual-v2/leaderboard-a/assets/
 
 # Rebuilt Courier Card review bundle
 design/visual-v2/courier-card-v2/preview.js

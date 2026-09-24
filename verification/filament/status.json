@@ -1,0 +1,17 @@
+{
+  "version": "0.3.20",
+  "versionCode": 23,
+  "renderer": "filament",
+  "testsPassed": 257,
+  "typecheck": true,
+  "webExport": true,
+  "webViewerSmoke": "Graphite and top preset passed",
+  "signedApk": "releases/steal-a-seeker-mainnet-v0.3.20-code23.apk",
+  "apkSha256": "43ceab41a0eefc51b3a9b0e5c61824fb1ee8bea3d2a9314d38df0e8c9628dcf4",
+  "bundledModels": 12,
+  "nativeLibraryAlignment": "24 of 24 pass 16KiB",
+  "installedOn": "Pixel_9_Pro ARM64 emulator",
+  "nativeInteractionTests": "pending ADB interaction permission; desktop UI controller cannot attach",
+  "physicalDeviceTests": "not run; no phone connected",
+  "storeReady": false
+}

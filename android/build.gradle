@@ -24,14 +24,23 @@ allprojects {
 subprojects { p ->
     ['com.android.library', 'com.android.application'].each { pluginId ->
         p.plugins.withId(pluginId) {
+            if (p.name == 'react-native-filament') {
+                p.android.ndkVersion = '27.1.12297006'
+            }
             p.android.defaultConfig.externalNativeBuild.cmake.arguments += [
                 '-DCMAKE_CXX_FLAGS_RELWITHDEBINFO=-O2 -g0 -DNDEBUG',
-                '-DCMAKE_C_FLAGS_RELWITHDEBINFO=-O2 -g0 -DNDEBUG'
+                '-DCMAKE_C_FLAGS_RELWITHDEBINFO=-O2 -g0 -DNDEBUG',
+                '-DANDROID_SUPPORT_FLEXIBLE_PAGE_SIZES=ON',
+                '-DCMAKE_SHARED_LINKER_FLAGS=-Wl,-z,max-page-size=16384'
             ]
         }
     }
 }
 
+// Filament's prebuilt C++ libraries require the real r27 runtime. Do not use
+// this machine's old 27.0 SDK alias, which points at NDK 25.
+ext.ndkVersion = '27.1.12297006'
+ext.RNF_enableLogs = 'false'
 apply plugin: "expo-root-project"
 apply plugin: "com.facebook.react.rootproject"
 
