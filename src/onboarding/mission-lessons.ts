@@ -1,10 +1,11 @@
 import {CAMPAIGN_IDS,type MissionId} from '../game/level';
 import {phoneEdition} from '../game/collection';
 import type {Contract} from '../../shared/contracts';
-export type MissionLesson={id:string;kicker:string;title:string;body:string;cue:string;edition:number;collection:boolean;footer:string};
+import type {Mechanic} from './mechanic-demo';
+export type MissionLesson={id:string;kicker:string;title:string;body:string;cue:string;edition:number;collection:boolean;footer:string;tip?:string;playLabel?:string;demo?:Mechanic};
 const lessons=[
  ['Your first clean getaway','Tap the floor to move. Tap a guard to shoot. Take the phone, then reach the exit.','MOVE → TAKE → ESCAPE'],
- ['Twelve heists. Twelve phones.','Each win adds a Seeker to Hideout → Phones. This mission adds a scout drone: break sight or shoot it before its amber radio ring fills and every enemy joins the hunt.','BREAK SIGHT → COLLECT → ESCAPE'],
+ ['Stop the scout drone','Drones do not shoot. Their radio reveals your location. Shoot them first or break sight before the amber ring fills. Each win adds a phone to Hideout → Phones.','SCAN → REPORT → INTERRUPT'],
  ['Choose the crossing','Paired guards watch different sides of cover. Wait for separation, take the longer flank, or break the drone’s sight before its radio ring fills.','WATCH → FLANK → CROSS'],
  ['Plan the way back','Taking the phone raises the alarm. Know your route to the exit before reinforcements arrive.','PHONE → COVER → EXIT'],
  ['Make the walls work for you','Walls stop shots. Move from one safe pocket to the next instead of crossing an open firing lane.','COVER → MOVE → COVER'],
@@ -16,9 +17,11 @@ const lessons=[
  ['Lose them between rooms','A confirmed sighting sends every guard and drone after you. Walls break vision, but enemies keep searching. Change rooms before they reach your last sighting.','BREAK SIGHT → CHANGE ROUTE'],
  ['One last Seeker','Flank the Warden’s armor and stop the drone report. Both security entrances respond when you take the final phone—plan your way out.','FLANK → TAKE → ESCAPE'],
 ] as const;
+const mechanics:readonly (Mechanic|undefined)[]=[undefined,'drone','flank','reinforcements','cover','armor','routes','relay','switch','timed-exit','pursuit','finale'];
 export function campaignLesson(mission:MissionId):MissionLesson{
  const edition=CAMPAIGN_IDS.indexOf(mission),[title,body,cue]=lessons[edition]!;
- return {id:mission,kicker:`MISSION ${String(edition+1).padStart(2,'0')} / 12`,title,body,cue,edition,collection:edition===1,footer:`Recover ${phoneEdition(mission).name} · View it in Hideout → Phones`};
+ const tip=edition===1?'Drones do not shoot. Take them out first: a full amber ring reports your location. Breaking sight interrupts an unsent report. A sent alert stays active.':edition===0?'Tap the floor to move; tap an enemy to stop and fire. Scout drones do not shoot, but report your location. Take them out before the amber ring fills.':body;
+ return {id:mission,kicker:`MISSION ${String(edition+1).padStart(2,'0')} / 12`,title,body,cue,edition,collection:edition===1,tip,demo:mechanics[edition],playLabel:`PLAY MISSION ${String(edition+1).padStart(2,'0')}  →`,footer:`Recover ${phoneEdition(mission).name} · Each win adds a phone to Hideout → Phones`};
 }
 export function weeklyLesson(c:Contract):MissionLesson{
  return {id:c.id,kicker:`WEEKLY MISSION · ${c.modifier.toUpperCase()}`,title:c.name,body:c.objective,cue:'FASTER ESCAPE + MORE HEALTH = MORE POINTS',edition:Math.min(11,c.slot*4),collection:false,footer:'One ranked chance is used only when you start. Best complete run counts.'};

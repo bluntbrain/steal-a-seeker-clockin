@@ -32,7 +32,8 @@ export default function Hideout({onContractStart,initialTab='map',visible,onClos
  const rackPhoneHeight=Math.max(12,Math.min(68,((roomW*.59-18)/4-8)*388/212,((roomH*.48-18)*.88/3-8)));
  const weekly=useWeekly(visible);
  const [tab,setTab]=useState<'rack'|'map'|'leaderboard'|'briefing'|'complete'>(initialTab),[selected,setSelected]=useState<MissionId>('practice');
- useEffect(()=>{if(visible){setSelected(next);setInspection(null);}},[visible,completed]);
+ // Returning from the teaching screen must keep the mission the player chose.
+ useEffect(()=>{if(visible){if(tab!=='briefing')setSelected(next);setInspection(null);}},[visible,completed,next,tab]);
  const level=useMemo(()=>combatLevel(selected),[selected]),nextLevel=useMemo(()=>combatLevel(next),[next]),edition=phoneEdition(selected),best=progress.missions[selected],available=unlocked(progress,selected);
  const action=(label:string,name:string,onPress:()=>void,primary=false,disabled=false,fluid=false)=><Pressable accessibilityRole="button" accessibilityLabel={name} onPress={onPress} disabled={disabled} style={[s.button,fluid&&{flexGrow:1,flexBasis:0,minWidth:0},primary&&s.primary,disabled&&{opacity:.4}]}><Text style={[s.buttonText,primary&&{color:'#173739'}]}>{label}</Text></Pressable>;
  return <Modal visible={visible} transparent animationType="none" onRequestClose={onClose}><View style={[s.overlay,(tab==='rack'||tab==='leaderboard')&&{backgroundColor:tab==='rack'?'#0B1612':'#0B1711'},{paddingTop:insets.top+8,paddingBottom:insets.bottom+8}]}><View style={{width:w,flex:1,maxHeight:980}}>

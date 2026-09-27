@@ -710,3 +710,13 @@ test('credit redemption and skin wallet checkout cannot spend both balances conc
  await service.cancelQuote(other.wallet,unpaid.id);await service.redeem(other.wallet,'solana-chase',3000);
  assert.equal((await service.me(other.wallet)).credits,100);assert(!(await service.preparePayment(other.wallet,unpaid.id)).payment);
 });
+
+test('weekly variety publishes atomically at cutover and captures only one clock value',async()=>{
+ const {LeagueService}=await import('./league-service');let calls=0;
+ const clock=()=>new Date(calls++===0?'2026-09-27T23:59:59.999Z':'2026-09-28T00:00:00.001Z');
+ const league=new LeagueService(pool,ranked,clock),old=await league.manifest();assert.equal(calls,1);assert.equal(old.week,'2026-09-21');assert(old.contracts.every(c=>c.week===old.week&&!c.generation));
+ const published=await Promise.all(Array.from({length:8},()=>league.manifest()));const first=published[0]!;
+ for(const pack of published){assert.deepEqual(pack,first);assert.equal(pack.week,'2026-09-28');assert(pack.contracts.every(c=>c.week===pack.week&&c.generation?.version===3));assert.equal(new Set(pack.contracts.map(c=>c.generation!.template)).size,3);}
+ assert.equal((await pool.query('SELECT count(*)::integer AS n FROM league_weeks WHERE week=$1',[first.week])).rows[0].n,1);
+ assert.deepEqual((await pool.query('SELECT manifest FROM league_weeks WHERE week=$1',[old.week])).rows[0].manifest,old);
+});

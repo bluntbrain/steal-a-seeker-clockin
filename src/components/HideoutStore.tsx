@@ -1,7 +1,8 @@
 import {HapticPressable as Pressable} from '../feedback/HapticPressable';
 import {useHaptics} from '../feedback/useHaptics';
 import React,{useEffect,useRef,useState} from 'react';
-import {Image,ScrollView,StyleSheet,Text,View,useWindowDimensions} from 'react-native';
+import {Image,PixelRatio,ScrollView,StyleSheet,Text,View,useWindowDimensions} from 'react-native';
+import {gridCardWidth} from './grid-layout';
 import {useEconomy} from '../commerce/EconomyProvider';
 import type {StoreItemId} from '../../shared/store';
 import {COSTUMES,costumeFor,isSolanaCostume,type CostumeId} from '../../shared/costumes';
@@ -19,7 +20,8 @@ export default function HideoutStore({active=true,progress,onInspect,ghostEarned
  useEffect(()=>{if(active){setSection('solana');setSelected(defaultSkin());setMessage('');scroll.current?.scrollTo({y:0,animated:false});}},[active]);
  const look=costumeFor(selected),product=e.items.find(p=>p.id===selected),equippedLook=costumeFor(e.equipment.outfit),premium=isSolanaCostume(look.id);
  const outfits=COSTUMES.filter(c=>isSolanaCostume(c.id)===(section==='solana'));
- const cardWidth=(Math.min(width-24,430)-16)/3,portraitHeight=Math.round(cardWidth*1.4),stageHeight=Math.max(240,Math.min(290,height*.34));
+ const [gridWidth,setGridWidth]=useState(0);
+ const cardWidth=gridCardWidth(gridWidth||Math.min(width-24,430),PixelRatio.get()),portraitHeight=Math.round(cardWidth*1.4),stageHeight=Math.max(240,Math.min(290,height*.34));
  const equipped=equippedLook.id===look.id,owned=look.unlock==='free'||(look.unlock==='weekly'?ghostEarned:e.owned.includes(look.id));
  const price=product?.price??0,lockedWeekly=look.unlock==='weekly'&&!ghostEarned;
  const label=busy?'Saving…':lockedWeekly?'Earn in weekly missions':equipped?'Equipped':owned?`Equip ${look.name} skin`:e.balance<price?premium?`Unlock ${look.name} skin`:`Get ${(price-e.balance).toLocaleString()} more credits`:`Unlock skin · ${price.toLocaleString()} credits`;
@@ -33,7 +35,7 @@ export default function HideoutStore({active=true,progress,onInspect,ghostEarned
   <ScrollView ref={scroll} testID="hideout-scroll" style={s.scroll} contentContainerStyle={s.content} showsVerticalScrollIndicator={false} bounces={false}>
    {section==='collection'?<><View style={s.phoneGrid}>{CAMPAIGN_IDS.map((id,i)=>{const won=!!progress.missions[id];return <Pressable key={id} accessibilityRole="button" accessibilityLabel={`View ${PHONE_EDITIONS[i]!.name}, ${won?'recovered':'locked'}`} onPress={()=>onInspect(i)} style={[s.phone,{borderColor:won?'#466B5A':'#253B31'}]}>{won?<PhoneArt index={i} height={86}/>:<Text style={{fontSize:32,color:'#546F62'}}>◇</Text>}<Text numberOfLines={1} style={s.phoneName}>{PHONE_EDITIONS[i]!.name}</Text></Pressable>;})}</View><Text style={s.collectionNote}>{CAMPAIGN_IDS.filter(id=>progress.missions[id]).length}/12 recovered · tap a phone to inspect</Text></>:<>
     <View style={s.stage}><CharacterStage sku={look.id} height={stageHeight} badges={premium} equipped={equipped}/></View>
-    <View testID="outfit-grid" style={s.grid}>{outfits.map(c=>{
+    <View testID="outfit-grid" onLayout={event=>setGridWidth(event.nativeEvent.layout.width)} style={s.grid}>{outfits.map(c=>{
      const p=e.items.find(i=>i.id===c.id),has=c.unlock==='free'||(c.unlock==='weekly'?ghostEarned:e.owned.includes(c.id)),worn=equippedLook.id===c.id,chosen=selected===c.id;
      return <Pressable key={c.id} accessibilityRole="button" accessibilityState={{selected:chosen}} accessibilityLabel={`Preview ${c.name} skin${worn?', equipped':has?', owned':c.unlock==='weekly'?', earn weekly':`, ${p!.price} credits`}`} onPress={()=>{setSelected(c.id);setMessage('');scroll.current?.scrollTo({y:0,animated:true});}} style={[s.outfit,{width:cardWidth},chosen&&s.selectedOutfit]}>
       {chosen&&<View pointerEvents="none" style={StyleSheet.absoluteFill}><SkinGlow/></View>}

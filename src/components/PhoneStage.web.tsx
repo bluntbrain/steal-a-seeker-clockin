@@ -7,7 +7,7 @@ import {PHONE_EDITIONS} from '../game/collection';
 import CollectiblePhone from '../three/CollectiblePhone';
 import PhoneTurntable from './PhoneTurntable';
 const presets={Front:[0,0],Back:[0,Math.PI],Left:[0,Math.PI/2],Right:[0,-Math.PI/2],Top:[Math.PI/2,0],Bottom:[-Math.PI/2,0]} as const;
-function LivePhoneStage({index,height}:{index:number;height:number}){
+function LivePhoneStage({index,height}:{index:number;height:number;active?:boolean}){
  const [pose,setPose]=useState<[number,number]>([-.13,Math.PI-.4]),[ready,setReady]=useState(false);
  const live=useRef(pose),start=useRef(pose);live.current=pose;
  const set=useCallback((v:readonly[number,number])=>{const next:[number,number]=[v[0],v[1]];live.current=next;setPose(next);},[]);
@@ -24,6 +24,7 @@ function LivePhoneStage({index,height}:{index:number;height:number}){
 }
 
 // Local visual QA can exercise the native renderer in the browser.
-export default function PhoneStage(props:{index:number;height:number}){
+export default function PhoneStage(props:{index:number;height:number;active?:boolean}){
+ if(props.active===false)return <View style={{height:props.height,backgroundColor:'#101A21'}}/>;
  return new URLSearchParams(window.location.search).has('nativePhonePreview')?<PhoneTurntable {...props}/>:<LivePhoneStage {...props}/>;
 }

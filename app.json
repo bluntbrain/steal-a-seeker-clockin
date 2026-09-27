@@ -2,7 +2,7 @@
   "expo": {
     "name": "Steal a Seeker",
     "slug": "steal-a-seeker-mvp",
-    "version": "0.3.23",
+    "version": "0.3.30",
     "icon": "./assets/app-icon.png",
     "orientation": "portrait",
     "userInterfaceStyle": "dark",
@@ -13,7 +13,7 @@
         "foregroundImage": "./assets/app-icon-adaptive.png",
         "backgroundColor": "#08A899"
       },
-      "versionCode": 26,
+      "versionCode": 33,
       "blockedPermissions": [
         "android.permission.RECORD_AUDIO",
         "android.permission.READ_EXTERNAL_STORAGE",
@@ -23,7 +23,7 @@
     },
     "web": {
       "bundler": "metro",
-      "name": "Steal a Seeker \u00b7 Night Shift"
+      "name": "Steal a Seeker · Night Shift"
     },
     "assetBundlePatterns": [
       "assets/**/*"

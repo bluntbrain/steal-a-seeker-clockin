@@ -1,5 +1,6 @@
 import type {Box,GuardSpec,LevelDefinition,Point} from './level';
 import type {EnemyRole} from './combat-levels';
+import {guardPressure} from './guard-pressure';
 
 type XY=readonly [number,number];
 type Rect=readonly [number,number,number,number];
@@ -15,12 +16,12 @@ const LAYOUTS:Layout[]=[
   walls:[[4,9,2.4,4.2],[1,14,2.2,1.2],[8,13.6,2.3,1.2],[7.8,5.8,2.5,2],[3.2,3.3,2,3]],
   cast:[['scout',[3.2,11],[3.2,9],[2.4,9]],['drone',[7.3,11.5],[7.3,9],[8.6,9]],['scout',[9.7,4.7],[7,4.7],[7,3]]],
   safe:[[2,16.3],[2,12.5],[2,8],[6.7,8],[6.7,3]],back:[[6.7,3],[6.7,8],[2,8],[2,16.3]],pockets:[[2,16.3],[5.2,14.4]],
-  tip:'Go behind the drone scan or break sight before its radio ring fills. The cover island gives you two routes.'},
+  entries:[[10.4,10.8]],tip:'Stay behind cover: guards spot you quickly and pursue together. Interrupt the drone report and plan for the pickup response.'},
  {spawn:[6,18],phone:[6,2.7],exit:[2,18],
   walls:[[4.5,11,3,3.2],[4.5,5,3,3.2],[1.2,8.5,2,1],[8.8,9.2,2.3,1],[8.7,15.8,1.5,1.1]],
   cast:[['scout',[3.5,12],[3.5,10.5],[2.1,10.5]],['scout',[8.5,12],[8.5,14.8],[7.7,15.2]],['scout',[8.5,5.7],[8.5,4],[6.2,4]],['drone',[2.3,5],[2.3,3],[3.5,3]]],
   safe:[[2.2,16.3],[2.2,11],[3.7,10.2],[3.7,4],[6,2.7]],back:[[8.1,3.5],[8.1,8.5],[7.9,10.4],[3.6,10.3],[3.5,15.5]],pockets:[[6,15.5],[6,9.3]],
-  tip:'Two guards share one island. Wait for a gap or take the outside flank. The middle crossing is shorter.'},
+  entries:[[10.5,8]],tip:'Two guards share one island. Flank before firing: accurate shots and longer sight make the open lane dangerous.'},
  {spawn:[2,18],phone:[9.5,2.5],exit:[9.5,18],
   walls:[[3.4,12,3,2.4],[6.6,5.8,2.4,3.4],[2,8.2,2,1.3],[9.6,12,1.1,3],[1,3.7,3.2,1.2],[5.5,1.2,1,2.4]],
   cast:[['scout',[2.5,12.8],[2.5,11],[4,11]],['scout',[7.3,13.3],[7.3,11],[8.4,11]],['drone',[5.4,7.8],[5.4,5],[4.8,5]],['scout',[9.9,5],[9.9,3.8],[8,3.8]]],
@@ -68,8 +69,37 @@ const LAYOUTS:Layout[]=[
   tip:'Flank the Warden, interrupt the drone and plan your escape. Taking the last Seeker calls both marked entrances.'},
 ];
 
+function applyPressure(l:LevelDefinition):LevelDefinition{
+ 'worklet';l.combat={version:2,revision:13};const p=guardPressure(l);
+ for(const g of l.patrols){
+  const heavy=g.combatRole==='heavy'||g.combatRole==='warden',drone=g.combatRole==='drone';
+  g.pursuitSpeed=p.pursuit+(drone?.3:heavy?-.45:0);
+  // Authored campaign values drive both the visible cone and actual sight.
+  // Frozen weekly definitions keep their own published range and angle.
+  g.range=p.vision*(drone?1:heavy?.6:.8);
+  g.halfAngle=drone?Math.PI/3:(heavy?75:95)*Math.PI/360;
+  g.spotSeconds=p.spot;g.pauseSeconds=.2;
+  g.speed=heavy?.75:drone?1.15:.9;
+ }
+ return l;
+}
 export function applyHeistLayout(l:LevelDefinition):LevelDefinition{
- 'worklet';if(l.number<=1)return l; // Preserve the verified guided tutorial.
+ 'worklet';
+ if(l.number<=1){
+  // The opening teaches three inputs, then leaves a real mission to solve.
+  // Keep its established touch targets and cover for saved tutorial UX.
+  l.patrols[0]!.route=[{x:3,y:11},{x:3,y:10.7}];
+  l.patrols[1]!.route=[{x:9,y:10},{x:8,y:10},{x:8,y:8}];
+  l.patrols[2]!.route=[{x:7.8,y:17.8},{x:7.8,y:16.8}];
+  l.patrols[2]!.reserveAfter=0;l.patrols[2]!.pickupWave=1;
+  l.patrols.push({...l.patrols[1]!,route:[{x:10.5,y:5},{x:10.5,y:8},{x:8,y:4.3}],roam:undefined});
+  l.briefing='Use cover and rear attacks. Guards spot you quickly and pursue together. Taking the Seeker calls a response; plan your escape.';
+  applyPressure(l);
+  // Face away during the brief control lesson. This drone still detects and
+  // broadcasts normally if approached from its front or alerted by the team.
+  l.patrols[0]!.speed=0;
+  return l;
+ }
  const plan=LAYOUTS[l.number-2]!;l.combat={version:2,revision:10};
  l.spawn=point(plan.spawn);l.phone=point(plan.phone);const exit=point(plan.exit);l.exit={x:exit.x-.65,y:exit.y-.55,w:1.3,h:1.1};
  l.blockers=[...l.blockers.slice(0,4),...plan.walls.map(box)];l.gates=undefined;l.switches=undefined;l.exitWindow=undefined;
@@ -86,5 +116,5 @@ export function applyHeistLayout(l:LevelDefinition):LevelDefinition{
  if(l.number===9){l.switches=[{x:2,y:7,kind:'power'}];l.gates=[{box:{x:9.1,y:7,w:2.2,h:.6,kind:'wall'},mode:'power',power:1,period:10,openSeconds:5,phase:0}];}
  if(l.number===10)l.exitWindow={period:8,openSeconds:4,phase:0};
  l.targetSeconds=l.number<=3?65:l.number===8?115:l.number<=7?80:95;l.hardLimitSeconds=l.number===8?240:210;l.briefing=plan.tip;
- return l;
+ return applyPressure(l);
 }

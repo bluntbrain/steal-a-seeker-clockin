@@ -12,7 +12,7 @@ import type {ProductId} from '../../shared/commerce';
 import {changePlaytest} from '../playtest/store';
 type StoreItem=Omit<typeof STORE_ITEMS[number],'price'>&{price:number};
 type EquipmentSlot='outfit'|'trail'|'frame'|'rack';
-export type Economy={passCheckoutOpen?:boolean;items:StoreItem[];catalog:StoreCatalog|null;syncGhost:()=>Promise<void>;unequip:(slot:EquipmentSlot)=>Promise<void>;tab:'map'|'leaderboard'|'rack';setTab:(tab:'map'|'leaderboard'|'rack')=>void;balance:number;ready:boolean;local:boolean;owned:readonly string[];equipment:Record<string,string>;notice:string;openCredits:()=>void;openPass:()=>void;openProduct:(sku:ProductId)=>void;redeem:(sku:StoreItemId)=>Promise<void>;equip:(sku:StoreItemId)=>Promise<void>;earn:(mission:string,stars:number)=>Promise<number>};
+export type Economy={checkoutOpen?:boolean;passCheckoutOpen?:boolean;items:StoreItem[];catalog:StoreCatalog|null;syncGhost:()=>Promise<void>;unequip:(slot:EquipmentSlot)=>Promise<void>;tab:'map'|'leaderboard'|'rack';setTab:(tab:'map'|'leaderboard'|'rack')=>void;balance:number;ready:boolean;local:boolean;owned:readonly string[];equipment:Record<string,string>;notice:string;openCredits:()=>void;openPass:()=>void;openProduct:(sku:ProductId)=>void;redeem:(sku:StoreItemId)=>Promise<void>;equip:(sku:StoreItemId)=>Promise<void>;earn:(mission:string,stars:number)=>Promise<number>};
 const Context=createContext<Economy|undefined>(undefined);
 export function useEconomy(){const c=useContext(Context);if(!c)throw Error('EconomyProvider missing');return c;}
 export default function EconomyProvider({children}:{children:ReactNode}){
@@ -34,7 +34,7 @@ export default function EconomyProvider({children}:{children:ReactNode}){
  async function earn(mission:string,stars:number){if(!local||!ready||!CAMPAIGN_IDS.includes(mission as any))return 0;return mutate(s=>earnCredits(s,mission,stars));}
  // The native wallet can change while checkout is open. The checkout itself
  // reconciles the wallet-bound order; a browser purchase is explicitly a demo.
- const value:Economy={passCheckoutOpen:checkout==='campaign',items,catalog,syncGhost:async()=>{if(account.preview)await mutate(s=>({...s,equipment:{...s.equipment,outfit:'ghost-courier'}}));},tab,setTab,balance:local?saved.balance:account.account?.credits??0,ready:local?ready:!!account.account,local,owned,equipment,notice,redeem,equip,unequip,earn,openCredits:()=>setCreditsOpen(true),openPass:()=>setCheckout('campaign'),openProduct:sku=>setCheckout(sku)};
+ const value:Economy={checkoutOpen:creditsOpen||checkout!==null,passCheckoutOpen:checkout==='campaign',items,catalog,syncGhost:async()=>{if(account.preview)await mutate(s=>({...s,equipment:{...s.equipment,outfit:'ghost-courier'}}));},tab,setTab,balance:local?saved.balance:account.account?.credits??0,ready:local?ready:!!account.account,local,owned,equipment,notice,redeem,equip,unequip,earn,openCredits:()=>setCreditsOpen(true),openPass:()=>setCheckout('campaign'),openProduct:sku=>setCheckout(sku)};
  // Mount on demand: web Modal portals keep their DOM position while hidden.
  // A persistent store portal can end up behind Hideout/PhoneInspector mounted later.
  // A fresh portal on each open also resets stale checkout/pack UI on close.

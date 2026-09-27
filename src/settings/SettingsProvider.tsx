@@ -1,8 +1,7 @@
 import React, {createContext, useContext, useEffect, useRef, useState} from 'react';
 import {readSave, writeSave} from '../progress/storage';
+import {DEFAULT_SETTINGS as defaults,restoreSettings,type Settings} from './preferences';
 
-type Settings = {sound: boolean; volume: number; haptics: boolean; reducedEffects: boolean};
-const defaults: Settings = {sound: true, volume: .65, haptics: true, reducedEffects: false};
 const key = 'seeker.settings.v1';
 type SettingsContext = {
   settings: Settings;
@@ -24,14 +23,10 @@ export default function SettingsProvider({children}: {children: React.ReactNode}
       const value: unknown = JSON.parse(raw);
       if (!value || typeof value !== 'object') throw new Error('Invalid settings');
       const data = value as Record<string, unknown>;
-      const restored: Settings = {
-        sound: typeof data.sound === 'boolean' ? data.sound : defaults.sound,
-        volume: typeof data.volume === 'number' && Number.isFinite(data.volume) ? Math.max(0, Math.min(1, data.volume)) : defaults.volume,
-        haptics: typeof data.haptics === 'boolean' ? data.haptics : defaults.haptics,
-        reducedEffects: typeof data.reducedEffects === 'boolean' ? data.reducedEffects : defaults.reducedEffects,
-      };
+      const restored = restoreSettings(data);
       latest.current = restored;
       setSettings(restored);
+      if(data.volume===.65)save(restored);
     }).catch(() => {
       if (active) setError('Could not load your preferences. Default settings are in use.');
     }).finally(() => { if (active) setReady(true); });

@@ -9,6 +9,14 @@ const previousTargets=[100,65,65,65,65,65,65,100,80,80,80,80];
 const roamingTargets=[100,75,75,75,90,90,90,125,90,100,100,100];
 export function campaignCreditTarget(hash:string,mission:MissionId):number|undefined{
  if(hash===rules.rulesHash)return combatLevel(mission).targetSeconds;
+ // Codes 29–32 retain their original sight ranges and reward thresholds.
+ if(hash==='07efc6e9b1a109c2af85397b2a0b87633c6378f6236d8533f5a29835068b79fd')return [100,65,65,80,80,80,80,115,95,95,95,95][CAMPAIGN_IDS.indexOf(mission)];
+ // Code 28 retains its original pace and rewards as district speed boosts ship.
+ if(hash==='fc58093a3480dc87c58673c20c7cf44e34aa75a87c9c92c839f50c7c797a745a')return [100,65,65,80,80,80,80,115,95,95,95,95][CAMPAIGN_IDS.indexOf(mission)];
+ // Code 27 keeps its faster revision-11 replay and original credit thresholds.
+ if(hash==='8325f1cc68a4847c185a412c1c95f5ec00d2e8b41d80950024b27307902d1d19')return [100,65,65,80,80,80,80,115,95,95,95,95][CAMPAIGN_IDS.indexOf(mission)];
+ // Keep the shipped 0.3.23 campaign claims working during the pressure update.
+ if(hash==='f4597c232c4bf00b5c1f2d43be08db491fa37812472b656f3fbfb441ec19db74')return [100,65,65,80,80,80,80,115,95,95,95,95][CAMPAIGN_IDS.indexOf(mission)];
  // The first local heist build remains verifiable after pursuit is corrected.
  if(hash==='823fd367df66595100be15112e238859fbd716c649c21aba5b86a22a6d4748f0')return [100,65,65,80,80,80,80,115,95,95,95,95][CAMPAIGN_IDS.indexOf(mission)];
  // The contact-tracking campaign retains its original star thresholds while

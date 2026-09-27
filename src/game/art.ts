@@ -2,9 +2,11 @@ import { createPicture, Skia, type SkCanvas, type SkImage } from '@shopify/react
 import { LEVEL,type LevelDefinition } from './level';
 import {districtFor} from './environment';
 import {drawWallPanels} from '../art/walls';
+import {interiorWalls,type WallStyle} from '../art/wall-depth';
+import {drawRaisedWalls} from '../art/wall-depth-art';
 const palette={ floor:'#20292c', line:'#293337', mint:'#cfe6e4', edge:'#465054' };
 // Code-native environment art is recorded once, not recreated on each animation frame.
-export function makeWarehouse(drawFloor=true,level:LevelDefinition=LEVEL,wallTexture?:SkImage|null){
+export function makeWarehouse(drawFloor=true,level:LevelDefinition=LEVEL,wallTexture?:SkImage|null,wallStyle:WallStyle='flat'){
   return createPicture((c:SkCanvas)=>{
     const district=districtFor(level.number),rooftop=district==='rooftops',power=district==='powerworks';
     const p=Skia.Paint();p.setAntiAlias(true);
@@ -58,7 +60,9 @@ export function makeWarehouse(drawFloor=true,level:LevelDefinition=LEVEL,wallTex
       for(let x=.8;x<11.2;x+=.55){rect(x,9.6,.36,.65,'#1D2939');rect(x+.08,9.75,.06,.06,'#598490');rect(x+.2,10,.05,.08,'#8BA8A5');}
       for(const x of [1.8,8]){rect(x,9.4,2.2,1.2,'#53666A');for(let y=9.48;y<10.6;y+=.15)line(x+.1,y,x+2.1,y,'#182C36',.045);line(x+.07,9.4,x+.07,10.6,'#B4E9DA',.06);line(x+2.13,9.4,x+2.13,10.6,'#B4E9DA',.06);}
     }
+    const raised=wallStyle!=='flat'&&wallTexture?interiorWalls(level.blockers,level.width,level.height):[];
     for(const [index,b] of level.blockers.entries()){
+      if(raised.includes(b))continue;
       // In Narrow Crossing these blocked spans become fenced roof gaps;
       // only the two actual timed doorways are traversable bridges.
       if(level.mission==='narrow-crossing'&&b.kind==='rack'&&b.y===9.4){
@@ -141,6 +145,7 @@ export function makeWarehouse(drawFloor=true,level:LevelDefinition=LEVEL,wallTex
       }
       for(const [x,y]of [[b.x+.16,b.y+.17],[b.x+b.w-.16,b.y+.17],[b.x+.16,b.y+b.h-.35],[b.x+b.w-.16,b.y+b.h-.35]]){p.setColor(Skia.Color('#97a09a'));c.drawCircle(x!,y!,.035,p);}
     }
+    if(raised.length&&wallTexture)drawRaisedWalls(c,raised,wallTexture,wallStyle,district);
     // Mint-lit exit bay and target pedestal. Effects and changing state are drawn separately.
     const e=level.exit;
     round(e.x-.15,e.y-.16,e.w+.3,e.h+.3,.15,'#101b1d');

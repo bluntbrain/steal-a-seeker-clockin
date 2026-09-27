@@ -2,6 +2,9 @@ import React,{memo,useMemo,useEffect} from 'react';
 import {Canvas,Group,Picture,Image,Atlas,Circle,RoundedRect,Oval,Line,Path,Skia,DashPathEffect,useImage,useRSXformBuffer} from '@shopify/react-native-skia';
 import {useDerivedValue,type SharedValue} from 'react-native-reanimated';
 import {makeWarehouse} from '../game/art';
+import {currentWallStyle} from '../art/wall-style';
+import {interiorWalls,wallActorClip,type WallStyle} from '../art/wall-depth';
+import {makeWallOcclusion} from '../art/wall-depth-art';
 import {districtFor,environmentFor} from '../game/environment';
 import {TUNING,SECURITY,type LevelDefinition} from '../game/level';
 import {targetPhone,decoyLanding,type GameState,type Input} from '../game/simulation';
@@ -11,12 +14,13 @@ import frames from '../../assets/costumes-v4/frames.json';
 import {costumeAtlas} from './costumeAssets';
 import {costumeFrame} from '../../shared/costumes';
 import GuardLayer from './GuardLayer';
+import {GUARD_SPRITES} from './enemy-presentation';
 import CameraSignals from './CameraSignals';
 import type {Camera} from '../camera/geometry';
 import CombatLayer from './CombatLayer';
 import EncounterFloor from './EncounterFloor';
 import {GateAsset,SwitchAsset,PowerCable} from './GateMechanism';
-type Props={onReady?:()=>void;onLoadError?:()=>void;camera?:SharedValue<Camera>;size:number;height?:number;input:SharedValue<Input>;game:SharedValue<GameState>;alpha:SharedValue<number>;clock:SharedValue<number>;level:LevelDefinition;appearance?:{outfit?:string;trail?:string;reducedEffects?:boolean}};
+type Props={wallStyle?:WallStyle;onReady?:()=>void;onLoadError?:()=>void;camera?:SharedValue<Camera>;size:number;height?:number;input:SharedValue<Input>;game:SharedValue<GameState>;alpha:SharedValue<number>;clock:SharedValue<number>;level:LevelDefinition;appearance?:{outfit?:string;trail?:string;reducedEffects?:boolean}};
 function DecoyLayer({game,input,reduced}:{game:SharedValue<GameState>;input:SharedValue<Input>;reduced:boolean}){
  const landing=useDerivedValue(()=>decoyLanding(game.value,input.value));
  const aim=useDerivedValue(()=>{const p=Skia.Path.Make();p.moveTo(game.value.x,game.value.y);p.lineTo(landing.value.x,landing.value.y);return p;});
@@ -31,13 +35,17 @@ function DecoyLayer({game,input,reduced}:{game:SharedValue<GameState>;input:Shar
  <Group opacity={opacity}><Circle cx={x} cy={y} r={radius} style="stroke" strokeWidth={.045} color="#CFE6E4" opacity={.65}/><Circle cx={x} cy={y} r={.26} color="#152D37"/><Circle cx={x} cy={y} r={.18} color="#CFE6E4"/><Circle cx={x} cy={y} r={.07} color="#304E56"/></Group>
  </>;
 }
-export default memo(function GameCanvas({camera,size,height=size*20/12,input,game,alpha,clock,level,appearance={},onReady,onLoadError}:Props){
+export default memo(function GameCanvas({camera,size,height=size*20/12,input,game,alpha,clock,level,appearance={},onReady,onLoadError,wallStyle=currentWallStyle()}:Props){
  const cameraTransform=useDerivedValue(()=>{const c=camera?.value??{x:0,y:0,zoom:1},scale=size/12*c.zoom;return [{translateX:-c.x*scale},{translateY:-c.y*scale},{scale}];});
  const district=districtFor(level.number),environment=environmentFor(level);
  const wallTexture=useImage(district==='rooftops'?require('../../assets/walls-v5/rooftop-cap.jpg'):district==='powerworks'?require('../../assets/walls-v5/vault-cap.jpg'):require('../../assets/walls-v5/warehouse-cap.jpg'),onLoadError);
- const world=useMemo(()=>wallTexture?makeWarehouse(false,level,wallTexture):null,[level,wallTexture]);
+ const world=useMemo(()=>wallTexture?makeWarehouse(false,level,wallTexture,wallStyle):null,[level,wallTexture,wallStyle]);
+ const wallOcclusion=useMemo(()=>makeWallOcclusion(interiorWalls(level.blockers,level.width,level.height),wallStyle),[level,wallStyle]);
+ const courierClip=useDerivedValue(()=>wallActorClip(wallOcclusion,game.value.py+(game.value.y-game.value.py)*alpha.value));
  const floor=useImage(district==='rooftops'?require('../../assets/world-v4/rooftop-floor.png'):district==='powerworks'?require('../../assets/world-v4/powerworks-floor.png'):require('../../assets/world-v3/floor.png'),onLoadError);
  const phones=useImage(require('../../assets/world-v3/phones.png'),onLoadError);
+ const droneSprite=useImage(require('../../assets/drones-v2/scout.png'),onLoadError);
+ const guardSprite=useImage(GUARD_SPRITES.guard,onLoadError),heavySprite=useImage(GUARD_SPRITES.heavy,onLoadError);
  const phoneIndex=editionIndex(level.mission),phoneFrame=phoneAtlas.frames[phoneIndex]!;
  const phoneScale=1.18/phoneFrame.height;
  const phoneSprites=useMemo(()=>[phoneFrame],[phoneIndex]);
@@ -47,10 +55,10 @@ export default memo(function GameCanvas({camera,size,height=size*20/12,input,gam
  // Each scene is keyed by the parent. Never acknowledge a previous district's
  // retained image while a new source is decoding. Let the new canvas paint first.
  useEffect(()=>{
-  if(!wallTexture||!floor||!phones||!sprite)return;
+  if(!wallTexture||!floor||!phones||!sprite||!droneSprite||!guardSprite||!heavySprite)return;
   let second=0;const first=requestAnimationFrame(()=>{second=requestAnimationFrame(()=>onReady?.());});
   return()=>{cancelAnimationFrame(first);cancelAnimationFrame(second);};
- },[wallTexture,floor,phones,sprite,onReady]);
+ },[wallTexture,floor,phones,sprite,droneSprite,guardSprite,heavySprite,onReady]);
  const reduced=!!appearance.reducedEffects;
  const x=useDerivedValue(()=>game.value.px+(game.value.x-game.value.px)*alpha.value);
  const y=useDerivedValue(()=>game.value.py+(game.value.y-game.value.py)*alpha.value);
@@ -90,7 +98,7 @@ export default memo(function GameCanvas({camera,size,height=size*20/12,input,gam
     <Group transform={useDerivedValue(()=>[{translateY:phoneBob.value}])}><Atlas image={phones} sprites={phoneSprites} transforms={phoneTransforms}/></Group>
     <RoundedRect x={0-.55} y={0+.65} width={pickupWidth} height={.07} r={.025} color="#d9fff0"/>
    </Group>
-   {level.patrols.map((_,index)=><GuardLayer key={index} game={game} alpha={alpha} index={index} clock={clock} reduced={reduced}/>)}
+   {level.patrols.map((_,index)=><GuardLayer key={index} game={game} alpha={alpha} index={index} clock={clock} reduced={reduced} droneSprite={droneSprite} guardSprite={guardSprite} heavySprite={heavySprite} wallOcclusion={wallOcclusion}/>)}
    {level.switches?.map((_,index)=><SwitchAsset key={index} game={game} level={level} index={index} clock={clock} reduced={reduced}/>)}
    {!level.combat&&<DecoyLayer game={game} input={input} reduced={reduced}/>}
    <Group transform={escapeTransform} opacity={escapeOpacity}>
@@ -104,12 +112,14 @@ export default memo(function GameCanvas({camera,size,height=size*20/12,input,gam
    </Group>
    <Circle cx={x} cy={y} r={footRadius} color="#CFE6E4" style="stroke" strokeWidth={.055} opacity={burst}/>
 
+   <Group clip={courierClip}>
    <Oval rect={shadow} color="#070c0d" opacity={.7}/>
    {sprite && <Atlas image={sprite} sprites={sprites} transforms={transforms}/>}
-   {!!level.combat&&<CombatLayer game={game} alpha={alpha} input={input}/>}
    <Group transform={carriedTransform} opacity={carry}>
     <Atlas image={phones} sprites={phoneSprites} transforms={carryTransforms}/>
    </Group>
+   </Group>
+   {!!level.combat&&<CombatLayer game={game} alpha={alpha} input={input}/>}
   </Group>
   <CameraSignals camera={camera} game={game} size={size} height={height}/>
  </Canvas>;

@@ -1,0 +1,46 @@
+[
+  {
+    "file": "shot-a.wav",
+    "prompt": "Professional firearm sound for an action game. A real unsuppressed 9mm pistol firing a single round. Explosive sharp crack, weighty low-mid punch, subtle mechanical slide action. Close microphone, immediate explosive attack, short natural decay. Exactly one shot. No burst, silencer, laser, electronic tone, ricochet, shell bounce, music, voices or ambience.",
+    "provider": "ElevenLabs",
+    "model": "eleven_text_to_sound_v2",
+    "durationSeconds": 0.42,
+    "sourceOnsetSeconds": 0.0,
+    "peakDbFS": -4,
+    "rmsDbFS": -23.49,
+    "sha256": "a424dbb350491d84c04e1f9b8ada9cd0cbdceb6643dff65195607777096c2cdd"
+  },
+  {
+    "file": "shot-b.wav",
+    "prompt": "Professional firearm sound for an action game. A second take of a real unsuppressed 9mm pistol firing one round. Clean punchy ballistic crack, body and tiny slide clack. Close microphone, immediate explosive attack, short natural decay. Exactly one shot. No burst, silencer, laser, electronic tone, ricochet, shell bounce, music, voices or ambience.",
+    "provider": "ElevenLabs",
+    "model": "eleven_text_to_sound_v2",
+    "durationSeconds": 0.42,
+    "sourceOnsetSeconds": 0.0,
+    "peakDbFS": -4,
+    "rmsDbFS": -23.05,
+    "sha256": "066a68e3e0cc5cafe1e0467ab1c540aad4b817316e262f4c0d23e91d394d95b3"
+  },
+  {
+    "file": "enemy-a.wav",
+    "prompt": "Professional firearm sound for an action game. A real compact carbine firing one round. Hard percussive rifle crack with a solid chesty thump and brief natural room reflection. Close microphone, immediate explosive attack, short natural decay. Exactly one shot. No burst, silencer, laser, electronic tone, ricochet, shell bounce, music, voices or ambience.",
+    "provider": "ElevenLabs",
+    "model": "eleven_text_to_sound_v2",
+    "durationSeconds": 0.42,
+    "sourceOnsetSeconds": 0.0,
+    "peakDbFS": -4,
+    "rmsDbFS": -24.32,
+    "sha256": "ef4c9542f1193b23c9e5a001151e31c22dfded623fe5fc7177e31255bed82241"
+  },
+  {
+    "file": "enemy-b.wav",
+    "prompt": "Professional firearm sound for an action game. A real heavy rifle firing exactly one round. Deep powerful gunpowder bang under a sharp high-frequency crack; brief mechanical bolt sound. Close microphone, immediate explosive attack, short natural decay. Exactly one shot. No burst, silencer, laser, electronic tone, ricochet, shell bounce, music, voices or ambience.",
+    "provider": "ElevenLabs",
+    "model": "eleven_text_to_sound_v2",
+    "durationSeconds": 0.42,
+    "sourceOnsetSeconds": 0.0,
+    "peakDbFS": -4,
+    "rmsDbFS": -21.7,
+    "sha256": "ed4a0b1ed738be8462693ab5ff11c2f2057cd62a50f57cc2076fac32dbb6acbb"
+  }
+]

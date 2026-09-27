@@ -1,7 +1,8 @@
 import type {LevelDefinition,Box,GuardSpec,MissionId} from '../src/game/level';
 import {legacyCombatLevel as combatLevel} from '../src/game/combat-levels';
 import {weekWindow} from './weekly';
-export type Contract={id:string;week:string;slot:number;name:string;district:string;modifier:string;objective:string;level:LevelDefinition};
+import {makeVariedContracts,WEEKLY_VARIETY_START} from './weekly-variety';
+export type Contract={id:string;week:string;slot:number;name:string;district:string;modifier:string;objective:string;level:LevelDefinition;generation?:{version:number;template:string;activeEnemies:number;drones:number;heavies:number;reinforcements:number}};
 export const CONTRACT_ATTEMPTS=5;
 export function makeContracts(date=new Date()):Contract[]{
  const week=weekWindow(date).week,weekNumber=Math.floor(Date.parse(week)/604800000);
@@ -27,6 +28,7 @@ export function makeContracts(date=new Date()):Contract[]{
 }
 /** A new manifest is frozen when its week opens. Never rewrite an active competition. */
 export function makeCombatContracts(date=new Date()):Contract[]{
+ if(weekWindow(date).week>=WEEKLY_VARIETY_START)return makeVariedContracts(date);
  return makeContracts(date).map(c=>{
   const level=combatLevel((['practice','sweep-window','power-trade'] as MissionId[])[c.slot]!);
   // Weekly seeded geometry and phone placement come from the weekly generator.

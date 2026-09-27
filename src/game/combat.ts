@@ -5,6 +5,7 @@ import {TUNING,type LevelDefinition,type Point} from './level';
 import {findPath,walkableSegment} from './navigation';
 import {sightDistance,sees,type Guard} from './guards';
 import {intersectsBox} from './geometry';
+import {courierSpeedMultiplier} from './courier-speed';
 import type {EnemyRole} from './combat-levels';
 export type CombatCommand={seq:number;kind:'move'|'attack'|'phone'|'exit'|'switch'|'stop';x:number;y:number;target:number};
 export type Projectile={id:number;x:number;y:number;px:number;py:number;vx:number;vy:number;left:number;owner:number;damage:number};
@@ -12,7 +13,7 @@ export type CombatState={hunt?:{x:number;y:number;tick:number};grateNoise?:{id:n
 export const COMBAT={damage:25,range:4,shotTicks:12,bulletSpeed:16,maxProjectiles:48,playerHP:100,damageGrace:6};
 export function freshCombat():CombatState{'worklet';return {version:2,hp:100,commandSeen:0,order:null,path:[],pathIndex:0,cooldown:0,invulnerable:0,shots:0,enemyShots:0,kills:0,damageTaken:0,aimEvents:0,hitEvents:0,feedback:'none',feedbackLeft:0,projectiles:[],nextShot:1,noise:{x:0,y:0},noiseLeft:0,flash:0,repath:0};}
 export function enemyStats(role:EnemyRole,hard=false){'worklet';if(hard)return role==='drone'?{hp:25,aim:0,damage:0,burst:0,recover:90}:role==='scout'?{hp:50,aim:21,damage:25,burst:2,recover:25}:role==='sentry'?{hp:75,aim:18,damage:20,burst:3,recover:30}:role==='heavy'?{hp:150,aim:30,damage:22,burst:3,recover:36}:{hp:200,aim:27,damage:25,burst:5,recover:33};return role==='drone'?{hp:25,aim:0,damage:0,burst:0,recover:90}:role==='scout'?{hp:50,aim:27,damage:20,burst:1,recover:33}:role==='sentry'?{hp:75,aim:24,damage:15,burst:2,recover:33}:role==='heavy'?{hp:150,aim:36,damage:10,burst:3,recover:42}:{hp:200,aim:42,damage:15,burst:3,recover:42};}
-export function tacticalCombat(l:LevelDefinition){'worklet';return (l.combat?.revision??0)>=3&&l.id!=='combat-v2:practice';}
+export function tacticalCombat(l:LevelDefinition){'worklet';return (l.combat?.revision??0)>=11||((l.combat?.revision??0)>=3&&l.id!=='combat-v2:practice');}
 export function fairAmbush(l:LevelDefinition){'worklet';return (l.combat?.revision??0)>=6;}
 function turnToward(g:Guard,angle:number,dt:number){
  'worklet';const delta=Math.atan2(Math.sin(angle-g.angle),Math.cos(angle-g.angle));
@@ -52,7 +53,7 @@ function issue(s:GameState,cmd:CombatCommand,l:LevelDefinition){
  c.order={...cmd};c.feedback=cmd.kind==='attack'?'target':'move';s.pickup=0;
 }
 function walkActor(a:Point,p:Point,speed:number,dt:number,l:LevelDefinition){'worklet';const d=Math.hypot(p.x-a.x,p.y-a.y),travel=Math.min(d,speed*dt);if(d<1e-6)return true;const next={x:a.x+(p.x-a.x)/d*travel,y:a.y+(p.y-a.y)/d*travel};if(!walkableSegment(a,next,l))return false;a.x=next.x;a.y=next.y;return true;}
-function spawnShot(s:GameState,from:Point,angle:number,owner:number,damage:number){'worklet';const c=s.combat!;if(c.projectiles.length>=COMBAT.maxProjectiles)return;const speed=owner<0?(tacticalCombat(s.definition!)?18:16):tacticalCombat(s.definition!)?13:10;c.projectiles.push({id:c.nextShot++,x:from.x,y:from.y,px:from.x,py:from.y,vx:Math.cos(angle)*speed,vy:Math.sin(angle)*speed,left:owner<0?COMBAT.range:7,owner,damage});if(owner<0){c.shots++;c.noise={x:s.x,y:s.y};c.noiseLeft=tacticalCombat(s.definition!)?1.5:1.2;}else c.enemyShots++;}
+function spawnShot(s:GameState,from:Point,angle:number,owner:number,damage:number){'worklet';const c=s.combat!;if(c.projectiles.length>=COMBAT.maxProjectiles)return;const speed=owner<0?(tacticalCombat(s.definition!)?18:16):(s.definition!.combat?.revision??0)>=11?16:tacticalCombat(s.definition!)?13:10;c.projectiles.push({id:c.nextShot++,x:from.x,y:from.y,px:from.x,py:from.y,vx:Math.cos(angle)*speed,vy:Math.sin(angle)*speed,left:owner<0?COMBAT.range:7,owner,damage});if(owner<0){c.shots++;c.noise={x:s.x,y:s.y};c.noiseLeft=tacticalCombat(s.definition!)?1.5:1.2;}else c.enemyShots++;}
 function gates(s:GameState){'worklet';const l=s.definition!;let changed=false;s.relayTimers=s.relayTimers.map(t=>Math.max(0,t-TUNING.step));for(let i=0;i<(l.gates?.length??0);i++){const g=l.gates![i]!,closed=g.mode==='power'?s.power!==g.power:g.mode==='relay'?(s.relayTimers[g.relay??0]??0)<=0:(s.elapsed+g.phase)%g.period>=g.openSeconds;const occupied=intersectsBox(s.x,s.y,g.box,.4)||s.guards.some(a=>a.active&&a.hp>0&&intersectsBox(a.x,a.y,g.box,.4));if((!closed||!occupied)&&s.closedGates[i]!==closed){s.closedGates[i]=closed;changed=true;}}if(changed)s.blockers=[...l.blockers,...(l.gates??[]).filter((_,i)=>s.closedGates[i]).map(g=>g.box)];}
 function enemies(s:GameState,dt:number,l:LevelDefinition){
  'worklet';if((l.combat?.revision??0)>=10){updateHeistGuards(s,dt,l,spawnShot);return;}if((l.combat?.revision??0)>=8){updateEncounterGuards(s,dt,l,spawnShot);return;}const c=s.combat!;
@@ -127,7 +128,7 @@ export function stepCombat(s:GameState,input:Input,dt=TUNING.step){
   else if(visible(s,g,level)&&Math.hypot(s.x-g.x,s.y-g.y)<=COMBAT.range){c.path=[];s.facing=Math.abs(g.x-s.x)>Math.abs(g.y-s.y)?(g.x<s.x?1:3):(g.y<s.y?2:0);if(!c.cooldown){const behind=(s.x-g.x)*Math.cos(g.angle)+(s.y-g.y)*Math.sin(g.angle)<0;const unaware=fairAmbush(level)?g.hp===g.maxHp&&!sees(g,s.x,s.y,level):!g.seesPlayer;const damage=tacticalCombat(level)&&!s.securityAlarm&&unaware&&g.gunPhase==='ready'&&behind?50:25;spawnShot(s,s,Math.atan2(g.y-s.y,g.x-s.x),-1,damage);c.cooldown=12;}}
   else if(c.pathIndex>=c.path.length){clearOrder(c);c.feedback='cover';c.feedbackLeft=1;}
  }
- const point=c.path[c.pathIndex];if(point){if(walkActor(s,point,tacticalCombat(level)?(s.carrying?3.15:4.1):(s.carrying?2.8:3.4),dt,level)){if(Math.hypot(point.x-s.x,point.y-s.y)<.02)c.pathIndex++;}else{c.repath++;if(!setPath(s,c.path[c.path.length-1]!,level)){clearOrder(c);c.feedback='blocked';c.feedbackLeft=1;}}}
+ const point=c.path[c.pathIndex];if(point){const speed=(tacticalCombat(level)?(s.carrying?3.15:4.1):(s.carrying?2.8:3.4))*courierSpeedMultiplier(level);if(walkActor(s,point,speed,dt,level)){if(Math.hypot(point.x-s.x,point.y-s.y)<.02)c.pathIndex++;}else{c.repath++;if(!setPath(s,c.path[c.path.length-1]!,level)){clearOrder(c);c.feedback='blocked';c.feedbackLeft=1;}}}
  s.vx=(s.x-s.px)/dt;s.vy=(s.y-s.py)/dt;s.walked+=Math.hypot(s.x-s.px,s.y-s.py);if(Math.hypot(s.vx,s.vy)>.01)s.facing=Math.abs(s.vx)>Math.abs(s.vy)?(s.vx<0?1:3):(s.vy<0?2:0);
  if(c.order&&c.pathIndex>=c.path.length&&c.order.kind!=='attack'){
   const kind=c.order.kind;if(kind==='phone'){const phone=level.targets?.[s.delivered]??level.phone;if(Math.hypot(s.x-phone.x,s.y-phone.y)<.7){s.pickup+=dt;if(s.pickup>=(tacticalCombat(level)?.55:.4)-1e-8){s.carrying=true;s.securityAlarm=true;s.thefts++;s.pickup=0;clearOrder(c);}}else clearOrder(c);}

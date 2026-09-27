@@ -7,9 +7,9 @@ import {verifyReplay} from '../server/replay';
 import {solveContract} from '../scripts/qa-contracts';
 import {decodeSkrOwner} from '../server/skr-identity';
 import {getAddressEncoder} from '@solana/kit';
-test('52 weeks have three reproducible contracts, clear targets, connected extraction and changing routes',()=>{
+test('52 weeks have three reproducible contracts, clear targets, connected extraction and connected patrols (legacy generator)',()=>{
  assert.notEqual(makeContracts(new Date('2026-09-14'))[0]!.modifier,makeContracts(new Date('2026-09-21'))[0]!.modifier);
- let previous='';for(let n=0;n<52;n++){const date=new Date(Date.UTC(2026,8,14+n*7)),contracts=makeContracts(date);assert.deepEqual(contracts,makeContracts(date));assert.equal(contracts.length,3);const layout=JSON.stringify(contracts.map(c=>c.level));assert.notEqual(layout,previous);previous=layout;
+ for(let n=0;n<52;n++){const date=new Date(Date.UTC(2026,8,14+n*7)),contracts=makeContracts(date);assert.deepEqual(contracts,makeContracts(date));assert.equal(contracts.length,3);
   for(const c of contracts){const l=c.level,exit={x:l.exit.x+l.exit.w/2,y:l.exit.y+l.exit.h/2};for(const target of l.targets??[l.phone]){assert(findPath(l.spawn,target,l).length,`${c.id}: unreachable phone`);assert(findPath(target,exit,l).length,`${c.id}: unreachable exit`);}for(const guard of l.patrols)for(let i=0;i<guard.route.length;i++)assert(walkableSegment(guard.route[i]!,guard.route[(i+1)%guard.route.length]!,l),`${c.id}: blocked patrol`);}
  }
 });

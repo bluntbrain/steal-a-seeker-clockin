@@ -1,3 +1,5 @@
+import {exitWindowSeconds} from './ranked/exit-window';
+import TutorialHand from './components/TutorialHand';
 import MissionIntro from './components/MissionIntro';
 import {campaignLesson} from './onboarding/mission-lessons';
 import {HapticPressable as Pressable} from './feedback/HapticPressable';
@@ -122,10 +124,11 @@ export function Game({rankTicket,paidPlay,dailyReturn,paidReturn,onRankStart,onR
  const worldOverlayStyle=useAnimatedStyle(()=>{const c=camera.value,scale=size/12*c.zoom;return {transform:[{translateX:(c.zoom-1)*size/2-c.x*scale},{translateY:(c.zoom-1)*boardHeight/2-c.y*scale},{scale:c.zoom}]};});
  const damagePulse=useSharedValue(0);
  const showDamage=useCallback(()=>{haptic('damage');damagePulse.value=settingsRef.current.reducedEffects?.45:1;damagePulse.value=withTiming(0,{duration:settingsRef.current.reducedEffects?160:280});},[damagePulse,haptic]);
- const gameplayVisible=!introMission&&!sceneLoading&&!paused&&!hideoutOpen&&!walletOpen&&!mapOpen&&!settingsOpen&&!dailyOpen&&!paidOpen&&!rewardsOpen;
+ const renderGameSurface=!introMission&&!hideoutOpen&&!walletOpen&&!settingsOpen&&!dailyOpen&&!paidOpen&&!rewardsOpen&&!economy.checkoutOpen;
+ const gameplayVisible=renderGameSurface&&!introMission&&!sceneLoading&&!paused&&!hideoutOpen&&!walletOpen&&!mapOpen&&!settingsOpen&&!dailyOpen&&!paidOpen&&!rewardsOpen;
  useCombatAudio(hud,settings.sound&&gameplayVisible,settings.volume,showDamage,gameplayVisible,haptic);
  useEffect(()=>{if(!gameplayVisible||hud.ticks===0)damagePulse.value=0;},[gameplayVisible,hud.ticks===0,damagePulse]);
- useFootstepAudio(hud,settings.sound&&!sceneLoading&&!paused&&!hideoutOpen&&!walletOpen&&!mapOpen&&!settingsOpen&&!dailyOpen&&!paidOpen&&!rewardsOpen&&!(guide.active&&guide.waiting),settings.volume);
+ useFootstepAudio(hud,settings.sound&&gameplayVisible&&!(guide.active&&guide.waiting),settings.volume);
  const level=useMemo(()=>rankTicket?.manifest.contract?.level??(combatMode?combatLevel(mission):getLevel(mission)),[rankTicket?.manifest.contract?.level,combatMode,mission]);
  useLevelMusic(level.number,settings.sound&&gameplayVisible&&hud.status==='playing'&&!(guide.active&&guide.waiting),settings.volume,hud.securityAlarm);
  const progress=useProgress(),recorded=useRef(false),rankResolved=useRef(false);
@@ -186,7 +189,7 @@ export function Game({rankTicket,paidPlay,dailyReturn,paidReturn,onRankStart,onR
   runOnUI(()=>{'worklet';try{const state=restorePaidState(paidPlay.entry.manifest.mission,paidPlay.replay);game.value=state;input.value={...idleInput(),dash:state.dashSeen,tool:state.toolSeen};runOnJS(restored)({...state});}catch{runOnJS(restoreFailed)();}})();
  },[paidPlay,game,input,restored,restoreFailed]);
  useEffect(()=>{if(!paidEntry?.run)return;const check=()=>{const left=Math.max(0,Math.ceil((new Date(paidEntry.run!.expiresAt).getTime()-Date.now())/1000));setSubmissionSeconds(left);if(left===0){setDeadlinePassed(true);suspended.value=true;if(game.value.status==='playing')setPaused(true);}};check();const timer=setInterval(check,1000);return()=>clearInterval(timer);},[paidEntry,suspended,game]);
- useFrameCallback(frame=>{
+ const frameDriver=useFrameCallback(frame=>{
    const raw=frame.timeSincePreviousFrame;if(raw===null)return;
    if(suspended.value||!sceneReady.value){pendingTap.value=null;accumulator.value=0;return;}
    tapElapsed.value+=raw;
@@ -220,6 +223,7 @@ export function Game({rankTicket,paidPlay,dailyReturn,paidReturn,onRankStart,onR
    hudClock.value+=dt;
    if(hudClock.value>=.12||previousDamage!==(game.value.combat?.damageTaken??0)||previousTool!==game.value.toolSeen||previousCarry!==game.value.carrying||previousStatus!==game.value.status||previousDashes!==game.value.dashes){runOnJS(publish)({...game.value},simulationEpoch.value);hudClock.value=0;}
  });
+ useEffect(()=>{frameDriver.setActive(renderGameSurface&&!paused);return()=>frameDriver.setActive(false);},[renderGameSurface,paused,frameDriver]);
  const pause=useCallback((value:boolean)=>{
   if(!value&&paidEntry&&(!recoveryReady||recoveryError||deadlinePassed))return;
   suspended.value=value;pendingTap.value=null;previousTap.value=null;
@@ -236,7 +240,7 @@ export function Game({rankTicket,paidPlay,dailyReturn,paidReturn,onRankStart,onR
    if(Platform.OS!=='web')return;
    const keys=new Set<string>();
    const sync=()=>{if(combatMode)return;const x=Number(keys.has('d')||keys.has('arrowright'))-Number(keys.has('a')||keys.has('arrowleft'));const y=Number(keys.has('s')||keys.has('arrowdown'))-Number(keys.has('w')||keys.has('arrowup'));input.modify(v=>{v.x=x;v.y=y;v.interact=keys.has('e');return v;});};
-   const down=(e:KeyboardEvent)=>{const k=e.key.toLowerCase();if(introMission||walletOpen||hideoutOpen||mapOpen||settingsOpen||dailyOpen||paidOpen||rewardsOpen)return;if(['w','a','s','d','arrowup','arrowdown','arrowleft','arrowright','e',' ','escape','r','q'].includes(k))e.preventDefault();keys.add(k);sync();if(!combatMode&&k===' '&&!e.repeat)input.modify(v=>{v.dash++;return v;});if(!combatMode&&k==='q'&&!e.repeat)input.modify(v=>{v.tool=(v.tool??0)+1;return v;});if(k==='escape'&&!e.repeat)pause(!suspended.value);if(k==='r'&&!e.repeat){keys.clear();restart();}};
+   const down=(e:KeyboardEvent)=>{const k=e.key.toLowerCase();if(introMission||walletOpen||hideoutOpen||mapOpen||settingsOpen||dailyOpen||paidOpen||rewardsOpen)return;if(['w','a','s','d','arrowup','arrowdown','arrowleft','arrowright','e',' ','escape','r','q'].includes(k))e.preventDefault();keys.add(k);sync();if(!combatMode&&k===' '&&!e.repeat)input.modify(v=>{v.dash++;return v;});if(!combatMode&&k==='q'&&!e.repeat)input.modify(v=>{v.tool=(v.tool??0)+1;return v;});if(k==='escape'&&!e.repeat&&game.value.status==='playing')pause(!suspended.value);if(k==='r'&&!e.repeat){keys.clear();restart();}};
    const up=(e:KeyboardEvent)=>{keys.delete(e.key.toLowerCase());sync();};
    const blur=()=>{keys.clear();if(game.value.status==='playing')pause(true);};
    window.addEventListener('keydown',down);window.addEventListener('keyup',up);window.addEventListener('blur',blur);
@@ -259,7 +263,7 @@ export function Game({rankTicket,paidPlay,dailyReturn,paidReturn,onRankStart,onR
   runOnUI(()=>{'worklet';if(simulationEpoch.value!==expected||sceneReady.value)return;accumulator.value=0;focusProgress.value=reduced?1:0;if(reduced){sceneReady.value=true;return;}focusProgress.value=withTiming(1,{duration:650},finished=>{if(finished&&simulationEpoch.value===expected){accumulator.value=0;sceneReady.value=true;}});})();
  },[sceneVersion,sceneReady,simulationEpoch,accumulator,focusProgress]);
  const sceneFailed=useCallback(()=>{if(sceneEpoch.current===sceneVersion)setSceneError('Could not load the map. Try again.');},[sceneVersion]);
- useEffect(()=>{if(!sceneLoading)return;const timer=setTimeout(()=>setSceneError('The map is taking longer to load. Retry to reload its artwork.'),12000);return()=>clearTimeout(timer);},[sceneLoading,sceneVersion]);
+ useEffect(()=>{if(!sceneLoading||!renderGameSurface)return;const timer=setTimeout(()=>setSceneError('The map is taking longer to load. Retry to reload its artwork.'),12000);return()=>clearTimeout(timer);},[sceneLoading,sceneVersion,renderGameSurface]);
  const appearance=useMemo(()=>({...economy.equipment,reducedEffects:settings.reducedEffects}),[economy.equipment.outfit,economy.equipment.trail,economy.equipment.frame,economy.equipment.rack,settings.reducedEffects]);
  const joystick=Gesture.Pan().minDistance(0).onBegin(e=>{const dx=(e.x-54)/36,dy=(e.y-54)/36,m=Math.max(1,Math.hypot(dx,dy));input.modify(v=>{v.x=dx/m;v.y=dy/m;return v;});}).onUpdate(e=>{const dx=(e.x-54)/36,dy=(e.y-54)/36,m=Math.max(1,Math.hypot(dx,dy));input.modify(v=>{v.x=dx/m;v.y=dy/m;return v;});}).onFinalize(()=>{input.modify(v=>{v.x=0;v.y=0;return v;});});
  const take=Gesture.LongPress().minDuration(0).maxDistance(100).onBegin(()=>{input.modify(v=>{v.interact=true;return v;});}).onFinalize(()=>{input.modify(v=>{v.interact=false;return v;});});
@@ -271,13 +275,13 @@ export function Game({rankTicket,paidPlay,dailyReturn,paidReturn,onRankStart,onR
  const lureMessage=decoyMessage(hud),alarmOn=hud.securityAlarm&&hud.status==='playing';
  const relaySeconds=Math.ceil(Math.max(0,...hud.relayTimers));
  const entranceOpening=alarmOn&&level.patrols.some((g,i)=>g.reserveAfter!==undefined&&!hud.guards[i]?.spawned&&g.reserveAfter-hud.alarmSeconds<=4);
- const contextHint=combatMode?(encounterHint(hud)??(hud.combat?.feedbackLeft&&hud.combat.feedback==='ambush'?'AMBUSH · DOUBLE HIT':hud.combat?.feedbackLeft&&hud.combat.feedback==='blocked'?'Tap nearby floor to redirect':hud.combat?.feedbackLeft&&hud.combat.feedback==='cover'?'Behind cover · choose another position':level.exitWindow?`EXIT ${exitOpen(hud)?'OPEN':'WAIT'} · ${Math.ceil(level.exitWindow.period-(hud.elapsed+level.exitWindow.phase)%level.exitWindow.period)}s`:entranceOpening?'SECURITY DOOR OPENING · KEEP CLEAR':alarmOn?'PHONE TAKEN · GET OUT':'')):level.exitWindow?`EXIT ${exitOpen(hud)?'OPEN':'LOCKED'} · ${Math.ceil(level.exitWindow.period-(hud.elapsed+level.exitWindow.phase)%level.exitWindow.period)}s cycle`:relaySeconds>0?`Relay door open · ${relaySeconds}s`:pad?(pad.kind==='relay'?`Stop · ACT opens door for ${pad.duration??9}s`:'Stop · ACT switches circuits'):activeTake&&!hud.carrying?'Stop · hold TAKE':lureMessage|| (hud.alert>0?'Spotted! Break their line of sight.':alarmOn?`PHONE TRACKED · guards +${alarmSpeedPercent(hud)}%`:'');
+ const contextHint=combatMode?(encounterHint(hud)??(hud.combat?.feedbackLeft&&hud.combat.feedback==='ambush'?'AMBUSH · DOUBLE HIT':hud.combat?.feedbackLeft&&hud.combat.feedback==='blocked'?'Tap nearby floor to redirect':hud.combat?.feedbackLeft&&hud.combat.feedback==='cover'?'Behind cover · choose another position':level.exitWindow?`EXIT ${exitOpen(hud)?'OPEN':'WAIT'} · ${exitWindowSeconds(level.exitWindow,hud.elapsed)}s`:entranceOpening?'SECURITY DOOR OPENING · KEEP CLEAR':alarmOn?'PHONE TAKEN · GET OUT':'')):level.exitWindow?`EXIT ${exitOpen(hud)?'OPEN':'LOCKED'} · ${exitWindowSeconds(level.exitWindow,hud.elapsed)}s`:relaySeconds>0?`Relay door open · ${relaySeconds}s`:pad?(pad.kind==='relay'?`Stop · ACT opens door for ${pad.duration??9}s`:'Stop · ACT switches circuits'):activeTake&&!hud.carrying?'Stop · hold TAKE':lureMessage|| (hud.alert>0?'Spotted! Break their line of sight.':alarmOn?`PHONE TRACKED · guards +${alarmSpeedPercent(hud)}%`:'');
  const damageStyle=useAnimatedStyle(()=>({opacity:damagePulse.value}));
  const alarmWash=useAnimatedStyle(()=>({opacity:game.value.securityAlarm&&game.value.status==='playing'&&!suspended.value&&!settings.reducedEffects?.025+.04*(.5+.5*Math.sin(clock.value*2.5)):0}));
  const alarmBorder=useAnimatedStyle(()=>({opacity:game.value.securityAlarm&&game.value.status==='playing'&&!suspended.value?(settings.reducedEffects?.35:.4+.25*(.5+.5*Math.sin(clock.value*2.5))):0}));
  return <SafeAreaView style={s.screen} edges={['top','bottom']}><StatusBar style="light"/><RewardsPanel onLegacy={()=>{setRewardsOpen(false);setPaidOpen(true);}} visible={rewardsOpen} onClose={()=>closeOverlay(setRewardsOpen)}/><WalletPanel visible={walletOpen} onClose={()=>closeOverlay(setWalletOpen)}/><Hideout onContractStart={ticket=>{setHideoutOpen(false);onRankStart(ticket);}} initialTab={dailyReturn?'leaderboard':economy.tab} visible={hideoutOpen} onStart={introduceMission} onClose={()=>setHideoutOpen(false)} onShop={()=>{setReturnHome(true);setHideoutOpen(false);setWalletOpen(true);}} progress={progress.progress} syncStatus={progress.syncStatus} onSync={()=>void progress.retrySync()} onSettings={()=>{setReturnHome(true);setHideoutOpen(false);setSettingsOpen(true);}} onDaily={()=>{setHideoutOpen(false);setDailyOpen(true);}} onPaid={()=>{setReturnHome(true);setHideoutOpen(false);setRewardsOpen(true);}}/><SettingsPanel onReplayTips={()=>{setReturnHome(false);combatMode?guide.replay():coach.replay();setSettingsOpen(false);setHideoutOpen(false);restart("practice");}} mission={mission} visible={settingsOpen} onClose={()=>closeOverlay(setSettingsOpen)}/><DailyPanel visible={dailyOpen} onClose={()=>{setDailyOpen(false);setHideoutOpen(true);}} onStart={ticket=>{setDailyOpen(false);onRankStart(ticket);}}/><PaidPanel visible={paidOpen} onClose={()=>closeOverlay(setPaidOpen)} onStart={play=>{setPaidOpen(false);onPaidStart(play);}}/><View style={[s.shell,{width:fullViewport?width:Math.max(size+16,Math.min(width,460)),paddingHorizontal:fullViewport?0:8}]}>
    <View testID="gameplay-topbar" style={[s.header,fullViewport&&{paddingHorizontal:8}]}>
-    <Pressable accessibilityRole="button" accessibilityLabel={paidEntry?'Save and leave paid attempt':rankTicket?'Leave daily challenge':'Open missions'} onPress={()=>{if(timedRun)restart();else{pause(true);trial.active?trial.finish():setHideoutOpen(true);}}} style={s.iconButton}><Text style={s.iconText}>‹</Text></Pressable>
+    <Pressable accessibilityRole="button" accessibilityLabel={paidEntry?'Save and leave paid attempt':rankTicket?(rankTicket.manifest.contract?'Leave weekly mission':'Leave daily challenge'):'Open missions'} onPress={()=>{if(timedRun)restart();else{pause(true);trial.active?trial.finish():setHideoutOpen(true);}}} style={s.iconButton}><Text style={s.iconText}>‹</Text></Pressable>
     <View style={s.missionHeading}><Text style={s.levelName} numberOfLines={1}>{testMission?'TEST / '+String(level.number).padStart(2,'0'):process.env.EXPO_PUBLIC_JUDGE_PREVIEW==='1'?'JUDGE / '+String(level.number).padStart(2,'0'):trial.active?'TRIAL':rankTicket?(rankTicket.practice?'PRACTICE':rankTicket.manifest.contract?'RANKED':'DAILY'):String(level.number).padStart(2,'0')} · {level.title}</Text><View style={s.runMetrics}>
     {(level.targets?.length??1)>1&&<Text accessibilityLabel={`Phones delivered ${hud.delivered} of ${level.targets!.length}`} style={s.charge}>▯ {hud.delivered}/{level.targets!.length}</Text>}
     <Text accessibilityLabel={paidEntry?'Submission time remaining':'Run time'} style={s.timer}>{time(paidEntry?submissionSeconds:hud.elapsed)}</Text>
@@ -285,11 +289,11 @@ export function Game({rankTicket,paidPlay,dailyReturn,paidReturn,onRankStart,onR
     {!combatMode&&hud.carrying&&<Text accessibilityLabel={`Phone charge ${hud.battery} percent`} style={s.charge}>{hud.battery}%</Text>}
     </View></View>
     <CreditBalance onPress={()=>{pause(true);economy.openCredits();}}/>
-    <Pressable accessibilityRole="button" accessibilityLabel={paused?'Resume game':'Pause game'} onPress={()=>pause(!paused)} style={s.iconButton}><Text style={s.iconText}>{paused?'▷':'Ⅱ'}</Text></Pressable>
+    <Pressable accessibilityRole="button" accessibilityLabel={paused?'Resume game':'Pause game'} disabled={hud.status!=='playing'} onPress={()=>{if(game.value.status==='playing')pause(!paused);}} style={s.iconButton}><Text style={s.iconText}>{paused?'▷':'Ⅱ'}</Text></Pressable>
    </View>
    <View style={{width:size+2,height:boardHeight+2}}><GestureDetector gesture={combatMode?tapBoard:Gesture.Tap().enabled(false)}><View testID="game-board" style={[s.board,{width:size+2,height:boardHeight+2}]}>
-    <GameCanvas key={sceneVersion} onReady={sceneLoaded} onLoadError={sceneFailed} camera={camera} size={size} height={boardHeight} input={input} game={game} alpha={alpha} clock={clock} level={level} appearance={appearance}/>
-    {!settings.reducedEffects&&<MissionFocus progress={focusProgress} game={game} camera={camera} width={size} height={boardHeight}/>}
+    {renderGameSurface&&<GameCanvas key={sceneVersion} onReady={sceneLoaded} onLoadError={sceneFailed} camera={camera} size={size} height={boardHeight} input={input} game={game} alpha={alpha} clock={clock} level={level} appearance={appearance}/>}
+    {renderGameSurface&&!settings.reducedEffects&&<MissionFocus progress={focusProgress} game={game} camera={camera} width={size} height={boardHeight}/>}
     <Animated.View pointerEvents="none" testID="camera-world-overlays" style={[{position:'absolute',left:0,top:0,width:size,height:boardHeight},worldOverlayStyle]}>
     {combatMode&&<SecurityEntrances level={level} state={hud} size={size} reduced={!!settings.reducedEffects}/>}
     <MechanismLabels level={level} state={hud} size={size}/>
@@ -301,7 +305,7 @@ export function Game({rankTicket,paidPlay,dailyReturn,paidReturn,onRankStart,onR
 
     {!!(contextHint||coach.text)&&!paused&&hud.status==='playing'&&<View pointerEvents="none" testID="security-banner" accessibilityLiveRegion="polite" style={[s.contextToast,alarmOn&&{backgroundColor:'#3A171FEF'}]}><Text style={s.contextText} numberOfLines={2}>{contextHint||coach.text}</Text></View>}
     {!!coach.text&&!paused&&<Pressable accessibilityRole="button" accessibilityLabel="Skip movement tips" onPress={coach.dismiss} style={{position:"absolute",bottom:5,right:5,padding:10,borderRadius:12,backgroundColor:"#142923EC"}}><Text style={s.contextText}>Skip tips ×</Text></Pressable>}
-    {guide.active&&hud.status==='playing'&&<View pointerEvents="none" style={StyleSheet.absoluteFill}><View testID="tutorial-target" style={{position:'absolute',left:(teachingTarget?.x??0)*size/12-23,top:(teachingTarget?.y??0)*size/12-23,width:46,height:46,borderRadius:23,borderWidth:3,borderColor:'#DEFFD9',backgroundColor:'#BCECCB30'}}/><View style={{position:'absolute',bottom:8,left:8,right:8,padding:9,borderRadius:12,backgroundColor:'#142923F5'}}><Text testID="tutorial-instruction" style={[s.contextText,{fontSize:12,fontWeight:'700'}]}>{GUIDE_STEPS[guide.stage]!.text}</Text></View></View>}
+    {guide.active&&hud.status==='playing'&&<View pointerEvents="none" style={StyleSheet.absoluteFill}><View testID="tutorial-target" style={{position:'absolute',left:(teachingTarget?.x??0)*size/12-23,top:(teachingTarget?.y??0)*size/12-23,width:46,height:46,borderRadius:23,borderWidth:3,borderColor:'#DEFFD9',backgroundColor:'#BCECCB30'}}/>{guide.waiting&&teachingTarget&&gameplayVisible&&<TutorialHand x={teachingTarget.x*size/12} y={teachingTarget.y*size/12} width={size} height={boardHeight} reduced={!!settings.reducedEffects}/>}<View style={{position:'absolute',bottom:8,left:8,right:8,padding:9,borderRadius:12,backgroundColor:'#142923F5'}}><Text testID="tutorial-instruction" style={[s.contextText,{fontSize:12,fontWeight:'700'}]}>{GUIDE_STEPS[guide.stage]!.text}</Text></View></View>}
     {guide.active&&<Pressable accessibilityRole="button" accessibilityLabel="Skip combat tutorial" onPress={guide.dismiss} style={{position:'absolute',top:36,right:8,padding:10,backgroundColor:'#142923EC',borderRadius:10}}><Text style={s.contextText}>Skip guide</Text></Pressable>}
    </View></GestureDetector>
    </View>

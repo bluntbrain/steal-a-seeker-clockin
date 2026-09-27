@@ -4,6 +4,7 @@ import {StyleSheet,Text,View} from 'react-native';
 import {Canvas,Path} from '@shopify/react-native-skia';
 import {combatLevel} from '../game/combat-levels';
 import {phoneEdition} from '../game/collection';
+import {courierSpeedBonus} from '../game/courier-speed';
 import type {MissionId} from '../game/level';
 import MissionPreview from './MissionPreview';
 
@@ -16,6 +17,7 @@ export default function MissionBriefing({mission,available,onBack,onPlay}:{missi
  const initial=level.patrols.filter(p=>p.reserveAfter===undefined).length,reserves=level.patrols.length-initial;
  const size=Math.max(1,Math.min(area.width-2,(area.height-2)*level.width/level.height));
  const target=`${String(Math.floor(level.targetSeconds/60)).padStart(2,'0')}:${String(level.targetSeconds%60).padStart(2,'0')}`;
+ const speedBonus=courierSpeedBonus(level);
  return <View testID="campaign-briefing" style={s.screen}>
   <View style={s.heading}><Pressable accessibilityRole="button" accessibilityLabel="Back to district map" onPress={onBack} style={s.back}><Text style={s.backArrow}>‹</Text></Pressable><View style={s.headingText}><Text style={s.eyebrow}>LEVEL {String(level.number).padStart(2,'0')}</Text><Text accessibilityRole="header" numberOfLines={1} adjustsFontSizeToFit minimumFontScale={.75} style={s.title}>{level.title.toUpperCase()}</Text></View></View>
   <View style={s.scene} onLayout={event=>{const {width,height}=event.nativeEvent.layout;setArea(old=>old.width===width&&old.height===height?old:{width,height});}}>
@@ -24,6 +26,7 @@ export default function MissionBriefing({mission,available,onBack,onPlay}:{missi
   <View style={s.details}>
    <View style={s.stats}><View style={s.stat}><StatIcon kind="guards"/><View><Text style={s.value}>{initial}</Text><Text style={s.label}>Patrol guards</Text></View></View><View style={s.stat}><StatIcon kind="clock"/><View><Text style={s.value}>{target}</Text><Text style={s.label}>Target time</Text></View></View></View>
    <View style={s.stats}><View style={s.stat}><StatIcon kind="reserve"/><View><Text style={s.value}>{reserves}</Text><Text style={s.label}>Alarm reinforcements</Text></View></View><View style={s.stat}><StatIcon kind="phone"/><View style={{flex:1}}><Text style={[s.value,{fontSize:12}]} numberOfLines={1}>{edition.name}</Text><Text style={s.label}>{level.targets?.length??1} phone{(level.targets?.length??1)>1?'s':''} · reach the exit</Text></View></View></View>
+   <Text testID="courier-speed-bonus" style={[s.footnote,{color:'#C8EDDF',fontWeight:'700'}]}>{speedBonus?`Courier speed +${speedBonus}% · Levels ${speedBonus===8?'5–8':'9–12'}`:'Courier speed · Standard for levels 1–4'}</Text>
    <Pressable accessibilityRole="button" accessibilityLabel={`Start ${level.title}`} disabled={!available} hapticCue="start" onPress={onPlay} style={({pressed})=>[s.play,!available&&s.locked,pressed&&{opacity:.8}]}><Text style={[s.playText,!available&&{color:'#96A7A1'}]}>{available?'PLAY  →':'LOCKED'}</Text></Pressable>
    <Text numberOfLines={2} style={s.footnote}>{available?(level.switches?.length?'Tap the power switch to open the locked gate. Then take the Seeker and escape.':level.briefing):'Clear the previous mission to unlock this heist.'}</Text>
   </View>

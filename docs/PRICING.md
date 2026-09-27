@@ -6,7 +6,7 @@ Open Railway → steal-a-seeker-clockin → production → seeker-api → Variab
 
 | Setting | Value | Meaning |
 |---|---:|---|
-| TEST_PRICING | true | Reduced test prices. Set false for the live profile. Does not change Mainnet to devnet. |
+| TEST_PRICING | false | Normal prices active since 25 September 2026. Set true only for reduced-price testing. Does not change Mainnet to devnet. |
 | GAME_PASS_SKR | 500 | Live pass price in SKR |
 | GAME_PASS_USD_CENTS | 1000 | Live pass price in SOL targets $10 |
 | TEST_GAME_PASS_SKR | 1 | Test pass price in SKR |
@@ -50,4 +50,4 @@ An existing token-payment order retains its exact snapshotted amount, currency a
 
 Version 0.3.2 already supports backend pass and checkout prices, but its store tiles use bundled values. Version 0.3.3 adds dynamic credit-pack tiles and credit redemption costs. For older apps, changing an outfit cost rejects stale redemption requests rather than charging an unseen price; update to 0.3.3.
 
-Do not change treasury keys, mint, network, credit rewards or prize settings to adjust prices. Weekly token prizes remain inactive. This work preserves TEST_PRICING=true.
+Do not change treasury keys, mint, network, credit rewards or prize settings to adjust prices. Weekly token prizes remain inactive. Normal pricing was enabled on 25 September 2026 with TEST_PRICING=false and SHOP_PRICE_DIVISOR=1. Public catalog and checkout pricing were read back successfully: Game Pass 500 SKR or $10 worth of SOL; credit packs $1/$2.50/$5; regular outfits 20 SKR; Solana character skins 100 SKR, with SOL conversions available.

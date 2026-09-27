@@ -1,5 +1,5 @@
 import {AppState} from 'react-native';
-import {exclusiveWalletSession,freshPaymentAuthorization} from './session-guard';
+import {exclusiveWalletSession,freshPaymentAuthorization,joinWalletConnection} from './session-guard';
 import {useMemo} from 'react';
 import type {Transaction,TransactionWithBlockhashLifetime} from '@solana/kit';
 import {sendWithWallet} from './sendWithWallet';
@@ -54,7 +54,7 @@ export function useLoggedWallet(){
     return result;
    });
   }
-  const connect:typeof mobile.connect=()=>session('mwa.connect',wallet=>auth.authorizeSession(wallet));
+  const connect:typeof mobile.connect=()=>joinWalletConnection(()=>session('mwa.connect',wallet=>auth.authorizeSession(wallet)));
   const signIn:typeof mobile.signIn=payload=>{
    let wireResult:AuthorizationResult['sign_in_result'];
    return session('mwa.sign-in',wallet=>signInWithFallback(payload,async()=>{

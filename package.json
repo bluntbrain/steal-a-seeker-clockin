@@ -1,6 +1,6 @@
 {
   "name": "steal-a-seeker-mvp",
-  "version": "0.3.23",
+  "version": "0.3.30",
   "private": true,
   "main": "index.ts",
   "scripts": {

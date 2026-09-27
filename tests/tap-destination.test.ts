@@ -34,11 +34,11 @@ test('a wall tap is recorded as its resolved destination and the existing server
  const verified=verifyReplay('practice',{version:2,chunks},l);assert.equal(verified.ticks,s.ticks);assert.equal(verified.hp,s.combat!.hp);
 });
 
-test('assisted taps preserve all eight guided tutorial actions',async()=>{
+test('assisted taps preserve the introductory actions then release the player',async()=>{
  const {GUIDE_STEPS,guideCommand,guideDone,guideTarget}=await import('../src/onboarding/combat-guide');
  const l=combatLevel('practice'),s=initialState('practice',l);
  for(let i=0;i<GUIDE_STEPS.length;i++){const target=guideTarget(i,s)!;const command=guideCommand(i,assistedCombatTap(s,target.x,target.y,i+1));assert(command,`Guide action ${i} accepted`);step(s,{...idleInput(),command});let budget=600;while(!guideDone(i,s)&&s.status==='playing'&&budget--)step(s,idleInput());assert(guideDone(i,s),`Guide action ${i} completed`);}
- assert.equal(s.status,'won');
+ assert.equal(s.status,'playing');assert.equal(s.combat!.kills,1);
 });
 
 

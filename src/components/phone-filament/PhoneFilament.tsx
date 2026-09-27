@@ -1,13 +1,14 @@
 import React,{useEffect,useMemo,useRef} from 'react';
 import {PanResponder,PixelRatio,StyleSheet,Text,View} from 'react-native';
-import {FilamentScene,FilamentView,EnvironmentalLight,Light,ModelRenderer,RenderCallbackContext,useFilamentContext,useModel,type FrameInfo} from 'react-native-filament';
-import {Worklets,useSharedValue,type ISharedValue} from 'react-native-worklets-core';
+import {FilamentScene,FilamentView,EnvironmentalLight,Light,ModelRenderer,RenderCallbackContext,useFilamentContext,useModel} from 'react-native-filament';
+import {useSharedValue,type ISharedValue} from 'react-native-worklets-core';
 import {HapticPressable as Pressable} from '../../feedback/HapticPressable';
 import {PHONE_EDITIONS} from '../../game/collection';
 import {PHONE_DEFAULT_POSE,PHONE_PRESETS,dragPhone,pinchPhone,type PhonePose} from '../phoneCamera';
+import {watchPhoneFrame} from './frame-readiness';
 
 // No screen-size texture atlas: only the chosen local, optimized model is loaded.
-export default function PhoneFilament({index,height,uri,onReady}:{index:number;height:number;uri:string;onReady:()=>void}){
+export default function PhoneFilament({index,height,uri,onReady,interactive=false}:{index:number;height:number;uri:string;onReady:()=>void;interactive?:boolean}){
   const pose=useSharedValue<PhonePose>({...PHONE_DEFAULT_POSE});
   const start=useRef({...PHONE_DEFAULT_POSE}),touch=useRef({count:0,x:0,y:0,span:0});
   const maxScale=Math.min(1,2/PixelRatio.get());
@@ -23,28 +24,28 @@ export default function PhoneFilament({index,height,uri,onReady}:{index:number;h
     },onPanResponderTerminationRequest:()=>true,
   }),[pose]);
   return <View style={{gap:12}}>
-    <View testID="phone-filament" accessibilityLabel={`Interactive ${PHONE_EDITIONS[index]!.name} 3D phone. Drag in any direction or pinch to zoom.`} style={{height,borderRadius:20,overflow:'hidden',backgroundColor:'#101A21'}} {...gesture.panHandlers}>
+    <View testID="phone-filament" accessibilityLabel={`Interactive ${PHONE_EDITIONS[index]!.name} 3D phone. Drag in any direction or pinch to zoom.`} pointerEvents={interactive?'auto':'none'} style={{height,borderRadius:20,overflow:'hidden',backgroundColor:'#101A21'}} {...gesture.panHandlers}>
       <FilamentScene backend="opengl" antiAliasing="FXAA" postProcessing shadowing={false} screenSpaceRefraction={false}
         temporalAntiAliasingOptions={{enabled:true,feedback:0.2,filterWidth:0.75,sharpness:0.15}}
         dynamicResolutionOptions={resolution} frameRateOptions={{interval:1,headRoomRatio:0.1}}>
         <Scene uri={uri} pose={pose} onReady={onReady}/>
       </FilamentScene>
-      <Text pointerEvents="none" style={styles.hint}>DRAG TO ROTATE · PINCH TO ZOOM</Text>
+      {interactive&&<Text pointerEvents="none" style={styles.hint}>DRAG TO ROTATE · PINCH TO ZOOM</Text>}
     </View>
-    <View style={styles.presets}>{Object.entries(PHONE_PRESETS).map(([name,value])=><Pressable key={name} accessibilityRole="button" accessibilityLabel={`Show phone ${name.toLowerCase()}`} onPress={()=>{pose.value={...value};}} style={styles.preset}><Text style={styles.presetText}>{name}</Text></Pressable>)}</View>
+    <View pointerEvents={interactive?'auto':'none'} accessibilityElementsHidden={!interactive} importantForAccessibility={interactive?'auto':'no-hide-descendants'} style={[styles.presets,{opacity:interactive?1:0}]}>{Object.entries(PHONE_PRESETS).map(([name,value])=><Pressable key={name} accessibilityRole="button" accessibilityLabel={`Show phone ${name.toLowerCase()}`} onPress={()=>{pose.value={...value};}} style={styles.preset}><Text style={styles.presetText}>{name}</Text></Pressable>)}</View>
   </View>;
 }
 function Scene({uri,pose,onReady}:{uri:string;pose:ISharedValue<PhonePose>;onReady:()=>void}){
   const source=useMemo(()=>({uri}),[uri]),model=useModel(source);
-  const ready=useSharedValue(false),frames=useSharedValue(0);
-  const notifyReady=useMemo(()=>Worklets.createRunOnJS(onReady),[onReady]);
-  useEffect(()=>{ready.value=model.state==='loaded';},[model.state,ready]);
-  const rendered=useSharedValue(false);
-  const onFrame=({timeSinceLastFrame}:FrameInfo)=>{
-    'worklet';
-    if(ready.value&&!rendered.value){frames.value+=1;if(frames.value>=3){rendered.value=true;notifyReady();}}
-  };
-  return <FilamentView style={StyleSheet.absoluteFillObject} renderCallback={onFrame}>
+  const {view}=useFilamentContext();
+  useEffect(()=>{
+    if(model.state!=='loaded')return;
+    const ids=new Set(model.asset.getRenderableEntities().map(entity=>entity.id));
+    // A loaded CPU asset and a few callbacks do not prove the GPU drew it.
+    // A pick query resolves after rendering and confirms geometry at the centre.
+    return watchPhoneFrame(view,ids,PixelRatio.get(),onReady);
+  },[model.state==='loaded'?model.asset:undefined,view,onReady]);
+  return <FilamentView style={StyleSheet.absoluteFillObject}>
     <EnvironmentalLight source={{uri:'RNF_default_env_ibl.ktx'}} intensity={26000}/>
     <Light type="directional" direction={[-0.4,-0.6,-1]} intensity={16000} colorKelvin={6000} castShadows={false}/>
     <Light type="directional" direction={[0.5,-0.2,1]} intensity={24000} colorKelvin={7200} castShadows={false}/>

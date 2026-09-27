@@ -10,7 +10,7 @@ import {encounterHint} from '../src/controls/encounterHint';
 
 function arena():LevelDefinition{
  const l=combatLevel('cone-lesson'),base={...l.patrols[0]!,speed:0,pursuitSpeed:2.4,range:3.5,roam:undefined,spotSeconds:.4,pauseSeconds:0};
- return {...l,number:7,spawn:{x:4,y:8},phone:{x:2,y:3},exit:{x:5.4,y:17.4,w:1.2,h:1.2},blockers:l.blockers.slice(0,4),
+ return {...l,combat:{version:2,revision:10},number:7,spawn:{x:4,y:8},phone:{x:2,y:3},exit:{x:5.4,y:17.4,w:1.2,h:1.2},blockers:l.blockers.slice(0,4),
   encounter:{junctions:[{x:4,y:10},{x:7,y:9}],pockets:[],islands:[],grates:[],routes:{approach:[],escape:[],fast:[]}},
   patrols:[{...base,combatRole:'drone',kind:'scanner',route:[{x:4,y:6},{x:4,y:7}]},
    {...base,combatRole:'scout',kind:undefined,range:.1,route:[{x:6,y:6},{x:6,y:5}]},
@@ -133,7 +133,7 @@ test('a hidden guard cannot steal the tap intended for an objective in revision 
  l.combat={version:2,revision:9};assert.equal(combatTap(s,6,10,1).kind,'attack','Historic command selection remains unchanged');
 });
 test('all heist pockets, entrances, route hints and guard anchors are traversable',()=>{
- for(const id of CAMPAIGN_IDS.slice(1)){const l=combatLevel(id);assert.equal(l.combat?.revision,10);
+ for(const id of CAMPAIGN_IDS.slice(1)){const l=combatLevel(id);assert.equal(l.combat?.revision,13);
   const points=[l.spawn,...(l.targets??[l.phone]),...(l.encounter?.junctions??[]),...(l.encounter?.pockets??[]),...(l.switches??[]),...l.patrols.flatMap(g=>g.roam??g.route)];
   for(const p of points){assert(walkableSegment(p,p,l),`${id}: point in a wall ${JSON.stringify(p)}`);assert(findPath(l.spawn,p,l).length,`${id}: disconnected point`);}
   const length=(points:Point[])=>{let from=l.spawn,distance=0;for(const target of points)for(const p of findPath(from,target,l)){distance+=Math.hypot(p.x-from.x,p.y-from.y);from=p;}return distance;};
