@@ -68,8 +68,8 @@ export default function GuardLayer({game,alpha,index,clock,reduced=false,droneSp
    </>}
   </Group></Group></Group>
   <Group transform={bar} opacity={live}><Group opacity={alertOpacity}><Circle cx={barWidth/2} cy={-.32} r={.19} color="#14221F"/><RoundedRect x={barWidth/2-.025} y={-.45} width={.05} height={.16} r={.02} color={alertColor}/><Circle cx={barWidth/2} cy={-.22} r={.03} color={alertColor}/></Group><Circle cx={barWidth/2} cy={-.18} r={.13} color="#CFE6E4" opacity={listening}/><Circle cx={barWidth/2} cy={-.18} r={.065} color="#243F48" opacity={listening}/>
-   <RoundedRect x={0} y={0} width={barWidth} height={.10} r={.04} color="#152023"/>
-   <RoundedRect x={0} y={0} width={width} height={.10} r={.04} color={game.value.combat?'#BAE8CD':'#ff8169'}/>
+   {!game.value.combat&&<RoundedRect x={0} y={0} width={barWidth} height={.10} r={.04} color="#152023"/>}
+   {!game.value.combat&&<RoundedRect x={0} y={0} width={width} height={.10} r={.04} color="#ff8169"/>}
   </Group>
  </Group>
  <Group transform={burstPose} opacity={burst}><Circle cx={0} cy={0} r={radius} color="#BDEADB" style="stroke" strokeWidth={.035}/><Path path={sparks} color={armor?'#E9C77D':'#CCF7E7'} style="stroke" strokeWidth={.065} strokeCap="round"/></Group>

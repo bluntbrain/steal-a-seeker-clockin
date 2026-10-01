@@ -1,3 +1,5 @@
+import KnifeLayer from './KnifeLayer';
+import ActorHealthBars from './ActorHealthBars';
 import React,{memo,useMemo,useEffect} from 'react';
 import {Canvas,Group,Picture,Image,Atlas,Circle,RoundedRect,Oval,Line,Path,Skia,DashPathEffect,useImage,useRSXformBuffer} from '@shopify/react-native-skia';
 import {useDerivedValue,type SharedValue} from 'react-native-reanimated';
@@ -52,13 +54,14 @@ export default memo(function GameCanvas({camera,size,height=size*20/12,input,gam
  const phoneTransforms=useMemo(()=>[Skia.RSXform(phoneScale,0,-phoneFrame.width/2*phoneScale,0)],[phoneIndex]);
  const carryTransforms=useMemo(()=>[Skia.RSXform(.48/phoneFrame.height,0,0,0)],[]);
  const sprite=useImage(costumeAtlas(appearance.outfit),onLoadError);
+ const knife=useImage(require('../../assets/weapons/knife-v1/knife.png'),onLoadError);
  // Each scene is keyed by the parent. Never acknowledge a previous district's
  // retained image while a new source is decoding. Let the new canvas paint first.
  useEffect(()=>{
-  if(!wallTexture||!floor||!phones||!sprite||!droneSprite||!guardSprite||!heavySprite)return;
+  if(!knife||!wallTexture||!floor||!phones||!sprite||!droneSprite||!guardSprite||!heavySprite)return;
   let second=0;const first=requestAnimationFrame(()=>{second=requestAnimationFrame(()=>onReady?.());});
   return()=>{cancelAnimationFrame(first);cancelAnimationFrame(second);};
- },[wallTexture,floor,phones,sprite,droneSprite,guardSprite,heavySprite,onReady]);
+ },[knife,wallTexture,floor,phones,sprite,droneSprite,guardSprite,heavySprite,onReady]);
  const reduced=!!appearance.reducedEffects;
  const x=useDerivedValue(()=>game.value.px+(game.value.x-game.value.px)*alpha.value);
  const y=useDerivedValue(()=>game.value.py+(game.value.y-game.value.py)*alpha.value);
@@ -114,12 +117,15 @@ export default memo(function GameCanvas({camera,size,height=size*20/12,input,gam
 
    <Group clip={courierClip}>
    <Oval rect={shadow} color="#070c0d" opacity={.7}/>
+   <KnifeLayer game={game} alpha={alpha} reduced={reduced} behind/>
    {sprite && <Atlas image={sprite} sprites={sprites} transforms={transforms}/>}
+   <KnifeLayer game={game} alpha={alpha} reduced={reduced}/>
    <Group transform={carriedTransform} opacity={carry}>
     <Atlas image={phones} sprites={phoneSprites} transforms={carryTransforms}/>
    </Group>
    </Group>
-   {!!level.combat&&<CombatLayer game={game} alpha={alpha} input={input}/>}
+   {!!level.combat&&<CombatLayer game={game} alpha={alpha} input={input} reduced={reduced}/>}
+   {!!level.combat&&<ActorHealthBars game={game} alpha={alpha}/>}
   </Group>
   <CameraSignals camera={camera} game={game} size={size} height={height}/>
  </Canvas>;

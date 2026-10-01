@@ -8,6 +8,8 @@ export const PRE_SCOUT_RULES='7f90be28b3c04449c9b16ad06de65b5bc688aac1c0de36b2e7
 const previousTargets=[100,65,65,65,65,65,65,100,80,80,80,80];
 const roamingTargets=[100,75,75,75,90,90,90,125,90,100,100,100];
 export function campaignCreditTarget(hash:string,mission:MissionId):number|undefined{
+ // Preserve the pre-targeting campaign rewards during rollout.
+ if(hash==='a44303bf08233f54f9edc45d156f1d9f7400ab6a00f982dd1355b94cb1a1c26a'||hash==='6def64a8028a9aacdd926441f15e07135318a88609042d9a17a635b94367d354')return [100,65,65,80,80,80,80,115,95,95,95,95][CAMPAIGN_IDS.indexOf(mission)];
  if(hash===rules.rulesHash)return combatLevel(mission).targetSeconds;
  // Codes 29–32 retain their original sight ranges and reward thresholds.
  if(hash==='07efc6e9b1a109c2af85397b2a0b87633c6378f6236d8533f5a29835068b79fd')return [100,65,65,80,80,80,80,115,95,95,95,95][CAMPAIGN_IDS.indexOf(mission)];

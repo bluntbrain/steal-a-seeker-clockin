@@ -4,7 +4,17 @@ import {TUNING,type LevelDefinition,type Point} from './level';
 // already standing on valid patrol lanes, making decoys appear to do nothing.
 const RADIUS=TUNING.radius;
 function blocked(x:number,y:number,level:LevelDefinition){'worklet';for(const b of level.blockers)if(intersectsBox(x,y,b,RADIUS))return true;return false;}
-export function walkableSegment(a:Point,b:Point,level:LevelDefinition){'worklet';const steps=Math.max(1,Math.ceil(Math.hypot(a.x-b.x,a.y-b.y)/.08));for(let i=0;i<=steps;i++)if(blocked(a.x+(b.x-a.x)*i/steps,a.y+(b.y-a.y)*i/steps,level))return false;return true;}
+export function walkableSegment(a:Point,b:Point,level:LevelDefinition){'worklet';const steps=Math.max(1,Math.ceil(Math.hypot(a.x-b.x,a.y-b.y)/.08));
+ if((level.combat?.revision??0)>=15){
+  // Same sample positions/circle collision as legacy, but reject distant boxes
+  // once per segment instead of visiting every wall at every sample.
+  const minX=Math.min(a.x,b.x)-RADIUS,maxX=Math.max(a.x,b.x)+RADIUS,minY=Math.min(a.y,b.y)-RADIUS,maxY=Math.max(a.y,b.y)+RADIUS;
+  for(const box of level.blockers){
+   if(box.x>maxX||box.x+box.w<minX||box.y>maxY||box.y+box.h<minY)continue;
+   for(let i=0;i<=steps;i++)if(intersectsBox(a.x+(b.x-a.x)*i/steps,a.y+(b.y-a.y)*i/steps,box,RADIUS))return false;
+  }return true;
+ }
+for(let i=0;i<=steps;i++)if(blocked(a.x+(b.x-a.x)*i/steps,a.y+(b.y-a.y)*i/steps,level))return false;return true;}
 // Bounded half-tile grid, deterministic neighbor order. Used only when an AI
 // destination changes, never as a per-frame full-map search.
 export function findPath(from:Point,to:Point,level:LevelDefinition):Point[]{

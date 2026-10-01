@@ -63,11 +63,12 @@ test('the faster drone report remains interruptible with the same countdown used
  assert.equal(g.heist!.charge,0);assert(!s.combat!.hunt);
 });
 test('campaign pursuit is grounded while alertness and opening pickup responses remain',()=>{
- for(const id of CAMPAIGN_IDS){const l=combatLevel(id);assert.equal(l.combat?.revision,13);
+ for(const id of CAMPAIGN_IDS){const l=combatLevel(id);assert.equal(l.combat?.revision,15);
   for(const g of l.patrols)assert(g.pursuitSpeed!>=2.4&&g.pursuitSpeed!<=3.65,'Pursuit stays within a believable pace');
   const current=guardPressure(l),previous=guardPressure({...l,combat:{version:2,revision:11}});
   assert(current.pursuit<previous.pursuit*.72);
-  assert.deepEqual({...current,pursuit:previous.pursuit},previous,'Keep visibility, detection and firing pressure');
+  assert.deepEqual({...current,pursuit:previous.pursuit,aim:previous.aim,recover:previous.recover,report:previous.report},previous,'Keep visibility, detection and damage pressure');
+  assert.equal(current.aim,previous.aim+10);assert.equal(current.recover,previous.recover+8);assert.equal(current.report,l.number<=3?36:30);
   if(l.number<=3)assert(l.patrols.some(g=>g.reserveAfter!==undefined&&g.pickupWave===1));
  }
 });

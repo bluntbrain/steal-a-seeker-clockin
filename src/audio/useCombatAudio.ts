@@ -6,6 +6,7 @@ import {combatSoundEvents,type CombatSoundCounters} from './combat-events';
 import type {GameState} from '../game/simulation';
 const zero:CombatSoundCounters={shots:0,enemyShots:0,hitEvents:0,damageTaken:0,kills:0,aimEvents:0,commandSeen:0};
 export function useCombatAudio(state:GameState,enabled:boolean,volume:number,onDamage?:()=>void,feedbackEnabled=enabled,onHaptic?:(cue:HapticCue)=>void){
+ const swing=useGameAudio(require('../../assets/audio-melee-v1/swing.wav')),swingB=useGameAudio(require('../../assets/audio-melee-v1/swing-b.wav')),slash=useGameAudio(require('../../assets/audio-melee-v1/impact.wav')),clang=useGameAudio(require('../../assets/audio-melee-v1/clang.wav'));
  const shotA=useGameAudio(require('../../assets/audio-shots-v5/shot-a.wav'));
  const shotB=useGameAudio(require('../../assets/audio-shots-v5/shot-b.wav'));
  const enemyA=useGameAudio(require('../../assets/audio-shots-v5/enemy-a.wav'));
@@ -22,7 +23,7 @@ export function useCombatAudio(state:GameState,enabled:boolean,volume:number,onD
  allowed.current=enabled;
  useEffect(()=>()=>{allowed.current=false;epoch.current++;},[]);
  useEffect(()=>{
-  const players=[shotA,shotB,enemyA,enemyB,hit,damage,knockout,knockoutB,heavyKO,droneKO,aim,grate];
+  const players=[swing,swingB,slash,clang,shotA,shotB,enemyA,enemyB,hit,damage,knockout,knockoutB,heavyKO,droneKO,aim,grate];
   if(!enabled||state.ticks<lastTick.current){epoch.current++;for(const p of players)p.pause();}
   const c=state.combat??zero,events=combatSoundEvents(previous.current,c);
   const grateId=state.combat?.grateNoise?.id??0;
@@ -31,7 +32,7 @@ export function useCombatAudio(state:GameState,enabled:boolean,volume:number,onD
    if(enabled){grate.volume=volume*.42;const run=epoch.current;void grate.seekTo(0).then(()=>{if(allowed.current&&epoch.current===run)grate.play();}).catch(()=>{});}
   }
   lastGrate.current=grateId;
-  if(feedbackEnabled&&state.ticks>=lastTick.current&&!events.includes('damage')){if(events.includes('knockout'))onHaptic?.('kill');else if(events.includes('shot'))onHaptic?.('shot');}
+  if(feedbackEnabled&&state.ticks>=lastTick.current&&!events.includes('damage')){if(events.includes('knockout'))onHaptic?.('kill');else if(events.includes('clang'))onHaptic?.('armor');else if(events.includes('slash'))onHaptic?.('melee');else if(events.includes('shot'))onHaptic?.('shot');}
   if(!enabled&&feedbackEnabled&&state.ticks>=lastTick.current&&events.includes('damage'))damageFeedback.current?.();
   if(enabled&&state.ticks>=lastTick.current){
    for(const cue of events){
@@ -40,8 +41,8 @@ export function useCombatAudio(state:GameState,enabled:boolean,volume:number,onD
     const heavy=state.guards.some(g=>g.active&&g.gunPhase==='fire'&&(g.combatRole==='heavy'||g.combatRole==='warden'));
     const defeated=state.guards.filter((g,i)=>g.hp<=0&&(previousHP.current[i]??0)>0);
     const finish=defeated.some(g=>g.combatRole==='heavy'||g.combatRole==='warden')?heavyKO:defeated.some(g=>g.combatRole==='drone')?droneKO:c.kills%2?knockout:knockoutB;
-    const player={shot:c.shots%2?shotA:shotB,enemy:heavy?enemyB:enemyA,hit,damage,knockout:finish,aim}[cue];
-    player.volume=volume*({shot:.8,enemy:.55,hit:.28,damage:.58,knockout:.68,aim:.48}[cue]);
+    const player={swing:(c.melee?.swings??0)%2?swing:swingB,slash,clang,shot:c.shots%2?shotA:shotB,enemy:heavy?enemyB:enemyA,hit,damage,knockout:finish,aim}[cue];
+    player.volume=volume*({swing:.55,slash:.65,clang:.6,shot:.8,enemy:.55,hit:.28,damage:.58,knockout:.68,aim:.48}[cue]);
     const run=epoch.current;
     if(cue==='damage')void playImpact(player,()=>allowed.current&&epoch.current===run,()=>damageFeedback.current?.()).catch(()=>{});
     else void player.seekTo(0).then(()=>{if(allowed.current&&epoch.current===run)player.play();}).catch(()=>{});
@@ -49,6 +50,6 @@ export function useCombatAudio(state:GameState,enabled:boolean,volume:number,onD
   }
   if(state.ticks<lastTick.current)lastAim.current=-100;
   previousHP.current=state.guards.map(g=>g.hp);
-  previous.current={shots:c.shots,enemyShots:c.enemyShots,hitEvents:c.hitEvents,damageTaken:c.damageTaken,kills:c.kills,aimEvents:c.aimEvents,commandSeen:c.commandSeen};lastTick.current=state.ticks;
- },[state,enabled,volume,feedbackEnabled,onHaptic,shotA,shotB,enemyA,enemyB,hit,damage,knockout,knockoutB,heavyKO,droneKO,aim,grate]);
+  previous.current={melee:c.melee?{...c.melee}:undefined,shots:c.shots,enemyShots:c.enemyShots,hitEvents:c.hitEvents,damageTaken:c.damageTaken,kills:c.kills,aimEvents:c.aimEvents,commandSeen:c.commandSeen};lastTick.current=state.ticks;
+ },[state,enabled,volume,feedbackEnabled,onHaptic,swing,swingB,slash,clang,shotA,shotB,enemyA,enemyB,hit,damage,knockout,knockoutB,heavyKO,droneKO,aim,grate]);
 }

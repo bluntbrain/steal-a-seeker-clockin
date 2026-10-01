@@ -21,7 +21,7 @@ const LAYOUTS:Layout[]=[
   walls:[[4.5,11,3,3.2],[4.5,5,3,3.2],[1.2,8.5,2,1],[8.8,9.2,2.3,1],[8.7,15.8,1.5,1.1]],
   cast:[['scout',[3.5,12],[3.5,10.5],[2.1,10.5]],['scout',[8.5,12],[8.5,14.8],[7.7,15.2]],['scout',[8.5,5.7],[8.5,4],[6.2,4]],['drone',[2.3,5],[2.3,3],[3.5,3]]],
   safe:[[2.2,16.3],[2.2,11],[3.7,10.2],[3.7,4],[6,2.7]],back:[[8.1,3.5],[8.1,8.5],[7.9,10.4],[3.6,10.3],[3.5,15.5]],pockets:[[6,15.5],[6,9.3]],
-  entries:[[10.5,8]],tip:'Two guards share one island. Flank before firing: accurate shots and longer sight make the open lane dangerous.'},
+  entries:[[10.5,8]],tip:'Two guards share one island. Flank before striking: guard shots and longer sight make the open lane dangerous.'},
  {spawn:[2,18],phone:[9.5,2.5],exit:[9.5,18],
   walls:[[3.4,12,3,2.4],[6.6,5.8,2.4,3.4],[2,8.2,2,1.3],[9.6,12,1.1,3],[1,3.7,3.2,1.2],[5.5,1.2,1,2.4]],
   cast:[['scout',[2.5,12.8],[2.5,11],[4,11]],['scout',[7.3,13.3],[7.3,11],[8.4,11]],['drone',[5.4,7.8],[5.4,5],[4.8,5]],['scout',[9.9,5],[9.9,3.8],[8,3.8]]],
@@ -36,7 +36,7 @@ const LAYOUTS:Layout[]=[
   walls:[[4.3,8,3.3,5],[1.3,13.8,2.1,1.2],[8.8,13.8,2,1.2],[1.2,5,2.1,2],[8.7,5,2.1,2],[5.2,15.5,1.6,1]],
   cast:[['scout',[3.4,11],[3.4,8],[3.4,7.6]],['scout',[8.5,11],[8.5,8],[8.5,7.7]],['heavy',[6,6.8],[6,7.5],[7.7,6.8]],['drone',[2,3.4],[4,3.4],[4,2]]],
   safe:[[3.8,16.2],[3.7,13.5],[3.7,7.6],[4,4.1],[4,2],[6,2]],back:[[8,4],[8,7.6],[8.1,13.2],[7.8,16.8]],pockets:[[6,14],[6,18]],
-  tip:'The Heavy blocks frontal shots. Circle the island and hit its mint rear weak point while it turns.'},
+  tip:'The Heavy blocks frontal knife strikes. Circle the island and hit its mint rear weak point while it turns.'},
  {spawn:[6,18],phone:[6,2],exit:[2,18],
   walls:[[3,10.5,2.3,4],[7.4,6.7,2.3,4],[2.5,3.8,2,2],[7,2.8,3,1],[7.5,14,2,2],[1.1,8,1.6,1]],
   cast:[['scout',[2,12.5],[2,10],[1.3,10]],['sentry',[6.2,12.5],[6.2,9.3],[6,8]],['scout',[6.3,5.5],[6.3,4.2],[5.3,4.2]],['scout',[10.5,9],[10.5,6],[9,5.5]],['drone',[2.2,2],[4,2],[4.8,2.5]]],
@@ -70,7 +70,7 @@ const LAYOUTS:Layout[]=[
 ];
 
 function applyPressure(l:LevelDefinition):LevelDefinition{
- 'worklet';l.combat={version:2,revision:13};const p=guardPressure(l);
+ 'worklet';l.combat={version:2,revision:15};const p=guardPressure(l);
  for(const g of l.patrols){
   const heavy=g.combatRole==='heavy'||g.combatRole==='warden',drone=g.combatRole==='drone';
   g.pursuitSpeed=p.pursuit+(drone?.3:heavy?-.45:0);
@@ -86,18 +86,44 @@ function applyPressure(l:LevelDefinition):LevelDefinition{
 export function applyHeistLayout(l:LevelDefinition):LevelDefinition{
  'worklet';
  if(l.number<=1){
-  // The opening teaches three inputs, then leaves a real mission to solve.
-  // Keep its established touch targets and cover for saved tutorial UX.
-  l.patrols[0]!.route=[{x:3,y:11},{x:3,y:10.7}];
-  l.patrols[1]!.route=[{x:9,y:10},{x:8,y:10},{x:8,y:8}];
-  l.patrols[2]!.route=[{x:7.8,y:17.8},{x:7.8,y:16.8}];
-  l.patrols[2]!.reserveAfter=0;l.patrols[2]!.pickupWave=1;
-  l.patrols.push({...l.patrols[1]!,route:[{x:10.5,y:5},{x:10.5,y:8},{x:8,y:4.3}],roam:undefined});
-  l.briefing='Use cover and rear attacks. Guards spot you quickly and pursue together. Taking the Seeker calls a response; plan your escape.';
-  applyPressure(l);
-  // Face away during the brief control lesson. This drone still detects and
-  // broadcasts normally if approached from its front or alerted by the team.
-  l.patrols[0]!.speed=0;
+  // Reconstruct the connected spine / alternating branches visible in the
+  // supplied warehouse screenshots. Keep both outer lanes connected.
+  const walls:Rect[]=[
+   [1.65,2,2.2,3.8],[7.1,2,.85,3.8],[7.1,5,2.3,.8],
+   [1.65,8.1,8.7,.8],[1.65,8.1,.85,1.65],
+   [5.65,8.1,.9,10.3],
+   [1.65,11.3,8.7,.8],[9.5,10,.85,2.1],
+   [1.65,14.5,8.7,.8],[1.65,13,.85,2.3],
+   [1.65,17.7,8.7,.8],[9.5,16.4,.85,2.1]
+  ];
+  const crates:Rect[]=[
+   [4,3,1.1,1.8],[8.05,3.7,1.25,1.15],[.72,3.1,.75,1.55],
+   [2.1,7.05,1.45,.95],[6.65,7.05,1.75,.95],
+   [3.25,9,1.15,.95],[6.65,10.05,1.15,1.15],
+   [3.4,13.3,1.55,1.1],[6.7,12.2,1.15,1.95],
+   [3.5,15.4,1.4,2.15],[6.7,16.45,1.15,1.15]
+  ];
+  l.spawn={x:3.1,y:6.6};l.phone={x:2.75,y:16.4};l.exit={x:10.05,y:17.9,w:1.15,h:1.15};
+  l.blockers=[...l.blockers.slice(0,4),...walls.map(box),...crates.map(v=>({...box(v),kind:'crate' as const}))];
+  l.gates=undefined;l.switches=undefined;l.targets=undefined;l.exitWindow=undefined;
+  const cast:Cast[]=[
+   ['drone',[5.7,2.2],[5.7,1.8]],
+   ['scout',[10.55,5.7],[10.55,3],[10,1.4]],
+   ['scout',[2.95,10.45],[4.8,10.45]],
+   ['scout',[8.6,9.75],[8.6,10.5]],
+   ['scout',[2.8,12.85],[4.8,12.85]],
+   ['scout',[8.6,15.95],[10.7,15.95]],
+   ['scout',[10.75,9.7],[10.75,12.8]]
+  ];
+  l.patrols=cast.map(([role,...anchors],index)=>({combatRole:role,route:anchors.map(point),
+   ...(role==='drone'?{kind:'scanner' as const}:{}),speed:.7,range:3.5,halfAngle:Math.PI/3.6,
+   spotSeconds:.3,pauseSeconds:.6,investigates:true,...(index===6?{reserveAfter:0,pickupWave:1}:{})}));
+  l.encounter={islands:walls.slice(0,3).map(box),grates:[],pockets:[{x:5.7,y:6.7},{x:1.15,y:16.4}],
+   junctions:[{x:1.15,y:6.5},{x:10.75,y:7},{x:1.15,y:10.3},{x:10.75,y:13},{x:1.15,y:16.4}],
+   routes:{approach:[{x:1.15,y:6.5},{x:1.15,y:16.4},l.phone],escape:[{x:1.15,y:16.4},{x:1.15,y:19},{x:10.75,y:19}],fast:[l.phone]}};
+  l.targetSeconds=100;l.hardLimitSeconds=240;
+  l.briefing='Tap a guard to approach and attack with your knife. Use the branching warehouse walls to flank, collect the Seeker and escape along the outer lane.';
+  applyPressure(l);l.patrols[0]!.speed=0;
   return l;
  }
  const plan=LAYOUTS[l.number-2]!;l.combat={version:2,revision:10};

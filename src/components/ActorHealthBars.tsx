@@ -1,0 +1,37 @@
+import React,{useMemo} from 'react';
+import {Group,RoundedRect,Text,useFont,type SkFont} from '@shopify/react-native-skia';
+import {useDerivedValue,type SharedValue} from 'react-native-reanimated';
+import type {GameState} from '../game/simulation';
+type Props={game:SharedValue<GameState>;alpha:SharedValue<number>};
+function Bar({game,alpha,index,font}:{game:Props['game'];alpha:Props['alpha'];index:number;font:SkFont}){
+ const courier=index<0,g=game.value.guards[index],armored=g?.combatRole==='heavy'||g?.combatRole==='warden';
+ const width=courier?1.22:armored?1.36:1.14;
+ const lift=courier?.28:g?.combatRole==='drone'?.60:armored?.76:.55;
+ const state=useDerivedValue(()=>{
+  const s=game.value,a=index<0?s:s.guards[index];
+  if(!a)return {x:0,y:0,hp:0,max:1,opacity:0};
+  return {x:a.px+(a.x-a.px)*alpha.value,y:a.py+(a.y-a.py)*alpha.value,
+   hp:index<0?s.combat?.hp??0:s.guards[index]!.hp,max:index<0?100:s.guards[index]!.maxHp,
+   opacity:index<0?(s.combat?1:0):s.guards[index]!.active&&s.guards[index]!.hp>0?1:0};
+ });
+ const transform=useDerivedValue(()=>[{translateX:state.value.x-width/2},{translateY:state.value.y+lift}]);
+ const opacity=useDerivedValue(()=>state.value.opacity),fill=useDerivedValue(()=>Math.max(0,Math.min(1,state.value.hp/state.value.max))*(width-.08));
+ const label=useDerivedValue(()=>String(Math.max(0,Math.ceil(state.value.hp))));
+ const digitWidths=useMemo(()=>font.getGlyphWidths(font.getGlyphIDs('0123456789')),[font]);
+ const textTransform=useDerivedValue(()=>[{translateX:width/2-label.value.split('').reduce((sum,d)=>sum+(digitWidths[Number(d)]??0),0)*.0125/2},{translateY:.025},{scale:.0125}]);
+ return <Group transform={transform} opacity={opacity}>
+  <RoundedRect x={-.04} y={-.015} width={width+.08} height={.20} r={.085} color="#071009"/>
+  <RoundedRect x={0} y={.025} width={width} height={.12} r={.05} color="#35473A"/>
+  <RoundedRect x={.04} y={.035} width={fill} height={.10} r={.045} color="#43F25D"/>
+  <Group transform={textTransform}>
+   <Text text={label} x={0} y={0} font={font} color="#080D09" style="stroke" strokeWidth={5.6} strokeJoin="round"/>
+   <Text text={label} x={0} y={0} font={font} color="#FFFFFF"/>
+  </Group>
+ </Group>;
+}
+/** A single bundled font works identically in Skia on Android and CanvasKit. */
+export default function ActorHealthBars({game,alpha}:Props){
+ const font=useFont(require('../../assets/fonts/Barlow-Bold.ttf'),24);
+ if(!font)return null;
+ return <><Bar game={game} alpha={alpha} index={-1} font={font}/>{game.value.guards.map((_,index)=><Bar key={index} game={game} alpha={alpha} index={index} font={font}/>)}</>;
+}

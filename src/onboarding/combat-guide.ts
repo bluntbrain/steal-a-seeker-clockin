@@ -1,9 +1,9 @@
 import type {GameState} from '../game/simulation';
 import type {CombatCommand} from '../game/combat';
 export const GUIDE_STEPS=[
- {text:'Tap here to move',x:2.1,y:15.3,kind:'move'},
- {text:'Tap behind the crate',x:2.1,y:12.2,kind:'move'},
- {text:'Tap the drone to shoot. Then take the Seeker and escape using cover.',x:3,y:11,kind:'attack',target:0},
+ {text:'Tap here to move',x:4.8,y:6.6,kind:'move'},
+ {text:'Tap beside the crate',x:5.7,y:4.6,kind:'move'},
+ {text:'Tap the drone. Get close and slash automatically.',x:5.7,y:2.2,kind:'attack',target:0},
 ] as const;
 export function guideAllows(step:number,command:CombatCommand){'worklet';const g=GUIDE_STEPS[step];if(!g)return true;return command.kind===g.kind&&(g.kind==='attack'?command.target===g.target:Math.hypot(command.x-g.x,command.y-g.y)<1.1);}
 // The teaching ring is a generous touch target. Once accepted, move to its

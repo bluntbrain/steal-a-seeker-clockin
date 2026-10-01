@@ -1,6 +1,6 @@
 # Steal a Seeker — current review guide
 
-A solo Android stealth-action game. Tap to move, use cover, tap robots to shoot, collect a virtual Seeker and escape the alarm. Twelve free campaign missions span Warehouse, Rooftops and Powerworks. Gameplay uses React Native and 2D Skia, not a WebView.
+A solo Android stealth-action game. Tap to move, use cover, tap robots to approach and slash, collect a virtual Seeker and escape the alarm. Twelve free campaign missions span Warehouse, Rooftops and Powerworks. Gameplay uses React Native and 2D Skia, not a WebView.
 
 ## Build and source
 
@@ -12,7 +12,7 @@ A solo Android stealth-action game. Tap to move, use cover, tap robots to shoot,
 
 ## First run
 
-Open Missions and Continue. No wallet or payment is required. The first room teaches movement, cover, shooting, dodging an aim line, phone collection and extraction through guided taps. Settings or the pause screen can replay the tutorial. Mission completion unlocks the next room and awards non-transferable credits. Three stars on a first clear earns 60 credits; repeat clears do not farm the same reward. Use credits in Hideout for outfits or the cosmetic escape trail. Phone collection/inspection is separate from gameplay.
+Open Missions and Continue. No wallet or payment is required. The first room teaches movement, cover, knife takedowns, dodging an aim line, phone collection and extraction through guided taps. Settings or the pause screen can replay the tutorial. Mission completion unlocks the next room and awards non-transferable credits. Three stars on a first clear earns 60 credits; repeat clears do not farm the same reward. Use credits in Hideout for outfits or the cosmetic escape trail. Phone collection/inspection is separate from gameplay.
 
 ## Weekly league and commerce
 

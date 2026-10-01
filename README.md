@@ -6,7 +6,7 @@ The game uses **2D Skia in React Native** on Android and React Native Web in the
 
 ## Current product — 17 September 2026
 
-- All 12 campaign missions are free. No wallet is needed to start. The first mission teaches movement, cover, shooting and extraction.
+- All 12 campaign missions are free. No wallet is needed to start. The first mission teaches movement, cover, knife takedowns and extraction.
 - First clears earn 50 credits; each extra star earns another 5. Up to 720 campaign credits. Identical repeats do not grant credits again.
 - Hideout is the store and collection: Outfits, Gear and Collection. Cosmetics use credits; packs can be bought with SKR or SOL. Bought items never improve weekly performance.
 - Leaderboard rankings and practice are free. A one-time Game Pass unlocks ranked attempts: three missions per week, five attempts each. No buying extra attempts. Best complete runs count; faster runs break score ties.

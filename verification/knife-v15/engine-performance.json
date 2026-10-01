@@ -1,0 +1,32 @@
+{
+  "scope": "Node desktop engine only; not Android frame-rate evidence",
+  "results": [
+    {
+      "mission": "practice",
+      "scenario": "same-target tap every simulation tick",
+      "ticks": 1200,
+      "p50Ms": 0.025749999999788997,
+      "p95Ms": 3.5891249999999673,
+      "p99Ms": 19.443040999999994,
+      "maxMs": 75.8999160000003
+    },
+    {
+      "mission": "narrow-crossing",
+      "scenario": "same-target tap every simulation tick",
+      "ticks": 1200,
+      "p50Ms": 0.020249999999577994,
+      "p95Ms": 0.24066700000003038,
+      "p99Ms": 4.0307080000002316,
+      "maxMs": 35.57987500000036
+    },
+    {
+      "mission": "last-vault",
+      "scenario": "same-target tap every simulation tick",
+      "ticks": 1200,
+      "p50Ms": 0.020000000000436557,
+      "p95Ms": 0.7688749999997526,
+      "p99Ms": 11.959249999999884,
+      "maxMs": 88.64850000000024
+    }
+  ]
+}

@@ -133,14 +133,15 @@ export function updateHeistGuards(s:GameState,dt:number,l:LevelDefinition,shoot:
   // Noise and pickup reports cannot replace a confirmed pursuit with an older
   // destination. Before detection they still cause ordinary investigation.
   if(b.pickupSeen<s.thefts){b.pickupSeen=s.thefts;const p=l.targets?.[Math.max(0,s.thefts-1)]??l.phone;if(!h.hunting&&!rawSeen&&Math.hypot(g.x-p.x,g.y-p.y)<7)investigate(g,p,s.ticks);}
-  if(c.shots>b.heardShot){b.heardShot=c.shots;if(!h.hunting&&!rawSeen&&c.noiseLeft>0&&Math.hypot(c.noise.x-g.x,c.noise.y-g.y)<(hard?5.8:3.6))investigate(g,c.noise,s.ticks);}
+  const heard=(l.combat?.revision??0)>=15?c.melee?.noiseId??0:c.shots;
+  if(heard>b.heardShot){b.heardShot=heard;if(!h.hunting&&!rawSeen&&c.noiseLeft>0&&Math.hypot(c.noise.x-g.x,c.noise.y-g.y)<((l.combat?.revision??0)>=15?c.melee?.noiseRadius??0:hard?5.8:3.6))investigate(g,c.noise,s.ticks);}
   const noise=c.grateNoise;
   if(noise&&noise.id>h.heardGrate){h.heardGrate=noise.id;if(!h.hunting&&!rawSeen&&noise.until>=s.ticks&&Math.hypot(noise.x-g.x,noise.y-g.y)<4.5)investigate(g,noise,s.ticks);}
   if(!rawSeen&&h.hunting&&b.lastSight===s.ticks-1)destination(g,g.lastSeen,'investigate');
   if(g.reactionTicks>0){g.reactionTicks--;continue;}
   // Notice the courier before continuing a patrol turn away from the cone.
   if(rawSeen&&!confirmed){face(g,Math.atan2(s.y-g.y,s.x-g.x),dt);continue;}
-  if(confirmed)face(g,Math.atan2(s.y-g.y,s.x-g.x),dt);
+  if(confirmed&&((l.combat?.revision??0)<15||g.gunPhase==='ready'))face(g,Math.atan2(s.y-g.y,s.x-g.x),dt);
   const armored=g.combatRole==='heavy'||g.combatRole==='warden';
   const aim=hard?pressure.aim+(armored?6:0):g.combatRole==='warden'?28:g.combatRole==='heavy'?32:l.number<=3?29:24;
   const burst=armored?3:g.combatRole==='sentry'||hard?2:1;
@@ -148,7 +149,7 @@ export function updateHeistGuards(s:GameState,dt:number,l:LevelDefinition,shoot:
   if(!drone){
    if(g.gunPhase==='aim'){
     if(!rawSeen){g.gunPhase='recover';g.gunTicks=12;}
-    else{if(g.gunTicks>6){if(hard)closeOnContact(g,s,l,(spec.pursuitSpeed??pressure.pursuit)*.85,dt);g.shotAngle=trackedShot(g,s,dt,hard);}face(g,g.shotAngle,dt);if(--g.gunTicks<=0){g.gunPhase='fire';g.burstLeft=burst;g.gunTicks=0;}continue;}
+    else{if(g.gunTicks>((l.combat?.revision??0)>=15?12:6)){if(hard)closeOnContact(g,s,l,(spec.pursuitSpeed??pressure.pursuit)*.85,dt);g.shotAngle=trackedShot(g,s,dt,hard);}face(g,g.shotAngle,dt);if(--g.gunTicks<=0){g.gunPhase='fire';g.burstLeft=burst;g.gunTicks=0;}continue;}
    }
    if(g.gunPhase==='fire'&&!rawSeen){g.gunPhase='recover';g.gunTicks=12;g.burstLeft=0;}
    if(g.gunPhase==='fire'){
@@ -159,6 +160,7 @@ export function updateHeistGuards(s:GameState,dt:number,l:LevelDefinition,shoot:
   }
   // During recovery/following, use a clear direct route to the observed
   // courier instead of walking an obsolete waypoint in the opposite direction.
+  if(drone&&(l.combat?.revision??0)>=15&&h.charge>0)continue;
   if(confirmed&&walkableSegment(g,g.lastSeen,l)){
    const dx=g.lastSeen.x-g.x,dy=g.lastSeen.y-g.y,d=Math.hypot(dx,dy),travel=Math.min(Math.max(0,d-1.15),(spec.pursuitSpeed??2.25)*dt);
    if(d>1e-6){g.x+=dx/d*travel;g.y+=dy/d*travel;}

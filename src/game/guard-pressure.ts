@@ -14,7 +14,8 @@ const RUN_SPEEDS=[2.85,2.95,3.05,3.15,3.25,3.35];
 const GROUNDED_PROFILES=PROFILES.map((profile,index)=>({...profile,pursuit:RUN_SPEEDS[index]!}));
 export function guardPressure(l:LevelDefinition){
  'worklet';const profiles=(l.combat?.revision??0)>=12?GROUNDED_PROFILES:PROFILES;
- return profiles[l.number<=1?0:l.number===2?1:l.number===3?2:l.number<=6?3:l.number<=9?4:5]!;
+ const p=profiles[l.number<=1?0:l.number===2?1:l.number===3?2:l.number<=6?3:l.number<=9?4:5]!;
+ return (l.combat?.revision??0)>=15?{...p,aim:p.aim+10,recover:p.recover+8,report:l.number<=3?36:30}:p;
 }
 export function pressureCombat(l:LevelDefinition){'worklet';return (l.combat?.revision??0)>=11;}
 export function droneReportTicks(l:LevelDefinition){'worklet';return pressureCombat(l)?guardPressure(l).report:27;}

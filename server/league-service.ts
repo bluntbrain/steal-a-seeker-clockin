@@ -1,3 +1,4 @@
+import {makeReleaseContracts} from '../shared/weekly-melee';
 import {randomUUID} from 'node:crypto';
 import type {Pool} from 'pg';
 import {transaction} from './db';
@@ -26,7 +27,7 @@ export class LeagueService{
   type Manifest=ReturnType<typeof weekWindow>&{rulesHash:string;engineHash?:string;contracts:Contract[]};
   const existing=await this.pool.query('SELECT manifest FROM league_weeks WHERE week=$1',[window.week]);
   if(existing.rowCount)return existing.rows[0].manifest as Manifest;
-  const manifest={...window,rulesHash:rules.rulesHash,engineHash:engine.engineHash,contracts:makeCombatContracts(now)};
+  const manifest={...window,rulesHash:rules.rulesHash,engineHash:engine.engineHash,contracts:makeReleaseContracts(now,process.env.KNIFE_WEEKLY_START)};
   await this.pool.query('INSERT INTO league_weeks(week,manifest) VALUES($1,$2) ON CONFLICT DO NOTHING',[window.week,manifest]);
   // Another instance may have published first. Always return the stored winner.
   return (await this.pool.query('SELECT manifest FROM league_weeks WHERE week=$1',[window.week])).rows[0].manifest as Manifest;

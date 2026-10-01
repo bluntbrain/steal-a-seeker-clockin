@@ -152,3 +152,30 @@ test('revision 12 movement stays unchanged when district speed boosts ship',asyn
  week.contracts[0].level={...week.contracts[0].level,combat:{version:2,revision:13}};
  assert(!isWeeklyCompatible(week),'Campaign speed boosts must not alter published weekly play');
 });
+
+test('revision 13 replays and active weeks remain unchanged after target following ships',async()=>{
+ const fixture=(await import('./fixtures/campaign-revision13.json')).default;
+ const archived=await import((await checkRuleBundle(fixture.rulesHash)).href);
+ for(const level of fixture.levels as LevelDefinition[]){
+  const win=solveCombat(level);assert(win,level.title);
+  assert.deepEqual(verifyReplay(level.mission,win.replay,level),archived.verifyReplay(level.mission,win.replay,level));
+ }
+ const week=JSON.parse(JSON.stringify(manifest));week.rulesHash=fixture.rulesHash;week.engineHash=fixture.engineHash;
+ week.contracts[0].level=fixture.levels[1];assert(isWeeklyCompatible(week));
+ delete week.engineHash;assert(isWeeklyCompatible(week));
+ week.contracts[0].level={...week.contracts[0].level,combat:{version:2,revision:14}};
+ assert(!isWeeklyCompatible(week),'Target-following cannot change the mechanics of a frozen week');
+});
+
+test('revision 14 targeting replays retain archived results after knife rollout',async()=>{
+ const {default:snapshot}=await import('./fixtures/campaign-revision14.json');
+ const archived=await import((await checkRuleBundle(snapshot.rules.rulesHash)).href);
+ for(const level of snapshot.levels as LevelDefinition[]){
+  const state=initialState(level.mission,level),replay:Replay={version:2,chunks:[]};
+  for(let tick=0;tick<360&&state.status==='playing';tick++){
+   const g=state.guards.findIndex(g=>g.active&&g.hp>0),command=tick%30===0&&g>=0?{seq:tick+1,kind:'attack' as const,target:g,x:state.guards[g]!.x,y:state.guards[g]!.y}:undefined;
+   recordStep(state,{...idleInput(),command},replay.chunks);
+  }
+  assert.deepEqual(verifyReplay(level.mission,replay,level),archived.verifyReplay(level.mission,replay,level));
+ }
+});

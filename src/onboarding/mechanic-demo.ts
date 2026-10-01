@@ -5,17 +5,17 @@ export type DemoPoint={x:number;y:number};
 export type DemoBox=DemoPoint&{width:number;height:number};
 export type DemoActor=DemoPoint&{kind:'guard'|'heavy'|'drone';visible:boolean;hp:number};
 export const MECHANIC_STEPS:Record<Mechanic,readonly {label:string;caption:string;badge:string}[]>={
- drone:[{label:'Scan',caption:'Scout drones do not shoot. They scan and charge a radio report.',badge:'SCOUT DRONE · NO GUN'},{label:'Report',caption:'If the amber ring fills, it shares your location. Other enemies join the hunt.',badge:'LOCATION SENT'},{label:'Interrupt',caption:'Instead, shoot it before it reports—or break sight. A sent alert stays active.',badge:'INSTEAD · STOP IT EARLY'}],
+ drone:[{label:'Scan',caption:'Scout drones do not shoot. They scan and charge a radio report.',badge:'SCOUT DRONE · NO GUN'},{label:'Report',caption:'If the amber ring fills, it shares your location. Other enemies join the hunt.',badge:'LOCATION SENT'},{label:'Interrupt',caption:'Instead, cut it down up close before it reports—or break sight. A sent alert stays active.',badge:'INSTEAD · STOP IT EARLY'}],
  flank:[{label:'Watch',caption:'Two guards cover one island. Rushing between them exposes you to both.',badge:'TWO GUARDS · ONE ISLAND'},{label:'Wait',caption:'Wait behind cover until the guards separate.',badge:'WAIT FOR A GAP'},{label:'Flank',caption:'Move around the island and attack one guard at a time.',badge:'ONE TARGET AT A TIME'}],
  reinforcements:[{label:'Plan',caption:'Plan your way back before you take the phone.',badge:'FIND YOUR ESCAPE ROUTE'},{label:'Response',caption:'The pickup triggers a warning at the marked security entrance. A guard arrives.',badge:'PICKUP CALLS SECURITY'},{label:'Escape',caption:'Move toward the exit through cover as the response arrives.',badge:'TAKE THE COVERED WAY OUT'}],
  cover:[{label:'Block',caption:'Solid walls block bullets. Stand behind cover to stop incoming shots.',badge:'WALLS STOP BULLETS'},{label:'Move',caption:'Tap the next safe pocket. Go around the wall, not through the firing lane.',badge:'MOVE BETWEEN POCKETS'},{label:'Shelter',caption:'Use the next wall to break sight. Alerted guards will keep searching.',badge:'COVER BUYS TIME'}],
- armor:[{label:'Front',caption:'The Heavy’s gold front armor blocks most damage. Frontal fire is inefficient.',badge:'GOLD FRONT · PROTECTED'},{label:'Circle',caption:'Circle around cover to get behind the Heavy.',badge:'FLANK THE ARMOR'},{label:'Rear',caption:'Shoot the mint panel on its back for much more damage.',badge:'MINT REAR · WEAK POINT'}],
+ armor:[{label:'Front',caption:'The Heavy’s gold front armor blocks knife strikes. A frontal knife strike is blocked.',badge:'GOLD FRONT · PROTECTED'},{label:'Circle',caption:'Circle around cover to get behind the Heavy.',badge:'FLANK THE ARMOR'},{label:'Rear',caption:'Strike the mint panel on its back for much more damage.',badge:'MINT REAR · WEAK POINT'}],
  routes:[{label:'Compare',caption:'The short route crosses a firing lane. The covered route takes longer.',badge:'TWO ROUTES · ONE PHONE'},{label:'Risk',caption:'Patrols watch the short corridor. Check where they are facing.',badge:'SHORT DOES NOT MEAN SAFE'},{label:'Detour',caption:'Use the longer route around the cover island when the direct lane is watched.',badge:'TAKE THE COVERED DETOUR'}],
  relay:[{label:'First',caption:'Collect the first phone. You can carry one at a time.',badge:'FIRST PHONE'},{label:'Deliver',caption:'Take it to the exit before starting the second trip.',badge:'ONE PHONE EXTRACTED'},{label:'Return',caption:'Return for the second phone, then extract again to finish.',badge:'TWO PHONES · TWO TRIPS'}],
  switch:[{label:'Open',caption:'Tap the switch. Follow its cable to the gate it opens.',badge:'SWITCH OPENS THE GATE'},{label:'Noise',caption:'Walking over a striped metal grate makes noise that nearby guards investigate.',badge:'METAL GRATES MAKE NOISE'},{label:'Detour',caption:'The gate is open. Take the quiet route around the grate to reach the phone.',badge:'CHOOSE THE QUIET ROUTE'}],
  'timed-exit':[{label:'Closed',caption:'The extraction light cycles. You cannot leave while the exit is closed.',badge:'AMBER · WAIT'},{label:'Wait',caption:'Wait behind cover beside the exit. Keep the phone with you.',badge:'WAIT IN THE SAFE POCKET'},{label:'Go',caption:'When the exit turns mint, tap it and cross while it is open.',badge:'MINT · GO NOW'}],
  pursuit:[{label:'Spotted',caption:'A confirmed sighting sends the whole team toward your location.',badge:'THE TEAM IS ALERTED'},{label:'Break sight',caption:'Move around a wall to break sight. They head to where they last saw you.',badge:'BREAK LINE OF SIGHT'},{label:'Relocate',caption:'They keep searching around that last sighting. Change rooms; do not wait there.',badge:'THE HUNT DOES NOT RESET'}],
- finale:[{label:'Warden',caption:'Flank the Warden and shoot its mint rear panel.',badge:'FLANK THE WARDEN'},{label:'Drone',caption:'Stop the scout drone before its radio report brings everyone after you.',badge:'STOP THE RADIO'},{label:'Extract',caption:'The final pickup calls both security entrances. Take your escape route.',badge:'BOTH ENTRANCES RESPOND'}],
+ finale:[{label:'Warden',caption:'Flank the Warden and strike its mint rear panel.',badge:'FLANK THE WARDEN'},{label:'Drone',caption:'Stop the scout drone before its radio report brings everyone after you.',badge:'STOP THE RADIO'},{label:'Extract',caption:'The final pickup calls both security entrances. Take your escape route.',badge:'BOTH ENTRANCES RESPOND'}],
 };
 export const MECHANIC_COVER:Record<Mechanic,DemoBox[]>={
  drone:[{x:54,y:240,width:58,height:36}],flank:[{x:130,y:145,width:60,height:65}],reinforcements:[{x:130,y:190,width:60,height:45}],cover:[{x:140,y:110,width:40,height:95},{x:200,y:190,width:65,height:32}],armor:[{x:145,y:190,width:50,height:50}],routes:[{x:140,y:135,width:55,height:75}],relay:[{x:140,y:170,width:45,height:50}],switch:[{x:206,y:55,width:12,height:55},{x:206,y:222,width:12,height:78}],'timed-exit':[{x:200,y:190,width:65,height:32}],pursuit:[{x:150,y:130,width:45,height:80}],finale:[{x:145,y:190,width:50,height:50}],
@@ -33,7 +33,14 @@ export function mechanicFrame(kind:Mechanic,seconds:number){
  const actor=(x:number,y:number,role:DemoActor['kind']='guard',visible=true):DemoActor=>({x,y,kind:role,visible,hp:1});
  const f={step,x:70,y:245,face:2,walking:false,frame:2,actors:[actor(250,120),actor(45,90,'guard',false),actor(280,240,'guard',false)],phone:point(250,155),secondPhone:point(250,115),phoneVisible:false,secondVisible:false,carried:false,delivered:0,exit:point(270,260),exitVisible:false,exitOpen:true,extracted:false,charge:0,radio:false,stopped:false,noise:false,gateOpen:false,entry:false,secondEntry:false,shot:{visible:false,x:0,y:0,angle:0,enemy:false},tap:point(0,0),tapVisible:false};
  const move=(points:DemoPoint[],start:number,end:number)=>{const p=travel(points,(t-start)/(end-start));f.x=p.x;f.y=p.y;f.face=p.face;f.walking=t>start&&t<end;};
- const shoot=(from:DemoPoint,to:DemoPoint,start:number,enemy=false)=>{const p=(t-start)/.38;if(p>=0&&p<=1){f.shot={visible:true,x:from.x+(to.x-from.x)*p,y:from.y+(to.y-from.y)*p,angle:Math.atan2(to.y-from.y,to.x-from.x),enemy};}};
+ const shoot=(from:DemoPoint,to:DemoPoint,start:number,enemy=false)=>{
+  const p=(t-start)/.38,angle=Math.atan2(to.y-from.y,to.x-from.x);
+  if(enemy){if(p>=0&&p<=1)f.shot={visible:true,x:from.x+(to.x-from.x)*p,y:from.y+(to.y-from.y)*p,angle,enemy};return;}
+  // Contact choreography: approach before the slash; never emit a courier bullet.
+  if(t>=start-.9){const q=clamp((t-start+.9)/.9),end={x:to.x-Math.cos(angle)*28,y:to.y-Math.sin(angle)*28};
+   f.x=f.x+(end.x-f.x)*q;f.y=f.y+(end.y-f.y)*q;f.walking=q<1;f.face=Math.cos(angle)>.5?3:Math.cos(angle)<-.5?1:Math.sin(angle)>0?0:2;
+   if(p>=0&&p<=1)f.shot={visible:true,x:f.x,y:f.y-14,angle:angle-.7+p*1.8,enemy:false};}
+ };
  if(kind==='drone'){
   f.x=110;f.y=202;f.face=3;f.actors=[actor(210,132,'drone'),actor(45,95),actor(282,222)];
   f.charge=step===0?clamp((phase-1)/4):step===1?1:phase<1.75?clamp(phase/3):0;
@@ -42,7 +49,7 @@ export function mechanicFrame(kind:Mechanic,seconds:number){
  }else if(kind==='armor'||kind==='finale'){
   f.actors=[actor(220,150,'heavy'),actor(210,80,'drone',kind==='finale'),actor(45,80,'guard',false)];
   if(kind==='armor'){
-   if(step===0){f.x=90;f.y=150;f.face=3;shoot(point(108,140),point(205,150),1.6);f.actors[0]!.hp=t>2?.92:1;}
+   if(step===0){f.x=90;f.y=150;f.face=3;shoot(point(108,140),point(205,150),1.6);f.actors[0]!.hp=1;}
    if(step===1)move([point(90,150),point(90,260),point(280,260),point(280,150)],5.3,9.7);
    if(step===2){f.x=280;f.y=150;f.face=1;shoot(point(264,139),point(235,150),11.3);f.actors[0]!.hp=t>11.7?.35:1;f.tap=point(220,150);f.tapVisible=phase<1.2;}
   }else{

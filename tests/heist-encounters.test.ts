@@ -133,7 +133,7 @@ test('a hidden guard cannot steal the tap intended for an objective in revision 
  l.combat={version:2,revision:9};assert.equal(combatTap(s,6,10,1).kind,'attack','Historic command selection remains unchanged');
 });
 test('all heist pockets, entrances, route hints and guard anchors are traversable',()=>{
- for(const id of CAMPAIGN_IDS.slice(1)){const l=combatLevel(id);assert.equal(l.combat?.revision,13);
+ for(const id of CAMPAIGN_IDS.slice(1)){const l=combatLevel(id);assert.equal(l.combat?.revision,15);
   const points=[l.spawn,...(l.targets??[l.phone]),...(l.encounter?.junctions??[]),...(l.encounter?.pockets??[]),...(l.switches??[]),...l.patrols.flatMap(g=>g.roam??g.route)];
   for(const p of points){assert(walkableSegment(p,p,l),`${id}: point in a wall ${JSON.stringify(p)}`);assert(findPath(l.spawn,p,l).length,`${id}: disconnected point`);}
   const length=(points:Point[])=>{let from=l.spawn,distance=0;for(const target of points)for(const p of findPath(from,target,l)){distance+=Math.hypot(p.x-from.x,p.y-from.y);from=p;}return distance;};

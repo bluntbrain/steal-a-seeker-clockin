@@ -61,7 +61,8 @@ export function assistedCombatTap(s:GameState,x:number,y:number,seq:number):Comb
   if(raw.kind==='move'||raw.kind==='stop')for(let i=0;i<(l.switches?.length??0);i++){const p=l.switches![i]!;if(Math.abs(x-p.x)<.8&&y>=p.y-1.25&&y<=p.y+.55){raw={seq,kind:'switch',target:i,x:p.x,y:p.y};break;}}
  }
 
- if(raw.kind==='stop')return raw;
+ if(raw.kind==='stop')return {...raw,x:s.x,y:s.y};
+ if(raw.kind==='attack'&&(l.combat?.revision??0)>=14)return raw;
  if(raw.kind==='attack'){
   const g=s.guards[raw.target]!,d=Math.hypot(g.x-s.x,g.y-s.y);
   const visible=d<1e-6||sightDistance(s.x,s.y,(g.x-s.x)/d,(g.y-s.y)/d,d,l)>=d-1e-7;

@@ -4,7 +4,7 @@ import type {GameState} from '../game/simulation';
 import type {MissionId} from '../game/level';
 import {GUIDE_STEPS,guideDone} from './combat-guide';
 import rules from '../../shared/rules-manifest.json';
-const KEY='seeker.combat-tutorial.v2',CHECKPOINT=KEY+'.checkpoint';
+const KEY='seeker.combat-tutorial.knife-v3',CHECKPOINT=KEY+'.checkpoint';
 type Checkpoint={rulesHash:string;stage:number;state:GameState};
 const copy=(state:GameState):GameState=>JSON.parse(JSON.stringify(state));
 export function useCombatGuide(state:GameState,eligible:boolean){

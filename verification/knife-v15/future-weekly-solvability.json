@@ -1,0 +1,65 @@
+[
+  {
+    "week": "2026-10-05",
+    "id": "2026-10-05:0:variety-v3:knife-v15",
+    "status": "won",
+    "ticks": 398,
+    "hp": 25
+  },
+  {
+    "week": "2026-10-05",
+    "id": "2026-10-05:1:variety-v3:knife-v15",
+    "status": "won",
+    "ticks": 485,
+    "hp": 100
+  },
+  {
+    "week": "2026-10-05",
+    "id": "2026-10-05:2:variety-v3:knife-v15",
+    "status": "won",
+    "ticks": 1313,
+    "hp": 10
+  },
+  {
+    "week": "2026-10-12",
+    "id": "2026-10-12:0:variety-v3:knife-v15",
+    "status": "won",
+    "ticks": 465,
+    "hp": 25
+  },
+  {
+    "week": "2026-10-12",
+    "id": "2026-10-12:1:variety-v3:knife-v15",
+    "status": "won",
+    "ticks": 515,
+    "hp": 100
+  },
+  {
+    "week": "2026-10-12",
+    "id": "2026-10-12:2:variety-v3:knife-v15",
+    "status": "won",
+    "ticks": 911,
+    "hp": 40
+  },
+  {
+    "week": "2026-10-19",
+    "id": "2026-10-19:0:variety-v3:knife-v15",
+    "status": "won",
+    "ticks": 781,
+    "hp": 100
+  },
+  {
+    "week": "2026-10-19",
+    "id": "2026-10-19:1:variety-v3:knife-v15",
+    "status": "won",
+    "ticks": 485,
+    "hp": 100
+  },
+  {
+    "week": "2026-10-19",
+    "id": "2026-10-19:2:variety-v3:knife-v15",
+    "status": "won",
+    "ticks": 434,
+    "hp": 100
+  }
+]
