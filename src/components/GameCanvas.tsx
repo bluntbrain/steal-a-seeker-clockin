@@ -1,4 +1,7 @@
-import KnifeLayer from './KnifeLayer';
+import DefeatLootLayer from './DefeatLootLayer';
+import {meleeAtlas} from './meleeAssets';
+import {MELEE_FRAMES,meleeFrame} from './melee-presentation';
+import {knifeCombat} from '../game/melee';
 import ActorHealthBars from './ActorHealthBars';
 import React,{memo,useMemo,useEffect} from 'react';
 import {Canvas,Group,Picture,Image,Atlas,Circle,RoundedRect,Oval,Line,Path,Skia,DashPathEffect,useImage,useRSXformBuffer} from '@shopify/react-native-skia';
@@ -53,22 +56,24 @@ export default memo(function GameCanvas({camera,size,height=size*20/12,input,gam
  const phoneSprites=useMemo(()=>[phoneFrame],[phoneIndex]);
  const phoneTransforms=useMemo(()=>[Skia.RSXform(phoneScale,0,-phoneFrame.width/2*phoneScale,0)],[phoneIndex]);
  const carryTransforms=useMemo(()=>[Skia.RSXform(.48/phoneFrame.height,0,0,0)],[]);
- const sprite=useImage(costumeAtlas(appearance.outfit),onLoadError);
- const knife=useImage(require('../../assets/weapons/knife-v1/knife.png'),onLoadError);
+ const knifeMode=knifeCombat(level),actorFrames=knifeMode?MELEE_FRAMES:frames;
+ const lootCoin=useImage(require('../../assets/loot-v1/coin.png'),onLoadError);
+ const sprite=useImage(knifeMode?meleeAtlas(appearance.outfit):costumeAtlas(appearance.outfit),onLoadError);
  // Each scene is keyed by the parent. Never acknowledge a previous district's
  // retained image while a new source is decoding. Let the new canvas paint first.
  useEffect(()=>{
-  if(!knife||!wallTexture||!floor||!phones||!sprite||!droneSprite||!guardSprite||!heavySprite)return;
+  if(!lootCoin||!wallTexture||!floor||!phones||!sprite||!droneSprite||!guardSprite||!heavySprite)return;
   let second=0;const first=requestAnimationFrame(()=>{second=requestAnimationFrame(()=>onReady?.());});
   return()=>{cancelAnimationFrame(first);cancelAnimationFrame(second);};
- },[knife,wallTexture,floor,phones,sprite,droneSprite,guardSprite,heavySprite,onReady]);
+ },[lootCoin,wallTexture,floor,phones,sprite,droneSprite,guardSprite,heavySprite,onReady]);
  const reduced=!!appearance.reducedEffects;
  const x=useDerivedValue(()=>game.value.px+(game.value.x-game.value.px)*alpha.value);
  const y=useDerivedValue(()=>game.value.py+(game.value.y-game.value.py)*alpha.value);
- const frame=useDerivedValue(()=>{const s=game.value;return costumeFrame(s.facing,Math.hypot(s.vx,s.vy)>.1 && Math.floor(s.walked*3.5)%2===1);});
- const sprites=useDerivedValue(()=>[frames[frame.value]!]);
+ const attack=useDerivedValue(()=>{const s=game.value,m=s.combat?.melee;return knifeMode&&m&&s.status==='playing'?meleeFrame(s.ticks-m.started,m.angle):-1;});
+ const frame=useDerivedValue(()=>{const s=game.value;if(attack.value>=0)return attack.value;return costumeFrame(s.facing,Math.hypot(s.vx,s.vy)>.1 && Math.floor(s.walked*3.5)%2===1);});
+ const sprites=useDerivedValue(()=>[actorFrames[frame.value]!]);
  const transforms=useRSXformBuffer(1,(transform)=>{
-  'worklet';const f=frames[frame.value]!;const scale=1.62/f.height;const bob=reduced?0:Math.hypot(game.value.vx,game.value.vy)>.1?Math.abs(Math.sin(game.value.walked*11))*.045:Math.sin(clock.value*2)*.012;transform.set(scale,0,x.value-f.width*scale/2,y.value-f.height*scale+.12-bob);});
+  'worklet';const f=actorFrames[frame.value]!;const scale=1.62/f.height;const bob=reduced||attack.value>=0?0:Math.hypot(game.value.vx,game.value.vy)>.1?Math.abs(Math.sin(game.value.walked*11))*.045:Math.sin(clock.value*2)*.012;transform.set(scale,0,x.value-f.width*scale/2,y.value-f.height*scale+.12-bob);});
  const shadow=useDerivedValue(()=>({x:x.value-.36,y:y.value-.02,width:.72,height:.22}));
  const carry=useDerivedValue(()=>game.value.carrying?1:0);
  const target=useDerivedValue(()=>game.value.carrying||game.value.delivered>=(level.targets?.length??1)?0:1);
@@ -117,14 +122,13 @@ export default memo(function GameCanvas({camera,size,height=size*20/12,input,gam
 
    <Group clip={courierClip}>
    <Oval rect={shadow} color="#070c0d" opacity={.7}/>
-   <KnifeLayer game={game} alpha={alpha} reduced={reduced} behind/>
    {sprite && <Atlas image={sprite} sprites={sprites} transforms={transforms}/>}
-   <KnifeLayer game={game} alpha={alpha} reduced={reduced}/>
    <Group transform={carriedTransform} opacity={carry}>
     <Atlas image={phones} sprites={phoneSprites} transforms={carryTransforms}/>
    </Group>
    </Group>
    {!!level.combat&&<CombatLayer game={game} alpha={alpha} input={input} reduced={reduced}/>}
+   {!!level.combat&&<DefeatLootLayer game={game} clock={clock} alpha={alpha} reduced={reduced} coin={lootCoin}/>}
    {!!level.combat&&<ActorHealthBars game={game} alpha={alpha}/>}
   </Group>
   <CameraSignals camera={camera} game={game} size={size} height={height}/>

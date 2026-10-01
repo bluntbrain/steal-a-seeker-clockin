@@ -1,3 +1,4 @@
+import DemoCourierSprite from './DemoCourierSprite';
 import {TapHand} from './TutorialHand';
 import React,{useEffect,useState} from 'react';
 import {AppState,Image,StyleSheet,Text,View} from 'react-native';
@@ -45,9 +46,8 @@ export default function MechanicDemo({kind,edition,reduced=false,busy=false}:{ki
   time.value=withSequence(withTiming(MECHANIC_DURATION,{duration:Math.max(0,(MECHANIC_DURATION-time.value)*1000),easing:Easing.linear}),withRepeat(withSequence(withTiming(0,{duration:0}),withTiming(MECHANIC_DURATION,{duration:15000,easing:Easing.linear})),-1,false));return()=>cancelAnimation(time);
  },[time,kind,reduced,paused,busy,foreground,revision]);
  const courier=useAnimatedStyle(()=>({opacity:film.value.extracted?.25:1,transform:[{translateX:film.value.x-21},{translateY:film.value.y-57}]}));
- const sprite=useAnimatedStyle(()=>({transform:[{translateX:-(film.value.frame%4)*42},{translateY:-Math.floor(film.value.frame/4)*63}]}));
+ const spriteFrame=useDerivedValue(()=>film.value.slash<0?film.value.frame:8+film.value.face+(film.value.slash<.4?0:film.value.slash<.7?4:8));
  const shot=useAnimatedStyle(()=>({opacity:film.value.shot.visible&&film.value.shot.enemy?1:0,transform:[{translateX:film.value.shot.x},{translateY:film.value.shot.y},{rotate:`${film.value.shot.angle}rad`}]}));
- const slash=useAnimatedStyle(()=>({opacity:film.value.shot.visible&&!film.value.shot.enemy?1:0,transform:[{translateX:film.value.shot.x},{translateY:film.value.shot.y},{rotate:`${film.value.shot.angle}rad`}]}));
  const phone=useAnimatedStyle(()=>({opacity:film.value.phoneVisible?1:0,transform:[{translateX:film.value.phone.x-11},{translateY:film.value.phone.y-24}]}));
  const second=useAnimatedStyle(()=>({opacity:film.value.secondVisible?1:0,transform:[{translateX:film.value.secondPhone.x-11},{translateY:film.value.secondPhone.y-24}]}));
  const carried=useAnimatedStyle(()=>({opacity:film.value.carried?1:0}));
@@ -81,8 +81,8 @@ export default function MechanicDemo({kind,edition,reduced=false,busy=false}:{ki
     {[0,1,2,3].map(i=><Enemy key={i} film={film} time={time} index={i} reduced={reduced} kind={i===0?(kind==='drone'?'drone':kind==='armor'||kind==='finale'?'heavy':'guard'):i===1&&kind==='finale'?'drone':'guard'}/>)}
     {(kind==='drone'||kind==='finale')&&Array.from({length:16},(_,i)=><ChargeMark key={i} film={film} index={i} actor={actor}/>)}
     {(kind==='drone'||kind==='pursuit')&&[0,1,2].map(i=><RadioWave key={i} film={film} time={time} index={i} actor={0} reduced={reduced}/>)}
-    <Animated.View testID="mechanic-courier" style={[s.courier,courier]}><View style={s.shadow}/><View style={s.crop}><Animated.Image source={require('../../assets/costumes-v4/default-atlas.png')} resizeMode="stretch" style={[s.sprite,sprite]}/></View><Animated.View style={[s.carried,carried]}><PhoneArt index={edition} height={20}/></Animated.View></Animated.View>
-    <Animated.View style={[s.bullet,shot]}/><Animated.Image source={require('../../assets/weapons/knife-v1/knife.png')} resizeMode="contain" style={[{position:'absolute',width:32,height:11},slash]}/><Animated.View style={[s.tap,tap]}><View style={{position:'absolute',left:15,top:15}}><TapHand size={50} flipX/></View><Text style={s.tapText}>TAP</Text></Animated.View>
+    <Animated.View testID="mechanic-courier" style={[s.courier,courier]}><View style={s.shadow}/><DemoCourierSprite frame={spriteFrame}/><Animated.View style={[s.carried,carried]}><PhoneArt index={edition} height={20}/></Animated.View></Animated.View>
+    <Animated.View style={[s.bullet,shot]}/><Animated.View style={[s.tap,tap]}><View style={{position:'absolute',left:15,top:15}}><TapHand size={50} flipX/></View><Text style={s.tapText}>TAP</Text></Animated.View>
     <Animated.View style={[{position:'absolute',left:20,right:20,top:110,padding:14,borderRadius:12,backgroundColor:'#081B16F5',borderWidth:1,borderColor:'#96C8B1',alignItems:'center'},rewind]}><Text style={{fontSize:12,fontWeight:'900',color:'#D9F7E7'}}>↶  TRY THIS INSTEAD</Text><Text style={{fontSize:10,color:'#B9D5C8',marginTop:5}}>{kind==='drone'?'Back to before the report':'Back to before the noisy grate'}</Text></Animated.View>
     <Animated.View style={[s.notice,{top:210,left:160},stopped]}><Text style={s.noticeText}>REPORT STOPPED ✓</Text></Animated.View>
     <Animated.View style={[s.notice,{top:64,left:80},success]}><Text style={s.noticeText}>EXTRACTED ✓</Text></Animated.View>

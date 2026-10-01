@@ -1,0 +1,6 @@
+{
+  "provider": "OpenAI image generation",
+  "source": "coin-source.png",
+  "runtime": "coin.png",
+  "prompt": "A single isolated mobile game loot coin sprite on genuine transparent alpha background. Round thick polished warm gold coin, viewed straight on with a tiny visible bevel along its bottom right edge. Raised simple mint diamond lozenge emblem centered on the face (not letters, not currency symbols). Chunky readable shape, clean bright rim, warm golden face, softly shaded sculpted 3D toy-game rendering. Coin fills 80 percent of square image, perfectly centered. No glow, no floor, no cast shadow, no particles, no scene, no text, no extra coins. Designed to remain legible at 12 pixels in a dark top-down mobile game."
+}

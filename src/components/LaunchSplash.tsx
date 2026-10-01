@@ -3,7 +3,7 @@ import {ActivityIndicator,ImageBackground,Platform,Pressable,StyleSheet,Text,Vie
 import {Asset} from 'expo-asset';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 const ART=require('../../assets/splash-v3/heist.png');
-const BOOT_ASSETS=[ART,require('../../assets/weapons/knife-v1/knife.png'),require('../../assets/costumes-v4/default-atlas.png'),require('../../assets/drones-v2/scout.png'),require('../../assets/guards-v2/patrol.png'),require('../../assets/guards-v2/heavy.png'),require('../../assets/world-v3/floor.png'),require('../../assets/walls-v5/warehouse-cap.jpg'),require('../../assets/world-v3/phones.png')];
+const BOOT_ASSETS=[ART,require('../../assets/loot-v1/coin.png'),require('../../assets/melee-v2/default-atlas.png'),require('../../assets/drones-v2/scout.png'),require('../../assets/guards-v2/patrol.png'),require('../../assets/guards-v2/heavy.png'),require('../../assets/world-v3/floor.png'),require('../../assets/walls-v5/warehouse-cap.jpg'),require('../../assets/world-v3/phones.png')];
 export default function LaunchSplash({children}:{children:ReactNode}){
  const [complete,setComplete]=useState(0),[done,setDone]=useState(false),[error,setError]=useState(false),[retry,setRetry]=useState(0);
  const insets=useSafeAreaInsets(),{width,height}=useWindowDimensions();

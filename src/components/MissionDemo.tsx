@@ -1,3 +1,4 @@
+import DemoCourierSprite from './DemoCourierSprite';
 import {TapHand} from './TutorialHand';
 import React,{useEffect,useState} from 'react';
 import {AppState,Image,StyleSheet,Text,View} from 'react-native';
@@ -26,11 +27,10 @@ export default function MissionDemo({edition,reduced=false,busy=false}:{edition:
   return()=>cancelAnimation(time);
  },[time,paused,busy,foreground,reduced,revision]);
  const courier=useAnimatedStyle(()=>({opacity:pose.value.extracted?.25:1,transform:[{translateX:pose.value.x-21},{translateY:pose.value.y-57}]}));
- const sprite=useAnimatedStyle(()=>({transform:[{translateX:-(pose.value.frame%4)*42},{translateY:-Math.floor(pose.value.frame/4)*63}]}));
+ const spriteFrame=useDerivedValue(()=>pose.value.slash<0?pose.value.frame:8+pose.value.facing+(pose.value.slash<.7?0:pose.value.slash<.86?4:8));
  const guard=useAnimatedStyle(()=>({opacity:1-pose.value.defeat,transform:[{rotate:`${pose.value.defeat*80}deg`},{scale:ENEMY_ART_SCALE.guard*(1-pose.value.defeat*.6)}]}));
  const health=useAnimatedStyle(()=>({width:36*pose.value.hp}));
  const impact=useAnimatedStyle(()=>({opacity:pose.value.dead?1-pose.value.defeat:0,transform:[{scale:.4+pose.value.defeat*1.3}]}));
- const shot=useAnimatedStyle(()=>({opacity:pose.value.slash>=0?1:0,transform:[{translateX:225},{rotate:`${-.7+Math.max(0,pose.value.slash)*1.8}rad`}]}));
  const phone=useAnimatedStyle(()=>({opacity:pose.value.phoneVisible?1:0}));
  const carried=useAnimatedStyle(()=>({opacity:pose.value.carried?1:0}));
  const success=useAnimatedStyle(()=>({opacity:pose.value.extracted?1:0}));
@@ -53,8 +53,8 @@ export default function MissionDemo({edition,reduced=false,busy=false}:{edition:
     <View style={s.exit}><Text style={s.exitText}>EXIT</Text><Text style={s.chevron}>⌄</Text></View>
     <Animated.View style={[s.pickup,phone]}><View style={s.phoneGlow}/><PhoneArt index={edition} height={38}/></Animated.View>
     <Animated.View style={[s.guard,guard]}><Image source={GUARD_SPRITES.guard} resizeMode="contain" style={{position:'absolute',left:-8,top:-8,width:60,height:60,transform:[{rotate:'180deg'}]}}/><View style={s.healthTrack}><Animated.View style={[s.health,health]}/></View></Animated.View>
-    <Animated.View style={[s.impact,impact]}><Text style={s.impactText}>✦</Text></Animated.View><Animated.Image source={require('../../assets/weapons/knife-v1/knife.png')} resizeMode="contain" style={[{position:'absolute',top:123,width:32,height:11},shot]}/>
-    <Animated.View testID="demo-courier" style={[s.courier,courier]}><View style={s.shadow}/><View style={s.spriteCrop}><Animated.Image source={require('../../assets/costumes-v4/default-atlas.png')} resizeMode="stretch" style={[s.sprite,sprite]}/></View><Animated.View style={[s.carried,carried]}><PhoneArt index={edition} height={22}/></Animated.View></Animated.View>
+    <Animated.View style={[s.impact,impact]}><Text style={s.impactText}>✦</Text></Animated.View>
+    <Animated.View testID="demo-courier" style={[s.courier,courier]}><View style={s.shadow}/><DemoCourierSprite frame={spriteFrame}/><Animated.View style={[s.carried,carried]}><PhoneArt index={edition} height={22}/></Animated.View></Animated.View>
     <Animated.View style={[s.ring,ring]}/><Animated.View style={[{position:'absolute',left:0,top:0,width:0,height:0},finger]}><TapHand size={54} flipX={step>0} flipY={step===2}/><View style={s.tapLabel}><Text style={s.tapText}>TAP</Text></View></Animated.View>
     <Animated.View style={[s.success,success]}><Text style={s.successText}>SEEKER SECURED ✓</Text></Animated.View>
    </View>

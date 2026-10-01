@@ -1,0 +1,67 @@
+{
+  "generator": "Built-in image_gen",
+  "date": "2026-10-01",
+  "defaultPrompt": "Use case: identity-preserve. Production sprite sheet for a mobile game, genuine transparent alpha background. Reference image is the existing courier's four-direction idle and walk atlas. Match exactly this cute 3D toy courier: ivory hood, black face with mint visor and two black oval eyes, black shirt/shorts, ivory mittens/sneakers, mint backpack. Preserve all proportions, materials and orthographic camera scale.\n\nCreate a NEW knife attack atlas: precisely 4 columns and 3 rows, TWELVE separate full-body sprites, evenly spaced identical cells, no labels or grid lines. COLUMN directions left to right: facing camera (south), facing screen-left (west), facing away (north), facing screen-right (east). ROW1 is wind-up: knees bent, torso coils, knife hand drawn back. ROW2 is contact: a short strong forward lunge and fast close-range slash toward the facing direction, arm clearly extended, whole body moves, feet remain grounded. ROW3 is follow-through: torso rotated, knife arm finishes across body, back foot recovering. Each pose must visibly differ; blade held firmly inside the right mitten, attached to the character at all times. Small short silver utility dagger with dark/mint handle, not a sword. No victim, blood, gore, guns, trails, motion blur, effects, ground shadows, scenery, text or extra parts.\nUse same slightly elevated orthographic view as reference, no perspective change. Lock head size and body scale across all12. Align feet to identical baseline within each row. Keep generous gutters and every body/blade fully inside its own cell. Square 1536x1536 canvas, each cell384x512; character about390 pixels tall, feet at cell y480. Transparent empty pixels everywhere outside sprites. Only ONE character identity.",
+  "otherPrompt": "Use case: identity-preserve. Production sprite sheet for a mobile game, genuine transparent alpha background. Reference image is the existing character's four-direction atlas. Copy exactly this character's face/hood, hair, clothing, backpack, footwear, proportions and materials. Keep their identity unchanged.\n\nCreate a NEW knife attack atlas: precisely 4 columns and 3 rows, TWELVE separate full-body sprites, evenly spaced identical cells, no labels or grid lines. COLUMN directions left to right: facing camera (south), facing screen-left (west), facing away (north), facing screen-right (east). ROW1 is wind-up: knees bent, torso coils, knife hand drawn back. ROW2 is contact: a short strong forward lunge and fast close-range slash toward the facing direction, arm clearly extended, whole body moves, feet remain grounded. ROW3 is follow-through: torso rotated, knife arm finishes across body, back foot recovering. Each pose must visibly differ; blade held firmly inside the right hand, attached to the character at all times. Small short silver utility dagger with dark/mint handle, not a sword. No victim, blood, gore, guns, trails, motion blur, effects, ground shadows, scenery, text or extra parts.\nUse same slightly elevated orthographic view as reference, no perspective change. Lock head size and body scale across all12. Align feet to identical baseline within each row. Keep generous gutters and every body/blade fully inside its own cell. Square canvas: 4 equal columns, 3 equal rows. Characters occupy only the middle 70% of each cell's width and height, with generous fully transparent gutters. Do not overlap cell boundaries. No white speckles or border halo. Transparent empty pixels everywhere outside sprites. Only ONE character identity.",
+  "poseTemplatePrompt": "Create exactly a KNIFE ATTACK animation sprite sheet, not a general character activity sheet. Image 1 is the REQUIRED pose template: copy its exact 4 columns × 3 rows layout and all twelve knife attack poses. Image 2 is the required CHARACTER IDENTITY. Replace the template courier with image2's character in EVERY cell, preserving image2's face, hair/hood, outfit, backpack, footwear, toy proportions and materials. Do not retain the template character's hood or face if image2 has a human head.\nColumns always FRONT, LEFT, BACK, RIGHT, repeated identically for all three rows. Row1 WIND-UP holding a short silver knife in right hand drawn back. Row2 CONTACT lunge with knife extended toward facing direction. Row3 RECOVERY with knife across body. Back-view poses must show the backpack and BACK OF HEAD, never a face. Left/right side views must face their assigned direction. Knife visible and held firmly in every pose. Each cell is the same character full body. No idle, walking, waving, smiling at camera, laptops, books, boxes, shelves or unrelated objects. Do not generate any pose from the old walking sheet; it is ONLY an identity reference.\nStyle: identical polished 3D chibi game render. Orthographic camera, identical scale and feet baseline. Match pose template spacing, transparent alpha background, no labels, no ground, no effects, no shadows, no blood or victim. EXACTLY12 knife attack poses.",
+  "templateBased": [
+    "archive-keeper",
+    "ghost-signal",
+    "toly",
+    "mert"
+  ],
+  "sources": [
+    {
+      "id": "default",
+      "source": "/Users/bluntbrain/.codex/generated_images/01a08ca4-ef03-7ee1-bab3-acb3d372ba17/exec-500363e9-0c6a-477c-ab07-ba970622ba90.png"
+    },
+    {
+      "id": "frost-runner",
+      "source": "/Users/bluntbrain/.codex/generated_images/01a08ca4-ef03-7ee1-bab3-acb3d372ba17/exec-2e6a0a39-941f-414a-b96b-0cb6ad0b4faa.png"
+    },
+    {
+      "id": "night-courier",
+      "source": "/Users/bluntbrain/.codex/generated_images/01a08ca4-ef03-7ee1-bab3-acb3d372ba17/exec-1d433cb7-4b0c-4ba1-abfe-8aadd33739d3.png"
+    },
+    {
+      "id": "circuit-scout",
+      "source": "/Users/bluntbrain/.codex/generated_images/01a08ca4-ef03-7ee1-bab3-acb3d372ba17/exec-99429eac-8d56-4f7a-b688-d57a29380005.png"
+    },
+    {
+      "id": "archive-keeper",
+      "source": "/Users/bluntbrain/.codex/generated_images/01a08ca4-ef03-7ee1-bab3-acb3d372ba17/exec-06e28a16-80d5-47f4-9792-fca07d3fdd12.png"
+    },
+    {
+      "id": "ghost-signal",
+      "source": "/Users/bluntbrain/.codex/generated_images/01a08ca4-ef03-7ee1-bab3-acb3d372ba17/exec-0ef4593a-039d-4024-acea-ac4ba2b76698.png"
+    },
+    {
+      "id": "toly",
+      "source": "/Users/bluntbrain/.codex/generated_images/01a08ca4-ef03-7ee1-bab3-acb3d372ba17/exec-6afce96b-d88a-43b1-898a-6377aeb3ecc9.png"
+    },
+    {
+      "id": "mert",
+      "source": "/Users/bluntbrain/.codex/generated_images/01a08ca4-ef03-7ee1-bab3-acb3d372ba17/exec-313db797-c07f-4d7e-8f42-e5ed55542d49.png"
+    },
+    {
+      "id": "chase",
+      "source": "/Users/bluntbrain/.codex/generated_images/01a08ca4-ef03-7ee1-bab3-acb3d372ba17/exec-89b3c1e8-39bb-4836-b9a0-24afb5d5e43d.png"
+    },
+    {
+      "id": "lily",
+      "source": "/Users/bluntbrain/.codex/generated_images/01a08ca4-ef03-7ee1-bab3-acb3d372ba17/exec-f37feb0c-82d5-4da5-b325-50d12119d59a.png"
+    },
+    {
+      "id": "vibhu",
+      "source": "/Users/bluntbrain/.codex/generated_images/01a08ca4-ef03-7ee1-bab3-acb3d372ba17/exec-062c43df-aef5-47f2-b5e2-aeaa92772458.png"
+    },
+    {
+      "id": "akshay",
+      "source": "/Users/bluntbrain/.codex/generated_images/01a08ca4-ef03-7ee1-bab3-acb3d372ba17/exec-4379ab3e-76eb-4776-a0fc-ef77ddfd7de5.png"
+    },
+    {
+      "id": "beeman",
+      "source": "/Users/bluntbrain/.codex/generated_images/01a08ca4-ef03-7ee1-bab3-acb3d372ba17/exec-05717806-87ba-4a82-af7a-81a1a5e4c081.png"
+    }
+  ]
+}

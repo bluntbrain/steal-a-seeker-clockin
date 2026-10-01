@@ -31,7 +31,7 @@ function travel(points:DemoPoint[],progress:number){
 export function mechanicFrame(kind:Mechanic,seconds:number){
  'worklet';const t=Math.max(0,Math.min(MECHANIC_DURATION,seconds)),step=Math.min(2,Math.floor(t/5)),phase=t-step*5;
  const actor=(x:number,y:number,role:DemoActor['kind']='guard',visible=true):DemoActor=>({x,y,kind:role,visible,hp:1});
- const f={step,x:70,y:245,face:2,walking:false,frame:2,actors:[actor(250,120),actor(45,90,'guard',false),actor(280,240,'guard',false)],phone:point(250,155),secondPhone:point(250,115),phoneVisible:false,secondVisible:false,carried:false,delivered:0,exit:point(270,260),exitVisible:false,exitOpen:true,extracted:false,charge:0,radio:false,stopped:false,noise:false,gateOpen:false,entry:false,secondEntry:false,shot:{visible:false,x:0,y:0,angle:0,enemy:false},tap:point(0,0),tapVisible:false};
+ const f={step,x:70,y:245,face:2,walking:false,frame:2,actors:[actor(250,120),actor(45,90,'guard',false),actor(280,240,'guard',false)],phone:point(250,155),secondPhone:point(250,115),phoneVisible:false,secondVisible:false,carried:false,delivered:0,exit:point(270,260),exitVisible:false,exitOpen:true,extracted:false,charge:0,radio:false,stopped:false,noise:false,gateOpen:false,entry:false,secondEntry:false,slash:-1,shot:{visible:false,x:0,y:0,angle:0,enemy:false},tap:point(0,0),tapVisible:false};
  const move=(points:DemoPoint[],start:number,end:number)=>{const p=travel(points,(t-start)/(end-start));f.x=p.x;f.y=p.y;f.face=p.face;f.walking=t>start&&t<end;};
  const shoot=(from:DemoPoint,to:DemoPoint,start:number,enemy=false)=>{
   const p=(t-start)/.38,angle=Math.atan2(to.y-from.y,to.x-from.x);
@@ -39,7 +39,7 @@ export function mechanicFrame(kind:Mechanic,seconds:number){
   // Contact choreography: approach before the slash; never emit a courier bullet.
   if(t>=start-.9){const q=clamp((t-start+.9)/.9),end={x:to.x-Math.cos(angle)*28,y:to.y-Math.sin(angle)*28};
    f.x=f.x+(end.x-f.x)*q;f.y=f.y+(end.y-f.y)*q;f.walking=q<1;f.face=Math.cos(angle)>.5?3:Math.cos(angle)<-.5?1:Math.sin(angle)>0?0:2;
-   if(p>=0&&p<=1)f.shot={visible:true,x:f.x,y:f.y-14,angle:angle-.7+p*1.8,enemy:false};}
+   if(p>=0&&p<=1){f.slash=p;f.shot={visible:true,x:f.x,y:f.y-14,angle:angle-.7+p*1.8,enemy:false};}}
  };
  if(kind==='drone'){
   f.x=110;f.y=202;f.face=3;f.actors=[actor(210,132,'drone'),actor(45,95),actor(282,222)];

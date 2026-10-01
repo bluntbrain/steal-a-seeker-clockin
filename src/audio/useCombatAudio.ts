@@ -15,6 +15,7 @@ export function useCombatAudio(state:GameState,enabled:boolean,volume:number,onD
  const damage=useGameAudio(require('../../assets/audio-combat-v3/damage.wav'));
  const knockout=useGameAudio(require('../../assets/audio-defeats/guard-a.wav'));
  const knockoutB=useGameAudio(require('../../assets/audio-defeats/guard-b.wav')),heavyKO=useGameAudio(require('../../assets/audio-defeats/heavy.wav')),droneKO=useGameAudio(require('../../assets/audio-defeats/drone.wav'));
+ const lootA=useGameAudio(require('../../assets/audio-loot-v1/coins-a.wav')),lootB=useGameAudio(require('../../assets/audio-loot-v1/coins-b.wav'));
  const previousHP=useRef<number[]>([]);
  const aim=useGameAudio(require('../../assets/audio-combat-v3/aim.wav'));
  const grate=useGameAudio(require('../../assets/audio/switch.wav')),lastGrate=useRef(0);
@@ -23,7 +24,7 @@ export function useCombatAudio(state:GameState,enabled:boolean,volume:number,onD
  allowed.current=enabled;
  useEffect(()=>()=>{allowed.current=false;epoch.current++;},[]);
  useEffect(()=>{
-  const players=[swing,swingB,slash,clang,shotA,shotB,enemyA,enemyB,hit,damage,knockout,knockoutB,heavyKO,droneKO,aim,grate];
+  const players=[swing,swingB,slash,clang,shotA,shotB,enemyA,enemyB,hit,damage,knockout,knockoutB,heavyKO,droneKO,aim,grate,lootA,lootB];
   if(!enabled||state.ticks<lastTick.current){epoch.current++;for(const p of players)p.pause();}
   const c=state.combat??zero,events=combatSoundEvents(previous.current,c);
   const grateId=state.combat?.grateNoise?.id??0;
@@ -44,6 +45,7 @@ export function useCombatAudio(state:GameState,enabled:boolean,volume:number,onD
     const player={swing:(c.melee?.swings??0)%2?swing:swingB,slash,clang,shot:c.shots%2?shotA:shotB,enemy:heavy?enemyB:enemyA,hit,damage,knockout:finish,aim}[cue];
     player.volume=volume*({swing:.55,slash:.65,clang:.6,shot:.8,enemy:.55,hit:.28,damage:.58,knockout:.68,aim:.48}[cue]);
     const run=epoch.current;
+    if(cue==='knockout'&&defeated.length>0){const loot=c.kills%2?lootA:lootB;loot.volume=volume*.5;void loot.seekTo(0).then(()=>{if(allowed.current&&epoch.current===run)loot.play();}).catch(()=>{});}
     if(cue==='damage')void playImpact(player,()=>allowed.current&&epoch.current===run,()=>damageFeedback.current?.()).catch(()=>{});
     else void player.seekTo(0).then(()=>{if(allowed.current&&epoch.current===run)player.play();}).catch(()=>{});
    }
@@ -51,5 +53,5 @@ export function useCombatAudio(state:GameState,enabled:boolean,volume:number,onD
   if(state.ticks<lastTick.current)lastAim.current=-100;
   previousHP.current=state.guards.map(g=>g.hp);
   previous.current={melee:c.melee?{...c.melee}:undefined,shots:c.shots,enemyShots:c.enemyShots,hitEvents:c.hitEvents,damageTaken:c.damageTaken,kills:c.kills,aimEvents:c.aimEvents,commandSeen:c.commandSeen};lastTick.current=state.ticks;
- },[state,enabled,volume,feedbackEnabled,onHaptic,swing,swingB,slash,clang,shotA,shotB,enemyA,enemyB,hit,damage,knockout,knockoutB,heavyKO,droneKO,aim,grate]);
+ },[state,enabled,volume,feedbackEnabled,onHaptic,swing,swingB,slash,clang,shotA,shotB,enemyA,enemyB,hit,damage,knockout,knockoutB,heavyKO,droneKO,aim,grate,lootA,lootB]);
 }
