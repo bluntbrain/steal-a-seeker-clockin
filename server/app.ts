@@ -3,6 +3,7 @@ import {registerSite} from './site';
 import {STORE_ITEMS,RETIRED_ITEMS} from '../shared/store';
 import {CampaignService} from './campaign-service';
 import {CAMPAIGN_IDS,type MissionId} from '../src/game/level';
+import {CONTRACT_ID_MAX} from '../shared/contracts';
 import Fastify from 'fastify';
 import rateLimit from '@fastify/rate-limit';
 import {z,ZodError} from 'zod';
@@ -51,7 +52,7 @@ export async function createApp(service:CommerceService,ranked=new RankedService
  app.post('/me/unequip',async req=>service.unequip((await account(req.headers.authorization)).wallet,z.object({slot:z.enum(['outfit','trail','frame','rack'])}).strict().parse(req.body).slot));
  app.get('/weekly/leaderboard',async req=>ranked.weekly(req.headers.authorization?(await account(req.headers.authorization)).wallet:undefined));
  app.get('/league',async req=>league.summary(req.headers.authorization?(await account(req.headers.authorization)).wallet:undefined));
- app.post('/league/start',async req=>league.start((await account(req.headers.authorization)).wallet,z.object({contractId:z.string().max(32),rulesHash:z.string().regex(/^[a-f0-9]{64}$/),requestKey:uuid}).strict().parse(req.body)));
+ app.post('/league/start',async req=>league.start((await account(req.headers.authorization)).wallet,z.object({contractId:z.string().max(CONTRACT_ID_MAX),rulesHash:z.string().regex(/^[a-f0-9]{64}$/),requestKey:uuid}).strict().parse(req.body)));
  app.post('/league/identity',{config:{rateLimit:{max:5,timeWindow:'1 minute'}}},async req=>{const a=await account(req.headers.authorization),{domain}=z.object({domain:z.string().regex(/^[a-zA-Z0-9-]{1,63}\.skr$/)}).strict().parse(req.body);let owner;try{owner=await resolveSkr(domain);}catch{throw new ServiceError(503,'Name service unavailable. Your wallet address is still usable.');}if(owner!==a.wallet)throw new ServiceError(400,'This .skr name is not currently registered to your connected wallet.');await service.pool.query('INSERT INTO league_identity(wallet,domain) VALUES($1,$2) ON CONFLICT(wallet) DO UPDATE SET domain=$2,checked_at=now()',[a.wallet,domain.toLowerCase()]);return {domain:domain.toLowerCase()};});
  app.post('/league/equip',async req=>league.equip((await account(req.headers.authorization)).wallet));
  app.get('/daily',async()=>ranked.daily());

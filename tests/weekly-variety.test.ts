@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {makeCombatContracts} from '../shared/contracts';
+import {makeCombatContracts,CONTRACT_ID_MAX} from '../shared/contracts';
+import {makeReleaseContracts} from '../shared/weekly-melee';
 import {wallSignature,WEEKLY_VARIETY_START} from '../shared/weekly-variety';
 import {WEEKLY_LAYOUTS} from '../shared/weekly-layouts';
 import {findPath,walkableSegment} from '../src/game/navigation';
@@ -33,4 +34,12 @@ test('cutover leaves historical combat definitions on revision 6',()=>{
 test('future browser preview is localhost-only and rejects malformed or non-Monday dates',()=>{
  assert.equal(previewWeek('http://127.0.0.1:8788/?weeklyPreview=2026-09-28'),'2026-09-28');assert.equal(previewWeek('http://localhost/?weeklyPreview=2026-09-28'),'2026-09-28');
  for(const url of ['https://example.com/?weeklyPreview=2026-09-28','http://localhost/?weeklyPreview=2026-09-29','http://localhost/?weeklyPreview=2026-02-30','http://localhost/?weeklyPreview=2026-09-21','http://localhost/?weeklyPreview=9999-01-01','http://localhost/'])assert.equal(previewWeek(url),null);
+});
+
+test('release contract ids, including knife weeks, fit the league start route limit',()=>{
+ const monday=week(60),iso=monday.toISOString().slice(0,10);
+ assert.deepEqual(makeReleaseContracts(monday),makeCombatContracts(monday));
+ const knife=makeReleaseContracts(monday,iso);
+ assert.equal(knife.length,3);
+ for(const c of knife){assert.ok(c.id.endsWith(':knife-v16'));assert.ok(c.id.length<=CONTRACT_ID_MAX,`${c.id} is ${c.id.length} characters`);assert.equal(c.level.combat?.revision,16);}
 });

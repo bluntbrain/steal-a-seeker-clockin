@@ -4,6 +4,8 @@ import {weekWindow} from './weekly';
 import {makeVariedContracts,WEEKLY_VARIETY_START} from './weekly-variety';
 export type Contract={id:string;week:string;slot:number;name:string;district:string;modifier:string;objective:string;level:LevelDefinition;generation?:{version:number;template:string;activeEnemies:number;drones:number;heavies:number;reinforcements:number}};
 export const CONTRACT_ATTEMPTS=5;
+// route schema limit; knife week ids are 33 characters, so the old 32 cap rejected every ranked start
+export const CONTRACT_ID_MAX=64;
 export function makeContracts(date=new Date()):Contract[]{
  const week=weekWindow(date).week,weekNumber=Math.floor(Date.parse(week)/604800000);
  return [0,1,2].map(slot=>{
