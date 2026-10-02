@@ -1,3 +1,5 @@
+import {activePromotion,publicOffer,resolvePromotion,reservePromotion,type PromotionConfig} from './promotions';
+import {discountedPrice,type PromotionPreview} from '../shared/promotions';
 import {CREDIT_PACKS,STORE_ITEMS,RETIRED_ITEMS} from '../shared/store';
 import type {SolanaCluster} from '../shared/network';
 import {CoinbasePriceFeed,priceProduct,productPricing,type PriceFeed} from './pricing';
@@ -14,10 +16,10 @@ import {transaction} from './db';
 import {mergeProgress,type SyncedProgress} from './progress';
 import {TOKEN_PROGRAM,SYSTEM_PROGRAM,RpcError,type PaymentChain,type Verification} from './chain';
 export class ServiceError extends Error{constructor(public status:number,message:string,public diagnostic?:string){super(message);}}
-export type CommerceConfig={creditPackPrices?:Record<string,number>;storeCreditPrices?:Record<string,number>;passSkr?:number;testPricing?:boolean;cluster?:SolanaCluster;shopPrices?:Record<string,string>;priceDivisor?:number;campaignUsdCents?:number;rebateSkr?:number;allowlist?:string[];allowAllWallets?:boolean;identityUri:string;mint:string;recipient:string;decimals:number;destination:string;campaignOffer?:boolean;usdPricing?:boolean};
+export type CommerceConfig={promotions?:PromotionConfig[];creditPackPrices?:Record<string,number>;storeCreditPrices?:Record<string,number>;passSkr?:number;testPricing?:boolean;cluster?:SolanaCluster;shopPrices?:Record<string,string>;priceDivisor?:number;campaignUsdCents?:number;rebateSkr?:number;allowlist?:string[];allowAllWallets?:boolean;identityUri:string;mint:string;recipient:string;decimals:number;destination:string;campaignOffer?:boolean;usdPricing?:boolean};
 const hash=(s:string)=>createHash('sha256').update(s).digest('hex');
 const iso=(d:Date|string)=>new Date(d).toISOString();
-function orderFromRow(r:Record<string,any>):Order{return {id:r.id,wallet:r.wallet,sku:r.sku,status:r.status,currency:r.currency??'SKR',...(r.price_snapshot?{pricing:r.price_snapshot}:{}),...(r.campaign_terms?{campaignTerms:r.campaign_terms}:{}),cluster:r.cluster,mint:r.mint,tokenProgram:r.token_program,decimals:r.decimals,amount:r.amount,recipient:r.recipient,source:r.source,destination:r.destination,reference:r.reference,memo:r.memo,createdAt:iso(r.created_at),expiresAt:iso(r.expires_at),signature:r.signature,detail:r.detail,...(r.payment_authorization?{payment:r.payment_authorization}:{})};}
+function orderFromRow(r:Record<string,any>):Order{return {id:r.id,wallet:r.wallet,sku:r.sku,status:r.status,currency:r.currency??'SKR',...(r.promotion_snapshot?{promotion:r.promotion_snapshot}:{}),...(r.price_snapshot?{pricing:r.price_snapshot}:{}),...(r.campaign_terms?{campaignTerms:r.campaign_terms}:{}),cluster:r.cluster,mint:r.mint,tokenProgram:r.token_program,decimals:r.decimals,amount:r.amount,recipient:r.recipient,source:r.source,destination:r.destination,reference:r.reference,memo:r.memo,createdAt:iso(r.created_at),expiresAt:iso(r.expires_at),signature:r.signature,detail:r.detail,...(r.payment_authorization?{payment:r.payment_authorization}:{})};}
 export class CommerceService {
  campaignReturns?:ReturnService;
  constructor(public pool:Pool,public chain:PaymentChain,public config:CommerceConfig,private prices:PriceFeed=new CoinbasePriceFeed()){}
@@ -28,6 +30,23 @@ export class CommerceService {
   }
  }
  async pricing(sku:ProductId){try{return {...await productPricing(sku,this.prices,this.config.decimals,this.config.priceDivisor??1,this.config.campaignUsdCents,this.config.shopPrices,this.config.passSkr,this.config.creditPackPrices),...(sku==='campaign'?{campaignOffer:{testPricing:this.config.testPricing??false,usdCents:this.config.campaignUsdCents??1000/(this.config.priceDivisor??1),rebateSkr:this.config.rebateSkr??25,missions:12,cluster:this.config.cluster??'solana:devnet'}}:{})};}catch{throw new ServiceError(503,'Live prices are unavailable. Refresh prices before paying.');}}
+ async previewPromotion(code:string,sku:ProductId):Promise<PromotionPreview>{
+  const p=resolvePromotion(this.config.promotions??[],code,sku);activePromotion(p);
+  const offer=publicOffer(p);if(p.percentOff===100)return offer;
+  const pricing=await this.pricing(sku);return {...offer,pricing:{...pricing,campaignOffer:pricing.campaignOffer?{...pricing.campaignOffer,rebateSkr:0}:undefined,options:pricing.options.map(price=>discountedPrice(price,p.percentOff))}};
+ }
+ async claimPromotion(wallet:string,code:string,sku:ProductId){
+  const p=resolvePromotion(this.config.promotions??[],code,sku);if(p.percentOff!==100)throw new ServiceError(400,'Apply this discount at checkout.');
+  await transaction(this.pool,async db=>{
+   await db.query('SELECT address FROM wallets WHERE address=$1 FOR UPDATE',[wallet]);
+   const previous=await db.query("SELECT 1 FROM promotion_redemptions WHERE promotion_id=$1 AND wallet=$2 AND state='granted'",[p.id,wallet]);if(previous.rowCount)return;
+   const skus=[...new Set([sku,...p.bonusSkus])];
+   const pending=await db.query("SELECT 1 FROM orders WHERE wallet=$1 AND sku=ANY($2) AND (status IN ('verifying','needs_review') OR (status='quoted' AND (expires_at>now() OR payment_authorization IS NOT NULL OR signature IS NOT NULL)))",[wallet,skus]);
+   if(pending.rowCount)throw new ServiceError(409,'Finish or cancel the existing checkout before claiming this offer.');
+   await reservePromotion(db,p,wallet,null);
+   for(const item of skus)await db.query('INSERT INTO entitlements(wallet,sku) VALUES($1,$2) ON CONFLICT DO NOTHING',[wallet,item]);
+  });return this.me(wallet);
+ }
  async challenge(wallet:string):Promise<SignInChallenge>{
   address(wallet);if(this.config.cluster==='solana:mainnet'&&!this.config.allowAllWallets&&!this.config.allowlist?.includes(wallet))throw new ServiceError(403,'This Mainnet test is limited to the configured tester wallet.');const now=new Date(),expires=new Date(now.getTime()+5*60_000),id=randomUUID();
   const payload:SignInChallenge['payload']={domain:new URL(this.config.identityUri).host,address:wallet,statement:`Sign in to Steal a Seeker on ${this.config.cluster==='solana:mainnet'?'Mainnet':'Devnet'}. This does not authorize a payment.`,uri:this.config.identityUri,version:'1',chainId:this.config.cluster??'solana:devnet',nonce:randomBytes(16).toString('hex'),issuedAt:now.toISOString(),expirationTime:expires.toISOString()};
@@ -45,30 +64,34 @@ export class CommerceService {
  async authenticate(token:string){const r=await this.pool.query('SELECT wallet FROM sessions WHERE token_hash=$1 AND expires_at>now()',[hash(token)]);if(!r.rowCount)throw new ServiceError(401,'Sign in again to continue.');return r.rows[0].wallet as string;}
  async logout(token:string){await this.pool.query('DELETE FROM sessions WHERE token_hash=$1',[hash(token)]);}
  async me(wallet:string):Promise<AccountState>{const [profile,items]=await Promise.all([this.pool.query('SELECT equipment,progress,credits FROM wallets WHERE address=$1',[wallet]),this.pool.query('SELECT sku FROM entitlements WHERE wallet=$1 ORDER BY sku',[wallet])]);if(!profile.rowCount)throw new ServiceError(404,'Account not found.');const stars=await this.pool.query('SELECT mission,stars FROM campaign_credit_stars WHERE wallet=$1',[wallet]);return {wallet,...profile.rows[0],creditStars:Object.fromEntries(stars.rows.map(r=>[r.mission,r.stars])),entitlements:items.rows.map(r=>r.sku)};}
- async createOrder(wallet:string,sku:ProductId,key:string,currency:PaymentCurrency='SKR'):Promise<Order>{
+ async createOrder(wallet:string,sku:ProductId,key:string,currency:PaymentCurrency='SKR',promotionCode?:string):Promise<Order>{
   if(this.config.cluster==='solana:mainnet'&&!this.config.allowAllWallets&&!this.config.allowlist?.includes(wallet))throw new ServiceError(403,'Wallet not enabled for Mainnet testing.');
   const product=PRODUCTS.find(p=>p.id===sku);if(!product)throw new ServiceError(400,'Unknown product.');
   if(RETIRED_ITEMS.includes(sku))throw new ServiceError(400,'This item is no longer for sale.');
   if(currency==='SOL'&&!this.config.usdPricing)throw new ServiceError(503,'SOL payments are not enabled.');
-  const existing=await this.pool.query('SELECT * FROM orders WHERE wallet=$1 AND idempotency_key=$2',[wallet,key]);if(existing.rowCount){if(existing.rows[0].sku!==sku||(existing.rows[0].currency??'SKR')!==currency)throw new ServiceError(409,'This request key belongs to another product.');return orderFromRow(existing.rows[0]);}
+  const promo=promotionCode?resolvePromotion(this.config.promotions??[],promotionCode,sku):undefined;
+  if(promo?.percentOff===100)throw new ServiceError(400,'Claim this free offer without a payment.');
+  const existing=await this.pool.query('SELECT * FROM orders WHERE wallet=$1 AND idempotency_key=$2',[wallet,key]);if(existing.rowCount){if(existing.rows[0].sku!==sku||(existing.rows[0].currency??'SKR')!==currency||(existing.rows[0].promotion_snapshot?.id??null)!==(promo?.id??null))throw new ServiceError(409,'This request key belongs to another product.');return orderFromRow(existing.rows[0]);}
+  if(promo)activePromotion(promo);
   await this.paymentReady();
   let snapshot;try{snapshot=this.config.usdPricing?priceProduct(sku,currency,await this.prices.rates(),this.config.decimals,Date.now(),this.config.priceDivisor??1,this.config.campaignUsdCents,this.config.shopPrices,this.config.passSkr,this.config.creditPackPrices):undefined;}catch{throw new ServiceError(503,'Live prices are unavailable. Refresh prices before paying.');}
+  const originalSnapshot=snapshot;if(promo&&snapshot)snapshot=discountedPrice(snapshot,promo.percentOff);
   const native=currency==='SOL',mint=native?SYSTEM_PROGRAM:this.config.mint,program=native?SYSTEM_PROGRAM:TOKEN_PROGRAM,decimals=native?9:this.config.decimals,destination=native?this.config.recipient:this.config.destination;
   const [tokenSource]=await findAssociatedTokenPda({owner:address(wallet),mint:address(this.config.mint),tokenProgram:address(TOKEN_PROGRAM)});
   const source=native?wallet:tokenSource;
   return transaction(this.pool,async db=>{
    await db.query('SELECT address FROM wallets WHERE address=$1 FOR UPDATE',[wallet]);
-   const retry=await db.query('SELECT * FROM orders WHERE wallet=$1 AND idempotency_key=$2',[wallet,key]);if(retry.rowCount){if(retry.rows[0].sku!==sku||(retry.rows[0].currency??'SKR')!==currency)throw new ServiceError(409,'This request key belongs to another product.');return orderFromRow(retry.rows[0]);}
+   const retry=await db.query('SELECT * FROM orders WHERE wallet=$1 AND idempotency_key=$2',[wallet,key]);if(retry.rowCount){if(retry.rows[0].sku!==sku||(retry.rows[0].currency??'SKR')!==currency||(retry.rows[0].promotion_snapshot?.id??null)!==(promo?.id??null))throw new ServiceError(409,'This request key belongs to another product.');return orderFromRow(retry.rows[0]);}
    const owned=await db.query('SELECT 1 FROM entitlements WHERE wallet=$1 AND sku=$2',[wallet,sku]);if(owned.rowCount&&product.kind!=='credits')throw new ServiceError(409,'You already own this item. Restore your purchases.');
-   const pending=await db.query("SELECT * FROM orders WHERE wallet=$1 AND sku=$2 AND (status IN ('verifying','needs_review') OR (status='quoted' AND expires_at>now())) ORDER BY created_at DESC LIMIT 1",[wallet,sku]);if(pending.rowCount){if((pending.rows[0].currency??'SKR')!==currency)throw new ServiceError(409,'Finish or cancel the existing quote before changing payment currency.');return orderFromRow(pending.rows[0]);}
-   const id=randomUUID(),reference=getBase58Decoder().decode(randomBytes(32)),created=new Date(),expires=new Date(created.getTime()+(snapshot?5:15)*60_000),amount=snapshot?.amount??(BigInt(product.price)*10n**BigInt(this.config.decimals)).toString();
-   const r=await db.query(`INSERT INTO orders(id,wallet,sku,idempotency_key,status,cluster,mint,token_program,decimals,amount,recipient,source,destination,reference,memo,created_at,expires_at,currency,price_snapshot) VALUES($1,$2,$3,$4,'quoted',$18,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17) RETURNING *`,[id,wallet,sku,key,mint,program,decimals,amount,this.config.recipient,source,destination,reference,`seeker-order:${id}`,created,expires,currency,snapshot??null,this.config.cluster??'solana:devnet']);if(sku==='campaign'&&this.config.campaignOffer&&(this.config.rebateSkr??campaignTerms.rebate)>0){const terms={...campaignTerms,rebate:this.config.rebateSkr??campaignTerms.rebate};await db.query('UPDATE orders SET campaign_terms=$2 WHERE id=$1',[id,terms]);r.rows[0].campaign_terms=terms;}return orderFromRow(r.rows[0]);
+   const pending=await db.query("SELECT * FROM orders WHERE wallet=$1 AND sku=$2 AND (status IN ('verifying','needs_review') OR (status='quoted' AND (expires_at>now() OR payment_authorization IS NOT NULL OR signature IS NOT NULL))) ORDER BY created_at DESC LIMIT 1",[wallet,sku]);if(pending.rowCount){if((pending.rows[0].currency??'SKR')!==currency||(pending.rows[0].promotion_snapshot?.id??null)!==(promo?.id??null))throw new ServiceError(409,'Finish or cancel the existing quote before changing payment currency or offer.');return orderFromRow(pending.rows[0]);}
+   const id=randomUUID(),reference=getBase58Decoder().decode(randomBytes(32)),created=new Date(),expires=new Date(created.getTime()+(snapshot?5:15)*60_000),amount=snapshot?.amount??((BigInt(product.price)*10n**BigInt(this.config.decimals)*BigInt(100-(promo?.percentOff??0))+99n)/100n).toString();
+   const r=await db.query(`INSERT INTO orders(id,wallet,sku,idempotency_key,status,cluster,mint,token_program,decimals,amount,recipient,source,destination,reference,memo,created_at,expires_at,currency,price_snapshot) VALUES($1,$2,$3,$4,'quoted',$18,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17) RETURNING *`,[id,wallet,sku,key,mint,program,decimals,amount,this.config.recipient,source,destination,reference,`seeker-order:${id}`,created,expires,currency,snapshot??null,this.config.cluster??'solana:devnet']);if(promo){const promotion={...publicOffer(promo),originalAmount:originalSnapshot?.amount??(BigInt(product.price)*10n**BigInt(this.config.decimals)).toString(),originalUsdCents:originalSnapshot?.usdCents};await db.query('UPDATE orders SET promotion_snapshot=$2,expires_at=LEAST(expires_at,$3) WHERE id=$1',[id,promotion,promo.expiresAt]);r.rows[0].promotion_snapshot=promotion;r.rows[0].expires_at=new Date(Math.min(expires.getTime(),Date.parse(promo.expiresAt)));await reservePromotion(db,promo,wallet,id);}if(!promo&&sku==='campaign'&&this.config.campaignOffer&&(this.config.rebateSkr??campaignTerms.rebate)>0){const terms={...campaignTerms,rebate:this.config.rebateSkr??campaignTerms.rebate};await db.query('UPDATE orders SET campaign_terms=$2 WHERE id=$1',[id,terms]);r.rows[0].campaign_terms=terms;}return orderFromRow(r.rows[0]);
   });
  }
  async cancelQuote(wallet:string,id:string){return transaction(this.pool,async db=>{
   const row=await db.query('SELECT * FROM orders WHERE id=$1 AND wallet=$2 FOR UPDATE',[id,wallet]);if(!row.rowCount)throw new ServiceError(404,'Order not found.');
   const o=row.rows[0];if(o.status!=='quoted'||o.payment_authorization||o.signature)throw new ServiceError(409,'A payment was already prepared. Restore its result before changing currency.');
-  await db.query("UPDATE orders SET expires_at=LEAST(expires_at,now()),detail='Unprepared quote cancelled.' WHERE id=$1",[id]);return {ok:true};
+  await db.query("UPDATE orders SET expires_at=LEAST(expires_at,now()),detail='Unprepared quote cancelled.' WHERE id=$1",[id]);await db.query("UPDATE promotion_redemptions SET state='released',updated_at=now() WHERE order_id=$1 AND state='reserved'",[id]);return {ok:true};
  });}
  async getOrder(wallet:string,id:string){const r=await this.pool.query('SELECT * FROM orders WHERE id=$1 AND wallet=$2',[id,wallet]);if(!r.rowCount)throw new ServiceError(404,'Order not found.');return orderFromRow(r.rows[0]);}
  async orders(wallet:string){return (await this.pool.query('SELECT * FROM orders WHERE wallet=$1 ORDER BY created_at DESC LIMIT 50',[wallet])).rows.map(orderFromRow);}
@@ -128,6 +151,7 @@ export class CommerceService {
    const pack=CREDIT_PACKS.find(p=>p.id===order.sku);
    if(pack){const balance=await db.query('UPDATE wallets SET credits=credits+$2 WHERE address=$1 RETURNING credits',[order.wallet,pack.credits]);await db.query('INSERT INTO credit_ledger(id,wallet,source,delta,balance_after) VALUES($1,$2,$3,$4,$5)',[randomUUID(),order.wallet,`order:${order.id}`,pack.credits,balance.rows[0].credits]);}
    else await db.query('INSERT INTO entitlements(wallet,sku,order_id) VALUES($1,$2,$3)',[order.wallet,order.sku,order.id]);
+   if(order.promotion){for(const bonus of order.promotion.bonusSkus)await db.query('INSERT INTO entitlements(wallet,sku) VALUES($1,$2) ON CONFLICT DO NOTHING',[order.wallet,bonus]);await db.query("UPDATE promotion_redemptions SET state='granted',granted_skus=$2,updated_at=now() WHERE order_id=$1",[order.id,JSON.stringify([order.sku,...order.promotion.bonusSkus])]);}
    await db.query("UPDATE orders SET status='fulfilled',signature=$2,detail=NULL,checked_at=now() WHERE id=$1",[order.id,signature]);
    await db.query("UPDATE order_attempts SET state='verified' WHERE order_id=$1 AND signature=$2",[order.id,signature]);
   });

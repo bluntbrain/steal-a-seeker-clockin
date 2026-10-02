@@ -1,0 +1,5 @@
+Code-derived evidence only. All 263 receipt source hashes matched at initial inspection; shared checkout later changed during other work.
+Wallet: src/wallet/sendWithWallet.ts uses signAndSendTransactions({transactions:[prepared], minContextSlot:Number(minContextSlot), commitment:"confirmed", skipPreflight:false, maxRetries:2}).
+HideoutStore.tsx derives cardWidth from window width and uses flexWrap. Runtime layout cause not established.
+SettingsPanel offers sound, volume, vibration and reduced effects; no independent music toggle in inspected panel.
+Guide steps: move, cover, attack drone. Actual observed completion documented separately.

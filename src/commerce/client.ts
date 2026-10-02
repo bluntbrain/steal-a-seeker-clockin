@@ -1,3 +1,4 @@
+import type {PromotionPreview} from '../../shared/promotions';
 import type {StoreItemId} from '../../shared/store';
 import type {PaymentCurrency,ProductPricing} from '../../shared/pricing';
 import type {AccountState,Order,ProductId,SignInChallenge} from '../../shared/commerce';
@@ -14,6 +15,8 @@ export async function api<T>(path:string,options:{token?:string;body?:unknown;me
 export type Session={token:string;wallet:string;expiresAt:string};
 export type StoreCatalog={testPricing?:boolean;products:{id:string;usdCents?:number;credits?:number;skrPrice?:number|string}[];creditStore?:{id:StoreItemId;price:number}[]};
 export const commerceApi={
+ promotionPreview:(code:string,sku:ProductId='campaign')=>api<PromotionPreview>('/promotions/preview',{body:{code,sku}}),
+ claimPromotion:(token:string,code:string,sku:ProductId='campaign')=>api<AccountState>('/promotions/claim',{token,body:{code,sku}}),
  catalog:()=>api<StoreCatalog>('/catalog'),
  unequip:(token:string,slot:'outfit'|'trail'|'frame'|'rack')=>api<AccountState>('/me/unequip',{token,body:{slot}}),
  redeem:(token:string,sku:string,expectedPrice?:number)=>api<AccountState>('/credits/redeem',{token,body:{sku,expectedPrice}}),
@@ -25,7 +28,7 @@ export const commerceApi={
  orders:(token:string)=>api<Order[]>('/orders',{token}),
  order:(token:string,id:string)=>api<Order>(`/orders/${id}`,{token}),
  prepare:(token:string,id:string)=>api<Order>(`/orders/${id}/prepare`,{token,body:{}}),
- quote:(token:string,sku:ProductId,idempotencyKey:string,currency:PaymentCurrency='SKR')=>api<Order>('/orders',{token,body:{sku,idempotencyKey,currency}}),
+ quote:(token:string,sku:ProductId,idempotencyKey:string,currency:PaymentCurrency='SKR',promotionCode?:string)=>api<Order>('/orders',{token,body:{sku,idempotencyKey,currency,promotionCode}}),
  attach:(token:string,id:string,signature:string)=>api<Order>(`/orders/${id}/transaction`,{token,body:{signature}}),
  reconcile:(token:string,id:string)=>api<Order>(`/orders/${id}/reconcile`,{token,body:{}}),
  equip:(token:string,sku:ProductId)=>api<AccountState>('/me/equipment',{token,method:'PUT',body:{sku}}),

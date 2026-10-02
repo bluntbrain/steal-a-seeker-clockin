@@ -1,0 +1,2187 @@
+
+> steal-a-seeker-mvp@0.3.27 test
+> tsx --test tests/*.test.ts
+
+TAP version 13
+# Subtest: cached access and equipment remain bound to the selected wallet
+ok 1 - cached access and equipment remain bound to the selected wallet
+  ---
+  duration_ms: 4.386167
+  type: 'test'
+  ...
+# Subtest: cloud restore preserves newer local bests and repeated merges do not add completions
+ok 2 - cloud restore preserves newer local bests and repeated merges do not add completions
+  ---
+  duration_ms: 0.276208
+  type: 'test'
+  ...
+# Subtest: a server-awarded Ghost Courier outfit survives account caching without a shop purchase
+ok 3 - a server-awarded Ghost Courier outfit survives account caching without a shop purchase
+  ---
+  duration_ms: 0.069834
+  type: 'test'
+  ...
+# Subtest: released native audio cannot throw through cleanup or volume updates
+ok 4 - released native audio cannot throw through cleanup or volume updates
+  ---
+  duration_ms: 1.143833
+  type: 'test'
+  ...
+# Subtest: late seek callback cannot play after unmount
+ok 5 - late seek callback cannot play after unmount
+  ---
+  duration_ms: 0.328625
+  type: 'test'
+  ...
+# Subtest: a rejected native media operation is contained
+ok 6 - a rejected native media operation is contained
+  ---
+  duration_ms: 0.23675
+  type: 'test'
+  ...
+# Subtest: turntable wraps both drag directions and preserves opposite views
+ok 7 - turntable wraps both drag directions and preserves opposite views
+  ---
+  duration_ms: 0.15475
+  type: 'test'
+  ...
+# Subtest: older challenge copy is translated without changing manifests
+ok 8 - older challenge copy is translated without changing manifests
+  ---
+  duration_ms: 0.486167
+  type: 'test'
+  ...
+# Subtest: local campaign and every cosmetic debit once, equip only owned items
+ok 9 - local campaign and every cosmetic debit once, equip only owned items
+  ---
+  duration_ms: 1.014916
+  type: 'test'
+  ...
+# Subtest: local entry returns only once and never settles another ticket
+ok 10 - local entry returns only once and never settles another ticket
+  ---
+  duration_ms: 1.092916
+  type: 'test'
+  ...
+# Subtest: completion rebate requires all twelve, pays once, keeps access, and never changes old purchase terms
+ok 11 - completion rebate requires all twelve, pays once, keeps access, and never changes old purchase terms
+  ---
+  duration_ms: 0.247208
+  type: 'test'
+  ...
+# Subtest: ranking distinguishes equal completion counts and never combines different attempts
+ok 12 - ranking distinguishes equal completion counts and never combines different attempts
+  ---
+  duration_ms: 0.119834
+  type: 'test'
+  ...
+# Subtest: new weekly passes have no completion rebate even after all twelve wins
+ok 13 - new weekly passes have no completion rebate even after all twelve wins
+  ---
+  duration_ms: 0.084208
+  type: 'test'
+  ...
+# Subtest: angled camera joystick directions project back to their intended screen axes
+ok 14 - angled camera joystick directions project back to their intended screen axes
+  ---
+  duration_ms: 0.9865
+  type: 'test'
+  ...
+# Subtest: campaign celebration requires all twelve wins and there is never a next mission after the last
+ok 15 - campaign celebration requires all twelve wins and there is never a next mission after the last
+  ---
+  duration_ms: 1.221292
+  type: 'test'
+  ...
+# Subtest: campaign export labels real aggregated progress, never a weekly rank or cash prize
+ok 16 - campaign export labels real aggregated progress, never a weekly rank or cash prize
+  ---
+  duration_ms: 0.425125
+  type: 'test'
+  ...
+# Subtest: two phone instructions explain every pickup and delivery stage
+ok 17 - two phone instructions explain every pickup and delivery stage
+  ---
+  duration_ms: 0.085125
+  type: 'test'
+  ...
+# Subtest: celebration export fits its own dimensions and preserves equipped outfits
+ok 18 - celebration export fits its own dimensions and preserves equipped outfits
+  ---
+  duration_ms: 17.422084
+  type: 'test'
+  ...
+# Subtest: replaying earlier missions after campaign completion never opens the finale
+ok 19 - replaying earlier missions after campaign completion never opens the finale
+  ---
+  duration_ms: 1.207334
+  type: 'test'
+  ...
+# Subtest: foreground win and background importer share one receipt, including after remount
+ok 20 - foreground win and background importer share one receipt, including after remount
+  ---
+  duration_ms: 4.260542
+  type: 'test'
+  ...
+# Subtest: failed upload stays durable and a later retry succeeds
+ok 21 - failed upload stays durable and a later retry succeeds
+  ---
+  duration_ms: 0.816167
+  type: 'test'
+  ...
+# Subtest: old upload cannot erase a newer win on the same mission
+ok 22 - old upload cannot erase a newer win on the same mission
+  ---
+  duration_ms: 0.427917
+  type: 'test'
+  ...
+# Subtest: disk cleanup failure does not discard the confirmed award
+ok 23 - disk cleanup failure does not discard the confirmed award
+  ---
+  duration_ms: 0.314666
+  type: 'test'
+  ...
+# Subtest: failed historical replay does not block submitting the current win
+ok 24 - failed historical replay does not block submitting the current win
+  ---
+  duration_ms: 0.527292
+  type: 'test'
+  ...
+# Subtest: uploads and receipts never cross wallet/session boundaries
+ok 25 - uploads and receipts never cross wallet/session boundaries
+  ---
+  duration_ms: 0.401166
+  type: 'test'
+  ...
+# Subtest: connecting during a guest import shares the award and clears both queues
+ok 26 - connecting during a guest import shares the award and clears both queues
+  ---
+  duration_ms: 0.423959
+  type: 'test'
+  ...
+# Subtest: practice: authored routes stay clear, full input route extracts and retry resets
+ok 27 - practice: authored routes stay clear, full input route extracts and retry resets
+  ---
+  duration_ms: 48.691167
+  type: 'test'
+  ...
+# Subtest: cone-lesson: authored routes stay clear, full input route extracts and retry resets
+ok 28 - cone-lesson: authored routes stay clear, full input route extracts and retry resets
+  ---
+  duration_ms: 38.681666
+  type: 'test'
+  ...
+# Subtest: battery-dash: authored routes stay clear, full input route extracts and retry resets
+ok 29 - battery-dash: authored routes stay clear, full input route extracts and retry resets
+  ---
+  duration_ms: 41.499458
+  type: 'test'
+  ...
+# Subtest: crossing-signals: authored routes stay clear, full input route extracts and retry resets
+ok 30 - crossing-signals: authored routes stay clear, full input route extracts and retry resets
+  ---
+  duration_ms: 33.123542
+  type: 'test'
+  ...
+# Subtest: sweep-window: authored routes stay clear, full input route extracts and retry resets
+ok 31 - sweep-window: authored routes stay clear, full input route extracts and retry resets
+  ---
+  duration_ms: 20.567041
+  type: 'test'
+  ...
+# Subtest: narrow-crossing: authored routes stay clear, full input route extracts and retry resets
+ok 32 - narrow-crossing: authored routes stay clear, full input route extracts and retry resets
+  ---
+  duration_ms: 175.650708
+  type: 'test'
+  ...
+# Subtest: false-footsteps: authored routes stay clear, full input route extracts and retry resets
+ok 33 - false-footsteps: authored routes stay clear, full input route extracts and retry resets
+  ---
+  duration_ms: 72.962083
+  type: 'test'
+  ...
+# Subtest: warden-gate: authored routes stay clear, full input route extracts and retry resets
+ok 34 - warden-gate: authored routes stay clear, full input route extracts and retry resets
+  ---
+  duration_ms: 118.584
+  type: 'test'
+  ...
+# Subtest: power-trade: authored routes stay clear, full input route extracts and retry resets
+ok 35 - power-trade: authored routes stay clear, full input route extracts and retry resets
+  ---
+  duration_ms: 104.808417
+  type: 'test'
+  ...
+# Subtest: two-targets: authored routes stay clear, full input route extracts and retry resets
+ok 36 - two-targets: authored routes stay clear, full input route extracts and retry resets
+  ---
+  duration_ms: 170.536625
+  type: 'test'
+  ...
+# Subtest: silent-circuit: authored routes stay clear, full input route extracts and retry resets
+ok 37 - silent-circuit: authored routes stay clear, full input route extracts and retry resets
+  ---
+  duration_ms: 83.262875
+  type: 'test'
+  ...
+# Subtest: last-vault: authored routes stay clear, full input route extracts and retry resets
+ok 38 - last-vault: authored routes stay clear, full input route extracts and retry resets
+  ---
+  duration_ms: 129.474167
+  type: 'test'
+  ...
+# Subtest: campaign missions have unique geometry and correctly bounded objectives
+ok 39 - campaign missions have unique geometry and correctly bounded objectives
+  ---
+  duration_ms: 0.249709
+  type: 'test'
+  ...
+# Subtest: exact displayed price can continue to wallet approval
+ok 40 - exact displayed price can continue to wallet approval
+  ---
+  duration_ms: 0.4185
+  type: 'test'
+  ...
+# Subtest: changed price, method or product requires another explicit review
+ok 41 - changed price, method or product requires another explicit review
+  ---
+  duration_ms: 0.331833
+  type: 'test'
+  ...
+# Subtest: existing submitted, prepared and fulfilled orders never automatically pay again
+ok 42 - existing submitted, prepared and fulfilled orders never automatically pay again
+  ---
+  duration_ms: 0.165584
+  type: 'test'
+  ...
+# Subtest: a changed completion reward also requires review even when the payment is unchanged
+ok 43 - a changed completion reward also requires review even when the payment is unchanged
+  ---
+  duration_ms: 0.139666
+  type: 'test'
+  ...
+# Subtest: a pass with no rebate can continue at the price selected by the player
+ok 44 - a pass with no rebate can continue at the price selected by the player
+  ---
+  duration_ms: 0.112583
+  type: 'test'
+  ...
+# Subtest: quick clean kills form a chain, not extra score or credits
+ok 45 - quick clean kills form a chain, not extra score or credits
+  ---
+  duration_ms: 1.224833
+  type: 'test'
+  ...
+# Subtest: damage on a kill, pauses, restarts and restored kills never award a stale combo
+ok 46 - damage on a kill, pauses, restarts and restored kills never award a stale combo
+  ---
+  duration_ms: 0.124
+  type: 'test'
+  ...
+# Subtest: combat audio distinguishes outgoing hits from player damage and collapses bursts
+ok 47 - combat audio distinguishes outgoing hits from player damage and collapses bursts
+  ---
+  duration_ms: 2.126625
+  type: 'test'
+  ...
+# Subtest: KO replaces impact sound; resetting and routine taps are silent
+ok 48 - KO replaces impact sound; resetting and routine taps are silent
+  ---
+  duration_ms: 0.386834
+  type: 'test'
+  ...
+# Subtest: all twelve combat maps have reachable phone and exit and valid guard routes
+ok 49 - all twelve combat maps have reachable phone and exit and valid guard routes
+  ---
+  duration_ms: 87.600292
+  type: 'test'
+  ...
+# Subtest: tap selects a guard, shoots, and permanently disables its attacks
+ok 50 - tap selects a guard, shoots, and permanently disables its attacks
+  ---
+  duration_ms: 24.382084
+  type: 'test'
+  ...
+# Subtest: tap movement replaces attack; repeated sequence never produces extra actions
+ok 51 - tap movement replaces attack; repeated sequence never produces extra actions
+  ---
+  duration_ms: 1.875791
+  type: 'test'
+  ...
+# Subtest: walls block bullets and rejected attack leaves a valid move intact
+ok 52 - walls block bullets and rejected attack leaves a valid move intact
+  ---
+  duration_ms: 0.681917
+  type: 'test'
+  ...
+# Subtest: guards warn before shooting and projectile damage replaces exposure death
+ok 53 - guards warn before shooting and projectile damage replaces exposure death
+  ---
+  duration_ms: 0.326959
+  type: 'test'
+  ...
+# Subtest: phone tap picks up, reserves activate after their countdown, exit completes
+ok 54 - phone tap picks up, reserves activate after their countdown, exit completes
+  ---
+  duration_ms: 0.904125
+  type: 'test'
+  ...
+# Subtest: recorded combat replay verifies exactly and rejects forged inputs
+ok 55 - recorded combat replay verifies exactly and rejects forged inputs
+  ---
+  duration_ms: 8.544375
+  type: 'test'
+  ...
+# Subtest: short control lesson ends with the harder mission still to solve
+ok 56 - short control lesson ends with the harder mission still to solve
+  ---
+  duration_ms: 36.8945
+  type: 'test'
+  ...
+# Subtest: all authored combat missions have honest input replays; local restore equals server result
+ok 57 - all authored combat missions have honest input replays; local restore equals server result
+  ---
+  duration_ms: 6498.471125
+  type: 'test'
+  ...
+# Subtest: 52 weekly combat rotations are deterministic, connected and distinguish health from speed
+ok 58 - 52 weekly combat rotations are deterministic, connected and distinguish health from speed
+  ---
+  duration_ms: 147.744417
+  type: 'test'
+  ...
+# Subtest: tactical guards react to being shot and rear ambush damage is decided when fired
+ok 59 - tactical guards react to being shot and rear ambush damage is decided when fired
+  ---
+  duration_ms: 1.024917
+  type: 'test'
+  ...
+# Subtest: tactical alarm doubles pursuit speed while preserving a readable aim window
+ok 60 - tactical alarm doubles pursuit speed while preserving a readable aim window
+  ---
+  duration_ms: 0.452208
+  type: 'test'
+  ...
+# Subtest: repeated phone taps do not restart the tactical pickup hold
+ok 61 - repeated phone taps do not restart the tactical pickup hold
+  ---
+  duration_ms: 0.293042
+  type: 'test'
+  ...
+# Subtest: close rear approach is unseen, while the front cone still detects at the same distance
+ok 62 - close rear approach is unseen, while the front cone still detects at the same distance
+  ---
+  duration_ms: 2.053458
+  type: 'test'
+  ...
+# Subtest: rear opening defeats a sentry; an armored survivor cannot be stun-locked
+ok 63 - rear opening defeats a sentry; an armored survivor cannot be stun-locked
+  ---
+  duration_ms: 0.235208
+  type: 'test'
+  ...
+# Subtest: 52 weeks have three reproducible contracts, clear targets, connected extraction and changing routes
+ok 64 - 52 weeks have three reproducible contracts, clear targets, connected extraction and changing routes
+  ---
+  duration_ms: 686.584041
+  type: 'test'
+  ...
+# Subtest: current three contracts have winning full-physics replays and exact server parity
+ok 65 - current three contracts have winning full-physics replays and exact server parity
+  ---
+  duration_ms: 1478.343084
+  type: 'test'
+  ...
+# Subtest: exit window prevents extraction while closed; failed runs cannot score
+ok 66 - exit window prevents extraction while closed; failed runs cannot score
+  ---
+  duration_ms: 0.166708
+  type: 'test'
+  ...
+# Subtest: .skr identity rejects expired, short, and wrong-program data
+ok 67 - .skr identity rejects expired, short, and wrong-program data
+  ---
+  duration_ms: 0.752625
+  type: 'test'
+  ...
+# Subtest: all thirteen costumes have distinct portraits, eight poses and stable old inventory IDs
+ok 68 - all thirteen costumes have distinct portraits, eight poses and stable old inventory IDs
+  ---
+  duration_ms: 20.336833
+  type: 'test'
+  ...
+# Subtest: courier direction indices and walking frame bounds match the atlas layout
+ok 69 - courier direction indices and walking frame bounds match the atlas layout
+  ---
+  duration_ms: 0.283542
+  type: 'test'
+  ...
+# Subtest: campaign spawn shows the backpack and real movement selects the correct view in both control modes
+ok 70 - campaign spawn shows the backpack and real movement selects the correct view in both control modes
+  ---
+  duration_ms: 76.952625
+  type: 'test'
+  ...
+# Subtest: only implemented outfits are on sale, and wallet inventory restores new outfits
+ok 71 - only implemented outfits are on sale, and wallet inventory restores new outfits
+  ---
+  duration_ms: 0.839166
+  type: 'test'
+  ...
+# Subtest: card shows actual weekly totals, participant count and live status
+ok 72 - card shows actual weekly totals, participant count and live status
+  ---
+  duration_ms: 2.715917
+  type: 'test'
+  ...
+# Subtest: local and unranked cards cannot imply a live rank or earned status
+ok 73 - local and unranked cards cannot imply a live rank or earned status
+  ---
+  duration_ms: 0.40275
+  type: 'test'
+  ...
+# Subtest: dates cross month and year boundaries in UTC, and timing rounds across minutes
+ok 74 - dates cross month and year boundaries in UTC, and timing rounds across minutes
+  ---
+  duration_ms: 0.164958
+  type: 'test'
+  ...
+# Subtest: export is self-contained, safely escapes identity and retains all layout data
+ok 75 - export is self-contained, safely escapes identity and retains all layout data
+  ---
+  duration_ms: 21.838292
+  type: 'test'
+  ...
+# Subtest: share art follows the equipped outfit without changing scores
+ok 76 - share art follows the equipped outfit without changing scores
+  ---
+  duration_ms: 2.206917
+  type: 'test'
+  ...
+# Subtest: district pace increases only at levels 5 and 9 and never stacks on retry
+ok 77 - district pace increases only at levels 5 and 9 and never stacks on retry
+  ---
+  duration_ms: 43.464334
+  type: 'test'
+  ...
+# Subtest: actual movement and footstep distance receive the same boost unloaded and carrying
+ok 78 - actual movement and footstep distance receive the same boost unloaded and carrying
+  ---
+  duration_ms: 7.520417
+  type: 'test'
+  ...
+# Subtest: weekly play has fixed speed, even with new mechanics and a late-district number
+ok 79 - weekly play has fixed speed, even with new mechanics and a late-district number
+  ---
+  duration_ms: 1.76875
+  type: 'test'
+  ...
+# Subtest: code 28 retains its old movement and claim thresholds
+ok 80 - code 28 retains its old movement and claim thresholds
+  ---
+  duration_ms: 4.122292
+  type: 'test'
+  ...
+# Subtest: verified replay with zero extra credits continues immediately
+ok 81 - verified replay with zero extra credits continues immediately
+  ---
+  duration_ms: 0.545
+  type: 'test'
+  ...
+# Subtest: an improved replay still offers its actual additional credits
+ok 82 - an improved replay still offers its actual additional credits
+  ---
+  duration_ms: 0.079958
+  type: 'test'
+  ...
+# Subtest: failed sync cannot trap a durably saved run or claim unverified credits
+ok 83 - failed sync cannot trap a durably saved run or claim unverified credits
+  ---
+  duration_ms: 0.057334
+  type: 'test'
+  ...
+# Subtest: a slow verifier allows continuing only after the replay was saved
+ok 84 - a slow verifier allows continuing only after the replay was saved
+  ---
+  duration_ms: 0.05425
+  type: 'test'
+  ...
+# Subtest: a failed local save must be retried before leaving
+ok 85 - a failed local save must be retried before leaving
+  ---
+  duration_ms: 0.04475
+  type: 'test'
+  ...
+# Subtest: wallet connection stays available without blocking departure from a saved win
+ok 86 - wallet connection stays available without blocking departure from a saved win
+  ---
+  duration_ms: 0.094875
+  type: 'test'
+  ...
+# Subtest: sustained scout sight shares a local snapshot with one nearby responder in early missions
+ok 87 - sustained scout sight shares a local snapshot with one nearby responder in early missions
+  ---
+  duration_ms: 8.946625
+  type: 'test'
+  ...
+# Subtest: engaged guards retain close contact through a sidestep and continue aiming
+ok 88 - engaged guards retain close contact through a sidestep and continue aiming
+  ---
+  duration_ms: 1.202291
+  type: 'test'
+  ...
+# Subtest: close tracking does not grant an unaware guard rear vision
+ok 89 - close tracking does not grant an unaware guard rear vision
+  ---
+  duration_ms: 0.348708
+  type: 'test'
+  ...
+# Subtest: an engaged guard loses actual visibility behind cover and cannot update the hidden position
+ok 90 - an engaged guard loses actual visibility behind cover and cannot update the hidden position
+  ---
+  duration_ms: 2.752709
+  type: 'test'
+  ...
+# Subtest: breaking contact stops hidden-player tracking, leads to search and then a patrol return
+ok 91 - breaking contact stops hidden-player tracking, leads to search and then a patrol return
+  ---
+  duration_ms: 26.876709
+  type: 'test'
+  ...
+# Subtest: walls prevent the initial report and short glimpses do not instantly alert a room
+ok 92 - walls prevent the initial report and short glimpses do not instantly alert a room
+  ---
+  duration_ms: 2.768458
+  type: 'test'
+  ...
+# Subtest: authored home zones are reachable and seeded roaming is repeatable without fixed ping-pong routes
+ok 93 - authored home zones are reachable and seeded roaming is repeatable without fixed ping-pong routes
+  ---
+  duration_ms: 486.631333
+  type: 'test'
+  ...
+# Subtest: Filament accepts a native thenable without a chained catch and releases late resources
+ok 94 - Filament accepts a native thenable without a chained catch and releases late resources
+  ---
+  duration_ms: 9.326458
+  type: 'test'
+  ...
+# Subtest: Filament initializer failures reach recovery state instead of unhandled rejection
+ok 95 - Filament initializer failures reach recovery state instead of unhandled rejection
+  ---
+  duration_ms: 1.6895
+  type: 'test'
+  ...
+# Subtest: camera flag restores the original map and invalid zoom cannot break layout
+ok 96 - camera flag restores the original map and invalid zoom cannot break layout
+  ---
+  duration_ms: 1.548708
+  type: 'test'
+  ...
+# Subtest: camera clamps at every map edge and keeps the courier inside the viewport
+ok 97 - camera clamps at every map edge and keeps the courier inside the viewport
+  ---
+  duration_ms: 0.859417
+  type: 'test'
+  ...
+# Subtest: follow is frame-rate independent, never overshoots and instantly restores overview
+ok 98 - follow is frame-rate independent, never overshoots and instantly restores overview
+  ---
+  duration_ms: 0.5835
+  type: 'test'
+  ...
+# Subtest: inverse projection preserves attack, phone, gate and floor taps on all twelve maps
+ok 99 - inverse projection preserves attack, phone, gate and floor taps on all twelve maps
+  ---
+  duration_ms: 1556.202666
+  type: 'test'
+  ...
+# Subtest: native overlay center-origin transform matches the Skia top-left transform
+ok 100 - native overlay center-origin transform matches the Skia top-left transform
+  ---
+  duration_ms: 0.210166
+  type: 'test'
+  ...
+# Subtest: edge markers only appear outside the cropped map and stay inside the screen
+ok 101 - edge markers only appear outside the cropped map and stay inside the screen
+  ---
+  duration_ms: 0.225083
+  type: 'test'
+  ...
+# Subtest: full-height phone viewports keep map edges, tap projection and markers aligned
+ok 102 - full-height phone viewports keep map edges, tap projection and markers aligned
+  ---
+  duration_ms: 0.592084
+  type: 'test'
+  ...
+# Subtest: footsteps require travel, alternate feet, and do not replay on other UI renders
+ok 103 - footsteps require travel, alternate feet, and do not replay on other UI renders
+  ---
+  duration_ms: 1.0485
+  type: 'test'
+  ...
+# Subtest: pause, mute, result, restart and a long gap discard accumulated footsteps
+ok 104 - pause, mute, result, restart and a long gap discard accumulated footsteps
+  ---
+  duration_ms: 0.18325
+  type: 'test'
+  ...
+# Subtest: carrying pace is slower, stationary shooting and blocked travel are silent
+ok 105 - carrying pace is slower, stationary shooting and blocked travel are silent
+  ---
+  duration_ms: 0.261167
+  type: 'test'
+  ...
+# Subtest: cadence follows distance across HUD refresh rates without catch-up bursts
+ok 106 - cadence follows distance across HUD refresh rates without catch-up bursts
+  ---
+  duration_ms: 0.273792
+  type: 'test'
+  ...
+# Subtest: all defeated bodies and particles fully clear, including restored old deaths
+ok 107 - all defeated bodies and particles fully clear, including restored old deaths
+  ---
+  duration_ms: 1.489833
+  type: 'test'
+  ...
+# Subtest: reduced effects fade without flash, recoil, particles or rotation
+ok 108 - reduced effects fade without flash, recoil, particles or rotation
+  ---
+  duration_ms: 0.224958
+  type: 'test'
+  ...
+# Subtest: collapse remains bounded and fade never reverses across many render frames
+ok 109 - collapse remains bounded and fade never reverses across many render frames
+  ---
+  duration_ms: 0.74925
+  type: 'test'
+  ...
+# Subtest: early vision catches a farther crossing and a wider flank but cover still blocks it
+ok 110 - early vision catches a farther crossing and a wider flank but cover still blocks it
+  ---
+  duration_ms: 12.538084
+  type: 'test'
+  ...
+# Subtest: alerted drones close on a phone carrier without overtaking an unloaded sprint
+ok 111 - alerted drones close on a phone carrier without overtaking an unloaded sprint
+  ---
+  duration_ms: 11.089541
+  type: 'test'
+  ...
+# Subtest: pressure guards shoot sooner, harder, and keep closing during tracking aim
+ok 112 - pressure guards shoot sooner, harder, and keep closing during tracking aim
+  ---
+  duration_ms: 2.709958
+  type: 'test'
+  ...
+# Subtest: the final aim tell is committed and cover cancels a burst
+ok 113 - the final aim tell is committed and cover cancels a burst
+  ---
+  duration_ms: 15.496542
+  type: 'test'
+  ...
+# Subtest: the faster drone report remains interruptible with the same countdown used by its ring
+ok 114 - the faster drone report remains interruptible with the same countdown used by its ring
+  ---
+  duration_ms: 2.327333
+  type: 'test'
+  ...
+# Subtest: campaign pursuit is grounded while alertness and opening pickup responses remain
+ok 115 - campaign pursuit is grounded while alertness and opening pickup responses remain
+  ---
+  duration_ms: 11.042084
+  type: 'test'
+  ...
+# Subtest: code 27 campaign claims retain the published thresholds after slowing pursuit
+ok 116 - code 27 campaign claims retain the published thresholds after slowing pursuit
+  ---
+  duration_ms: 12.607708
+  type: 'test'
+  ...
+# Subtest: the shipped campaign still earns its original credits while the harder build rolls out
+ok 117 - the shipped campaign still earns its original credits while the harder build rolls out
+  ---
+  duration_ms: 0.118917
+  type: 'test'
+  ...
+# Subtest: opening mission has a guard; legacy night shift retains two independent patrols
+ok 118 - opening mission has a guard; legacy night shift retains two independent patrols
+  ---
+  duration_ms: 0.79275
+  type: 'test'
+  ...
+# Subtest: vision respects cone, range and cover in either direction
+ok 119 - vision respects cone, range and cover in either direction
+  ---
+  duration_ms: 0.248791
+  type: 'test'
+  ...
+# Subtest: suspicion fills over time and breaking sight clears it
+ok 120 - suspicion fills over time and breaking sight clears it
+  ---
+  duration_ms: 0.729458
+  type: 'test'
+  ...
+# Subtest: sustained sight catches courier; caught state freezes and retry clears it
+ok 121 - sustained sight catches courier; caught state freezes and retry clears it
+  ---
+  duration_ms: 3.575375
+  type: 'test'
+  ...
+# Subtest: guard capture takes priority over simultaneous extraction
+ok 122 - guard capture takes priority over simultaneous extraction
+  ---
+  duration_ms: 0.18
+  type: 'test'
+  ...
+# Subtest: patrol routes remain outside every blocker over repeated loops
+ok 123 - patrol routes remain outside every blocker over repeated loops
+  ---
+  duration_ms: 57.906583
+  type: 'test'
+  ...
+# Subtest: night shift replays deterministically from the same inputs
+ok 124 - night shift replays deterministically from the same inputs
+  ---
+  duration_ms: 9.635834
+  type: 'test'
+  ...
+# Subtest: night shift can be completed from spawn with movement inputs and timed cover
+ok 125 - night shift can be completed from spawn with movement inputs and timed cover
+  ---
+  duration_ms: 4.541625
+  type: 'test'
+  ...
+# Subtest: supported feedback does not double fire the fallback
+ok 126 - supported feedback does not double fire the fallback
+  ---
+  duration_ms: 1.073208
+  type: 'test'
+  ...
+# Subtest: unsupported Android effect falls back once and never interrupts navigation
+ok 127 - unsupported Android effect falls back once and never interrupts navigation
+  ---
+  duration_ms: 0.153042
+  type: 'test'
+  ...
+# Subtest: disabling vibration or leaving the app prevents a late fallback
+ok 128 - disabling vibration or leaving the app prevents a late fallback
+  ---
+  duration_ms: 0.073459
+  type: 'test'
+  ...
+# Subtest: starting a run has its own bounded cue without suppressing a later back tap
+ok 129 - starting a run has its own bounded cue without suppressing a later back tap
+  ---
+  duration_ms: 0.094291
+  type: 'test'
+  ...
+# Subtest: automatic fire is bounded; damage interrupts it, not the reverse
+ok 130 - automatic fire is bounded; damage interrupts it, not the reverse
+  ---
+  duration_ms: 0.522
+  type: 'test'
+  ...
+# Subtest: coin landings and UI taps do not overwhelm confirmation or victory
+ok 131 - coin landings and UI taps do not overwhelm confirmation or victory
+  ---
+  duration_ms: 0.09225
+  type: 'test'
+  ...
+# Subtest: scanner sweeps in place and its detection respects the same cover as its beam
+ok 132 - scanner sweeps in place and its detection respects the same cover as its beam
+  ---
+  duration_ms: 3.163584
+  type: 'test'
+  ...
+# Subtest: closed timed gate blocks pushing; scheduled opening permits passage
+ok 133 - closed timed gate blocks pushing; scheduled opening permits passage
+  ---
+  duration_ms: 13.08075
+  type: 'test'
+  ...
+# Subtest: gate waits for occupants to leave instead of closing on them
+ok 134 - gate waits for occupants to leave instead of closing on them
+  ---
+  duration_ms: 1.019458
+  type: 'test'
+  ...
+# Subtest: drone scan and report charge are separate; cover cancels the report before broadcasting
+ok 135 - drone scan and report charge are separate; cover cancels the report before broadcasting
+  ---
+  duration_ms: 76.104167
+  type: 'test'
+  ...
+# Subtest: defeating a reporting drone cancels it; a completed broadcast alerts distant enemies too
+ok 136 - defeating a reporting drone cancels it; a completed broadcast alerts distant enemies too
+  ---
+  duration_ms: 1.450667
+  type: 'test'
+  ...
+# Subtest: confirmed radio sends every living deployed guard and drone toward the sighting
+ok 137 - confirmed radio sends every living deployed guard and drone toward the sighting
+  ---
+  duration_ms: 2.265042
+  type: 'test'
+  ...
+# Subtest: a drone keeps chasing after the broadcast animation and old cooldown finish
+ok 138 - a drone keeps chasing after the broadcast animation and old cooldown finish
+  ---
+  duration_ms: 1.704792
+  type: 'test'
+  ...
+# Subtest: heavy recovery approaches the visible courier instead of an obsolete retreat waypoint
+ok 139 - heavy recovery approaches the visible courier instead of an obsolete retreat waypoint
+  ---
+  duration_ms: 1.847042
+  type: 'test'
+  ...
+# Subtest: loss of sight follows the last observed position and keeps searching beyond the old three-second timeout
+ok 140 - loss of sight follows the last observed position and keeps searching beyond the old three-second timeout
+  ---
+  duration_ms: 4.533541
+  type: 'test'
+  ...
+# Subtest: reacquisition broadcasts a fresh target and cancels old searches for the whole team
+ok 141 - reacquisition broadcasts a fresh target and cancels old searches for the whole team
+  ---
+  duration_ms: 0.923125
+  type: 'test'
+  ...
+# Subtest: reinforcements join an existing hunt instead of investigating the old pedestal
+ok 142 - reinforcements join an existing hunt instead of investigating the old pedestal
+  ---
+  duration_ms: 1.536584
+  type: 'test'
+  ...
+# Subtest: a heavy stops its remaining burst when cover blocks actual sight
+ok 143 - a heavy stops its remaining burst when cover blocks actual sight
+  ---
+  duration_ms: 1.725834
+  type: 'test'
+  ...
+# Subtest: an investigating guard travels faster than its readable patrol speed
+ok 144 - an investigating guard travels faster than its readable patrol speed
+  ---
+  duration_ms: 1.697958
+  type: 'test'
+  ...
+# Subtest: engaged heist guards retain a nearby sidestep but cannot see behind cover
+ok 145 - engaged heist guards retain a nearby sidestep but cannot see behind cover
+  ---
+  duration_ms: 0.539583
+  type: 'test'
+  ...
+# Subtest: pickup immediately starts a single warned reinforcement response and an occupied entrance remains safe
+ok 146 - pickup immediately starts a single warned reinforcement response and an occupied entrance remains safe
+  ---
+  duration_ms: 2.818875
+  type: 'test'
+  ...
+# Subtest: directional armor protects the front, keeps side damage and rewards the rear at impact
+ok 147 - directional armor protects the front, keeps side damage and rewards the rear at impact
+  ---
+  duration_ms: 2.358334
+  type: 'test'
+  ...
+# Subtest: a noisy grate reports the crossing position once per cooldown, not the hidden moving player
+ok 148 - a noisy grate reports the crossing position once per cooldown, not the hidden moving player
+  ---
+  duration_ms: 1.169833
+  type: 'test'
+  ...
+# Subtest: a hidden guard cannot steal the tap intended for an objective in revision 10
+ok 149 - a hidden guard cannot steal the tap intended for an objective in revision 10
+  ---
+  duration_ms: 0.66175
+  type: 'test'
+  ...
+# Subtest: all heist pockets, entrances, route hints and guard anchors are traversable
+ok 150 - all heist pockets, entrances, route hints and guard anchors are traversable
+  ---
+  duration_ms: 331.279917
+  type: 'test'
+  ...
+# Subtest: heist movement, reports and reinforcements survive serialization deterministically
+ok 151 - heist movement, reports and reinforcements survive serialization deterministically
+  ---
+  duration_ms: 17.521875
+  type: 'test'
+  ...
+# Subtest: confirmed impact starts its audio and edge glow together, after the seek
+ok 152 - confirmed impact starts its audio and edge glow together, after the seek
+  ---
+  duration_ms: 2.172583
+  type: 'test'
+  ...
+# Subtest: impact completed after pause or restart cannot replay a sound or flash
+ok 153 - impact completed after pause or restart cannot replay a sound or flash
+  ---
+  duration_ms: 0.1015
+  type: 'test'
+  ...
+# Subtest: music has one slot per mission, safe fallbacks, and weekly district reuse
+ok 154 - music has one slot per mission, safe fallbacks, and weekly district reuse
+  ---
+  duration_ms: 0.1545
+  type: 'test'
+  ...
+# Subtest: noise causes investigation, a bounded search and a return to the patrol route
+ok 155 - noise causes investigation, a bounded search and a return to the patrol route
+  ---
+  duration_ms: 70.878875
+  type: 'test'
+  ...
+# Subtest: last-seen position is investigated after the courier breaks sight
+ok 156 - last-seen position is investigated after the courier breaks sight
+  ---
+  duration_ms: 2.6695
+  type: 'test'
+  ...
+# Subtest: decoy inputs consume once, stop at cover and reset with the mission
+ok 157 - decoy inputs consume once, stop at cover and reset with the mission
+  ---
+  duration_ms: 11.55725
+  type: 'test'
+  ...
+# Subtest: current weekly wins appear in recent attempts before weekly history finalizes
+ok 158 - current weekly wins appear in recent attempts before weekly history finalizes
+  ---
+  duration_ms: 2.8085
+  type: 'test'
+  ...
+# Subtest: history does not award points for pending, rejected, lost or practice runs
+ok 159 - history does not award points for pending, rejected, lost or practice runs
+  ---
+  duration_ms: 0.113333
+  type: 'test'
+  ...
+# Subtest: an expired unsubmitted attempt is not presented as still in progress
+ok 160 - an expired unsubmitted attempt is not presented as still in progress
+  ---
+  duration_ms: 0.151834
+  type: 'test'
+  ...
+# Subtest: podium preserves shared ranks and server order without mutating the board
+ok 161 - podium preserves shared ranks and server order without mutating the board
+  ---
+  duration_ms: 2.104083
+  type: 'test'
+  ...
+# Subtest: empty and partial leaderboards do not fabricate winners or duplicate podium rows
+ok 162 - empty and partial leaderboards do not fabricate winners or duplicate podium rows
+  ---
+  duration_ms: 0.120542
+  type: 'test'
+  ...
+# Subtest: rival prompt distinguishes points from time and never promises a rank gain
+ok 163 - rival prompt distinguishes points from time and never promises a rank gain
+  ---
+  duration_ms: 19.331125
+  type: 'test'
+  ...
+# Subtest: list standings include leaders, preserve ties and append an off-page personal score once
+ok 164 - list standings include leaders, preserve ties and append an off-page personal score once
+  ---
+  duration_ms: 0.709292
+  type: 'test'
+  ...
+# Subtest: all-wallet Mainnet access is explicit and independent of pricing
+ok 165 - all-wallet Mainnet access is explicit and independent of pricing
+  ---
+  duration_ms: 2.232458
+  type: 'test'
+  ...
+# Subtest: Mainnet requires explicit enablement and tester allowlist; devnet remains the default
+ok 166 - Mainnet requires explicit enablement and tester allowlist; devnet remains the default
+  ---
+  duration_ms: 0.407334
+  type: 'test'
+  ...
+# Subtest: Mainnet test pass is one dollar in either token, cosmetics are ten times cheaper
+ok 167 - Mainnet test pass is one dollar in either token, cosmetics are ten times cheaper
+  ---
+  duration_ms: 9.745
+  type: 'test'
+  ...
+# Subtest: a devnet client refuses a Mainnet payment before constructing or signing it
+ok 168 - a devnet client refuses a Mainnet payment before constructing or signing it
+  ---
+  duration_ms: 0.159375
+  type: 'test'
+  ...
+# Subtest: prices and rewards use validated environment settings
+ok 169 - prices and rewards use validated environment settings
+  ---
+  duration_ms: 24.236958
+  type: 'test'
+  ...
+# Subtest: individual shop settings override the general discount
+ok 170 - individual shop settings override the general discount
+  ---
+  duration_ms: 0.428625
+  type: 'test'
+  ...
+# Subtest: test pricing selects cheap quotes without overwriting the live profile or changing network
+ok 171 - test pricing selects cheap quotes without overwriting the live profile or changing network
+  ---
+  duration_ms: 1.469625
+  type: 'test'
+  ...
+# Subtest: demo shows floor movement, stationary shooting, then pickup before extraction
+ok 172 - demo shows floor movement, stationary shooting, then pickup before extraction
+  ---
+  duration_ms: 3.862917
+  type: 'test'
+  ...
+# Subtest: demo feet stay on walkable floor and shot line stays clear of cover
+ok 173 - demo feet stay on walkable floor and shot line stays clear of cover
+  ---
+  duration_ms: 3.479666
+  type: 'test'
+  ...
+# Subtest: each hit reduces enemy health; reduced-motion stills show their matching step
+ok 174 - each hit reduces enemy health; reduced-motion stills show their matching step
+  ---
+  duration_ms: 0.230583
+  type: 'test'
+  ...
+# Subtest: campaign lessons match actual collection, drones and mission mechanics
+ok 175 - campaign lessons match actual collection, drones and mission mechanics
+  ---
+  duration_ms: 8.85525
+  type: 'test'
+  ...
+# Subtest: weekly lessons use current server-authored objectives, without promising collection rewards
+ok 176 - weekly lessons use current server-authored objectives, without promising collection rewards
+  ---
+  duration_ms: 2.646625
+  type: 'test'
+  ...
+# Subtest: welcome comparison follows both backend prices and rejects missing prices
+ok 177 - welcome comparison follows both backend prices and rejects missing prices
+  ---
+  duration_ms: 1.345958
+  type: 'test'
+  ...
+# Subtest: investigation path detours around cover with robot clearance and deterministic waypoints
+ok 178 - investigation path detours around cover with robot clearance and deterministic waypoints
+  ---
+  duration_ms: 12.243167
+  type: 'test'
+  ...
+# Subtest: unreachable or obstructed noise does not teleport a guard through a barrier
+ok 179 - unreachable or obstructed noise does not teleport a guard through a barrier
+  ---
+  duration_ms: 0.442208
+  type: 'test'
+  ...
+# Subtest: a lost Start response recovers the original run from a pre-start marker; reinstall cannot reset it
+ok 180 - a lost Start response recovers the original run from a pre-start marker; reinstall cannot reset it
+  ---
+  duration_ms: 2.242917
+  type: 'test'
+  ...
+# Subtest: serialized snapshots survive reload and delayed snapshots cannot roll back a paid run
+ok 181 - serialized snapshots survive reload and delayed snapshots cannot roll back a paid run
+  ---
+  duration_ms: 0.507958
+  type: 'test'
+  ...
+# Subtest: a second installation cannot turn another Start request into an empty recovered run
+ok 182 - a second installation cannot turn another Start request into an empty recovered run
+  ---
+  duration_ms: 0.222542
+  type: 'test'
+  ...
+# Subtest: failed storage blocks initialization or checkpoint, retains data and allows a serialized retry
+ok 183 - failed storage blocks initialization or checkpoint, retains data and allows a serialized retry
+  ---
+  duration_ms: 0.383791
+  type: 'test'
+  ...
+# Subtest: wallet, run, rule and deadline mismatches cannot resume another attempt or overwrite corrupt data
+ok 184 - wallet, run, rule and deadline mismatches cannot resume another attempt or overwrite corrupt data
+  ---
+  duration_ms: 0.722417
+  type: 'test'
+  ...
+# Subtest: saved replays reject invalid axes, repeated action edges and oversized runs
+ok 185 - saved replays reject invalid axes, repeated action edges and oversized runs
+  ---
+  duration_ms: 0.491125
+  type: 'test'
+  ...
+# Subtest: restored partial runs continue with identical state and recording across all current campaign replays
+ok 186 - restored partial runs continue with identical state and recording across all current campaign replays
+  ---
+  duration_ms: 1220.9345
+  type: 'test'
+  ...
+# Subtest: optional launch offer never gates owners, skipped sessions or mission diagnostics
+ok 187 - optional launch offer never gates owners, skipped sessions or mission diagnostics
+  ---
+  duration_ms: 0.84925
+  type: 'test'
+  ...
+# Subtest: RPC retries a throttled read once and preserves sanitized failure diagnostics
+ok 188 - RPC retries a throttled read once and preserves sanitized failure diagnostics
+  ---
+  duration_ms: 1507.410709
+  type: 'test'
+  ...
+# Subtest: RPC retry is bounded and never rebroadcasts a write
+ok 189 - RPC retry is bounded and never rebroadcasts a write
+  ---
+  duration_ms: 1502.015791
+  type: 'test'
+  ...
+# Subtest: readiness coalesces callers, caches briefly, and rechecks treasury after expiry
+ok 190 - readiness coalesces callers, caches briefly, and rechecks treasury after expiry
+  ---
+  duration_ms: 2.454541
+  type: 'test'
+  ...
+# Subtest: readiness refuses an RPC for the wrong chain
+ok 191 - readiness refuses an RPC for the wrong chain
+  ---
+  duration_ms: 0.204625
+  type: 'test'
+  ...
+# Subtest: payment diagnostics never include provider credentials or arbitrary exception messages
+ok 192 - payment diagnostics never include provider credentials or arbitrary exception messages
+  ---
+  duration_ms: 0.883916
+  type: 'test'
+  ...
+# Subtest: resuming an approval compiles identical bytes, with only the buyer required to sign
+ok 193 - resuming an approval compiles identical bytes, with only the buyer required to sign
+  ---
+  duration_ms: 76.336917
+  type: 'test'
+  ...
+# Subtest: native SOL payment compiles a System transfer with exact lamports and buyer signature
+ok 194 - native SOL payment compiles a System transfer with exact lamports and buyer signature
+  ---
+  duration_ms: 2.508875
+  type: 'test'
+  ...
+# Subtest: native phone supports independent continuous horizontal and vertical rotation
+ok 195 - native phone supports independent continuous horizontal and vertical rotation
+  ---
+  duration_ms: 0.887083
+  type: 'test'
+  ...
+# Subtest: orbit avoids pole singularities and bounds zoom even on extreme input
+ok 196 - orbit avoids pole singularities and bounds zoom even on extreme input
+  ---
+  duration_ms: 0.853792
+  type: 'test'
+  ...
+# Subtest: all mobile models preserve geometry while reducing primitives and bytes
+ok 197 - all mobile models preserve geometry while reducing primitives and bytes
+  ---
+  duration_ms: 0.737458
+  type: 'test'
+  ...
+# Subtest: unsupported server products do not endlessly retry exchange rates
+ok 198 - unsupported server products do not endlessly retry exchange rates
+  ---
+  duration_ms: 0.462167
+  type: 'test'
+  ...
+# Subtest: rate and connection outages still offer retry without leaking diagnostics
+ok 199 - rate and connection outages still offer retry without leaking diagnostics
+  ---
+  duration_ms: 0.096584
+  type: 'test'
+  ...
+# Subtest: campaign rounds both methods up to at least ten dollars, using integer arithmetic
+ok 200 - campaign rounds both methods up to at least ten dollars, using integer arithmetic
+  ---
+  duration_ms: 2.47325
+  type: 'test'
+  ...
+# Subtest: cosmetics preserve SKR price and receive a SOL alternative
+ok 201 - cosmetics preserve SKR price and receive a SOL alternative
+  ---
+  duration_ms: 0.601
+  type: 'test'
+  ...
+# Subtest: invalid, zero, and stale prices fail closed
+ok 202 - invalid, zero, and stale prices fail closed
+  ---
+  duration_ms: 0.735375
+  type: 'test'
+  ...
+# Subtest: rate provider caches fresh results, rejects mismatched currency, never serves expired cache after failure
+ok 203 - rate provider caches fresh results, rejects mismatched currency, never serves expired cache after failure
+  ---
+  duration_ms: 43.520667
+  type: 'test'
+  ...
+# Subtest: preview refresh fetches new rates before the old one-minute quote expires
+ok 204 - preview refresh fetches new rates before the old one-minute quote expires
+  ---
+  duration_ms: 2.112042
+  type: 'test'
+  ...
+# Subtest: completion unlocks next mission; retries preserve independent personal bests
+ok 205 - completion unlocks next mission; retries preserve independent personal bests
+  ---
+  duration_ms: 2.864542
+  type: 'test'
+  ...
+# Subtest: mastery needs clean time; malformed and future saves do not silently reset
+ok 206 - mastery needs clean time; malformed and future saves do not silently reset
+  ---
+  duration_ms: 0.240167
+  type: 'test'
+  ...
+# Subtest: three shop cards fit measured content even at fractional Android density
+ok 207 - three shop cards fit measured content even at fractional Android density
+  ---
+  duration_ms: 0.606416
+  type: 'test'
+  ...
+# Subtest: native missing-wallet transport errors receive specific recovery copy
+ok 208 - native missing-wallet transport errors receive specific recovery copy
+  ---
+  duration_ms: 0.482166
+  type: 'test'
+  ...
+# (node:68477) ExperimentalWarning: The MockTimers API is an experimental feature and might change at any time
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: rapid Connect requests share one transport and return the same account
+ok 209 - rapid Connect requests share one transport and return the same account
+  ---
+  duration_ms: 3.395583
+  type: 'test'
+  ...
+# Subtest: a cancelled or missing-wallet connection permits an explicit retry
+ok 210 - a cancelled or missing-wallet connection permits an explicit retry
+  ---
+  duration_ms: 0.471667
+  type: 'test'
+  ...
+# Subtest: phone controls wait for actual model geometry and stop probing once visible
+ok 211 - phone controls wait for actual model geometry and stop probing once visible
+  ---
+  duration_ms: 3.21525
+  type: 'test'
+  ...
+# Subtest: phone rendering probes never overlap or reveal a closed viewer
+ok 212 - phone rendering probes never overlap or reveal a closed viewer
+  ---
+  duration_ms: 0.943458
+  type: 'test'
+  ...
+# Subtest: a released native phone view cannot cause an unhandled probe rejection
+ok 213 - a released native phone view cannot cause an unhandled probe rejection
+  ---
+  duration_ms: 0.595083
+  type: 'test'
+  ...
+# Subtest: practice: quantized recording and verifier agree on the full route
+ok 214 - practice: quantized recording and verifier agree on the full route
+  ---
+  duration_ms: 30.995666
+  type: 'test'
+  ...
+# Subtest: cone-lesson: quantized recording and verifier agree on the full route
+ok 215 - cone-lesson: quantized recording and verifier agree on the full route
+  ---
+  duration_ms: 81.442292
+  type: 'test'
+  ...
+# Subtest: battery-dash: quantized recording and verifier agree on the full route
+ok 216 - battery-dash: quantized recording and verifier agree on the full route
+  ---
+  duration_ms: 62.113292
+  type: 'test'
+  ...
+# Subtest: crossing-signals: quantized recording and verifier agree on the full route
+ok 217 - crossing-signals: quantized recording and verifier agree on the full route
+  ---
+  duration_ms: 63.838792
+  type: 'test'
+  ...
+# Subtest: sweep-window: quantized recording and verifier agree on the full route
+ok 218 - sweep-window: quantized recording and verifier agree on the full route
+  ---
+  duration_ms: 21.807708
+  type: 'test'
+  ...
+# Subtest: narrow-crossing: quantized recording and verifier agree on the full route
+ok 219 - narrow-crossing: quantized recording and verifier agree on the full route
+  ---
+  duration_ms: 68.759042
+  type: 'test'
+  ...
+# Subtest: false-footsteps: quantized recording and verifier agree on the full route
+ok 220 - false-footsteps: quantized recording and verifier agree on the full route
+  ---
+  duration_ms: 39.669917
+  type: 'test'
+  ...
+# Subtest: warden-gate: quantized recording and verifier agree on the full route
+ok 221 - warden-gate: quantized recording and verifier agree on the full route
+  ---
+  duration_ms: 21.41275
+  type: 'test'
+  ...
+# Subtest: power-trade: quantized recording and verifier agree on the full route
+ok 222 - power-trade: quantized recording and verifier agree on the full route
+  ---
+  duration_ms: 98.709792
+  type: 'test'
+  ...
+# Subtest: two-targets: quantized recording and verifier agree on the full route
+ok 223 - two-targets: quantized recording and verifier agree on the full route
+  ---
+  duration_ms: 134.51275
+  type: 'test'
+  ...
+# Subtest: silent-circuit: quantized recording and verifier agree on the full route
+ok 224 - silent-circuit: quantized recording and verifier agree on the full route
+  ---
+  duration_ms: 141.214375
+  type: 'test'
+  ...
+# Subtest: last-vault: quantized recording and verifier agree on the full route
+ok 225 - last-vault: quantized recording and verifier agree on the full route
+  ---
+  duration_ms: 150.803292
+  type: 'test'
+  ...
+# Subtest: daily changes at midnight UTC and cycles across every campaign mission
+ok 226 - daily changes at midnight UTC and cycles across every campaign mission
+  ---
+  duration_ms: 5.399333
+  type: 'test'
+  ...
+# Subtest: coach follows movement, pickup and escape without changing simulation state
+ok 227 - coach follows movement, pickup and escape without changing simulation state
+  ---
+  duration_ms: 0.521041
+  type: 'test'
+  ...
+# Subtest: playtest recording defaults off, is bounded, deduplicates results and reports real retry counts
+ok 228 - playtest recording defaults off, is bounded, deduplicates results and reports real retry counts
+  ---
+  duration_ms: 0.443917
+  type: 'test'
+  ...
+# Subtest: rival gap distinguishes score, time and a shared first place
+ok 229 - rival gap distinguishes score, time and a shared first place
+  ---
+  duration_ms: 0.11375
+  type: 'test'
+  ...
+# Subtest: restore never claims ownership when no purchase was completed
+ok 230 - restore never claims ownership when no purchase was completed
+  ---
+  duration_ms: 1.221291
+  type: 'test'
+  ...
+# Subtest: restoration recovers a pending order even when its local pointer is missing
+ok 231 - restoration recovers a pending order even when its local pointer is missing
+  ---
+  duration_ms: 0.1025
+  type: 'test'
+  ...
+# Subtest: confirmed entitlement wins over stale local pending order
+ok 232 - confirmed entitlement wins over stale local pending order
+  ---
+  duration_ms: 0.058375
+  type: 'test'
+  ...
+# Subtest: display path rounds a right-angle turn with tangent entry and exit
+ok 233 - display path rounds a right-angle turn with tangent entry and exit
+  ---
+  duration_ms: 1.725083
+  type: 'test'
+  ...
+# Subtest: route rounding reduces its radius to keep the path outside inside-corner walls
+ok 234 - route rounding reduces its radius to keep the path outside inside-corner walls
+  ---
+  duration_ms: 0.536625
+  type: 'test'
+  ...
+# Subtest: consumed and duplicate points do not create invalid coordinates or backwards route segments
+ok 235 - consumed and duplicate points do not create invalid coordinates or backwards route segments
+  ---
+  duration_ms: 0.325208
+  type: 'test'
+  ...
+# Subtest: destination arrow points along the final segment in every direction
+ok 236 - destination arrow points along the final segment in every direction
+  ---
+  duration_ms: 0.386333
+  type: 'test'
+  ...
+# Subtest: new scout drones move, can be defeated in one shot, and never fire
+ok 237 - new scout drones move, can be defeated in one shot, and never fire
+  ---
+  duration_ms: 9.146542
+  type: 'test'
+  ...
+# Subtest: scout reports need sustained sight and only alert nearby guards
+ok 238 - scout reports need sustained sight and only alert nearby guards
+  ---
+  duration_ms: 20.381709
+  type: 'test'
+  ...
+# Subtest: levels 2–6 have moving drones, traversable patrol loops and screened regroup pockets
+ok 239 - levels 2–6 have moving drones, traversable patrol loops and screened regroup pockets
+  ---
+  duration_ms: 140.710958
+  type: 'test'
+  ...
+# Subtest: real pickup triggers alarm immediately and delivery does not reset it
+ok 240 - real pickup triggers alarm immediately and delivery does not reset it
+  ---
+  duration_ms: 7.860417
+  type: 'test'
+  ...
+# Subtest: alarm increases actual patrol travel immediately and caps the escalation
+ok 241 - alarm increases actual patrol travel immediately and caps the escalation
+  ---
+  duration_ms: 0.886917
+  type: 'test'
+  ...
+# Subtest: all twelve missions have reinforcements and noise lures
+ok 242 - all twelve missions have reinforcements and noise lures
+  ---
+  duration_ms: 0.167625
+  type: 'test'
+  ...
+# Subtest: a persistent beacon attracts a guard that enters range later, then holds its search
+ok 243 - a persistent beacon attracts a guard that enters range later, then holds its search
+  ---
+  duration_ms: 0.376084
+  type: 'test'
+  ...
+# Subtest: guards seeing the courier and fixed scanners ignore a noise lure
+ok 244 - guards seeing the courier and fixed scanners ignore a noise lure
+  ---
+  duration_ms: 4.086833
+  type: 'test'
+  ...
+# Subtest: blocked throws are explained and the landing preview matches the real beacon
+ok 245 - blocked throws are explained and the landing preview matches the real beacon
+  ---
+  duration_ms: 2.636042
+  type: 'test'
+  ...
+# Subtest: a guard on a valid narrow patrol lane can path to a decoy beside cover
+ok 246 - a guard on a valid narrow patrol lane can path to a decoy beside cover
+  ---
+  duration_ms: 0.77725
+  type: 'test'
+  ...
+# Subtest: theft reports send mobile guards toward the courier around cover, without teleporting
+ok 247 - theft reports send mobile guards toward the courier around cover, without teleporting
+  ---
+  duration_ms: 5.596333
+  type: 'test'
+  ...
+# Subtest: alarm pursuit keeps moving during detection instead of freezing in the cone
+ok 248 - alarm pursuit keeps moving during detection instead of freezing in the cone
+  ---
+  duration_ms: 0.396875
+  type: 'test'
+  ...
+# Subtest: a decoy can override hidden phone reports and stationary scanners never chase
+ok 249 - a decoy can override hidden phone reports and stationary scanners never chase
+  ---
+  duration_ms: 1.564834
+  type: 'test'
+  ...
+# Subtest: new settings and old factory volume start at 100%, preserving mute and accessibility choices
+ok 250 - new settings and old factory volume start at 100%, preserving mute and accessibility choices
+  ---
+  duration_ms: 2.108459
+  type: 'test'
+  ...
+# Subtest: explicit volume choices survive restoration and malformed volume falls back safely
+ok 251 - explicit volume choices survive restoration and malformed volume falls back safely
+  ---
+  duration_ms: 0.289708
+  type: 'test'
+  ...
+# Subtest: initial level is playable and routes are walkable
+ok 252 - initial level is playable and routes are walkable
+  ---
+  duration_ms: 5.757458
+  type: 'test'
+  ...
+# Subtest: normalizes diagonal speed and decelerates within two ticks
+ok 253 - normalizes diagonal speed and decelerates within two ticks
+  ---
+  duration_ms: 1.637292
+  type: 'test'
+  ...
+# Subtest: all four walls hold during a long movement and dash cannot tunnel through a crate
+ok 254 - all four walls hold during a long movement and dash cannot tunnel through a crate
+  ---
+  duration_ms: 10.350167
+  type: 'test'
+  ...
+# Subtest: pickup requires proximity, hold duration and standing; interruption resets progress
+ok 255 - pickup requires proximity, hold duration and standing; interruption resets progress
+  ---
+  duration_ms: 0.925
+  type: 'test'
+  ...
+# Subtest: dash charges exactly once, respects cooldown and cannot overspend
+ok 256 - dash charges exactly once, respects cooldown and cannot overspend
+  ---
+  duration_ms: 0.755333
+  type: 'test'
+  ...
+# Subtest: zero battery can extract, holding exit completes once, terminal states freeze
+ok 257 - zero battery can extract, holding exit completes once, terminal states freeze
+  ---
+  duration_ms: 0.663708
+  type: 'test'
+  ...
+# Subtest: empty-handed exit does not win; leaving the exit resets hold; timeout is final
+ok 258 - empty-handed exit does not win; leaving the exit resets hold; timeout is final
+  ---
+  duration_ms: 0.246875
+  type: 'test'
+  ...
+# Subtest: same ordered inputs reproduce the same outcome
+ok 259 - same ordered inputs reproduce the same outcome
+  ---
+  duration_ms: 39.912042
+  type: 'test'
+  ...
+# Subtest: campaign credits reward first clears and only newly earned stars
+ok 260 - campaign credits reward first clears and only newly earned stars
+  ---
+  duration_ms: 0.612167
+  type: 'test'
+  ...
+# Subtest: first outfit needs five perfect clears or six ordinary clears, without repeat farming
+ok 261 - first outfit needs five perfect clears or six ordinary clears, without repeat farming
+  ---
+  duration_ms: 1.9835
+  type: 'test'
+  ...
+# Subtest: reward rebalance preserves old credits and previously purchased outfits
+ok 262 - reward rebalance preserves old credits and previously purchased outfits
+  ---
+  duration_ms: 1.437959
+  type: 'test'
+  ...
+# Subtest: local store atomically debits once and equips; insufficient funds are unchanged
+ok 263 - local store atomically debits once and equips; insufficient funds are unchanged
+  ---
+  duration_ms: 4.21275
+  type: 'test'
+  ...
+# Subtest: live pass has two distinct choices and testing reduces both
+ok 264 - live pass has two distinct choices and testing reduces both
+  ---
+  duration_ms: 6.500667
+  type: 'test'
+  ...
+# Subtest: credit pack quote uses dollars, never its credited quantity or cosmetic token price
+ok 265 - credit pack quote uses dollars, never its credited quantity or cosmetic token price
+  ---
+  duration_ms: 0.629958
+  type: 'test'
+  ...
+# Subtest: backend price profiles validate overrides and keep test and live prices separate
+ok 266 - backend price profiles validate overrides and keep test and live prices separate
+  ---
+  duration_ms: 1.412125
+  type: 'test'
+  ...
+# Subtest: guest redemption uses the displayed configured price and remains idempotent
+ok 267 - guest redemption uses the displayed configured price and remains idempotent
+  ---
+  duration_ms: 0.104333
+  type: 'test'
+  ...
+# Subtest: Solana skins cost at least five times a classic outfit and use existing credit ownership
+ok 268 - Solana skins cost at least five times a classic outfit and use existing credit ownership
+  ---
+  duration_ms: 0.305292
+  type: 'test'
+  ...
+# Subtest: premium direct checkout has configurable SKR and converted SOL prices, independent of credits
+ok 269 - premium direct checkout has configurable SKR and converted SOL prices, independent of credits
+  ---
+  duration_ms: 0.845708
+  type: 'test'
+  ...
+# Subtest: every blocker, map corner and floor grid tap on all twelve maps resolves to reachable floor
+ok 270 - every blocker, map corner and floor grid tap on all twelve maps resolves to reachable floor
+  ---
+  duration_ms: 1146.935625
+  type: 'test'
+  ...
+# Subtest: wall projection is close to the tapped surface and cannot cross disconnected regions or closed doors
+ok 271 - wall projection is close to the tapped surface and cannot cross disconnected regions or closed doors
+  ---
+  duration_ms: 4.6405
+  type: 'test'
+  ...
+# Subtest: a wall tap is recorded as its resolved destination and the existing server replay agrees
+ok 272 - a wall tap is recorded as its resolved destination and the existing server replay agrees
+  ---
+  duration_ms: 9.320333
+  type: 'test'
+  ...
+# Subtest: assisted taps preserve the introductory actions then release the player
+ok 273 - assisted taps preserve the introductory actions then release the player
+  ---
+  duration_ms: 30.727917
+  type: 'test'
+  ...
+# Subtest: Dark Circuit gate and switch label taps activate the linked switch and open the passage
+ok 274 - Dark Circuit gate and switch label taps activate the linked switch and open the passage
+  ---
+  duration_ms: 20.313833
+  type: 'test'
+  ...
+# Subtest: rapid burst stays bounded, keeps newest intent and drains without a backlog
+ok 275 - rapid burst stays bounded, keeps newest intent and drains without a backlog
+  ---
+  duration_ms: 1.156625
+  type: 'test'
+  ...
+# Subtest: ordinary first tap is ready immediately; only short duplicate taps are ignored
+ok 276 - ordinary first tap is ready immediately; only short duplicate taps are ignored
+  ---
+  duration_ms: 0.187375
+  type: 'test'
+  ...
+# Subtest: off-centre teaching taps complete the short lesson without awarding a campaign win
+ok 277 - off-centre teaching taps complete the short lesson without awarding a campaign win
+  ---
+  duration_ms: 64.934292
+  type: 'test'
+  ...
+# Subtest: every serialized tutorial checkpoint can resume into the unassisted mission
+ok 278 - every serialized tutorial checkpoint can resume into the unassisted mission
+  ---
+  duration_ms: 6.759084
+  type: 'test'
+  ...
+# Subtest: invalid taps are ignored; a nearby stop tap becomes the intended teaching move
+ok 279 - invalid taps are ignored; a nearby stop tap becomes the intended teaching move
+  ---
+  duration_ms: 9.0985
+  type: 'test'
+  ...
+# Subtest: power pad toggles door/scanner circuit once per press, and works while carrying
+ok 280 - power pad toggles door/scanner circuit once per press, and works while carrying
+  ---
+  duration_ms: 8.649333
+  type: 'test'
+  ...
+# Subtest: relay expires, holds for a body in the doorway, and can be reopened from either side
+ok 281 - relay expires, holds for a body in the doorway, and can be reopened from either side
+  ---
+  duration_ms: 16.075541
+  type: 'test'
+  ...
+# Subtest: two targets need two deliveries and keep separate batteries; final charge controls reward score
+ok 282 - two targets need two deliveries and keep separate batteries; final charge controls reward score
+  ---
+  duration_ms: 7.829708
+  type: 'test'
+  ...
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.718Z","id":1,"stage":"test.safe","details":{"status":401,"accounts":2}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.720Z","id":2,"stage":"test.failure.failed","details":{"code":-32000}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.722Z","id":3,"stage":"test.success.start","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.722Z","id":4,"stage":"test.success.ok.3","details":{"durationMs":0}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.722Z","id":5,"stage":"test.error.start","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.722Z","id":6,"stage":"test.error.5.failed","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.722Z","id":7,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.722Z","id":8,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.723Z","id":9,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.723Z","id":10,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.723Z","id":11,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.723Z","id":12,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.723Z","id":13,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.723Z","id":14,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.723Z","id":15,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.723Z","id":16,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.723Z","id":17,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.723Z","id":18,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.723Z","id":19,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.723Z","id":20,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.723Z","id":21,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.723Z","id":22,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.723Z","id":23,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.723Z","id":24,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.723Z","id":25,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.723Z","id":26,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.723Z","id":27,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.723Z","id":28,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.723Z","id":29,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.723Z","id":30,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.723Z","id":31,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.723Z","id":32,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.723Z","id":33,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.723Z","id":34,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.723Z","id":35,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.723Z","id":36,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.723Z","id":37,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.723Z","id":38,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.723Z","id":39,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.723Z","id":40,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.723Z","id":41,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.723Z","id":42,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.723Z","id":43,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.723Z","id":44,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.723Z","id":45,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.723Z","id":46,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.723Z","id":47,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.723Z","id":48,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.723Z","id":49,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.724Z","id":50,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.724Z","id":51,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.724Z","id":52,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.724Z","id":53,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.724Z","id":54,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.724Z","id":55,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.724Z","id":56,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.724Z","id":57,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.724Z","id":58,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.724Z","id":59,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.724Z","id":60,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.724Z","id":61,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.724Z","id":62,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.724Z","id":63,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.724Z","id":64,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.724Z","id":65,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.724Z","id":66,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.724Z","id":67,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.724Z","id":68,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.724Z","id":69,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.724Z","id":70,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.724Z","id":71,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.724Z","id":72,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.724Z","id":73,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.724Z","id":74,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.724Z","id":75,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.724Z","id":76,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.724Z","id":77,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.724Z","id":78,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.724Z","id":79,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.724Z","id":80,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.724Z","id":81,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.724Z","id":82,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.724Z","id":83,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.724Z","id":84,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.724Z","id":85,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.724Z","id":86,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.724Z","id":87,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.724Z","id":88,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.724Z","id":89,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.724Z","id":90,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.724Z","id":91,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.724Z","id":92,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.724Z","id":93,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.724Z","id":94,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.724Z","id":95,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.724Z","id":96,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.724Z","id":97,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.724Z","id":98,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.724Z","id":99,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.724Z","id":100,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.724Z","id":101,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.724Z","id":102,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.724Z","id":103,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.724Z","id":104,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.724Z","id":105,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.724Z","id":106,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.724Z","id":107,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.724Z","id":108,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.724Z","id":109,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.724Z","id":110,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.724Z","id":111,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.724Z","id":112,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.724Z","id":113,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.724Z","id":114,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.724Z","id":115,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.724Z","id":116,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.724Z","id":117,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.724Z","id":118,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.724Z","id":119,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.724Z","id":120,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.724Z","id":121,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.724Z","id":122,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.724Z","id":123,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.724Z","id":124,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.724Z","id":125,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.724Z","id":126,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.724Z","id":127,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.724Z","id":128,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.724Z","id":129,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.724Z","id":130,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.724Z","id":131,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.724Z","id":132,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.724Z","id":133,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.724Z","id":134,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.724Z","id":135,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.724Z","id":136,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.724Z","id":137,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.724Z","id":138,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.724Z","id":139,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.724Z","id":140,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.724Z","id":141,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.724Z","id":142,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.724Z","id":143,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.724Z","id":144,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.724Z","id":145,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.724Z","id":146,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.724Z","id":147,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.724Z","id":148,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.724Z","id":149,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.724Z","id":150,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.724Z","id":151,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.724Z","id":152,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.724Z","id":153,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.724Z","id":154,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.724Z","id":155,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.724Z","id":156,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.724Z","id":157,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.724Z","id":158,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.724Z","id":159,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.724Z","id":160,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.724Z","id":161,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.724Z","id":162,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.724Z","id":163,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.724Z","id":164,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.724Z","id":165,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.724Z","id":166,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.724Z","id":167,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.724Z","id":168,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.724Z","id":169,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.724Z","id":170,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.724Z","id":171,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.724Z","id":172,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.724Z","id":173,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.724Z","id":174,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.724Z","id":175,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.724Z","id":176,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.724Z","id":177,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.724Z","id":178,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.724Z","id":179,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.724Z","id":180,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.724Z","id":181,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.724Z","id":182,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.724Z","id":183,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.724Z","id":184,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.724Z","id":185,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.724Z","id":186,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.725Z","id":187,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.725Z","id":188,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.725Z","id":189,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.725Z","id":190,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.725Z","id":191,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.725Z","id":192,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.725Z","id":193,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.725Z","id":194,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.725Z","id":195,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.725Z","id":196,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.725Z","id":197,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.725Z","id":198,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.725Z","id":199,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.725Z","id":200,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.725Z","id":201,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.725Z","id":202,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.725Z","id":203,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.725Z","id":204,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.725Z","id":205,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.725Z","id":206,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.725Z","id":207,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.725Z","id":208,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.725Z","id":209,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.725Z","id":210,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.725Z","id":211,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.725Z","id":212,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.725Z","id":213,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.725Z","id":214,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.725Z","id":215,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.725Z","id":216,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.725Z","id":217,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.725Z","id":218,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.725Z","id":219,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.725Z","id":220,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.725Z","id":221,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.725Z","id":222,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.725Z","id":223,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.725Z","id":224,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.725Z","id":225,"stage":"test.bounded","details":{}}
+# [SeekerWallet] {"at":"2026-09-25T09:28:28.725Z","id":226,"stage":"test.bounded","details":{}}
+# Subtest: diagnostics discard unknown fields and never serialize arbitrary SDK errors
+ok 283 - diagnostics discard unknown fields and never serialize arbitrary SDK errors
+  ---
+  duration_ms: 3.154625
+  type: 'test'
+  ...
+# Subtest: network failure is not reported as user cancellation
+ok 284 - network failure is not reported as user cancellation
+  ---
+  duration_ms: 0.223625
+  type: 'test'
+  ...
+# Subtest: steps retain the original result and error without serializing them
+ok 285 - steps retain the original result and error without serializing them
+  ---
+  duration_ms: 0.898833
+  type: 'test'
+  ...
+# Subtest: diagnostic buffer stays bounded
+ok 286 - diagnostic buffer stays bounded
+  ---
+  duration_ms: 2.433292
+  type: 'test'
+  ...
+# Subtest: official SDK sends SOL once and returns its receipt for server verification
+ok 287 - official SDK sends SOL once and returns its receipt for server verification
+  ---
+  duration_ms: 106.788958
+  type: 'test'
+  ...
+# Subtest: official SDK sends SKR once and returns its receipt for server verification
+ok 288 - official SDK sends SKR once and returns its receipt for server verification
+  ---
+  duration_ms: 6.996625
+  type: 'test'
+  ...
+# Subtest: a wallet send error never automatically opens a second payment or falls back to local broadcast
+ok 289 - a wallet send error never automatically opens a second payment or falls back to local broadcast
+  ---
+  duration_ms: 9.212708
+  type: 'test'
+  ...
+# Subtest: wrong payer and invalid receipts are rejected
+ok 290 - wrong payer and invalid receipts are rejected
+  ---
+  duration_ms: 3.951042
+  type: 'test'
+  ...
+# [SeekerWallet] {"at":"2026-09-25T09:28:29.065Z","id":1,"stage":"test.native-authorization.authorization-failed","details":{"code":-1}}
+# Subtest: native rejected authorization becomes the protocol class used by SDK retry
+ok 291 - native rejected authorization becomes the protocol class used by SDK retry
+  ---
+  duration_ms: 8.791458
+  type: 'test'
+  ...
+# Subtest: native decline retains -3 and is not eligible for authorization retry
+ok 292 - native decline retains -3 and is not eligible for authorization retry
+  ---
+  duration_ms: 0.290167
+  type: 'test'
+  ...
+# Subtest: already normalized, transport and malformed errors are preserved
+ok 293 - already normalized, transport and malformed errors are preserved
+  ---
+  duration_ms: 0.091875
+  type: 'test'
+  ...
+# Subtest: payment drops a stale authorization token while preserving chain and identity
+ok 294 - payment drops a stale authorization token while preserving chain and identity
+  ---
+  duration_ms: 0.813333
+  type: 'test'
+  ...
+# Subtest: wallet sessions serialize and a failed session does not block the next one
+ok 295 - wallet sessions serialize and a failed session does not block the next one
+  ---
+  duration_ms: 2.1785
+  type: 'test'
+  ...
+# Subtest: base64 MWA result passes the same SIWS verifier used by the server
+ok 296 - base64 MWA result passes the same SIWS verifier used by the server
+  ---
+  duration_ms: 72.276667
+  type: 'test'
+  ...
+# Subtest: wrong wallet, malformed base64 and wrong signature length fail closed
+ok 297 - wrong wallet, malformed base64 and wrong signature length fail closed
+  ---
+  duration_ms: 1.276708
+  type: 'test'
+  ...
+# Subtest: changed nonce and tampered signature still fail verification
+ok 298 - changed nonce and tampered signature still fail verification
+  ---
+  duration_ms: 1.101167
+  type: 'test'
+  ...
+# Subtest: uses standard sign-in directly when supported
+ok 299 - uses standard sign-in directly when supported
+  ---
+  duration_ms: 1.150125
+  type: 'test'
+  ...
+# Subtest: missing optional result falls back to signing the same challenge
+ok 300 - missing optional result falls back to signing the same challenge
+  ---
+  duration_ms: 0.818542
+  type: 'test'
+  ...
+# Subtest: does not retry declines, transport errors, or account changes
+ok 301 - does not retry declines, transport errors, or account changes
+  ---
+  duration_ms: 0.502083
+  type: 'test'
+  ...
+# Subtest: rejects modified, missing and truncated signed messages
+ok 302 - rejects modified, missing and truncated signed messages
+  ---
+  duration_ms: 0.100833
+  type: 'test'
+  ...
+# Subtest: campaign-only rules changes do not invalidate a supported weekly engine
+ok 303 - campaign-only rules changes do not invalidate a supported weekly engine
+  ---
+  duration_ms: 16.452125
+  type: 'test'
+  ...
+# Subtest: unknown weekly mechanics fail closed even when the engine fingerprint matches
+ok 304 - unknown weekly mechanics fail closed even when the engine fingerprint matches
+  ---
+  duration_ms: 0.235042
+  type: 'test'
+  ...
+# Subtest: the frozen active week has identical winning and delayed outcomes in its archived verifier
+ok 305 - the frozen active week has identical winning and delayed outcomes in its archived verifier
+  ---
+  duration_ms: 789.309708
+  type: 'test'
+  ...
+# Subtest: scout encounters preserve revision-6 weekly wins and delayed replay outcomes
+ok 306 - scout encounters preserve revision-6 weekly wins and delayed replay outcomes
+  ---
+  duration_ms: 409.396334
+  type: 'test'
+  ...
+# Subtest: revision 7 campaigns retain their archived verifier outcomes after roaming update
+ok 307 - revision 7 campaigns retain their archived verifier outcomes after roaming update
+  ---
+  duration_ms: 3246.177542
+  type: 'test'
+  ...
+# Subtest: revision 8 replays keep their published outcomes after combat contact is fixed
+ok 308 - revision 8 replays keep their published outcomes after combat contact is fixed
+  ---
+  duration_ms: 686.927292
+  type: 'test'
+  ...
+# Subtest: revision 9 campaign replays retain their published results after heist encounters
+ok 309 - revision 9 campaign replays retain their published results after heist encounters
+  ---
+  duration_ms: 721.85725
+  type: 'test'
+  ...
+# Subtest: revision 10 outcomes and weekly eligibility survive the revision 11 pressure increase
+ok 310 - revision 10 outcomes and weekly eligibility survive the revision 11 pressure increase
+  ---
+  duration_ms: 2618.533833
+  type: 'test'
+  ...
+# Subtest: shipped revision 11 replays and frozen weeks keep their original movement
+ok 311 - shipped revision 11 replays and frozen weeks keep their original movement
+  ---
+  duration_ms: 8322.575667
+  type: 'test'
+  ...
+# Subtest: revision 12 movement stays unchanged when district speed boosts ship
+ok 312 - revision 12 movement stays unchanged when district speed boosts ship
+  ---
+  duration_ms: 5058.567833
+  type: 'test'
+  ...
+# Subtest: weekly rollover uses Monday UTC across year boundaries
+ok 313 - weekly rollover uses Monday UTC across year boundaries
+  ---
+  duration_ms: 6.332042
+  type: 'test'
+  ...
+# Subtest: actual compiled game modules initialize and run without forward worklet captures
+ok 314 - actual compiled game modules initialize and run without forward worklet captures
+  ---
+  duration_ms: 2581.832833
+  type: 'test'
+  ...
+# Subtest: one worklet compiler for src/GameScreen.tsx
+ok 315 - one worklet compiler for src/GameScreen.tsx
+  ---
+  duration_ms: 16.947084
+  type: 'test'
+  ...
+# Subtest: one worklet compiler for src/game/combat.ts
+ok 316 - one worklet compiler for src/game/combat.ts
+  ---
+  duration_ms: 7.257292
+  type: 'test'
+  ...
+# Subtest: one worklet compiler for src/game/heist-guards.ts
+ok 317 - one worklet compiler for src/game/heist-guards.ts
+  ---
+  duration_ms: 10.295625
+  type: 'test'
+  ...
+# Subtest: one worklet compiler for src/components/QuadDrone.tsx
+ok 318 - one worklet compiler for src/components/QuadDrone.tsx
+  ---
+  duration_ms: 5.487708
+  type: 'test'
+  ...
+# Subtest: one worklet compiler for src/components/phone-filament/PhoneFilament.tsx
+ok 319 - one worklet compiler for src/components/phone-filament/PhoneFilament.tsx
+  ---
+  duration_ms: 18.70975
+  type: 'test'
+  ...
+# Subtest: one worklet compiler for node_modules/react-native-filament/src/hooks/useModel.ts
+ok 320 - one worklet compiler for node_modules/react-native-filament/src/hooks/useModel.ts
+  ---
+  duration_ms: 11.933875
+  type: 'test'
+  ...
+# Subtest: one worklet compiler for node_modules/react-native-worklets-core/src/hooks/useWorklet.ts
+ok 321 - one worklet compiler for node_modules/react-native-worklets-core/src/hooks/useWorklet.ts
+  ---
+  duration_ms: 9.579541
+  type: 'test'
+  ...
+# Subtest: captured defaults execute in an isolated worklet runtime: src/game/simulation.ts
+ok 322 - captured defaults execute in an isolated worklet runtime: src/game/simulation.ts
+  ---
+  duration_ms: 8.488209
+  type: 'test'
+  ...
+# Subtest: captured defaults execute in an isolated worklet runtime: src/components/phone-filament/PhoneFilament.tsx
+ok 323 - captured defaults execute in an isolated worklet runtime: src/components/phone-filament/PhoneFilament.tsx
+  ---
+  duration_ms: 18.226792
+  type: 'test'
+  ...
+# Subtest: Filament host objects retain identity across renders and worklet dependencies
+ok 324 - Filament host objects retain identity across renders and worklet dependencies
+  ---
+  duration_ms: 8.556
+  type: 'test'
+  ...
+1..324
+# tests 324
+# suites 0
+# pass 324
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 26501.031834

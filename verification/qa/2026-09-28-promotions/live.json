@@ -1,0 +1,68 @@
+{
+  "at": "2026-09-28T12:46:54.288Z",
+  "api": "https://seeker-api-production-41b3.up.railway.app",
+  "wallet": "fqtvKyav5DF3s9ayix7GbXeqj4yvxKRkMK8yWSPQZfH",
+  "checks": [
+    {
+      "check": "health",
+      "result": {
+        "ok": true,
+        "cluster": "solana:mainnet"
+      }
+    },
+    {
+      "check": "normal mainnet pricing",
+      "passed": true
+    },
+    {
+      "check": "real signed authentication",
+      "passed": true
+    },
+    {
+      "check": "100 percent preview needs no price",
+      "passed": true
+    },
+    {
+      "check": "50 percent SKR order and cancellation",
+      "passed": true
+    },
+    {
+      "check": "50 percent SOL order and cancellation",
+      "passed": true
+    },
+    {
+      "check": "50 percent live price preview",
+      "passed": true
+    },
+    {
+      "check": "25 percent SKR order and cancellation",
+      "passed": true
+    },
+    {
+      "check": "25 percent SOL order and cancellation",
+      "passed": true
+    },
+    {
+      "check": "25 percent live price preview",
+      "passed": true
+    },
+    {
+      "check": "free claim plus retry, 8 entitlements, zero payment orders",
+      "passed": true
+    },
+    {
+      "check": "ownership restored, credit balance unchanged",
+      "passed": true
+    },
+    {
+      "check": "gifted skin equip",
+      "passed": true
+    },
+    {
+      "check": "ranked weekly access; test attempt abandoned without score",
+      "passed": true
+    }
+  ],
+  "noPaymentSent": true,
+  "communityRedemptionsUsedForQA": 1
+}

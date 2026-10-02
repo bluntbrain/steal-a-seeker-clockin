@@ -1,0 +1,377 @@
+{
+  "description": "Objective-only input probes at three start delays. Not human win rates or Android frame measurements.",
+  "results": [
+    {
+      "mission": "practice",
+      "number": 1,
+      "revision": 12,
+      "probes": [
+        {
+          "delayTicks": 0,
+          "status": "won",
+          "hp": 25,
+          "seconds": 11.37,
+          "enemyShots": 10,
+          "p95StepMs": 0.4
+        },
+        {
+          "delayTicks": 30,
+          "status": "caught",
+          "hp": 0,
+          "seconds": 11.63,
+          "enemyShots": 11,
+          "p95StepMs": 0.149
+        },
+        {
+          "delayTicks": 90,
+          "status": "caught",
+          "hp": 0,
+          "seconds": 11.97,
+          "enemyShots": 11,
+          "p95StepMs": 0.105
+        }
+      ]
+    },
+    {
+      "mission": "cone-lesson",
+      "number": 2,
+      "revision": 12,
+      "probes": [
+        {
+          "delayTicks": 0,
+          "status": "caught",
+          "hp": 0,
+          "seconds": 6.67,
+          "enemyShots": 5,
+          "p95StepMs": 0.016
+        },
+        {
+          "delayTicks": 30,
+          "status": "caught",
+          "hp": 0,
+          "seconds": 11.03,
+          "enemyShots": 15,
+          "p95StepMs": 0.053
+        },
+        {
+          "delayTicks": 90,
+          "status": "caught",
+          "hp": 0,
+          "seconds": 8.57,
+          "enemyShots": 10,
+          "p95StepMs": 0.011
+        }
+      ]
+    },
+    {
+      "mission": "battery-dash",
+      "number": 3,
+      "revision": 12,
+      "probes": [
+        {
+          "delayTicks": 0,
+          "status": "caught",
+          "hp": 0,
+          "seconds": 3.17,
+          "enemyShots": 6,
+          "p95StepMs": 0.158
+        },
+        {
+          "delayTicks": 30,
+          "status": "caught",
+          "hp": 0,
+          "seconds": 4,
+          "enemyShots": 6,
+          "p95StepMs": 0.233
+        },
+        {
+          "delayTicks": 90,
+          "status": "caught",
+          "hp": 0,
+          "seconds": 4.4,
+          "enemyShots": 7,
+          "p95StepMs": 0.138
+        }
+      ]
+    },
+    {
+      "mission": "crossing-signals",
+      "number": 4,
+      "revision": 12,
+      "probes": [
+        {
+          "delayTicks": 0,
+          "status": "caught",
+          "hp": 0,
+          "seconds": 6.83,
+          "enemyShots": 14,
+          "p95StepMs": 0.094
+        },
+        {
+          "delayTicks": 30,
+          "status": "caught",
+          "hp": 0,
+          "seconds": 6.37,
+          "enemyShots": 6,
+          "p95StepMs": 0.084
+        },
+        {
+          "delayTicks": 90,
+          "status": "caught",
+          "hp": 0,
+          "seconds": 10.43,
+          "enemyShots": 10,
+          "p95StepMs": 0.008
+        }
+      ]
+    },
+    {
+      "mission": "sweep-window",
+      "number": 5,
+      "revision": 12,
+      "probes": [
+        {
+          "delayTicks": 0,
+          "status": "caught",
+          "hp": 0,
+          "seconds": 5.9,
+          "enemyShots": 12,
+          "p95StepMs": 0.068
+        },
+        {
+          "delayTicks": 30,
+          "status": "caught",
+          "hp": 0,
+          "seconds": 10.5,
+          "enemyShots": 14,
+          "p95StepMs": 0.089
+        },
+        {
+          "delayTicks": 90,
+          "status": "caught",
+          "hp": 0,
+          "seconds": 9.1,
+          "enemyShots": 11,
+          "p95StepMs": 0.067
+        }
+      ]
+    },
+    {
+      "mission": "narrow-crossing",
+      "number": 6,
+      "revision": 12,
+      "probes": [
+        {
+          "delayTicks": 0,
+          "status": "caught",
+          "hp": 0,
+          "seconds": 5.87,
+          "enemyShots": 12,
+          "p95StepMs": 0.03
+        },
+        {
+          "delayTicks": 30,
+          "status": "caught",
+          "hp": 0,
+          "seconds": 6.97,
+          "enemyShots": 12,
+          "p95StepMs": 0.012
+        },
+        {
+          "delayTicks": 90,
+          "status": "caught",
+          "hp": 0,
+          "seconds": 9,
+          "enemyShots": 17,
+          "p95StepMs": 0.01
+        }
+      ]
+    },
+    {
+      "mission": "false-footsteps",
+      "number": 7,
+      "revision": 12,
+      "probes": [
+        {
+          "delayTicks": 0,
+          "status": "caught",
+          "hp": 0,
+          "seconds": 4.13,
+          "enemyShots": 9,
+          "p95StepMs": 0.138
+        },
+        {
+          "delayTicks": 30,
+          "status": "caught",
+          "hp": 0,
+          "seconds": 5.4,
+          "enemyShots": 8,
+          "p95StepMs": 0.013
+        },
+        {
+          "delayTicks": 90,
+          "status": "caught",
+          "hp": 0,
+          "seconds": 7.57,
+          "enemyShots": 11,
+          "p95StepMs": 0.023
+        }
+      ]
+    },
+    {
+      "mission": "warden-gate",
+      "number": 8,
+      "revision": 12,
+      "probes": [
+        {
+          "delayTicks": 0,
+          "status": "caught",
+          "hp": 0,
+          "seconds": 5.97,
+          "enemyShots": 7,
+          "p95StepMs": 0.065
+        },
+        {
+          "delayTicks": 30,
+          "status": "caught",
+          "hp": 0,
+          "seconds": 9.37,
+          "enemyShots": 15,
+          "p95StepMs": 0.15
+        },
+        {
+          "delayTicks": 90,
+          "status": "caught",
+          "hp": 0,
+          "seconds": 8.67,
+          "enemyShots": 14,
+          "p95StepMs": 0.15
+        }
+      ]
+    },
+    {
+      "mission": "power-trade",
+      "number": 9,
+      "revision": 12,
+      "probes": [
+        {
+          "delayTicks": 0,
+          "status": "caught",
+          "hp": 0,
+          "seconds": 4.57,
+          "enemyShots": 10,
+          "p95StepMs": 0.143
+        },
+        {
+          "delayTicks": 30,
+          "status": "caught",
+          "hp": 0,
+          "seconds": 6.3,
+          "enemyShots": 11,
+          "p95StepMs": 0.021
+        },
+        {
+          "delayTicks": 90,
+          "status": "caught",
+          "hp": 0,
+          "seconds": 6.87,
+          "enemyShots": 10,
+          "p95StepMs": 0.041
+        }
+      ]
+    },
+    {
+      "mission": "two-targets",
+      "number": 10,
+      "revision": 12,
+      "probes": [
+        {
+          "delayTicks": 0,
+          "status": "caught",
+          "hp": 0,
+          "seconds": 5.93,
+          "enemyShots": 11,
+          "p95StepMs": 0.028
+        },
+        {
+          "delayTicks": 30,
+          "status": "caught",
+          "hp": 0,
+          "seconds": 6.13,
+          "enemyShots": 11,
+          "p95StepMs": 0.083
+        },
+        {
+          "delayTicks": 90,
+          "status": "caught",
+          "hp": 0,
+          "seconds": 7.53,
+          "enemyShots": 14,
+          "p95StepMs": 0.124
+        }
+      ]
+    },
+    {
+      "mission": "silent-circuit",
+      "number": 11,
+      "revision": 12,
+      "probes": [
+        {
+          "delayTicks": 0,
+          "status": "caught",
+          "hp": 0,
+          "seconds": 7,
+          "enemyShots": 29,
+          "p95StepMs": 0.205
+        },
+        {
+          "delayTicks": 30,
+          "status": "caught",
+          "hp": 0,
+          "seconds": 8.13,
+          "enemyShots": 23,
+          "p95StepMs": 0.159
+        },
+        {
+          "delayTicks": 90,
+          "status": "caught",
+          "hp": 0,
+          "seconds": 7.73,
+          "enemyShots": 14,
+          "p95StepMs": 0.106
+        }
+      ]
+    },
+    {
+      "mission": "last-vault",
+      "number": 12,
+      "revision": 12,
+      "probes": [
+        {
+          "delayTicks": 0,
+          "status": "caught",
+          "hp": 0,
+          "seconds": 3.1,
+          "enemyShots": 8,
+          "p95StepMs": 0.456
+        },
+        {
+          "delayTicks": 30,
+          "status": "caught",
+          "hp": 0,
+          "seconds": 3.57,
+          "enemyShots": 5,
+          "p95StepMs": 0.427
+        },
+        {
+          "delayTicks": 90,
+          "status": "caught",
+          "hp": 0,
+          "seconds": 5.53,
+          "enemyShots": 6,
+          "p95StepMs": 0.37
+        }
+      ]
+    }
+  ]
+}

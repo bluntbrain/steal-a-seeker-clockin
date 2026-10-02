@@ -1,0 +1,867 @@
+{
+  "health": {
+    "ok": true,
+    "cluster": "solana:mainnet"
+  },
+  "league": {
+    "week": "2026-09-21",
+    "endsAt": "2026-09-28T00:00:00.000Z",
+    "startsAt": "2026-09-21T00:00:00.000Z",
+    "contracts": [
+      {
+        "id": "2026-09-21:0:combat-v2",
+        "name": "Ghost Freight",
+        "slot": 0,
+        "week": "2026-09-21",
+        "level": {
+          "id": "combat-v2:2026-09-21:0",
+          "exit": {
+            "h": 1.4,
+            "w": 1.6,
+            "x": 9.2,
+            "y": 1.6999999999999986
+          },
+          "phone": {
+            "x": 2.4000000000000004,
+            "y": 17.6
+          },
+          "spawn": {
+            "x": 10,
+            "y": 2.5
+          },
+          "title": "Ghost Freight",
+          "width": 12,
+          "combat": {
+            "version": 2,
+            "revision": 6
+          },
+          "decoys": 0,
+          "height": 20,
+          "number": 1,
+          "mission": "practice",
+          "patrols": [
+            {
+              "range": 4.5,
+              "route": [
+                {
+                  "x": 4.4,
+                  "y": 12.6
+                },
+                {
+                  "x": 1.5999999999999996,
+                  "y": 12.6
+                },
+                {
+                  "x": 1.5999999999999996,
+                  "y": 13.8
+                },
+                {
+                  "x": 4.4,
+                  "y": 13.8
+                }
+              ],
+              "speed": 1.2,
+              "halfAngle": 0.9817477042468103,
+              "combatRole": "sentry",
+              "spotSeconds": 1.1,
+              "investigates": true,
+              "pauseSeconds": 0.4
+            },
+            {
+              "range": 4.5,
+              "route": [
+                {
+                  "x": 5.1,
+                  "y": 15.6
+                },
+                {
+                  "x": 1.5999999999999996,
+                  "y": 15.6
+                }
+              ],
+              "speed": 1.45,
+              "halfAngle": 0.9817477042468103,
+              "combatRole": "scout",
+              "spotSeconds": 1.1,
+              "investigates": true,
+              "pauseSeconds": 0.4
+            },
+            {
+              "range": 4.5,
+              "route": [
+                {
+                  "x": 2,
+                  "y": 2.5
+                },
+                {
+                  "x": 2,
+                  "y": 2.1
+                }
+              ],
+              "speed": 1.45,
+              "halfAngle": 0.9817477042468103,
+              "combatRole": "scout",
+              "spotSeconds": 1.1,
+              "investigates": true,
+              "pauseSeconds": 0.4,
+              "reserveAfter": 2
+            },
+            {
+              "range": 4.5,
+              "route": [
+                {
+                  "x": 2,
+                  "y": 2.5
+                },
+                {
+                  "x": 2,
+                  "y": 2.1
+                }
+              ],
+              "speed": 1.45,
+              "halfAngle": 0.9817477042468103,
+              "combatRole": "scout",
+              "spotSeconds": 1.1,
+              "investigates": true,
+              "pauseSeconds": 0.4,
+              "reserveAfter": 4.2
+            }
+          ],
+          "targets": [
+            {
+              "x": 2.4000000000000004,
+              "y": 17.6
+            },
+            {
+              "x": 9.9,
+              "y": 17.6
+            }
+          ],
+          "blockers": [
+            {
+              "h": 0.7,
+              "w": 12,
+              "x": 0,
+              "y": 0,
+              "kind": "wall"
+            },
+            {
+              "h": 0.7,
+              "w": 12,
+              "x": 0,
+              "y": 19.3,
+              "kind": "wall"
+            },
+            {
+              "h": 20,
+              "w": 0.7,
+              "x": 0,
+              "y": 0,
+              "kind": "wall"
+            },
+            {
+              "h": 20,
+              "w": 0.7,
+              "x": 11.3,
+              "y": 0,
+              "kind": "wall"
+            },
+            {
+              "h": 2.8,
+              "w": 2,
+              "x": 5.3,
+              "y": 12.2,
+              "kind": "rack"
+            },
+            {
+              "h": 3,
+              "w": 2,
+              "x": 6.1,
+              "y": 5.5,
+              "kind": "rack"
+            },
+            {
+              "h": 1.4,
+              "w": 1.8,
+              "x": 9,
+              "y": 10.1,
+              "kind": "crate"
+            },
+            {
+              "h": 1.5,
+              "w": 1.7,
+              "x": 1.4999999999999993,
+              "y": 9.1,
+              "kind": "crate"
+            },
+            {
+              "h": 1.2,
+              "w": 2,
+              "x": 2.5999999999999996,
+              "y": 2.999999999999999,
+              "kind": "crate"
+            },
+            {
+              "h": 1.1,
+              "w": 1.5,
+              "x": 9,
+              "y": 15.4,
+              "kind": "crate"
+            }
+          ],
+          "briefing": "Bring back both phones. Your health must last.",
+          "floorColor": "#253A37",
+          "targetSeconds": 150,
+          "hardLimitSeconds": 150
+        },
+        "district": "Warehouse",
+        "modifier": "Double haul",
+        "objective": "Bring back both phones. Your health must last."
+      },
+      {
+        "id": "2026-09-21:1:combat-v2",
+        "name": "Skyline Relay",
+        "slot": 1,
+        "week": "2026-09-21",
+        "level": {
+          "id": "combat-v2:2026-09-21:1",
+          "exit": {
+            "h": 1.4,
+            "w": 1.6,
+            "x": 1.7999999999999996,
+            "y": 16.900000000000002
+          },
+          "phone": {
+            "x": 2.4000000000000004,
+            "y": 2.4
+          },
+          "spawn": {
+            "x": 10,
+            "y": 17.5
+          },
+          "title": "Skyline Relay",
+          "width": 12,
+          "combat": {
+            "version": 2,
+            "revision": 6
+          },
+          "decoys": 0,
+          "height": 20,
+          "number": 5,
+          "mission": "sweep-window",
+          "patrols": [
+            {
+              "range": 4.5,
+              "route": [
+                {
+                  "x": 4.4,
+                  "y": 7.9
+                },
+                {
+                  "x": 1.5999999999999996,
+                  "y": 7.9
+                },
+                {
+                  "x": 1.5999999999999996,
+                  "y": 6.7
+                },
+                {
+                  "x": 4.4,
+                  "y": 6.7
+                }
+              ],
+              "speed": 1.2,
+              "halfAngle": 0.9817477042468103,
+              "combatRole": "sentry",
+              "spotSeconds": 1.1,
+              "investigates": true,
+              "pauseSeconds": 0.4
+            },
+            {
+              "range": 4.5,
+              "route": [
+                {
+                  "x": 5.1,
+                  "y": 4.4
+                },
+                {
+                  "x": 1.5999999999999996,
+                  "y": 4.4
+                }
+              ],
+              "speed": 1.45,
+              "halfAngle": 0.9817477042468103,
+              "combatRole": "scout",
+              "spotSeconds": 1.1,
+              "investigates": true,
+              "pauseSeconds": 0.4
+            },
+            {
+              "range": 4.5,
+              "route": [
+                {
+                  "x": 2,
+                  "y": 17.5
+                },
+                {
+                  "x": 2,
+                  "y": 17.1
+                }
+              ],
+              "speed": 1.45,
+              "halfAngle": 0.9817477042468103,
+              "combatRole": "scout",
+              "spotSeconds": 1.1,
+              "investigates": true,
+              "pauseSeconds": 0.4,
+              "reserveAfter": 2
+            },
+            {
+              "range": 4.5,
+              "route": [
+                {
+                  "x": 2,
+                  "y": 17.5
+                },
+                {
+                  "x": 2,
+                  "y": 17.1
+                }
+              ],
+              "speed": 1.45,
+              "halfAngle": 0.9817477042468103,
+              "combatRole": "scout",
+              "spotSeconds": 1.1,
+              "investigates": true,
+              "pauseSeconds": 0.4,
+              "reserveAfter": 4.2
+            }
+          ],
+          "blockers": [
+            {
+              "h": 0.7,
+              "w": 12,
+              "x": 0,
+              "y": 0,
+              "kind": "wall"
+            },
+            {
+              "h": 0.7,
+              "w": 12,
+              "x": 0,
+              "y": 19.3,
+              "kind": "wall"
+            },
+            {
+              "h": 20,
+              "w": 0.7,
+              "x": 0,
+              "y": 0,
+              "kind": "wall"
+            },
+            {
+              "h": 20,
+              "w": 0.7,
+              "x": 11.3,
+              "y": 0,
+              "kind": "wall"
+            },
+            {
+              "h": 2.8,
+              "w": 2,
+              "x": 4.9,
+              "y": 5,
+              "kind": "rack"
+            },
+            {
+              "h": 3,
+              "w": 2,
+              "x": 6.5,
+              "y": 11.5,
+              "kind": "rack"
+            },
+            {
+              "h": 1.4,
+              "w": 1.8,
+              "x": 9,
+              "y": 8.5,
+              "kind": "crate"
+            },
+            {
+              "h": 1.5,
+              "w": 1.7,
+              "x": 1.4999999999999993,
+              "y": 9.8,
+              "kind": "crate"
+            },
+            {
+              "h": 1.2,
+              "w": 2,
+              "x": 2.5999999999999996,
+              "y": 15.8,
+              "kind": "crate"
+            },
+            {
+              "h": 1.1,
+              "w": 1.5,
+              "x": 9,
+              "y": 3.5,
+              "kind": "crate"
+            }
+          ],
+          "briefing": "Take the Seeker. The exit opens for 4 seconds every 8 seconds.",
+          "exitWindow": {
+            "phase": 1.5,
+            "period": 8,
+            "openSeconds": 4
+          },
+          "floorColor": "#253649",
+          "targetSeconds": 90,
+          "hardLimitSeconds": 120
+        },
+        "district": "Rooftops",
+        "modifier": "Exit window",
+        "objective": "Take the Seeker. The exit opens for 4 seconds every 8 seconds."
+      },
+      {
+        "id": "2026-09-21:2:combat-v2",
+        "name": "Pulse Vault",
+        "slot": 2,
+        "week": "2026-09-21",
+        "level": {
+          "id": "combat-v2:2026-09-21:2",
+          "exit": {
+            "h": 1.4,
+            "w": 1.6,
+            "x": 1.7999999999999996,
+            "y": 16.900000000000002
+          },
+          "phone": {
+            "x": 2.4000000000000004,
+            "y": 2.7
+          },
+          "spawn": {
+            "x": 10,
+            "y": 17.5
+          },
+          "title": "Pulse Vault",
+          "width": 12,
+          "combat": {
+            "version": 2,
+            "revision": 6
+          },
+          "decoys": 0,
+          "height": 20,
+          "number": 9,
+          "mission": "power-trade",
+          "patrols": [
+            {
+              "range": 3,
+              "route": [
+                {
+                  "x": 4.4,
+                  "y": 7.9
+                },
+                {
+                  "x": 1.5999999999999996,
+                  "y": 7.9
+                },
+                {
+                  "x": 1.5999999999999996,
+                  "y": 6.7
+                },
+                {
+                  "x": 4.4,
+                  "y": 6.7
+                }
+              ],
+              "speed": 1.2,
+              "halfAngle": 0.9817477042468103,
+              "combatRole": "sentry",
+              "spotSeconds": 1.1,
+              "investigates": true,
+              "pauseSeconds": 0.4
+            },
+            {
+              "range": 3,
+              "route": [
+                {
+                  "x": 5.1,
+                  "y": 4.4
+                },
+                {
+                  "x": 1.5999999999999996,
+                  "y": 4.4
+                }
+              ],
+              "speed": 1.45,
+              "halfAngle": 0.9817477042468103,
+              "combatRole": "scout",
+              "spotSeconds": 1.1,
+              "investigates": true,
+              "pauseSeconds": 0.4
+            },
+            {
+              "range": 3,
+              "route": [
+                {
+                  "x": 2,
+                  "y": 17.5
+                },
+                {
+                  "x": 2,
+                  "y": 17.1
+                }
+              ],
+              "speed": 1.45,
+              "halfAngle": 0.9817477042468103,
+              "combatRole": "scout",
+              "spotSeconds": 1.1,
+              "investigates": true,
+              "pauseSeconds": 0.4,
+              "reserveAfter": 2
+            },
+            {
+              "range": 3,
+              "route": [
+                {
+                  "x": 2,
+                  "y": 17.5
+                },
+                {
+                  "x": 2,
+                  "y": 17.1
+                }
+              ],
+              "speed": 1.45,
+              "halfAngle": 0.9817477042468103,
+              "combatRole": "scout",
+              "spotSeconds": 1.1,
+              "investigates": true,
+              "pauseSeconds": 0.4,
+              "reserveAfter": 4.2
+            }
+          ],
+          "blockers": [
+            {
+              "h": 0.7,
+              "w": 12,
+              "x": 0,
+              "y": 0,
+              "kind": "wall"
+            },
+            {
+              "h": 0.7,
+              "w": 12,
+              "x": 0,
+              "y": 19.3,
+              "kind": "wall"
+            },
+            {
+              "h": 20,
+              "w": 0.7,
+              "x": 0,
+              "y": 0,
+              "kind": "wall"
+            },
+            {
+              "h": 20,
+              "w": 0.7,
+              "x": 11.3,
+              "y": 0,
+              "kind": "wall"
+            },
+            {
+              "h": 2.8,
+              "w": 2,
+              "x": 4.9,
+              "y": 5,
+              "kind": "rack"
+            },
+            {
+              "h": 3,
+              "w": 2,
+              "x": 6.5,
+              "y": 11.5,
+              "kind": "rack"
+            },
+            {
+              "h": 1.4,
+              "w": 1.8,
+              "x": 9,
+              "y": 8.5,
+              "kind": "crate"
+            },
+            {
+              "h": 1.5,
+              "w": 1.7,
+              "x": 1.4999999999999993,
+              "y": 9.8,
+              "kind": "crate"
+            },
+            {
+              "h": 1.2,
+              "w": 2,
+              "x": 2.5999999999999996,
+              "y": 15.8,
+              "kind": "crate"
+            },
+            {
+              "h": 1.1,
+              "w": 1.5,
+              "x": 9,
+              "y": 3.5,
+              "kind": "crate"
+            }
+          ],
+          "briefing": "Short guard sight. Take the Seeker and escape.",
+          "floorColor": "#343D40",
+          "targetSeconds": 90,
+          "hardLimitSeconds": 120
+        },
+        "district": "Powerworks",
+        "modifier": "Blackout",
+        "objective": "Short guard sight. Take the Seeker and escape."
+      }
+    ],
+    "rulesHash": "7f90be28b3c04449c9b16ad06de65b5bc688aac1c0de36b2e727dd04f394a55b",
+    "engineHash": "cd6dd46f097d3872f3a8e90c4b80a082febef88da20832ab2099ee8c3062e75a",
+    "authenticated": false,
+    "attempts": {},
+    "board": {
+      "week": "2026-09-21",
+      "endsAt": "2026-09-28T00:00:00.000Z",
+      "participants": 1,
+      "entries": [
+        {
+          "wallet": "GyftsRcgrvFWHGhhTvVTQMDGVU565UmmPvbhuZ3nYwgE",
+          "points": 16703,
+          "ticks": 2155,
+          "cleared": 2,
+          "best": [
+            {
+              "ticks": 1191,
+              "points": 7507,
+              "contract": "2026-09-21:1:combat-v2"
+            },
+            {
+              "ticks": 964,
+              "points": 9196,
+              "contract": "2026-09-21:2:combat-v2"
+            }
+          ],
+          "rank": 1,
+          "position": 1
+        }
+      ],
+      "nearby": [],
+      "personal": null,
+      "rival": null,
+      "final": false
+    },
+    "history": [],
+    "recentRuns": [],
+    "earned": false,
+    "domain": null,
+    "active": null
+  },
+  "catalog": {
+    "testPricing": false,
+    "creditStore": [
+      {
+        "id": "night-courier",
+        "name": "Night Courier",
+        "price": 300,
+        "kind": "outfit",
+        "description": "Charcoal hood and dark backpack."
+      },
+      {
+        "id": "signal-runner",
+        "name": "Frost Runner",
+        "price": 400,
+        "kind": "outfit",
+        "description": "Snowflake hood. Mint winter trim."
+      },
+      {
+        "id": "circuit-scout",
+        "name": "Circuit Scout",
+        "price": 500,
+        "kind": "outfit",
+        "description": "Mint circuit stripes on charcoal."
+      },
+      {
+        "id": "archive-keeper",
+        "name": "Archive Keeper",
+        "price": 600,
+        "kind": "outfit",
+        "description": "Cream jacket and tan satchel straps."
+      },
+      {
+        "id": "solana-toly",
+        "name": "Toly",
+        "price": 3000,
+        "kind": "outfit",
+        "description": "Premium character skin. Same gameplay stats."
+      },
+      {
+        "id": "solana-mert",
+        "name": "Mert",
+        "price": 3000,
+        "kind": "outfit",
+        "description": "Premium character skin. Same gameplay stats."
+      },
+      {
+        "id": "solana-chase",
+        "name": "Chase",
+        "price": 3000,
+        "kind": "outfit",
+        "description": "Premium character skin. Same gameplay stats."
+      },
+      {
+        "id": "solana-lily",
+        "name": "Lily",
+        "price": 3000,
+        "kind": "outfit",
+        "description": "Premium character skin. Same gameplay stats."
+      },
+      {
+        "id": "solana-vibhu",
+        "name": "Vibhu",
+        "price": 3000,
+        "kind": "outfit",
+        "description": "Premium character skin. Same gameplay stats."
+      },
+      {
+        "id": "solana-akshay",
+        "name": "Akshay Rajan",
+        "price": 3000,
+        "kind": "outfit",
+        "description": "Premium character skin. Same gameplay stats."
+      },
+      {
+        "id": "solana-beeman",
+        "name": "Beeman",
+        "price": 3000,
+        "kind": "outfit",
+        "description": "Premium character skin. Same gameplay stats."
+      }
+    ],
+    "cluster": "solana:mainnet",
+    "disclaimer": "Mainnet: payments use real money.",
+    "paymentCurrencies": [
+      "SKR",
+      "SOL"
+    ],
+    "products": [
+      {
+        "id": "campaign",
+        "name": "Game Pass",
+        "kind": "access",
+        "description": "Weekly ranked competition. One purchase per wallet. Campaign and practice are free.",
+        "usdCents": 1000,
+        "skrPrice": 500
+      },
+      {
+        "id": "night-courier",
+        "name": "Night Courier",
+        "kind": "outfit",
+        "description": "Charcoal and mint courier outfit. Same gameplay stats.",
+        "skrPrice": 20
+      },
+      {
+        "id": "signal-runner",
+        "name": "Frost Runner",
+        "kind": "outfit",
+        "description": "Snowflake hood and mint winter trim. Same gameplay stats.",
+        "skrPrice": 20
+      },
+      {
+        "id": "circuit-scout",
+        "name": "Circuit Scout",
+        "kind": "outfit",
+        "description": "Mint circuit stripes on charcoal. Same gameplay stats.",
+        "skrPrice": 20
+      },
+      {
+        "id": "archive-keeper",
+        "name": "Archive Keeper",
+        "kind": "outfit",
+        "description": "Cream jacket with tan satchel straps. Same gameplay stats.",
+        "skrPrice": 20
+      },
+      {
+        "id": "solana-toly",
+        "name": "Toly",
+        "kind": "outfit",
+        "description": "Permanent cosmetic character. Same gameplay stats.",
+        "skrPrice": 100
+      },
+      {
+        "id": "solana-mert",
+        "name": "Mert",
+        "kind": "outfit",
+        "description": "Permanent cosmetic character. Same gameplay stats.",
+        "skrPrice": 100
+      },
+      {
+        "id": "solana-chase",
+        "name": "Chase",
+        "kind": "outfit",
+        "description": "Permanent cosmetic character. Same gameplay stats.",
+        "skrPrice": 100
+      },
+      {
+        "id": "solana-lily",
+        "name": "Lily",
+        "kind": "outfit",
+        "description": "Permanent cosmetic character. Same gameplay stats.",
+        "skrPrice": 100
+      },
+      {
+        "id": "solana-vibhu",
+        "name": "Vibhu",
+        "kind": "outfit",
+        "description": "Permanent cosmetic character. Same gameplay stats.",
+        "skrPrice": 100
+      },
+      {
+        "id": "solana-akshay",
+        "name": "Akshay Rajan",
+        "kind": "outfit",
+        "description": "Permanent cosmetic character. Same gameplay stats.",
+        "skrPrice": 100
+      },
+      {
+        "id": "solana-beeman",
+        "name": "Beeman",
+        "kind": "outfit",
+        "description": "Permanent cosmetic character. Same gameplay stats.",
+        "skrPrice": 100
+      },
+      {
+        "id": "credits-500",
+        "name": "500 credits",
+        "kind": "credits",
+        "description": "Game currency for outfits and gear. No cash value.",
+        "credits": 500,
+        "usdCents": 100
+      },
+      {
+        "id": "credits-1500",
+        "name": "1,500 credits",
+        "kind": "credits",
+        "description": "Game currency for outfits and gear. No cash value.",
+        "credits": 1500,
+        "usdCents": 250
+      },
+      {
+        "id": "credits-3500",
+        "name": "3,500 credits",
+        "kind": "credits",
+        "description": "Game currency for outfits and gear. No cash value.",
+        "credits": 3500,
+        "usdCents": 500
+      }
+    ]
+  }
+}

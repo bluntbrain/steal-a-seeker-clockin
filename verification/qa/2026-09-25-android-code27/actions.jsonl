@@ -1,0 +1,473 @@
+{"time": "2026-09-25T00:18:37.341845+05:30", "action": "record", "detail": ["01-first-launch"]}
+{"time": "2026-09-25T00:18:37.397793+05:30", "action": "launch", "detail": []}
+{"time": "2026-09-25T00:18:49.442422+05:30", "action": "shot", "detail": ["001-launch"]}
+{"time": "2026-09-25T00:18:52.259087+05:30", "action": "screenshot", "detail": "001-launch"}
+{"time": "2026-09-25T00:18:52.396112+05:30", "action": "dump", "detail": ["launch"]}
+{"time": "2026-09-25T00:19:04.532911+05:30", "action": "tap", "detail": ["540", "2040", "2"]}
+{"time": "2026-09-25T00:19:07.260125+05:30", "action": "shot", "detail": ["002-pass-checkout"]}
+{"time": "2026-09-25T00:19:10.296452+05:30", "action": "screenshot", "detail": "002-pass-checkout"}
+{"time": "2026-09-25T00:19:10.474274+05:30", "action": "dump", "detail": ["pass-checkout"]}
+{"time": "2026-09-25T00:19:24.428925+05:30", "action": "tap", "detail": ["540", "1160", "2"]}
+{"time": "2026-09-25T00:19:26.885399+05:30", "action": "key", "detail": ["4"]}
+{"time": "2026-09-25T00:19:27.343093+05:30", "action": "shot", "detail": ["003-android-back-checkout"]}
+{"time": "2026-09-25T00:19:29.480585+05:30", "action": "screenshot", "detail": "003-android-back-checkout"}
+{"time": "2026-09-25T00:19:29.612052+05:30", "action": "dump", "detail": ["back-checkout"]}
+{"time": "2026-09-25T00:19:44.544102+05:30", "action": "tap", "detail": ["970", "230", "1"]}
+{"time": "2026-09-25T00:19:46.497756+05:30", "action": "shot", "detail": ["004-fresh-map"]}
+{"time": "2026-09-25T00:19:48.204622+05:30", "action": "screenshot", "detail": "004-fresh-map"}
+{"time": "2026-09-25T00:19:48.314459+05:30", "action": "dump", "detail": ["fresh-map"]}
+{"time": "2026-09-25T00:19:54.550396+05:30", "action": "stop", "detail": []}
+{"time": "2026-09-25T00:20:05.624205+05:30", "action": "tap", "detail": ["978", "238", "3"]}
+{"time": "2026-09-25T00:20:08.959754+05:30", "action": "shot", "detail": ["005-skip-retry"]}
+{"time": "2026-09-25T00:20:09.812957+05:30", "action": "screenshot", "detail": "005-skip-retry"}
+{"time": "2026-09-25T00:20:20.221644+05:30", "action": "stop", "detail": []}
+{"time": "2026-09-25T00:20:21.345409+05:30", "action": "dump", "detail": ["current"]}
+{"time": "2026-09-25T00:20:46.705898+05:30", "action": "key", "detail": ["4"]}
+{"time": "2026-09-25T00:20:47.474631+05:30", "action": "shot", "detail": ["006-settings-back"]}
+{"time": "2026-09-25T00:20:54.677628+05:30", "action": "screenshot", "detail": "006-settings-back"}
+{"time": "2026-09-25T00:20:54.788868+05:30", "action": "dump", "detail": ["after-settings"]}
+{"time": "2026-09-25T00:21:12.129547+05:30", "action": "shot", "detail": ["007-current"]}
+{"time": "2026-09-25T00:21:29.907844+05:30", "action": "screenshot", "detail": "007-current"}
+{"time": "2026-09-25T00:21:59.351306+05:30", "action": "tap", "detail": ["240", "745", "3"]}
+{"time": "2026-09-25T00:22:05.174529+05:30", "action": "shot", "detail": ["008-mission-one-brief"]}
+{"time": "2026-09-25T00:22:06.612373+05:30", "action": "screenshot", "detail": "008-mission-one-brief"}
+{"time": "2026-09-25T00:22:06.703685+05:30", "action": "dump", "detail": ["mission-one-brief"]}
+{"time": "2026-09-25T00:22:20.547423+05:30", "action": "tap", "detail": ["540", "1910", "3"]}
+{"time": "2026-09-25T00:22:24.629714+05:30", "action": "shot", "detail": ["009-tutorial-start"]}
+{"time": "2026-09-25T00:22:26.264358+05:30", "action": "screenshot", "detail": "009-tutorial-start"}
+{"time": "2026-09-25T00:22:26.427207+05:30", "action": "dump", "detail": ["tutorial-start"]}
+{"time": "2026-09-25T00:22:41.598825+05:30", "action": "tap", "detail": ["540", "2210", "3"]}
+{"time": "2026-09-25T00:22:46.756312+05:30", "action": "shot", "detail": ["010-tutorial-move"]}
+{"time": "2026-09-25T00:22:47.136951+05:30", "action": "screenshot", "detail": "010-tutorial-move"}
+{"time": "2026-09-25T00:23:01.353259+05:30", "action": "shot", "detail": ["011-tutorial-ready"]}
+{"time": "2026-09-25T00:23:06.722071+05:30", "action": "screenshot", "detail": "011-tutorial-ready"}
+{"time": "2026-09-25T00:23:21.623376+05:30", "action": "tap", "detail": ["204", "1768", "2"]}
+{"time": "2026-09-25T00:23:26.276060+05:30", "action": "shot", "detail": ["012-tutorial-step-two"]}
+{"time": "2026-09-25T00:23:29.911770+05:30", "action": "screenshot", "detail": "012-tutorial-step-two"}
+{"time": "2026-09-25T00:23:37.276963+05:30", "action": "shot", "detail": ["013-guide-next"]}
+{"time": "2026-09-25T00:23:37.650887+05:30", "action": "screenshot", "detail": "013-guide-next"}
+{"time": "2026-09-25T00:24:36.507288+05:30", "action": "shot", "detail": ["014-host-resume"]}
+{"time": "2026-09-25T00:24:37.419796+05:30", "action": "screenshot", "detail": "014-host-resume"}
+{"time": "2026-09-25T00:24:46.087180+05:30", "action": "tap", "detail": ["975", "235", "2"]}
+{"time": "2026-09-25T00:24:48.223754+05:30", "action": "tap", "detail": ["540", "2040", "2"]}
+{"time": "2026-09-25T00:24:50.319911+05:30", "action": "shot", "detail": ["015-host-start"]}
+{"time": "2026-09-25T00:24:50.735347+05:30", "action": "screenshot", "detail": "015-host-start"}
+{"time": "2026-09-25T00:24:59.944826+05:30", "action": "tap", "detail": ["540", "2210", "4"]}
+{"time": "2026-09-25T00:25:04.022261+05:30", "action": "shot", "detail": ["016-host-guide"]}
+{"time": "2026-09-25T00:25:04.606384+05:30", "action": "screenshot", "detail": "016-host-guide"}
+{"time": "2026-09-25T00:25:13.606694+05:30", "action": "tap", "detail": ["204", "1500", "2"]}
+{"time": "2026-09-25T00:25:15.767012+05:30", "action": "shot", "detail": ["017-guide-shoot"]}
+{"time": "2026-09-25T00:25:16.299412+05:30", "action": "screenshot", "detail": "017-guide-shoot"}
+{"time": "2026-09-25T00:25:25.012319+05:30", "action": "tap", "detail": ["280", "1400", "1"]}
+{"time": "2026-09-25T00:25:26.387553+05:30", "action": "tap", "detail": ["1000", "380", ".2"]}
+{"time": "2026-09-25T00:25:26.764135+05:30", "action": "shot", "detail": ["018-tutorial-result-pause"]}
+{"time": "2026-09-25T00:25:28.003068+05:30", "action": "screenshot", "detail": "018-tutorial-result-pause"}
+{"time": "2026-09-25T00:25:37.734859+05:30", "action": "tap", "detail": ["1000", "220", ".2"]}
+{"time": "2026-09-25T00:25:38.147766+05:30", "action": "shot", "detail": ["019-paused"]}
+{"time": "2026-09-25T00:25:39.325027+05:30", "action": "screenshot", "detail": "019-paused"}
+{"time": "2026-09-25T00:25:49.891458+05:30", "action": "tap", "detail": ["285", "2220", "2"]}
+{"time": "2026-09-25T00:25:52.267948+05:30", "action": "tap", "detail": ["1000", "220", ".2"]}
+{"time": "2026-09-25T00:25:52.589807+05:30", "action": "shot", "detail": ["020-retry-paused"]}
+{"time": "2026-09-25T00:25:53.799303+05:30", "action": "screenshot", "detail": "020-retry-paused"}
+{"time": "2026-09-25T00:26:10.542418+05:30", "action": "tap", "detail": ["800", "2110", ".2"]}
+{"time": "2026-09-25T00:26:11.095308+05:30", "action": "tap", "detail": ["350", "1285", "1.5"]}
+{"time": "2026-09-25T00:26:12.677949+05:30", "action": "tap", "detail": ["1000", "220", ".2"]}
+{"time": "2026-09-25T00:26:12.950212+05:30", "action": "shot", "detail": ["021-combat-target"]}
+{"time": "2026-09-25T00:26:13.777842+05:30", "action": "screenshot", "detail": "021-combat-target"}
+{"time": "2026-09-25T00:26:23.585916+05:30", "action": "tap", "detail": ["800", "2110", ".2"]}
+{"time": "2026-09-25T00:26:24.100020+05:30", "action": "shot", "detail": ["022-full-game"]}
+{"time": "2026-09-25T00:26:25.113228+05:30", "action": "screenshot", "detail": "022-full-game"}
+{"time": "2026-09-25T00:26:25.211523+05:30", "action": "tap", "detail": ["1000", "220", ".1"]}
+{"time": "2026-09-25T00:26:40.412957+05:30", "action": "tap", "detail": ["800", "2110", ".2"]}
+{"time": "2026-09-25T00:26:40.839472+05:30", "action": "tap", "detail": ["235", "1460", "1.1"]}
+{"time": "2026-09-25T00:26:42.057005+05:30", "action": "shot", "detail": ["023-approach-drone"]}
+{"time": "2026-09-25T00:26:43.036587+05:30", "action": "screenshot", "detail": "023-approach-drone"}
+{"time": "2026-09-25T00:26:43.134475+05:30", "action": "tap", "detail": ["1000", "220", ".1"]}
+{"time": "2026-09-25T00:26:53.698440+05:30", "action": "tap", "detail": ["800", "2110", ".2"]}
+{"time": "2026-09-25T00:26:59.049501+05:30", "action": "tap", "detail": ["350", "1280", "1"]}
+{"time": "2026-09-25T00:27:00.293710+05:30", "action": "shot", "detail": ["024-drone-defeat"]}
+{"time": "2026-09-25T00:27:02.152802+05:30", "action": "screenshot", "detail": "024-drone-defeat"}
+{"time": "2026-09-25T00:27:02.316552+05:30", "action": "tap", "detail": ["1000", "220", ".1"]}
+{"time": "2026-09-25T00:27:48.573005+05:30", "action": "tap", "detail": ["800", "2110", ".2"]}
+{"time": "2026-09-25T00:27:49.148267+05:30", "action": "tap", "detail": ["352", "1320", "1.5"]}
+{"time": "2026-09-25T00:27:50.756680+05:30", "action": "shot", "detail": ["025-drone-attack-retry"]}
+{"time": "2026-09-25T00:27:52.606626+05:30", "action": "screenshot", "detail": "025-drone-attack-retry"}
+{"time": "2026-09-25T00:27:52.729297+05:30", "action": "tap", "detail": ["1000", "220", ".1"]}
+{"time": "2026-09-25T00:28:04.520167+05:30", "action": "tap", "detail": ["800", "2110", ".8"]}
+{"time": "2026-09-25T00:28:05.655692+05:30", "action": "tap", "detail": ["352", "1280", "1"]}
+{"time": "2026-09-25T00:28:06.764875+05:30", "action": "shot", "detail": ["026-drone-target-confirm"]}
+{"time": "2026-09-25T00:28:08.243654+05:30", "action": "screenshot", "detail": "026-drone-target-confirm"}
+{"time": "2026-09-25T00:28:08.368019+05:30", "action": "tap", "detail": ["1000", "220", ".1"]}
+{"time": "2026-09-25T00:28:20.502626+05:30", "action": "tap", "detail": ["800", "2110", ".7"]}
+{"time": "2026-09-25T00:28:21.566438+05:30", "action": "tap", "detail": ["695", "1350", "1"]}
+{"time": "2026-09-25T00:28:22.883012+05:30", "action": "shot", "detail": ["027-cover-crossing"]}
+{"time": "2026-09-25T00:28:25.123913+05:30", "action": "screenshot", "detail": "027-cover-crossing"}
+{"time": "2026-09-25T00:28:25.268186+05:30", "action": "tap", "detail": ["1000", "220", ".1"]}
+{"time": "2026-09-25T00:28:36.800007+05:30", "action": "tap", "detail": ["800", "2110", ".7"]}
+{"time": "2026-09-25T00:28:37.784771+05:30", "action": "tap", "detail": ["895", "1185", "1"]}
+{"time": "2026-09-25T00:28:38.893164+05:30", "action": "shot", "detail": ["028-first-guard"]}
+{"time": "2026-09-25T00:28:39.691544+05:30", "action": "screenshot", "detail": "028-first-guard"}
+{"time": "2026-09-25T00:28:39.781399+05:30", "action": "tap", "detail": ["1000", "220", ".1"]}
+{"time": "2026-09-25T00:29:12.106103+05:30", "action": "tap", "detail": ["285", "2220", "1.5"]}
+{"time": "2026-09-25T00:29:13.822798+05:30", "action": "tap", "detail": ["235", "1460", "1.2"]}
+{"time": "2026-09-25T00:29:15.133350+05:30", "action": "tap", "detail": ["350", "1280", "1"]}
+{"time": "2026-09-25T00:29:16.245539+05:30", "action": "shot", "detail": ["029-attempt3-start"]}
+{"time": "2026-09-25T00:29:17.232255+05:30", "action": "screenshot", "detail": "029-attempt3-start"}
+{"time": "2026-09-25T00:29:17.334610+05:30", "action": "tap", "detail": ["1000", "220", ".1"]}
+{"time": "2026-09-25T00:29:30.916128+05:30", "action": "tap", "detail": ["800", "2110", ".6"]}
+{"time": "2026-09-25T00:29:31.818328+05:30", "action": "tap", "detail": ["600", "1250", ".6"]}
+{"time": "2026-09-25T00:29:32.548737+05:30", "action": "shot", "detail": ["030-approach-cover"]}
+{"time": "2026-09-25T00:29:33.685177+05:30", "action": "screenshot", "detail": "030-approach-cover"}
+{"time": "2026-09-25T00:29:33.788986+05:30", "action": "tap", "detail": ["1000", "220", ".1"]}
+{"time": "2026-09-25T00:29:45.020456+05:30", "action": "tap", "detail": ["800", "2110", ".55"]}
+{"time": "2026-09-25T00:29:45.836529+05:30", "action": "tap", "detail": ["980", "1190", ".7"]}
+{"time": "2026-09-25T00:29:46.640903+05:30", "action": "shot", "detail": ["031-target-scout"]}
+{"time": "2026-09-25T00:29:47.683235+05:30", "action": "screenshot", "detail": "031-target-scout"}
+{"time": "2026-09-25T00:29:47.788974+05:30", "action": "tap", "detail": ["1000", "220", ".1"]}
+{"time": "2026-09-25T00:30:02.925395+05:30", "action": "tap", "detail": ["800", "2110", ".4"]}
+{"time": "2026-09-25T00:30:03.566353+05:30", "action": "tap", "detail": ["550", "1400", ".3"]}
+{"time": "2026-09-25T00:30:03.972018+05:30", "action": "tap", "detail": ["720", "1200", ".3"]}
+{"time": "2026-09-25T00:30:04.356954+05:30", "action": "shot", "detail": ["032-attempt3-outcome"]}
+{"time": "2026-09-25T00:30:05.292226+05:30", "action": "screenshot", "detail": "032-attempt3-outcome"}
+{"time": "2026-09-25T00:30:22.924016+05:30", "action": "tap", "detail": ["795", "2220", "1"]}
+{"time": "2026-09-25T00:30:24.139681+05:30", "action": "tap", "detail": ["830", "245", "1"]}
+{"time": "2026-09-25T00:30:25.212741+05:30", "action": "shot", "detail": ["033-add-credits"]}
+{"time": "2026-09-25T00:30:25.515250+05:30", "action": "screenshot", "detail": "033-add-credits"}
+{"time": "2026-09-25T00:30:25.583890+05:30", "action": "dump", "detail": ["credits"]}
+{"time": "2026-09-25T00:30:52.861164+05:30", "action": "tap", "detail": ["550", "745", ".4"]}
+{"time": "2026-09-25T00:30:53.490504+05:30", "action": "shot", "detail": ["034-pack500"]}
+{"time": "2026-09-25T00:30:53.724506+05:30", "action": "screenshot", "detail": "034-pack500"}
+{"time": "2026-09-25T00:30:53.800573+05:30", "action": "tap", "detail": ["550", "1450", ".4"]}
+{"time": "2026-09-25T00:30:54.290034+05:30", "action": "shot", "detail": ["035-pack3500"]}
+{"time": "2026-09-25T00:30:54.467523+05:30", "action": "screenshot", "detail": "035-pack3500"}
+{"time": "2026-09-25T00:30:54.537909+05:30", "action": "tap", "detail": ["550", "1850", "1"]}
+{"time": "2026-09-25T00:30:55.598103+05:30", "action": "shot", "detail": ["036-pack-wallet-error"]}
+{"time": "2026-09-25T00:30:55.793063+05:30", "action": "screenshot", "detail": "036-pack-wallet-error"}
+{"time": "2026-09-25T00:31:16.384924+05:30", "action": "tap", "detail": ["550", "1980", ".1"]}
+{"time": "2026-09-25T00:31:26.753280+05:30", "action": "tap", "detail": ["550", "1980", ".1"]}
+{"time": "2026-09-25T00:31:27.902018+05:30", "action": "key", "detail": ["4"]}
+{"time": "2026-09-25T00:31:28.853280+05:30", "action": "tap", "detail": ["540", "2240", "1"]}
+{"time": "2026-09-25T00:31:30.056887+05:30", "action": "shot", "detail": ["037-leaderboard"]}
+{"time": "2026-09-25T00:31:31.170182+05:30", "action": "screenshot", "detail": "037-leaderboard"}
+{"time": "2026-09-25T00:31:31.283916+05:30", "action": "dump", "detail": ["leaderboard"]}
+{"time": "2026-09-25T00:31:41.341111+05:30", "action": "shot", "detail": ["038-current"]}
+{"time": "2026-09-25T00:31:42.877192+05:30", "action": "screenshot", "detail": "038-current"}
+{"time": "2026-09-25T00:32:05.437201+05:30", "action": "tap", "detail": ["330", "1370", "2"]}
+{"time": "2026-09-25T00:32:07.624102+05:30", "action": "tap", "detail": ["540", "2240", "2"]}
+{"time": "2026-09-25T00:32:09.693790+05:30", "action": "shot", "detail": ["039-anr-wait-recovery"]}
+{"time": "2026-09-25T00:32:09.956181+05:30", "action": "screenshot", "detail": "039-anr-wait-recovery"}
+{"time": "2026-09-25T00:32:21.098810+05:30", "action": "tap", "detail": ["875", "675", ".5"]}
+{"time": "2026-09-25T00:32:21.883923+05:30", "action": "shot", "detail": ["040-weekly-rules"]}
+{"time": "2026-09-25T00:32:24.365497+05:30", "action": "screenshot", "detail": "040-weekly-rules"}
+{"time": "2026-09-25T00:32:24.434018+05:30", "action": "dump", "detail": ["weekly-rules"]}
+{"time": "2026-09-25T00:32:46.141770+05:30", "action": "tap", "detail": ["330", "1370", "1"]}
+{"time": "2026-09-25T00:32:58.853273+05:30", "action": "tap", "detail": ["875", "675", "1"]}
+{"time": "2026-09-25T00:32:59.985041+05:30", "action": "shot", "detail": ["041-weekly-howtoplay"]}
+{"time": "2026-09-25T00:33:01.962404+05:30", "action": "screenshot", "detail": "041-weekly-howtoplay"}
+{"time": "2026-09-25T00:33:02.029631+05:30", "action": "dump", "detail": ["weekly-howtoplay"]}
+{"time": "2026-09-25T00:33:19.206474+05:30", "action": "tap", "detail": ["330", "1250", "1"]}
+{"time": "2026-09-25T00:33:20.334501+05:30", "action": "launch", "detail": []}
+{"time": "2026-09-25T00:33:22.413378+05:30", "action": "tap", "detail": ["975", "235", "1"]}
+{"time": "2026-09-25T00:33:23.487065+05:30", "action": "tap", "detail": ["540", "2240", "1"]}
+{"time": "2026-09-25T00:33:24.553106+05:30", "action": "tap", "detail": ["875", "675", "1"]}
+{"time": "2026-09-25T00:33:25.617643+05:30", "action": "shot", "detail": ["042-rules-unrecorded"]}
+{"time": "2026-09-25T00:33:25.866258+05:30", "action": "screenshot", "detail": "042-rules-unrecorded"}
+{"time": "2026-09-25T00:33:25.942210+05:30", "action": "dump", "detail": ["rules-unrecorded"]}
+{"time": "2026-09-25T00:33:37.902793+05:30", "action": "tap", "detail": ["540", "1900", ".5"]}
+{"time": "2026-09-25T00:33:38.536235+05:30", "action": "shot", "detail": ["043-weekly-missions"]}
+{"time": "2026-09-25T00:33:38.762992+05:30", "action": "screenshot", "detail": "043-weekly-missions"}
+{"time": "2026-09-25T00:33:38.836645+05:30", "action": "dump", "detail": ["weekly-missions"]}
+{"time": "2026-09-25T00:33:55.060660+05:30", "action": "tap", "detail": ["540", "1060", ".5"]}
+{"time": "2026-09-25T00:33:55.781179+05:30", "action": "shot", "detail": ["044-weekly-detail"]}
+{"time": "2026-09-25T00:33:56.263154+05:30", "action": "screenshot", "detail": "044-weekly-detail"}
+{"time": "2026-09-25T00:33:56.346069+05:30", "action": "dump", "detail": ["weekly-detail"]}
+{"time": "2026-09-25T00:34:15.718374+05:30", "action": "tap", "detail": ["80", "400", ".4"]}
+{"time": "2026-09-25T00:34:16.291968+05:30", "action": "tap", "detail": ["540", "1450", ".4"]}
+{"time": "2026-09-25T00:34:16.836025+05:30", "action": "shot", "detail": ["045-weekly-skyline"]}
+{"time": "2026-09-25T00:34:17.145222+05:30", "action": "screenshot", "detail": "045-weekly-skyline"}
+{"time": "2026-09-25T00:34:17.237648+05:30", "action": "tap", "detail": ["80", "400", ".4"]}
+{"time": "2026-09-25T00:34:17.703197+05:30", "action": "tap", "detail": ["540", "1820", ".4"]}
+{"time": "2026-09-25T00:34:18.166919+05:30", "action": "shot", "detail": ["046-weekly-pulse"]}
+{"time": "2026-09-25T00:34:18.694404+05:30", "action": "screenshot", "detail": "046-weekly-pulse"}
+{"time": "2026-09-25T00:34:18.779057+05:30", "action": "tap", "detail": ["80", "400", ".4"]}
+{"time": "2026-09-25T00:34:19.244245+05:30", "action": "tap", "detail": ["880", "800", ".4"]}
+{"time": "2026-09-25T00:34:19.708089+05:30", "action": "shot", "detail": ["047-history-empty"]}
+{"time": "2026-09-25T00:34:19.903226+05:30", "action": "screenshot", "detail": "047-history-empty"}
+{"time": "2026-09-25T00:34:19.976595+05:30", "action": "dump", "detail": ["history"]}
+{"time": "2026-09-25T00:34:36.663742+05:30", "action": "tap", "detail": ["830", "245", ".5"]}
+{"time": "2026-09-25T00:34:37.321304+05:30", "action": "shot", "detail": ["048-credits-from-history"]}
+{"time": "2026-09-25T00:34:37.496516+05:30", "action": "screenshot", "detail": "048-credits-from-history"}
+{"time": "2026-09-25T00:34:37.565121+05:30", "action": "tap", "detail": ["110", "245", ".5"]}
+{"time": "2026-09-25T00:34:38.129643+05:30", "action": "tap", "detail": ["880", "2240", ".6"]}
+{"time": "2026-09-25T00:34:38.799069+05:30", "action": "shot", "detail": ["049-hideout-default"]}
+{"time": "2026-09-25T00:34:39.087867+05:30", "action": "screenshot", "detail": "049-hideout-default"}
+{"time": "2026-09-25T00:34:39.163991+05:30", "action": "dump", "detail": ["hideout"]}
+{"time": "2026-09-25T00:34:53.372249+05:30", "action": "tap", "detail": ["540", "1470", ".4"]}
+{"time": "2026-09-25T00:34:53.916296+05:30", "action": "shot", "detail": ["050-mert"]}
+{"time": "2026-09-25T00:34:54.199431+05:30", "action": "screenshot", "detail": "050-mert"}
+{"time": "2026-09-25T00:34:54.276421+05:30", "action": "swipe", "detail": ["730", "1660", "730", "650", "600"]}
+{"time": "2026-09-25T00:34:54.953350+05:30", "action": "shot", "detail": ["051-solana-scroll"]}
+{"time": "2026-09-25T00:34:55.214559+05:30", "action": "screenshot", "detail": "051-solana-scroll"}
+{"time": "2026-09-25T00:34:55.288533+05:30", "action": "dump", "detail": ["solana-scroll"]}
+{"time": "2026-09-25T00:35:18.681034+05:30", "action": "preview_skin", "detail": {"name": "chase", "tap": [195, 930]}}
+{"time": "2026-09-25T00:35:19.693879+05:30", "action": "screenshot", "detail": "052-chase"}
+{"time": "2026-09-25T00:35:20.898665+05:30", "action": "preview_skin", "detail": {"name": "lily", "tap": [540, 930]}}
+{"time": "2026-09-25T00:35:21.804387+05:30", "action": "screenshot", "detail": "052-lily"}
+{"time": "2026-09-25T00:35:23.016273+05:30", "action": "preview_skin", "detail": {"name": "vibhu", "tap": [195, 1530]}}
+{"time": "2026-09-25T00:35:23.929036+05:30", "action": "screenshot", "detail": "052-vibhu"}
+{"time": "2026-09-25T00:35:25.134115+05:30", "action": "preview_skin", "detail": {"name": "akshay", "tap": [540, 1530]}}
+{"time": "2026-09-25T00:35:26.055401+05:30", "action": "screenshot", "detail": "052-akshay"}
+{"time": "2026-09-25T00:35:28.546795+05:30", "action": "screenshot", "detail": "053-solana-bottom"}
+{"time": "2026-09-25T00:35:28.618880+05:30", "action": "dump", "detail": ["solana-bottom"]}
+{"time": "2026-09-25T00:35:54.058533+05:30", "action": "tap", "detail": ["195", "1450", ".4"]}
+{"time": "2026-09-25T00:35:54.637476+05:30", "action": "shot", "detail": ["054-beeman"]}
+{"time": "2026-09-25T00:35:54.935597+05:30", "action": "screenshot", "detail": "054-beeman"}
+{"time": "2026-09-25T00:35:55.013623+05:30", "action": "tap", "detail": ["540", "2030", ".6"]}
+{"time": "2026-09-25T00:35:55.675230+05:30", "action": "shot", "detail": ["055-skin-checkout"]}
+{"time": "2026-09-25T00:35:55.930282+05:30", "action": "screenshot", "detail": "055-skin-checkout"}
+{"time": "2026-09-25T00:35:56.006974+05:30", "action": "dump", "detail": ["skin-checkout"]}
+{"time": "2026-09-25T00:36:14.383697+05:30", "action": "tap", "detail": ["785", "1760", ".4"]}
+{"time": "2026-09-25T00:36:14.929325+05:30", "action": "shot", "detail": ["056-sol-selected"]}
+{"time": "2026-09-25T00:36:15.213995+05:30", "action": "screenshot", "detail": "056-sol-selected"}
+{"time": "2026-09-25T00:36:15.293897+05:30", "action": "tap", "detail": ["70", "230", ".4"]}
+{"time": "2026-09-25T00:36:15.760514+05:30", "action": "tap", "detail": ["200", "397", ".4"]}
+{"time": "2026-09-25T00:36:16.234809+05:30", "action": "shot", "detail": ["057-outfits"]}
+{"time": "2026-09-25T00:36:16.538130+05:30", "action": "screenshot", "detail": "057-outfits"}
+{"time": "2026-09-25T00:36:16.617962+05:30", "action": "dump", "detail": ["outfits"]}
+{"time": "2026-09-25T00:36:43.562333+05:30", "action": "tap", "detail": ["540", "1480", ".4"]}
+{"time": "2026-09-25T00:36:44.096757+05:30", "action": "shot", "detail": ["058-frost"]}
+{"time": "2026-09-25T00:36:44.398021+05:30", "action": "screenshot", "detail": "058-frost"}
+{"time": "2026-09-25T00:36:44.476873+05:30", "action": "tap", "detail": ["540", "2030", ".4"]}
+{"time": "2026-09-25T00:36:44.947441+05:30", "action": "shot", "detail": ["059-insufficient-credit-route"]}
+{"time": "2026-09-25T00:36:45.122368+05:30", "action": "screenshot", "detail": "059-insufficient-credit-route"}
+{"time": "2026-09-25T00:36:45.194323+05:30", "action": "tap", "detail": ["110", "245", ".4"]}
+{"time": "2026-09-25T00:36:45.655598+05:30", "action": "swipe", "detail": ["730", "1660", "730", "650", "600"]}
+{"time": "2026-09-25T00:36:46.340288+05:30", "action": "shot", "detail": ["060-outfit-scroll"]}
+{"time": "2026-09-25T00:36:46.620581+05:30", "action": "screenshot", "detail": "060-outfit-scroll"}
+{"time": "2026-09-25T00:36:46.698839+05:30", "action": "dump", "detail": ["outfit-scroll"]}
+{"time": "2026-09-25T00:37:10.496213+05:30", "action": "preview_outfit", "detail": {"name": "night", "tap": [195, 930]}}
+{"time": "2026-09-25T00:37:11.611888+05:30", "action": "screenshot", "detail": "061-night"}
+{"time": "2026-09-25T00:37:12.799843+05:30", "action": "preview_outfit", "detail": {"name": "circuit", "tap": [540, 930]}}
+{"time": "2026-09-25T00:37:13.764817+05:30", "action": "screenshot", "detail": "061-circuit"}
+{"time": "2026-09-25T00:37:14.966602+05:30", "action": "preview_outfit", "detail": {"name": "archive", "tap": [195, 1530]}}
+{"time": "2026-09-25T00:37:15.896289+05:30", "action": "screenshot", "detail": "061-archive"}
+{"time": "2026-09-25T00:37:17.098863+05:30", "action": "preview_outfit", "detail": {"name": "ghost", "tap": [540, 1530]}}
+{"time": "2026-09-25T00:37:18.036216+05:30", "action": "screenshot", "detail": "061-ghost"}
+{"time": "2026-09-25T00:37:18.124803+05:30", "action": "tap", "detail": ["540", "2030", ".5"]}
+{"time": "2026-09-25T00:37:18.690376+05:30", "action": "shot", "detail": ["062-ghost-weekly-route"]}
+{"time": "2026-09-25T00:37:18.924521+05:30", "action": "screenshot", "detail": "062-ghost-weekly-route"}
+{"time": "2026-09-25T00:37:18.999835+05:30", "action": "tap", "detail": ["880", "2240", ".5"]}
+{"time": "2026-09-25T00:37:19.571281+05:30", "action": "tap", "detail": ["880", "397", ".5"]}
+{"time": "2026-09-25T00:37:20.139330+05:30", "action": "shot", "detail": ["063-phones-grid"]}
+{"time": "2026-09-25T00:37:20.281314+05:30", "action": "screenshot", "detail": "063-phones-grid"}
+{"time": "2026-09-25T00:37:20.349893+05:30", "action": "dump", "detail": ["phones-grid"]}
+{"time": "2026-09-25T00:37:32.009671+05:30", "action": "tap", "detail": ["190", "660", "2"]}
+{"time": "2026-09-25T00:37:34.234443+05:30", "action": "shot", "detail": ["064-phone-frost"]}
+{"time": "2026-09-25T00:37:34.425992+05:30", "action": "screenshot", "detail": "064-phone-frost"}
+{"time": "2026-09-25T00:37:34.492501+05:30", "action": "dump", "detail": ["phone-frost"]}
+{"time": "2026-09-25T00:37:46.533291+05:30", "action": "tap", "detail": ["320", "2000", "1"]}
+{"time": "2026-09-25T00:37:47.907671+05:30", "action": "shot", "detail": ["065-frost-back"]}
+{"time": "2026-09-25T00:37:48.295236+05:30", "action": "screenshot", "detail": "065-frost-back"}
+{"time": "2026-09-25T00:38:02.015842+05:30", "action": "phone_view", "detail": "front"}
+{"time": "2026-09-25T00:38:03.386134+05:30", "action": "screenshot", "detail": "066-frost-front"}
+{"time": "2026-09-25T00:38:03.432578+05:30", "action": "phone_view", "detail": "left"}
+{"time": "2026-09-25T00:38:04.386249+05:30", "action": "screenshot", "detail": "066-frost-left"}
+{"time": "2026-09-25T00:38:04.425458+05:30", "action": "phone_view", "detail": "right"}
+{"time": "2026-09-25T00:38:05.385792+05:30", "action": "screenshot", "detail": "066-frost-right"}
+{"time": "2026-09-25T00:38:05.426404+05:30", "action": "phone_view", "detail": "top"}
+{"time": "2026-09-25T00:38:06.366220+05:30", "action": "screenshot", "detail": "066-frost-top"}
+{"time": "2026-09-25T00:38:06.404081+05:30", "action": "phone_view", "detail": "bottom"}
+{"time": "2026-09-25T00:38:07.348430+05:30", "action": "screenshot", "detail": "066-frost-bottom"}
+{"time": "2026-09-25T00:38:08.806032+05:30", "action": "screenshot", "detail": "067-frost-drag"}
+{"time": "2026-09-25T00:38:26.303494+05:30", "action": "inspect_phone", "detail": {"edition": 2, "name": "graphite", "tap": [530, 660]}}
+{"time": "2026-09-25T00:38:30.217970+05:30", "action": "screenshot", "detail": "068-phone-02-graphite"}
+{"time": "2026-09-25T00:38:30.263722+05:30", "action": "inspect_phone", "detail": {"edition": 3, "name": "tide", "tap": [875, 660]}}
+{"time": "2026-09-25T00:38:33.953868+05:30", "action": "screenshot", "detail": "068-phone-03-tide"}
+{"time": "2026-09-25T00:38:33.997779+05:30", "action": "inspect_phone", "detail": {"edition": 4, "name": "static", "tap": [190, 1030]}}
+{"time": "2026-09-25T00:38:37.664722+05:30", "action": "screenshot", "detail": "068-phone-04-static"}
+{"time": "2026-09-25T00:38:37.707659+05:30", "action": "inspect_phone", "detail": {"edition": 5, "name": "mist", "tap": [530, 1030]}}
+{"time": "2026-09-25T00:38:41.493844+05:30", "action": "screenshot", "detail": "068-phone-05-mist"}
+{"time": "2026-09-25T00:39:23.508559+05:30", "action": "inspect_phone", "detail": {"edition": 6, "name": "orbit", "tap": [875, 1030]}}
+{"time": "2026-09-25T00:39:27.359750+05:30", "action": "screenshot", "detail": "068-phone-06-orbit"}
+{"time": "2026-09-25T00:39:27.403014+05:30", "action": "inspect_phone", "detail": {"edition": 7, "name": "pearl", "tap": [190, 1400]}}
+{"time": "2026-09-25T00:39:31.095911+05:30", "action": "screenshot", "detail": "068-phone-07-pearl"}
+{"time": "2026-09-25T00:39:31.138551+05:30", "action": "inspect_phone", "detail": {"edition": 8, "name": "circuit", "tap": [530, 1400]}}
+{"time": "2026-09-25T00:39:34.822564+05:30", "action": "screenshot", "detail": "068-phone-08-circuit"}
+{"time": "2026-09-25T00:39:34.864914+05:30", "action": "inspect_phone", "detail": {"edition": 9, "name": "relic", "tap": [875, 1400]}}
+{"time": "2026-09-25T00:39:38.522156+05:30", "action": "screenshot", "detail": "068-phone-09-relic"}
+{"time": "2026-09-25T00:39:48.110026+05:30", "action": "inspect_phone", "detail": {"edition": 10, "name": "flux", "tap": [190, 1770]}}
+{"time": "2026-09-25T00:39:51.973545+05:30", "action": "screenshot", "detail": "068-phone-10-flux"}
+{"time": "2026-09-25T00:39:52.019981+05:30", "action": "inspect_phone", "detail": {"edition": 11, "name": "archive", "tap": [530, 1770]}}
+{"time": "2026-09-25T00:39:55.683814+05:30", "action": "screenshot", "detail": "068-phone-11-archive"}
+{"time": "2026-09-25T00:39:55.727261+05:30", "action": "inspect_phone", "detail": {"edition": 12, "name": "ghost", "tap": [875, 1770]}}
+{"time": "2026-09-25T00:39:59.388874+05:30", "action": "screenshot", "detail": "068-phone-12-ghost"}
+{"time": "2026-09-25T00:40:21.232324+05:30", "action": "tap", "detail": ["950", "360", ".5"]}
+{"time": "2026-09-25T00:40:22.085006+05:30", "action": "shot", "detail": ["069-credits-from-phone"]}
+{"time": "2026-09-25T00:40:22.334209+05:30", "action": "screenshot", "detail": "069-credits-from-phone"}
+{"time": "2026-09-25T00:40:22.406969+05:30", "action": "tap", "detail": ["110", "245", ".5"]}
+{"time": "2026-09-25T00:40:23.002655+05:30", "action": "tap", "detail": ["970", "508", ".5"]}
+{"time": "2026-09-25T00:40:23.578168+05:30", "action": "tap", "detail": ["950", "245", ".5"]}
+{"time": "2026-09-25T00:40:24.146564+05:30", "action": "shot", "detail": ["070-credits-from-hideout"]}
+{"time": "2026-09-25T00:40:24.322256+05:30", "action": "screenshot", "detail": "070-credits-from-hideout"}
+{"time": "2026-09-25T00:40:24.393550+05:30", "action": "tap", "detail": ["110", "245", ".5"]}
+{"time": "2026-09-25T00:40:24.955357+05:30", "action": "tap", "detail": ["200", "2240", ".5"]}
+{"time": "2026-09-25T00:40:25.517870+05:30", "action": "tap", "detail": ["1000", "245", ".5"]}
+{"time": "2026-09-25T00:40:26.103681+05:30", "action": "shot", "detail": ["071-settings"]}
+{"time": "2026-09-25T00:40:26.297817+05:30", "action": "screenshot", "detail": "071-settings"}
+{"time": "2026-09-25T00:40:26.367265+05:30", "action": "dump", "detail": ["settings"]}
+{"time": "2026-09-25T00:40:43.854358+05:30", "action": "set_volume", "detail": "25"}
+{"time": "2026-09-25T00:40:44.401993+05:30", "action": "screenshot", "detail": "072-volume-25"}
+{"time": "2026-09-25T00:40:44.443955+05:30", "action": "set_volume", "detail": "50"}
+{"time": "2026-09-25T00:40:44.876296+05:30", "action": "screenshot", "detail": "072-volume-50"}
+{"time": "2026-09-25T00:40:44.915683+05:30", "action": "set_volume", "detail": "75"}
+{"time": "2026-09-25T00:40:45.348646+05:30", "action": "screenshot", "detail": "072-volume-75"}
+{"time": "2026-09-25T00:40:45.388898+05:30", "action": "set_volume", "detail": "100"}
+{"time": "2026-09-25T00:40:45.817225+05:30", "action": "screenshot", "detail": "072-volume-100"}
+{"time": "2026-09-25T00:40:45.858392+05:30", "action": "toggle_setting", "detail": "sound-off"}
+{"time": "2026-09-25T00:40:46.191000+05:30", "action": "toggle_setting", "detail": "haptics-off"}
+{"time": "2026-09-25T00:40:46.528192+05:30", "action": "toggle_setting", "detail": "reduced-on"}
+{"time": "2026-09-25T00:40:47.005710+05:30", "action": "screenshot", "detail": "073-settings-changed"}
+{"time": "2026-09-25T00:40:48.175918+05:30", "action": "screenshot", "detail": "074-settings-footer"}
+{"time": "2026-09-25T00:40:48.238291+05:30", "action": "dump", "detail": ["settings-footer"]}
+{"time": "2026-09-25T00:41:04.985758+05:30", "action": "tap", "detail": ["925", "1655", ".4"]}
+{"time": "2026-09-25T00:41:05.497194+05:30", "action": "swipe", "detail": ["730", "2030", "730", "1510", "500"]}
+{"time": "2026-09-25T00:41:06.055163+05:30", "action": "shot", "detail": ["075-settings-version"]}
+{"time": "2026-09-25T00:41:06.203474+05:30", "action": "screenshot", "detail": "075-settings-version"}
+{"time": "2026-09-25T00:41:06.268922+05:30", "action": "dump", "detail": ["settings-version"]}
+{"time": "2026-09-25T00:41:08.280530+05:30", "action": "cold", "detail": []}
+{"time": "2026-09-25T00:41:10.449687+05:30", "action": "tap", "detail": ["975", "235", ".8"]}
+{"time": "2026-09-25T00:41:11.322444+05:30", "action": "tap", "detail": ["1000", "245", ".4"]}
+{"time": "2026-09-25T00:41:11.793648+05:30", "action": "shot", "detail": ["076-settings-persisted"]}
+{"time": "2026-09-25T00:41:11.977662+05:30", "action": "screenshot", "detail": "076-settings-persisted"}
+{"time": "2026-09-25T00:41:36.327502+05:30", "action": "tap", "detail": ["540", "2270", ".5"]}
+{"time": "2026-09-25T00:41:37.044300+05:30", "action": "cold", "detail": []}
+{"time": "2026-09-25T00:41:40.158564+05:30", "action": "shot", "detail": ["077-offline-launch"]}
+{"time": "2026-09-25T00:41:40.596479+05:30", "action": "screenshot", "detail": "077-offline-launch"}
+{"time": "2026-09-25T00:41:40.673507+05:30", "action": "tap", "detail": ["975", "235", ".5"]}
+{"time": "2026-09-25T00:41:41.240689+05:30", "action": "tap", "detail": ["540", "2240", "1"]}
+{"time": "2026-09-25T00:41:42.397743+05:30", "action": "shot", "detail": ["078-offline-league"]}
+{"time": "2026-09-25T00:41:42.678195+05:30", "action": "screenshot", "detail": "078-offline-league"}
+{"time": "2026-09-25T00:41:42.750452+05:30", "action": "dump", "detail": ["offline-league"]}
+{"time": "2026-09-25T00:42:03.148965+05:30", "action": "tap", "detail": ["200", "510", "1"]}
+{"time": "2026-09-25T00:42:04.419743+05:30", "action": "shot", "detail": ["079-slow-league-loading"]}
+{"time": "2026-09-25T00:42:04.633704+05:30", "action": "screenshot", "detail": "079-slow-league-loading"}
+{"time": "2026-09-25T00:42:08.721015+05:30", "action": "shot", "detail": ["080-slow-league-recovered"]}
+{"time": "2026-09-25T00:42:10.129625+05:30", "action": "screenshot", "detail": "080-slow-league-recovered"}
+{"time": "2026-09-25T00:42:29.547101+05:30", "action": "tap", "detail": ["200", "510", "2"]}
+{"time": "2026-09-25T00:42:31.667337+05:30", "action": "shot", "detail": ["081-online-recovered"]}
+{"time": "2026-09-25T00:42:31.876813+05:30", "action": "screenshot", "detail": "081-online-recovered"}
+{"time": "2026-09-25T00:42:31.949348+05:30", "action": "tap", "detail": ["200", "2240", ".4"]}
+{"time": "2026-09-25T00:42:32.411723+05:30", "action": "tap", "detail": ["1000", "245", ".4"]}
+{"time": "2026-09-25T00:42:32.874587+05:30", "action": "tap", "detail": ["925", "948", ".3"]}
+{"time": "2026-09-25T00:42:33.237305+05:30", "action": "tap", "detail": ["925", "1410", ".3"]}
+{"time": "2026-09-25T00:42:33.602369+05:30", "action": "tap", "detail": ["925", "1675", ".3"]}
+{"time": "2026-09-25T00:42:33.969184+05:30", "action": "tap", "detail": ["654", "1205", ".3"]}
+{"time": "2026-09-25T00:42:34.336691+05:30", "action": "tap", "detail": ["540", "2270", ".5"]}
+{"time": "2026-09-25T00:42:34.902614+05:30", "action": "shot", "detail": ["082-settings-restored"]}
+{"time": "2026-09-25T00:42:35.237297+05:30", "action": "screenshot", "detail": "082-settings-restored"}
+{"time": "2026-09-25T00:42:48.617755+05:30", "action": "tap", "detail": ["442", "790", ".4"]}
+{"time": "2026-09-25T00:42:49.190682+05:30", "action": "shot", "detail": ["083-level02-locked"]}
+{"time": "2026-09-25T00:42:49.336017+05:30", "action": "screenshot", "detail": "083-level02-locked"}
+{"time": "2026-09-25T00:42:49.403732+05:30", "action": "dump", "detail": ["level02-locked"]}
+{"time": "2026-09-25T00:43:02.945468+05:30", "action": "shot", "detail": ["084-level02-loaded"]}
+{"time": "2026-09-25T00:43:05.453899+05:30", "action": "screenshot", "detail": "084-level02-loaded"}
+{"time": "2026-09-25T00:43:05.527033+05:30", "action": "open_locked_mission", "detail": {"level": 3, "mapTap": [646, 860]}}
+{"time": "2026-09-25T00:43:07.686021+05:30", "action": "screenshot", "detail": "085-level03-locked"}
+{"time": "2026-09-25T00:43:07.733777+05:30", "action": "open_locked_mission", "detail": {"level": 4, "mapTap": [848, 754]}}
+{"time": "2026-09-25T00:43:09.798636+05:30", "action": "screenshot", "detail": "085-level04-locked"}
+{"time": "2026-09-25T00:43:09.847947+05:30", "action": "open_locked_mission", "detail": {"level": 5, "mapTap": [854, 1280]}}
+{"time": "2026-09-25T00:43:11.845589+05:30", "action": "screenshot", "detail": "085-level05-locked"}
+{"time": "2026-09-25T00:43:11.897950+05:30", "action": "open_locked_mission", "detail": {"level": 6, "mapTap": [648, 1360]}}
+{"time": "2026-09-25T00:43:13.893768+05:30", "action": "screenshot", "detail": "085-level06-locked"}
+{"time": "2026-09-25T00:43:13.943185+05:30", "action": "open_locked_mission", "detail": {"level": 7, "mapTap": [442, 1185]}}
+{"time": "2026-09-25T00:43:15.951477+05:30", "action": "screenshot", "detail": "085-level07-locked"}
+{"time": "2026-09-25T00:43:43.625363+05:30", "action": "open_locked_mission", "detail": {"level": 8, "mapTap": [236, 1250]}}
+{"time": "2026-09-25T00:44:02.073373+05:30", "action": "screenshot", "detail": "085-level08-locked"}
+{"time": "2026-09-25T00:44:02.417603+05:30", "action": "open_locked_mission", "detail": {"level": 9, "mapTap": [260, 1770]}}
+{"time": "2026-09-25T00:44:07.227413+05:30", "action": "screenshot", "detail": "085-level09-locked"}
+{"time": "2026-09-25T00:44:07.543153+05:30", "action": "open_locked_mission", "detail": {"level": 10, "mapTap": [450, 1725]}}
+{"time": "2026-09-25T00:44:15.058989+05:30", "action": "screenshot", "detail": "085-level10-locked"}
+{"time": "2026-09-25T00:44:15.308477+05:30", "action": "open_locked_mission", "detail": {"level": 11, "mapTap": [639, 1840]}}
+{"time": "2026-09-25T00:44:23.493329+05:30", "action": "screenshot", "detail": "085-level11-locked"}
+{"time": "2026-09-25T00:44:23.760459+05:30", "action": "open_locked_mission", "detail": {"level": 12, "mapTap": [828, 1750]}}
+{"time": "2026-09-25T00:44:30.352506+05:30", "action": "screenshot", "detail": "085-level12-locked"}
+{"time": "2026-09-25T00:44:50.538516+05:30", "action": "tap", "detail": ["85", "360", "1"]}
+{"time": "2026-09-25T00:44:54.682379+05:30", "action": "shot", "detail": ["086-back-map"]}
+{"time": "2026-09-25T00:45:03.854395+05:30", "action": "screenshot", "detail": "086-back-map"}
+{"time": "2026-09-25T00:45:50.390320+05:30", "action": "shot", "detail": ["087-small-screen-map"]}
+{"time": "2026-09-25T00:45:59.158597+05:30", "action": "screenshot", "detail": "087-small-screen-map"}
+{"time": "2026-09-25T00:45:59.657817+05:30", "action": "dump", "detail": ["small-screen-map"]}
+{"time": "2026-09-25T00:46:38.527037+05:30", "action": "cold", "detail": []}
+{"time": "2026-09-25T00:46:52.798459+05:30", "action": "shot", "detail": ["088-small-launch"]}
+{"time": "2026-09-25T00:47:19.557754+05:30", "action": "screenshot", "detail": "088-small-launch"}
+{"time": "2026-09-25T00:48:09.288998+05:30", "action": "shot", "detail": ["089-small-offer"]}
+{"time": "2026-09-25T00:48:12.766122+05:30", "action": "screenshot", "detail": "089-small-offer"}
+{"time": "2026-09-25T00:48:13.284357+05:30", "action": "dump", "detail": ["small-offer"]}
+{"time": "2026-09-25T00:48:30.384522+05:30", "action": "swipe", "detail": ["500", "1130", "500", "500", "500"]}
+{"time": "2026-09-25T00:48:31.630146+05:30", "action": "shot", "detail": ["090-small-offer-scroll"]}
+{"time": "2026-09-25T00:48:33.560755+05:30", "action": "screenshot", "detail": "090-small-offer-scroll"}
+{"time": "2026-09-25T00:48:34.039328+05:30", "action": "dump", "detail": ["small-offer-scroll"]}
+{"time": "2026-09-25T00:48:56.841756+05:30", "action": "swipe", "detail": ["500", "420", "500", "1100", "500"]}
+{"time": "2026-09-25T00:48:58.035029+05:30", "action": "tap", "detail": ["640", "165", ".8"]}
+{"time": "2026-09-25T00:48:59.485130+05:30", "action": "shot", "detail": ["091-small-map-fit"]}
+{"time": "2026-09-25T00:49:01.368807+05:30", "action": "screenshot", "detail": "091-small-map-fit"}
+{"time": "2026-09-25T00:49:01.923252+05:30", "action": "dump", "detail": ["small-map-fit"]}
+{"time": "2026-09-25T00:49:35.146651+05:30", "action": "shot", "detail": ["092-small-map"]}
+{"time": "2026-09-25T00:49:38.658162+05:30", "action": "screenshot", "detail": "092-small-map"}
+{"time": "2026-09-25T00:49:39.078164+05:30", "action": "tap", "detail": ["584", "1160", "2"]}
+{"time": "2026-09-25T00:49:41.841832+05:30", "action": "shot", "detail": ["093-small-hideout"]}
+{"time": "2026-09-25T00:49:43.241689+05:30", "action": "screenshot", "detail": "093-small-hideout"}
+{"time": "2026-09-25T00:49:43.829224+05:30", "action": "dump", "detail": ["small-hideout"]}
+{"time": "2026-09-25T00:50:24.049540+05:30", "action": "swipe", "detail": ["600", "780", "600", "350", "500"]}
+{"time": "2026-09-25T00:50:25.738511+05:30", "action": "shot", "detail": ["094-small-hideout-scroll"]}
+{"time": "2026-09-25T00:50:30.424116+05:30", "action": "screenshot", "detail": "094-small-hideout-scroll"}
+{"time": "2026-09-25T00:50:34.664165+05:30", "action": "cold", "detail": []}
+{"time": "2026-09-25T00:50:45.469727+05:30", "action": "shot", "detail": ["095-restored-launch"]}
+{"time": "2026-09-25T00:50:50.588111+05:30", "action": "screenshot", "detail": "095-restored-launch"}
+{"time": "2026-09-25T00:59:57.783251+05:30", "action": "tap", "detail": ["975", "235", "1"]}
+{"time": "2026-09-25T01:00:01.272215+05:30", "action": "key", "detail": ["3"]}
+{"time": "2026-09-25T01:00:02.388597+05:30", "action": "launch", "detail": []}
+{"time": "2026-09-25T01:00:03.489355+05:30", "action": "shot", "detail": ["096-warm-resume"]}
+{"time": "2026-09-25T01:00:04.840053+05:30", "action": "screenshot", "detail": "096-warm-resume"}
+{"time": "2026-09-25T01:00:26.897230+05:30", "action": "tap", "detail": ["540", "2040", "1"]}
+{"time": "2026-09-25T01:00:35.272527+05:30", "action": "tap", "detail": ["540", "2210", "2"]}
+{"time": "2026-09-25T01:00:37.453100+05:30", "action": "key", "detail": ["3"]}
+{"time": "2026-09-25T01:00:39.649553+05:30", "action": "launch", "detail": []}
+{"time": "2026-09-25T01:00:40.776722+05:30", "action": "shot", "detail": ["097-game-background-resume"]}
+{"time": "2026-09-25T01:00:41.976593+05:30", "action": "screenshot", "detail": "097-game-background-resume"}
+{"time": "2026-09-25T01:01:00.131983+05:30", "action": "tap", "detail": ["540", "2240", "1"]}
+{"time": "2026-09-25T01:01:01.244891+05:30", "action": "shot", "detail": ["098-replay-guide"]}
+{"time": "2026-09-25T01:01:02.055381+05:30", "action": "screenshot", "detail": "098-replay-guide"}
+{"time": "2026-09-25T01:01:02.154914+05:30", "action": "dump", "detail": ["replay-guide"]}
+{"time": "2026-09-25T01:01:19.943637+05:30", "action": "tap", "detail": ["204", "1768", "1.2"]}
+{"time": "2026-09-25T01:01:21.306253+05:30", "action": "tap", "detail": ["204", "1500", "1.2"]}
+{"time": "2026-09-25T01:01:22.626105+05:30", "action": "tap", "detail": ["280", "1400", "1.2"]}
+{"time": "2026-09-25T01:01:23.934191+05:30", "action": "tap", "detail": ["1000", "220", ".5"]}
+{"time": "2026-09-25T01:01:24.536094+05:30", "action": "shot", "detail": ["099-replay-completed"]}
+{"time": "2026-09-25T01:01:25.406267+05:30", "action": "screenshot", "detail": "099-replay-completed"}
+{"time": "2026-09-25T01:01:41.561861+05:30", "action": "tap", "detail": ["800", "2110", ".4"]}
+{"time": "2026-09-25T01:01:43.233098+05:30", "action": "tap", "detail": ["960", "980", ".8"]}
+{"time": "2026-09-25T01:01:44.224218+05:30", "action": "tap", "detail": ["1000", "220", ".6"]}
+{"time": "2026-09-25T01:01:44.924039+05:30", "action": "shot", "detail": ["100-attempt4-scout"]}
+{"time": "2026-09-25T01:01:45.805077+05:30", "action": "screenshot", "detail": "100-attempt4-scout"}
+{"time": "2026-09-25T01:01:59.948280+05:30", "action": "tap", "detail": ["800", "2110", ".8"]}
+{"time": "2026-09-25T01:02:04.507730+05:30", "action": "tap", "detail": ["1010", "1150", "1"]}
+{"time": "2026-09-25T01:02:07.695343+05:30", "action": "tap", "detail": ["1000", "220", ".6"]}
+{"time": "2026-09-25T01:02:08.419425+05:30", "action": "shot", "detail": ["101-attempt4-approach"]}
+{"time": "2026-09-25T01:02:09.298266+05:30", "action": "screenshot", "detail": "101-attempt4-approach"}
+{"time": "2026-09-25T01:02:28.270501+05:30", "action": "tap", "detail": ["800", "2110", "1"]}
+{"time": "2026-09-25T01:03:07.840372+05:30", "action": "tap", "detail": ["620", "1350", ".8"]}
+{"time": "2026-09-25T01:03:18.204025+05:30", "action": "tap", "detail": ["1000", "220", ".6"]}
+{"time": "2026-09-25T01:03:18.926874+05:30", "action": "shot", "detail": ["102-attempt4-position"]}
+{"time": "2026-09-25T01:03:20.630448+05:30", "action": "screenshot", "detail": "102-attempt4-position"}
+{"time": "2026-09-25T01:05:50.425979+05:30", "action": "key", "detail": ["4"]}
+{"time": "2026-09-25T01:05:54.923601+05:30", "action": "shot", "detail": ["103-attempt4-back"]}
+{"time": "2026-09-25T01:06:02.655902+05:30", "action": "screenshot", "detail": "103-attempt4-back"}
+{"time": "2026-09-25T01:06:26.263445+05:30", "action": "cold", "detail": []}
+{"time": "2026-09-25T01:06:33.805169+05:30", "action": "shot", "detail": ["104-final-launch"]}
+{"time": "2026-09-25T01:06:36.083985+05:30", "action": "screenshot", "detail": "104-final-launch"}
+{"time": "2026-09-25T01:07:47.937778+05:30", "action": "shot", "detail": ["105-final-offer"]}
+{"time": "2026-09-25T01:07:48.408758+05:30", "action": "screenshot", "detail": "105-final-offer"}
+{"time": "2026-09-25T01:09:07.678467+05:30", "action": "tap", "detail": ["970", "230", "1"]}
+{"time": "2026-09-25T01:09:08.765314+05:30", "action": "shot", "detail": ["106-final-map"]}
+{"time": "2026-09-25T01:09:09.223122+05:30", "action": "screenshot", "detail": "106-final-map"}

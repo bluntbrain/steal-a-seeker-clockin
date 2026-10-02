@@ -1,0 +1,10 @@
+# Scout drone sprite
+
+Generated with the built-in OpenAI image generator on 2026-09-25. No Higgsfield. Original kept in scout-source.png; production PNG is assets/drones-v2/scout.png, resized to 512 pixels with Sharp. Genuine alpha, forward direction +X (right). Used by the Skia game and native mission lesson. No gameplay tuning changed by this asset.
+
+## Prompt
+
+Create a polished production-ready GAME SPRITE, one single scout quadcopter drone, for the mobile stealth game Steal a Seeker. 1024x1024 PNG with a genuinely transparent alpha background. No environment, no floor, no shadow outside the drone, no text, no frame, no checkerboard baked in.
+CAMERA / DIRECTION: Strict straight-down orthographic top view, flat in the XY plane, no perspective tilt. FRONT of the drone points RIGHT (east). Centered compact symmetrical silhouette, occupies 86% of image width and height with clear transparent padding.
+DESIGN: Four unmistakable large round DUCTED ROTORS in an X arrangement, one in each quadrant, each with a dark graphite protective circular rim, visible three-blade propeller and clean ivory rim highlights. Four short sturdy dark arms connect them to a compact cream-white rounded armored central fuselage. A prominent glowing mint/cyan single scanner-eye lens sits at the RIGHT/front tip of the central body. A small amber radio aerial panel sits on its back/left. This is a surveillance drone, NO guns, NO missiles, no hands, no legs. All four fans must be fully visible and separate. Rotor centers near 24%/24%, 76%/24%, 24%/76%, 76%/76% of canvas; rotor radius about 18%. Central body runs horizontally.
+STYLE: High-quality softly rendered 3D toy-like game asset, believable beveled plastic and brushed graphite, charming but alert little security robot, restrained cream/mint/charcoal palette. Strong readable silhouette, generous clean shapes, detail that reads at 60 pixels wide on phone. Soft neutral overhead lighting, subtle ambient occlusion within drone, crisp anti-aliased edges. No scene, no people, no lettering, no numerical labels. Only ONE drone, no sprite sheet, no duplicate angles. Export with transparent background.

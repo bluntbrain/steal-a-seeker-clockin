@@ -1,0 +1,71 @@
+{
+  "verifiedAt": "2026-09-25T11:19:39.278914+00:00",
+  "artifact": "releases/steal-a-seeker-mainnet-v0.3.30-code33.apk",
+  "application": {
+    "package": "com.bluntbrain.stealaseeker",
+    "version": "0.3.30",
+    "versionCode": 33
+  },
+  "bytes": 139969364,
+  "sha256": "f0cfb913de9b9e7c7fb79a51a9902de53456564037971693b4fbcaf3d49156df",
+  "publicConfig": {
+    "phoneRenderer": "filament",
+    "phoneModelManifestSha256": "324bfe5349d05c541dd3a661bcb954460858fe814ccf1c86ed93907d2990956e",
+    "apiUrl": "https://seeker-api-production-41b3.up.railway.app",
+    "cluster": "solana:mainnet",
+    "identityUri": "https://stealaseeker.bluntbrain.com"
+  },
+  "sourceHashesVerified": 274,
+  "signatureVerified": true,
+  "sameReleaseCertificate": true,
+  "zipAlignment16Kb": true,
+  "tests": {
+    "client": 332,
+    "server": 81
+  },
+  "backend": {
+    "deploymentId": "2e27542c-fd02-4543-a005-8635eeb526ca",
+    "status": "SUCCESS",
+    "testPricing": false,
+    "replayVerification": {
+      "rulesHash": "6def64a8028a9aacdd926441f15e07135318a88609042d9a17a635b94367d354",
+      "results": [
+        {
+          "mission": "practice",
+          "status": "won",
+          "score": 8868,
+          "hp": 50
+        },
+        {
+          "mission": "last-vault",
+          "status": "won",
+          "score": 7980,
+          "hp": 10
+        }
+      ]
+    }
+  },
+  "musicTracks": [
+    2,
+    3,
+    4,
+    10,
+    12
+  ],
+  "sprites": [
+    {
+      "source": "assets/guards-v2/heavy.png",
+      "apkEntry": "res/2S1.png"
+    },
+    {
+      "source": "assets/drones-v2/scout.png",
+      "apkEntry": "res/F5.png"
+    },
+    {
+      "source": "assets/guards-v2/patrol.png",
+      "apkEntry": "res/xW.png"
+    }
+  ],
+  "physicalDeviceTested": false,
+  "storeUploaded": false
+}

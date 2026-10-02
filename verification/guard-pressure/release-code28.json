@@ -1,0 +1,58 @@
+{
+  "verifiedAt": "2026-09-24T19:07:00.648Z",
+  "artifact": "releases/steal-a-seeker-mainnet-v0.3.25-code28.apk",
+  "application": {
+    "package": "com.bluntbrain.stealaseeker",
+    "version": "0.3.25",
+    "versionCode": 28
+  },
+  "bytes": 144968447,
+  "sha256": "247531c9d8426b6dc6cc0f231eac1f8329763ae8bc993950a054cf44aa13426e",
+  "publicConfig": {
+    "phoneRenderer": "filament",
+    "phoneModelManifestSha256": "324bfe5349d05c541dd3a661bcb954460858fe814ccf1c86ed93907d2990956e",
+    "apiUrl": "https://seeker-api-production-41b3.up.railway.app",
+    "cluster": "solana:mainnet",
+    "identityUri": "https://stealaseeker.bluntbrain.com"
+  },
+  "sourceHashesVerified": 264,
+  "newGunshotAssetsEmbedded": 4,
+  "apkSignatureVerified": true,
+  "zipAlignment16Kb": true,
+  "signerSha256": "4fa3e9942238f110824fb67dc99438fc1d70ef48a273e4a79331d5f8a1e1e913",
+  "tests": {
+    "client": 309,
+    "server": 81,
+    "campaignWins": 12,
+    "weeklyWins": 3
+  },
+  "backend": {
+    "deploymentId": "d849b578-92e9-4985-8e2b-5ea83c46752d",
+    "status": "SUCCESS",
+    "health": true,
+    "paymentHealth": true,
+    "rulesHash": "fc58093a3480dc87c58673c20c7cf44e34aa75a87c9c92c839f50c7c797a745a",
+    "bundleVerified": true,
+    "replays": [
+      {
+        "mission": "practice",
+        "status": "won",
+        "score": 8868,
+        "hp": 50
+      },
+      {
+        "mission": "last-vault",
+        "status": "won",
+        "score": 9777,
+        "hp": 100
+      }
+    ]
+  },
+  "browser": {
+    "volumeDisplayed": 100,
+    "missionStarted": "cone-lesson",
+    "liveAlertAndDefeat": true
+  },
+  "physicalDeviceTested": false,
+  "storeUploaded": false
+}

@@ -1,0 +1,421 @@
+{
+  "rulesHash": "6def64a8028a9aacdd926441f15e07135318a88609042d9a17a635b94367d354",
+  "results": [
+    {
+      "mission": "practice",
+      "seconds": 13.166666666666666,
+      "hp": 50,
+      "vision": [
+        {
+          "role": "drone",
+          "range": 5.2,
+          "angle": 119.99999999999999
+        },
+        {
+          "role": "scout",
+          "range": 4.16,
+          "angle": 95
+        },
+        {
+          "role": "scout",
+          "range": 4.16,
+          "angle": 95
+        },
+        {
+          "role": "scout",
+          "range": 4.16,
+          "angle": 95
+        }
+      ],
+      "verified": true
+    },
+    {
+      "mission": "cone-lesson",
+      "seconds": 14.033333333333333,
+      "hp": 100,
+      "vision": [
+        {
+          "role": "scout",
+          "range": 4.32,
+          "angle": 95
+        },
+        {
+          "role": "drone",
+          "range": 5.4,
+          "angle": 119.99999999999999
+        },
+        {
+          "role": "scout",
+          "range": 4.32,
+          "angle": 95
+        },
+        {
+          "role": "scout",
+          "range": 4.32,
+          "angle": 95
+        }
+      ],
+      "verified": true
+    },
+    {
+      "mission": "battery-dash",
+      "seconds": 13.333333333333334,
+      "hp": 25,
+      "vision": [
+        {
+          "role": "scout",
+          "range": 4.4799999999999995,
+          "angle": 95
+        },
+        {
+          "role": "scout",
+          "range": 4.4799999999999995,
+          "angle": 95
+        },
+        {
+          "role": "scout",
+          "range": 4.4799999999999995,
+          "angle": 95
+        },
+        {
+          "role": "drone",
+          "range": 5.6,
+          "angle": 119.99999999999999
+        },
+        {
+          "role": "scout",
+          "range": 4.4799999999999995,
+          "angle": 95
+        }
+      ],
+      "verified": true
+    },
+    {
+      "mission": "crossing-signals",
+      "seconds": 12.933333333333334,
+      "hp": 73,
+      "vision": [
+        {
+          "role": "scout",
+          "range": 4.64,
+          "angle": 95
+        },
+        {
+          "role": "scout",
+          "range": 4.64,
+          "angle": 95
+        },
+        {
+          "role": "drone",
+          "range": 5.8,
+          "angle": 119.99999999999999
+        },
+        {
+          "role": "scout",
+          "range": 4.64,
+          "angle": 95
+        },
+        {
+          "role": "scout",
+          "range": 4.64,
+          "angle": 95
+        }
+      ],
+      "verified": true
+    },
+    {
+      "mission": "sweep-window",
+      "seconds": 13.5,
+      "hp": 46,
+      "vision": [
+        {
+          "role": "scout",
+          "range": 4.64,
+          "angle": 95
+        },
+        {
+          "role": "scout",
+          "range": 4.64,
+          "angle": 95
+        },
+        {
+          "role": "drone",
+          "range": 5.8,
+          "angle": 119.99999999999999
+        },
+        {
+          "role": "drone",
+          "range": 5.8,
+          "angle": 119.99999999999999
+        },
+        {
+          "role": "scout",
+          "range": 4.64,
+          "angle": 95
+        },
+        {
+          "role": "scout",
+          "range": 4.64,
+          "angle": 95
+        }
+      ],
+      "verified": true
+    },
+    {
+      "mission": "narrow-crossing",
+      "seconds": 13.2,
+      "hp": 46,
+      "vision": [
+        {
+          "role": "scout",
+          "range": 4.64,
+          "angle": 95
+        },
+        {
+          "role": "scout",
+          "range": 4.64,
+          "angle": 95
+        },
+        {
+          "role": "heavy",
+          "range": 3.48,
+          "angle": 75.00000000000001
+        },
+        {
+          "role": "drone",
+          "range": 5.8,
+          "angle": 119.99999999999999
+        }
+      ],
+      "verified": true
+    },
+    {
+      "mission": "false-footsteps",
+      "seconds": 13.933333333333334,
+      "hp": 16,
+      "vision": [
+        {
+          "role": "scout",
+          "range": 4.800000000000001,
+          "angle": 95
+        },
+        {
+          "role": "sentry",
+          "range": 4.800000000000001,
+          "angle": 95
+        },
+        {
+          "role": "scout",
+          "range": 4.800000000000001,
+          "angle": 95
+        },
+        {
+          "role": "scout",
+          "range": 4.800000000000001,
+          "angle": 95
+        },
+        {
+          "role": "drone",
+          "range": 6,
+          "angle": 119.99999999999999
+        },
+        {
+          "role": "scout",
+          "range": 4.800000000000001,
+          "angle": 95
+        }
+      ],
+      "verified": true
+    },
+    {
+      "mission": "warden-gate",
+      "seconds": 28.9,
+      "hp": 44,
+      "vision": [
+        {
+          "role": "scout",
+          "range": 4.800000000000001,
+          "angle": 95
+        },
+        {
+          "role": "scout",
+          "range": 4.800000000000001,
+          "angle": 95
+        },
+        {
+          "role": "sentry",
+          "range": 4.800000000000001,
+          "angle": 95
+        },
+        {
+          "role": "scout",
+          "range": 4.800000000000001,
+          "angle": 95
+        },
+        {
+          "role": "drone",
+          "range": 6,
+          "angle": 119.99999999999999
+        },
+        {
+          "role": "scout",
+          "range": 4.800000000000001,
+          "angle": 95
+        }
+      ],
+      "verified": true
+    },
+    {
+      "mission": "power-trade",
+      "seconds": 14.166666666666666,
+      "hp": 44,
+      "vision": [
+        {
+          "role": "scout",
+          "range": 4.800000000000001,
+          "angle": 95
+        },
+        {
+          "role": "scout",
+          "range": 4.800000000000001,
+          "angle": 95
+        },
+        {
+          "role": "sentry",
+          "range": 4.800000000000001,
+          "angle": 95
+        },
+        {
+          "role": "scout",
+          "range": 4.800000000000001,
+          "angle": 95
+        }
+      ],
+      "verified": true
+    },
+    {
+      "mission": "two-targets",
+      "seconds": 19.166666666666668,
+      "hp": 40,
+      "vision": [
+        {
+          "role": "scout",
+          "range": 4.960000000000001,
+          "angle": 95
+        },
+        {
+          "role": "sentry",
+          "range": 4.960000000000001,
+          "angle": 95
+        },
+        {
+          "role": "scout",
+          "range": 4.960000000000001,
+          "angle": 95
+        },
+        {
+          "role": "sentry",
+          "range": 4.960000000000001,
+          "angle": 95
+        },
+        {
+          "role": "drone",
+          "range": 6.2,
+          "angle": 119.99999999999999
+        },
+        {
+          "role": "scout",
+          "range": 4.960000000000001,
+          "angle": 95
+        }
+      ],
+      "verified": true
+    },
+    {
+      "mission": "silent-circuit",
+      "seconds": 13.766666666666667,
+      "hp": 70,
+      "vision": [
+        {
+          "role": "scout",
+          "range": 4.960000000000001,
+          "angle": 95
+        },
+        {
+          "role": "scout",
+          "range": 4.960000000000001,
+          "angle": 95
+        },
+        {
+          "role": "sentry",
+          "range": 4.960000000000001,
+          "angle": 95
+        },
+        {
+          "role": "scout",
+          "range": 4.960000000000001,
+          "angle": 95
+        },
+        {
+          "role": "drone",
+          "range": 6.2,
+          "angle": 119.99999999999999
+        },
+        {
+          "role": "sentry",
+          "range": 4.960000000000001,
+          "angle": 95
+        },
+        {
+          "role": "scout",
+          "range": 4.960000000000001,
+          "angle": 95
+        }
+      ],
+      "verified": true
+    },
+    {
+      "mission": "last-vault",
+      "seconds": 15.366666666666667,
+      "hp": 10,
+      "vision": [
+        {
+          "role": "scout",
+          "range": 4.960000000000001,
+          "angle": 95
+        },
+        {
+          "role": "sentry",
+          "range": 4.960000000000001,
+          "angle": 95
+        },
+        {
+          "role": "warden",
+          "range": 3.7199999999999998,
+          "angle": 75.00000000000001
+        },
+        {
+          "role": "scout",
+          "range": 4.960000000000001,
+          "angle": 95
+        },
+        {
+          "role": "drone",
+          "range": 6.2,
+          "angle": 119.99999999999999
+        },
+        {
+          "role": "scout",
+          "range": 4.960000000000001,
+          "angle": 95
+        },
+        {
+          "role": "scout",
+          "range": 4.960000000000001,
+          "angle": 95
+        }
+      ],
+      "verified": true
+    }
+  ]
+}

@@ -1,0 +1,265 @@
+--------- beginning of main
+09-25 00:18:07.504   217   735 W libc    : Unable to set property "ctl.interface_start" to "aidl/sensor_privacy": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+09-25 00:18:10.167  1110  1110 I libc    : SetHeapTaggingLevel: tag level set to 0
+09-25 00:18:10.227  1110  1110 I AndroidRuntime: VM exiting with result code 0, cleanup skipped.
+09-25 00:18:10.240  1154  1154 I libc    : SetHeapTaggingLevel: tag level set to 0
+09-25 00:18:10.494  1241  1260 I EGL_emulation: Opening libGLESv1_CM_emulation.so
+09-25 00:18:10.494  1241  1260 I EGL_emulation: Opening libGLESv2_emulation.so
+09-25 00:18:10.525   467   497 W libc    : Access denied finding property "persist.vendor.debug.wifi.hal.preset_interface_combination_idx"
+09-25 00:18:10.677  1323  1344 I EGL_emulation: Opening libGLESv1_CM_emulation.so
+09-25 00:18:10.678  1323  1344 I EGL_emulation: Opening libGLESv2_emulation.so
+09-25 00:18:10.914   518   549 E EGL_emulation: eglQueryContext 3100  EGL_BAD_ATTRIBUTE
+09-25 00:18:10.914   518   549 E EGL_emulation: tid 549: eglQueryContext(2159): error 0x3004 (EGL_BAD_ATTRIBUTE)
+09-25 00:18:11.198  1048  1206 I EGL_emulation: Opening libGLESv1_CM_emulation.so
+09-25 00:18:11.198  1048  1206 I EGL_emulation: Opening libGLESv2_emulation.so
+09-25 00:17:54.520   650  1414 I EGL_emulation: Opening libGLESv1_CM_emulation.so
+09-25 00:17:54.520   650  1414 I EGL_emulation: Opening libGLESv2_emulation.so
+09-25 00:17:54.722  2029  2198 I EGL_emulation: Opening libGLESv1_CM_emulation.so
+09-25 00:17:54.723  2029  2198 I EGL_emulation: Opening libGLESv2_emulation.so
+09-25 00:17:57.799  1645  2324 I EGL_emulation: Opening libGLESv1_CM_emulation.so
+09-25 00:17:57.799  1645  2324 I EGL_emulation: Opening libGLESv2_emulation.so
+09-25 00:18:00.613  1645  1824 W libc    : Access denied finding property "ro.hardware.chipname"
+09-25 00:18:00.927  1645  1824 I EGL_emulation: Opening libGLESv1_CM_emulation.so
+09-25 00:18:00.928  1645  1824 I EGL_emulation: Opening libGLESv2_emulation.so
+09-25 00:18:08.235  2128  2518 I EGL_emulation: Opening libGLESv1_CM_emulation.so
+09-25 00:18:08.235  2128  2518 I EGL_emulation: Opening libGLESv2_emulation.so
+09-25 00:18:08.333  2128  2497 I EGL_emulation: Opening libGLESv1_CM_emulation.so
+09-25 00:18:08.333  2128  2497 I EGL_emulation: Opening libGLESv2_emulation.so
+09-25 00:18:08.412  1897  2936 W libc    : Access denied finding property "ro.hardware.chipname"
+09-25 00:18:12.652  2925  3070 W libc    : Access denied finding property "ro.hardware.chipname"
+09-25 00:18:14.334  2384  2659 I EGL_emulation: Opening libGLESv1_CM_emulation.so
+09-25 00:18:14.335  2384  2659 I EGL_emulation: Opening libGLESv2_emulation.so
+09-25 00:18:15.974  2384  2827 I EGL_emulation: Opening libGLESv1_CM_emulation.so
+09-25 00:18:15.974  2384  2827 I EGL_emulation: Opening libGLESv2_emulation.so
+09-25 00:18:16.870  3422  3486 I EGL_emulation: Opening libGLESv1_CM_emulation.so
+09-25 00:18:16.870  3422  3486 I EGL_emulation: Opening libGLESv2_emulation.so
+09-25 00:18:19.015  3422  3525 I ReactNativeJS: Running "main"
+09-25 00:18:19.489  3422  3525 I ReactNativeJS: '[SeekerWallet]', '{"at":"2026-09-24T18:48:19.489Z","id":1,"stage":"app.wallet-diagnostics-ready","details":{}}'
+09-25 00:18:19.495  3422  3525 I ReactNativeJS: '[SeekerWallet]', '{"at":"2026-09-24T18:48:19.494Z","id":2,"stage":"account.selected","details":{"connected":false}}'
+09-25 00:18:19.495  3422  3525 I ReactNativeJS: '[SeekerWallet]', '{"at":"2026-09-24T18:48:19.495Z","id":3,"stage":"api./catalog.start","details":{}}'
+09-25 00:18:19.497  3422  3525 I ReactNativeJS: '[SeekerWallet]', '{"at":"2026-09-24T18:48:19.497Z","id":4,"stage":"api./catalog.start","details":{}}'
+09-25 00:18:19.498  3422  3525 I ReactNativeJS: '[SeekerWallet]', '{"at":"2026-09-24T18:48:19.498Z","id":5,"stage":"cache.read.start","details":{}}'
+09-25 00:18:19.574  3422  3525 I ReactNativeJS: '[SeekerWallet]', '{"at":"2026-09-24T18:48:19.574Z","id":6,"stage":"cache.restored","details":{"cached":false}}'
+09-25 00:18:19.574  3422  3525 I ReactNativeJS: '[SeekerWallet]', '{"at":"2026-09-24T18:48:19.574Z","id":7,"stage":"cache.read.ok.5","details":{"durationMs":76}}'
+09-25 00:18:20.191  3422  3525 I ReactNativeJS: '[SeekerWallet]', '{"at":"2026-09-24T18:48:20.191Z","id":8,"stage":"app.active","details":{}}'
+09-25 00:18:20.199  3422  3525 I ReactNativeJS: '[SeekerWallet]', '{"at":"2026-09-24T18:48:20.197Z","id":9,"stage":"api./catalog.start","details":{}}'
+09-25 00:18:23.882  3422  3525 I ReactNativeJS: '[SeekerWallet]', '{"at":"2026-09-24T18:48:23.882Z","id":10,"stage":"api.response","details":{"status":200}}'
+09-25 00:18:23.895  3422  3525 I ReactNativeJS: '[SeekerWallet]', '{"at":"2026-09-24T18:48:23.895Z","id":11,"stage":"api.response","details":{"status":200}}'
+09-25 00:18:23.895  3422  3525 I ReactNativeJS: '[SeekerWallet]', '{"at":"2026-09-24T18:48:23.895Z","id":12,"stage":"api.response","details":{"status":200}}'
+09-25 00:18:23.900  3422  3525 I ReactNativeJS: '[SeekerWallet]', '{"at":"2026-09-24T18:48:23.900Z","id":13,"stage":"api./catalog.ok.9","details":{"durationMs":3701}}'
+09-25 00:18:23.953  3422  3525 I ReactNativeJS: '[SeekerWallet]', '{"at":"2026-09-24T18:48:23.952Z","id":14,"stage":"api./catalog.ok.3","details":{"durationMs":4457}}'
+09-25 00:18:23.971  3422  3525 I ReactNativeJS: '[SeekerWallet]', '{"at":"2026-09-24T18:48:23.971Z","id":15,"stage":"api./catalog.ok.4","details":{"durationMs":4474}}'
+09-25 00:18:25.030  2384  2659 W libc    : Access denied finding property "persist.adb.tls_server.enable"
+09-25 00:18:25.030  2384  2659 W libc    : Access denied finding property "service.adb.tls.port"
+09-25 00:18:27.389  1645  3278 W libc    : Access denied finding property "ro.hardware.chipname"
+09-25 00:18:27.552  1752  3991 W libc    : Access denied finding property "ro.hardware.chipname"
+09-25 00:18:30.536  4038  4038 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+09-25 00:18:30.577  4038  4038 I AndroidRuntime: Using default boot image
+09-25 00:18:30.577  4038  4038 I AndroidRuntime: Leaving lock profiling enabled
+09-25 00:18:31.303  2384  2431 W libc    : Access denied finding property "persist.adb.tls_server.enable"
+09-25 00:18:31.303  2384  2431 W libc    : Access denied finding property "service.adb.tls.port"
+09-25 00:18:31.544  4038  4038 D AndroidRuntime: Calling main entry com.android.commands.uiautomator.Launcher
+09-25 00:18:33.725  4038  4038 D AndroidRuntime: Shutting down VM
+09-25 00:18:35.440  2384  2633 I EGL_emulation: Opening libGLESv1_CM_emulation.so
+09-25 00:18:35.441  2384  2633 I EGL_emulation: Opening libGLESv2_emulation.so
+09-25 00:18:36.428  2384  2633 W libc    : Access denied finding property "persist.adb.tls_server.enable"
+09-25 00:18:36.428  2384  2633 W libc    : Access denied finding property "service.adb.tls.port"
+09-25 00:18:36.870  2128  2518 I EGL_emulation: Opening libGLESv1_CM_emulation.so
+09-25 00:18:36.871  2128  2518 I EGL_emulation: Opening libGLESv2_emulation.so
+09-25 00:18:40.182  2384  4006 W libc    : Access denied finding property "persist.adb.tls_server.enable"
+09-25 00:18:40.182  2384  4006 W libc    : Access denied finding property "service.adb.tls.port"
+09-25 00:18:40.901  2384  4006 I EGL_emulation: Opening libGLESv1_CM_emulation.so
+09-25 00:18:40.902  2384  4006 I EGL_emulation: Opening libGLESv2_emulation.so
+09-25 00:18:43.302  3422  3525 I ReactNativeJS: '[SeekerWallet]', '{"at":"2026-09-24T18:48:43.302Z","id":16,"stage":"checkout.sheet.visible","details":{"connected":false}}'
+09-25 00:18:43.302  3422  3525 I ReactNativeJS: '[SeekerWallet]', '{"at":"2026-09-24T18:48:43.302Z","id":17,"stage":"mwa.connect.start","details":{}}'
+09-25 00:18:44.467  3422  3525 I ReactNativeJS: '[SeekerWallet]', '{"at":"2026-09-24T18:48:44.467Z","id":18,"stage":"mwa.connect.17.failed","details":{}}'
+09-25 00:18:44.720  2128  2519 I EGL_emulation: Opening libGLESv1_CM_emulation.so
+09-25 00:18:44.740  2128  2519 I EGL_emulation: Opening libGLESv2_emulation.so
+09-25 00:18:44.856  3422  3525 I ReactNativeJS: '[SeekerWallet]', '{"at":"2026-09-24T18:48:44.856Z","id":19,"stage":"app.background","details":{}}'
+09-25 00:18:44.867  3422  3525 I ReactNativeJS: '[SeekerWallet]', '{"at":"2026-09-24T18:48:44.867Z","id":20,"stage":"app.active","details":{}}'
+09-25 00:18:44.868  3422  3525 I ReactNativeJS: '[SeekerWallet]', '{"at":"2026-09-24T18:48:44.868Z","id":21,"stage":"api./catalog.start","details":{}}'
+09-25 00:18:45.427  3422  3525 I ReactNativeJS: '[SeekerWallet]', '{"at":"2026-09-24T18:48:45.427Z","id":22,"stage":"api.response","details":{"status":200}}'
+09-25 00:18:45.430  3422  3525 I ReactNativeJS: '[SeekerWallet]', '{"at":"2026-09-24T18:48:45.430Z","id":23,"stage":"api./catalog.ok.21","details":{"durationMs":562}}'
+09-25 00:18:45.470  2384  2431 W libc    : Access denied finding property "persist.adb.tls_server.enable"
+09-25 00:18:45.471  2384  2431 W libc    : Access denied finding property "service.adb.tls.port"
+09-25 00:18:48.476  2384  2431 I EGL_emulation: Opening libGLESv1_CM_emulation.so
+09-25 00:18:48.478  2384  2431 I EGL_emulation: Opening libGLESv2_emulation.so
+09-25 00:18:49.217  4592  4592 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+09-25 00:18:49.577  4592  4592 I AndroidRuntime: Using default boot image
+09-25 00:18:49.577  4592  4592 I AndroidRuntime: Leaving lock profiling enabled
+09-25 00:18:53.477  4592  4592 D AndroidRuntime: Calling main entry com.android.commands.uiautomator.Launcher
+09-25 00:18:59.810  4592  4592 D AndroidRuntime: Shutting down VM
+09-25 00:19:02.730  3422  3525 I ReactNativeJS: '[SeekerWallet]', '{"at":"2026-09-24T18:49:02.730Z","id":24,"stage":"mwa.connect.start","details":{}}'
+09-25 00:19:03.310  2384  2462 W libc    : Access denied finding property "persist.adb.tls_server.enable"
+09-25 00:19:03.310  2384  2462 W libc    : Access denied finding property "service.adb.tls.port"
+09-25 00:19:03.366  3422  3525 I ReactNativeJS: '[SeekerWallet]', '{"at":"2026-09-24T18:49:03.366Z","id":25,"stage":"mwa.connect.24.failed","details":{}}'
+09-25 00:19:03.378  3422  3525 I ReactNativeJS: '[SeekerWallet]', '{"at":"2026-09-24T18:49:03.375Z","id":26,"stage":"app.background","details":{}}'
+09-25 00:19:03.378  3422  3525 I ReactNativeJS: '[SeekerWallet]', '{"at":"2026-09-24T18:49:03.378Z","id":27,"stage":"app.active","details":{}}'
+09-25 00:19:03.379  3422  3525 I ReactNativeJS: '[SeekerWallet]', '{"at":"2026-09-24T18:49:03.379Z","id":28,"stage":"api./catalog.start","details":{}}'
+09-25 00:19:03.845  2384  2462 I EGL_emulation: Opening libGLESv1_CM_emulation.so
+09-25 00:19:03.967  2384  2462 I EGL_emulation: Opening libGLESv2_emulation.so
+09-25 00:19:04.569  3422  3525 I ReactNativeJS: '[SeekerWallet]', '{"at":"2026-09-24T18:49:04.569Z","id":29,"stage":"api.response","details":{"status":200}}'
+09-25 00:19:04.614  3422  3525 I ReactNativeJS: '[SeekerWallet]', '{"at":"2026-09-24T18:49:04.613Z","id":30,"stage":"api./catalog.ok.28","details":{"durationMs":1234}}'
+09-25 00:19:04.631  2384  2431 W libc    : Access denied finding property "persist.adb.tls_server.enable"
+09-25 00:19:04.632  2384  2431 W libc    : Access denied finding property "service.adb.tls.port"
+09-25 00:19:05.140  2384  2431 I EGL_emulation: Opening libGLESv1_CM_emulation.so
+09-25 00:19:05.140  2384  2431 I EGL_emulation: Opening libGLESv2_emulation.so
+09-25 00:19:07.793  4854  4854 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+09-25 00:19:07.935  4854  4854 I AndroidRuntime: Using default boot image
+09-25 00:19:07.935  4854  4854 I AndroidRuntime: Leaving lock profiling enabled
+09-25 00:19:09.276  2384  2431 W libc    : Access denied finding property "persist.adb.tls_server.enable"
+09-25 00:19:09.276  2384  2431 W libc    : Access denied finding property "service.adb.tls.port"
+09-25 00:19:09.841  4854  4854 D AndroidRuntime: Calling main entry com.android.commands.uiautomator.Launcher
+09-25 00:19:12.352  4854  4854 D AndroidRuntime: Shutting down VM
+09-25 00:19:12.910  2128  2529 I EGL_emulation: Opening libGLESv1_CM_emulation.so
+09-25 00:19:12.913  2128  2529 I EGL_emulation: Opening libGLESv2_emulation.so
+09-25 00:19:15.556  2384  2827 W libc    : Access denied finding property "persist.adb.tls_server.enable"
+09-25 00:19:15.556  2384  2827 W libc    : Access denied finding property "service.adb.tls.port"
+09-25 00:19:16.232  1645  4453 W libc    : Access denied finding property "ro.hardware.chipname"
+09-25 00:19:16.272  2384  2827 I EGL_emulation: Opening libGLESv1_CM_emulation.so
+09-25 00:19:16.273  2384  2827 I EGL_emulation: Opening libGLESv2_emulation.so
+09-25 00:19:16.604  2384  4943 I EGL_emulation: Opening libGLESv1_CM_emulation.so
+09-25 00:19:16.604  2384  4943 I EGL_emulation: Opening libGLESv2_emulation.so
+09-25 00:19:16.731  2384  4943 W libc    : Access denied finding property "persist.adb.tls_server.enable"
+09-25 00:19:16.732  2384  4943 W libc    : Access denied finding property "service.adb.tls.port"
+09-25 00:19:16.958  1645  4453 W libc    : Access denied finding property "ro.hardware.chipname"
+09-25 00:19:18.532  2384  2827 W libc    : Access denied finding property "persist.adb.tls_server.enable"
+09-25 00:19:18.532  2384  2827 W libc    : Access denied finding property "service.adb.tls.port"
+09-25 00:19:21.362  2128  2518 I EGL_emulation: Opening libGLESv1_CM_emulation.so
+09-25 00:19:21.363  2128  2518 I EGL_emulation: Opening libGLESv2_emulation.so
+09-25 00:19:22.722  2384  2431 W libc    : Access denied finding property "persist.adb.tls_server.enable"
+09-25 00:19:22.722  2384  2431 W libc    : Access denied finding property "service.adb.tls.port"
+09-25 00:19:26.284  5300  5300 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+09-25 00:19:26.407  5300  5300 I AndroidRuntime: Using default boot image
+09-25 00:19:26.407  5300  5300 I AndroidRuntime: Leaving lock profiling enabled
+09-25 00:19:26.566  3422  3525 I ReactNativeJS: '[SeekerWallet]', '{"at":"2026-09-24T18:49:26.566Z","id":31,"stage":"checkout.sheet.hidden","details":{"connected":false}}'
+09-25 00:19:26.689  3422  3525 I ReactNativeJS: '[SeekerWallet]', '{"at":"2026-09-24T18:49:26.689Z","id":32,"stage":"api./league.start","details":{}}'
+09-25 00:19:26.997  3422  3422 E EGL_emulation: eglQueryContext 32c0  EGL_BAD_ATTRIBUTE
+09-25 00:19:26.997  3422  3422 E EGL_emulation: tid 3422: eglQueryContext(2159): error 0x3004 (EGL_BAD_ATTRIBUTE)
+09-25 00:19:27.341  3422  3422 E EGL_emulation: eglQueryContext 32c0  EGL_BAD_ATTRIBUTE
+09-25 00:19:27.341  3422  3422 E EGL_emulation: tid 3422: eglQueryContext(2159): error 0x3004 (EGL_BAD_ATTRIBUTE)
+09-25 00:19:27.424  3422  3422 E EGL_emulation: eglQueryContext 32c0  EGL_BAD_ATTRIBUTE
+09-25 00:19:27.424  3422  3422 E EGL_emulation: tid 3422: eglQueryContext(2159): error 0x3004 (EGL_BAD_ATTRIBUTE)
+09-25 00:19:27.468  3422  3422 E EGL_emulation: eglQueryContext 32c0  EGL_BAD_ATTRIBUTE
+09-25 00:19:27.468  3422  3422 E EGL_emulation: tid 3422: eglQueryContext(2159): error 0x3004 (EGL_BAD_ATTRIBUTE)
+09-25 00:19:27.479  3422  3422 E EGL_emulation: eglQueryContext 32c0  EGL_BAD_ATTRIBUTE
+09-25 00:19:27.479  3422  3422 E EGL_emulation: tid 3422: eglQueryContext(2159): error 0x3004 (EGL_BAD_ATTRIBUTE)
+09-25 00:19:27.494  3422  3422 E EGL_emulation: eglQueryContext 32c0  EGL_BAD_ATTRIBUTE
+09-25 00:19:27.494  3422  3422 E EGL_emulation: tid 3422: eglQueryContext(2159): error 0x3004 (EGL_BAD_ATTRIBUTE)
+09-25 00:19:27.505  3422  3422 E EGL_emulation: eglQueryContext 32c0  EGL_BAD_ATTRIBUTE
+09-25 00:19:27.505  3422  3422 E EGL_emulation: tid 3422: eglQueryContext(2159): error 0x3004 (EGL_BAD_ATTRIBUTE)
+09-25 00:19:27.512  3422  3422 E EGL_emulation: eglQueryContext 32c0  EGL_BAD_ATTRIBUTE
+09-25 00:19:27.512  3422  3422 E EGL_emulation: tid 3422: eglQueryContext(2159): error 0x3004 (EGL_BAD_ATTRIBUTE)
+09-25 00:19:27.517  3422  3422 E EGL_emulation: eglQueryContext 32c0  EGL_BAD_ATTRIBUTE
+09-25 00:19:27.517  3422  3422 E EGL_emulation: tid 3422: eglQueryContext(2159): error 0x3004 (EGL_BAD_ATTRIBUTE)
+09-25 00:19:27.522  3422  3422 E EGL_emulation: eglQueryContext 32c0  EGL_BAD_ATTRIBUTE
+09-25 00:19:27.522  3422  3422 E EGL_emulation: tid 3422: eglQueryContext(2159): error 0x3004 (EGL_BAD_ATTRIBUTE)
+09-25 00:19:27.529  3422  3422 E EGL_emulation: eglQueryContext 32c0  EGL_BAD_ATTRIBUTE
+09-25 00:19:27.529  3422  3422 E EGL_emulation: tid 3422: eglQueryContext(2159): error 0x3004 (EGL_BAD_ATTRIBUTE)
+09-25 00:19:27.531  5300  5300 D AndroidRuntime: Calling main entry com.android.commands.uiautomator.Launcher
+09-25 00:19:27.538  3422  3422 E EGL_emulation: eglQueryContext 32c0  EGL_BAD_ATTRIBUTE
+09-25 00:19:27.538  3422  3422 E EGL_emulation: tid 3422: eglQueryContext(2159): error 0x3004 (EGL_BAD_ATTRIBUTE)
+09-25 00:19:27.545  3422  3422 E EGL_emulation: eglQueryContext 32c0  EGL_BAD_ATTRIBUTE
+09-25 00:19:27.545  3422  3422 E EGL_emulation: tid 3422: eglQueryContext(2159): error 0x3004 (EGL_BAD_ATTRIBUTE)
+09-25 00:19:27.552  3422  3422 E EGL_emulation: eglQueryContext 32c0  EGL_BAD_ATTRIBUTE
+09-25 00:19:27.552  3422  3422 E EGL_emulation: tid 3422: eglQueryContext(2159): error 0x3004 (EGL_BAD_ATTRIBUTE)
+09-25 00:19:27.555  3422  3422 E EGL_emulation: eglQueryContext 32c0  EGL_BAD_ATTRIBUTE
+09-25 00:19:27.555  3422  3422 E EGL_emulation: tid 3422: eglQueryContext(2159): error 0x3004 (EGL_BAD_ATTRIBUTE)
+09-25 00:19:27.560  3422  3422 E EGL_emulation: eglQueryContext 32c0  EGL_BAD_ATTRIBUTE
+09-25 00:19:27.560  3422  3422 E EGL_emulation: tid 3422: eglQueryContext(2159): error 0x3004 (EGL_BAD_ATTRIBUTE)
+09-25 00:19:29.022  3422  3525 I ReactNativeJS: '[SeekerWallet]', '{"at":"2026-09-24T18:49:29.022Z","id":33,"stage":"api.response","details":{"status":200}}'
+09-25 00:19:29.239  3422  3525 I ReactNativeJS: '[SeekerWallet]', '{"at":"2026-09-24T18:49:29.239Z","id":34,"stage":"api./league.ok.32","details":{"durationMs":2550}}'
+09-25 00:19:31.149  5300  5300 D AndroidRuntime: Shutting down VM
+09-25 00:19:33.151   650   721 W libc    : Access denied finding property "pm.dexopt.dm.require_manifest"
+09-25 00:19:36.750  5613  5672 W libc    : Access denied finding property "ro.hardware.chipname"
+09-25 00:19:36.832  5588  5675 W libc    : Access denied finding property "persist.adb.tls_server.enable"
+09-25 00:19:36.834  5588  5675 W libc    : Access denied finding property "service.adb.tls.port"
+09-25 00:19:36.850  5588  5596 W libc    : Access denied finding property "persist.adb.tls_server.enable"
+09-25 00:19:36.850  5588  5596 W libc    : Access denied finding property "service.adb.tls.port"
+09-25 00:19:44.538  5767  5884 W libc    : Access denied finding property "ro.hardware.chipname"
+09-25 00:19:51.212  5588  5675 W libc    : Access denied finding property "persist.adb.tls_server.enable"
+09-25 00:19:51.213  5588  5675 W libc    : Access denied finding property "service.adb.tls.port"
+09-25 00:19:54.790  5588  5675 W libc    : Access denied finding property "persist.adb.tls_server.enable"
+09-25 00:19:54.790  5588  5675 W libc    : Access denied finding property "service.adb.tls.port"
+09-25 00:20:06.179  5588  5675 W libc    : Access denied finding property "persist.adb.tls_server.enable"
+09-25 00:20:06.179  5588  5675 W libc    : Access denied finding property "service.adb.tls.port"
+09-25 00:20:08.270  5588  5675 I EGL_emulation: Opening libGLESv1_CM_emulation.so
+09-25 00:20:08.270  5588  5675 I EGL_emulation: Opening libGLESv2_emulation.so
+09-25 00:20:27.529  3422  3525 I ReactNativeJS: '[SeekerWallet]', '{"at":"2026-09-24T18:50:27.521Z","id":35,"stage":"api./league.start","details":{}}'
+09-25 00:20:31.931  3422  3422 E EGL_emulation: eglQueryContext 32c0  EGL_BAD_ATTRIBUTE
+09-25 00:20:31.931  3422  3422 E EGL_emulation: tid 3422: eglQueryContext(2159): error 0x3004 (EGL_BAD_ATTRIBUTE)
+09-25 00:20:32.189  3422  3422 E EGL_emulation: eglQueryContext 32c0  EGL_BAD_ATTRIBUTE
+09-25 00:20:32.189  3422  3422 E EGL_emulation: tid 3422: eglQueryContext(2159): error 0x3004 (EGL_BAD_ATTRIBUTE)
+09-25 00:20:32.267  3422  3422 E EGL_emulation: eglQueryContext 32c0  EGL_BAD_ATTRIBUTE
+09-25 00:20:32.268  3422  3422 E EGL_emulation: tid 3422: eglQueryContext(2159): error 0x3004 (EGL_BAD_ATTRIBUTE)
+09-25 00:20:32.358  3422  3422 E EGL_emulation: eglQueryContext 32c0  EGL_BAD_ATTRIBUTE
+09-25 00:20:32.359  3422  3422 E EGL_emulation: tid 3422: eglQueryContext(2159): error 0x3004 (EGL_BAD_ATTRIBUTE)
+09-25 00:20:32.540  3422  3422 E EGL_emulation: eglQueryContext 32c0  EGL_BAD_ATTRIBUTE
+09-25 00:20:32.540  3422  3422 E EGL_emulation: tid 3422: eglQueryContext(2159): error 0x3004 (EGL_BAD_ATTRIBUTE)
+09-25 00:20:32.572  3422  3422 E EGL_emulation: eglQueryContext 32c0  EGL_BAD_ATTRIBUTE
+09-25 00:20:32.572  3422  3422 E EGL_emulation: tid 3422: eglQueryContext(2159): error 0x3004 (EGL_BAD_ATTRIBUTE)
+09-25 00:20:32.688  3422  3422 E EGL_emulation: eglQueryContext 32c0  EGL_BAD_ATTRIBUTE
+09-25 00:20:32.692  3422  3422 E EGL_emulation: tid 3422: eglQueryContext(2159): error 0x3004 (EGL_BAD_ATTRIBUTE)
+09-25 00:20:32.771  3422  3422 E EGL_emulation: eglQueryContext 32c0  EGL_BAD_ATTRIBUTE
+09-25 00:20:32.774  3422  3422 E EGL_emulation: tid 3422: eglQueryContext(2159): error 0x3004 (EGL_BAD_ATTRIBUTE)
+09-25 00:20:32.794  3422  3422 E EGL_emulation: eglQueryContext 32c0  EGL_BAD_ATTRIBUTE
+09-25 00:20:32.794  3422  3422 E EGL_emulation: tid 3422: eglQueryContext(2159): error 0x3004 (EGL_BAD_ATTRIBUTE)
+09-25 00:20:32.837  3422  3422 E EGL_emulation: eglQueryContext 32c0  EGL_BAD_ATTRIBUTE
+09-25 00:20:32.837  3422  3422 E EGL_emulation: tid 3422: eglQueryContext(2159): error 0x3004 (EGL_BAD_ATTRIBUTE)
+09-25 00:20:32.863  3422  3422 E EGL_emulation: eglQueryContext 32c0  EGL_BAD_ATTRIBUTE
+09-25 00:20:32.864  3422  3422 E EGL_emulation: tid 3422: eglQueryContext(2159): error 0x3004 (EGL_BAD_ATTRIBUTE)
+09-25 00:20:32.902  3422  3422 E EGL_emulation: eglQueryContext 32c0  EGL_BAD_ATTRIBUTE
+09-25 00:20:32.902  3422  3422 E EGL_emulation: tid 3422: eglQueryContext(2159): error 0x3004 (EGL_BAD_ATTRIBUTE)
+09-25 00:20:32.925  3422  3422 E EGL_emulation: eglQueryContext 32c0  EGL_BAD_ATTRIBUTE
+09-25 00:20:32.925  3422  3422 E EGL_emulation: tid 3422: eglQueryContext(2159): error 0x3004 (EGL_BAD_ATTRIBUTE)
+09-25 00:20:32.949  3422  3422 E EGL_emulation: eglQueryContext 32c0  EGL_BAD_ATTRIBUTE
+09-25 00:20:32.949  3422  3422 E EGL_emulation: tid 3422: eglQueryContext(2159): error 0x3004 (EGL_BAD_ATTRIBUTE)
+09-25 00:20:32.976  3422  3422 E EGL_emulation: eglQueryContext 32c0  EGL_BAD_ATTRIBUTE
+09-25 00:20:32.976  3422  3422 E EGL_emulation: tid 3422: eglQueryContext(2159): error 0x3004 (EGL_BAD_ATTRIBUTE)
+09-25 00:20:33.058  3422  3525 I ReactNativeJS: '[SeekerWallet]', '{"at":"2026-09-24T18:50:33.058Z","id":36,"stage":"api.response","details":{"status":200}}'
+09-25 00:20:33.189  3422  3525 I ReactNativeJS: '[SeekerWallet]', '{"at":"2026-09-24T18:50:33.188Z","id":37,"stage":"api./league.ok.35","details":{"durationMs":5659}}'
+09-25 00:20:34.985  6463  6463 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+09-25 00:20:35.182  6463  6463 I AndroidRuntime: Using default boot image
+09-25 00:20:35.182  6463  6463 I AndroidRuntime: Leaving lock profiling enabled
+09-25 00:20:43.003  6463  6463 D AndroidRuntime: Calling main entry com.android.commands.uiautomator.Launcher
+09-25 00:20:51.809  6463  6463 D AndroidRuntime: Shutting down VM
+09-25 00:21:07.482  5588  5596 W libc    : Access denied finding property "persist.adb.tls_server.enable"
+09-25 00:21:07.486  5588  5596 W libc    : Access denied finding property "service.adb.tls.port"
+09-25 00:21:17.214  5393  5393 I libc    : Requested dump for pid 5393 (ndroid.settings)
+09-25 00:21:41.462  3422  3422 E EGL_emulation: eglQueryContext 32c0  EGL_BAD_ATTRIBUTE
+09-25 00:21:41.462  3422  3422 E EGL_emulation: tid 3422: eglQueryContext(2159): error 0x3004 (EGL_BAD_ATTRIBUTE)
+09-25 00:21:41.483  3422  3422 E EGL_emulation: eglQueryContext 32c0  EGL_BAD_ATTRIBUTE
+09-25 00:21:41.483  3422  3422 E EGL_emulation: tid 3422: eglQueryContext(2159): error 0x3004 (EGL_BAD_ATTRIBUTE)
+09-25 00:21:41.492  3422  3422 E EGL_emulation: eglQueryContext 32c0  EGL_BAD_ATTRIBUTE
+09-25 00:21:41.492  3422  3422 E EGL_emulation: tid 3422: eglQueryContext(2159): error 0x3004 (EGL_BAD_ATTRIBUTE)
+09-25 00:21:41.502  3422  3422 E EGL_emulation: eglQueryContext 32c0  EGL_BAD_ATTRIBUTE
+09-25 00:21:41.502  3422  3422 E EGL_emulation: tid 3422: eglQueryContext(2159): error 0x3004 (EGL_BAD_ATTRIBUTE)
+09-25 00:21:41.826  3422  3422 E EGL_emulation: eglQueryContext 32c0  EGL_BAD_ATTRIBUTE
+09-25 00:21:41.826  3422  3422 E EGL_emulation: tid 3422: eglQueryContext(2159): error 0x3004 (EGL_BAD_ATTRIBUTE)
+09-25 00:21:42.206  6004  6045 I EGL_emulation: Opening libGLESv1_CM_emulation.so
+09-25 00:21:42.206  6004  6045 I EGL_emulation: Opening libGLESv2_emulation.so
+09-25 00:21:44.145  5588  5597 W libc    : Access denied finding property "persist.adb.tls_server.enable"
+09-25 00:21:44.145  5588  5597 W libc    : Access denied finding property "service.adb.tls.port"
+09-25 00:21:44.447  7133  7133 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+09-25 00:21:44.467  7133  7133 I AndroidRuntime: Using default boot image
+09-25 00:21:44.467  7133  7133 I AndroidRuntime: Leaving lock profiling enabled
+09-25 00:21:44.619  7133  7133 D AndroidRuntime: Calling main entry com.android.commands.uiautomator.Launcher
+09-25 00:21:46.029  7133  7133 D AndroidRuntime: Shutting down VM
+09-25 00:22:04.457  7230  7230 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+09-25 00:22:04.601  7230  7230 I AndroidRuntime: Using default boot image
+09-25 00:22:04.601  7230  7230 I AndroidRuntime: Leaving lock profiling enabled
+09-25 00:22:08.806  7230  7230 D AndroidRuntime: Calling main entry com.android.commands.uiautomator.Launcher
+09-25 00:22:14.297  7230  7230 D AndroidRuntime: Shutting down VM
+09-25 00:22:22.810  3422  3422 E EGL_emulation: eglQueryContext 32c0  EGL_BAD_ATTRIBUTE
+09-25 00:22:22.811  3422  3422 E EGL_emulation: tid 3422: eglQueryContext(2159): error 0x3004 (EGL_BAD_ATTRIBUTE)
+09-25 00:23:07.747  5588  5598 W libc    : Access denied finding property "persist.adb.tls_server.enable"
+09-25 00:23:07.747  5588  5598 W libc    : Access denied finding property "service.adb.tls.port"
+09-25 00:23:13.615   650   721 W libc    : Access denied finding property "pm.dexopt.dm.require_manifest"
+09-25 00:23:13.618   650   721 W libc    : Access denied finding property "pm.dexopt.dm.require_manifest"
+09-25 00:23:13.620   650   721 W libc    : Access denied finding property "pm.dexopt.dm.require_manifest"
+09-25 00:23:13.621   650   721 W libc    : Access denied finding property "pm.dexopt.dm.require_manifest"
+09-25 00:23:13.621   650   721 W libc    : Access denied finding property "pm.dexopt.dm.require_manifest"
+09-25 00:23:13.628   650   721 W libc    : Access denied finding property "pm.dexopt.dm.require_manifest"
+09-25 00:23:13.630   650   721 W libc    : Access denied finding property "pm.dexopt.dm.require_manifest"
+09-25 00:23:13.631   650   721 W libc    : Access denied finding property "pm.dexopt.dm.require_manifest"
+09-25 00:23:13.640   650   721 W libc    : Access denied finding property "pm.dexopt.dm.require_manifest"

@@ -1,3 +1,4 @@
+import PromotionEntry,{type AppliedPromotion} from './PromotionEntry';
 import {HapticPressable as Pressable} from '../feedback/HapticPressable';
 import {useHaptics} from '../feedback/useHaptics';
 import {NETWORK_NAME,IS_MAINNET,SKR_LABEL,NETWORK_LABEL} from '../wallet/config';
@@ -20,7 +21,8 @@ import PaymentMethods from './PaymentMethods';
 import {pricingFailure} from './pricing-state';
 const pendingKey=(wallet:string)=>`seeker.order.${NETWORK_NAME}.${wallet}`;
 const label=(c:PaymentCurrency)=>currencyLabel(c,IS_MAINNET);
-export default function CommerceSection({sku='campaign',onComplete,renderSelection,fullScreen=false,beforeSelection,initialCurrency='SKR'}:{sku?:ProductId;onComplete?:()=>void;renderSelection?:(locked:boolean,sku:ProductId)=>React.ReactNode;fullScreen?:boolean;beforeSelection?:React.ReactNode;initialCurrency?:PaymentCurrency}){
+export default function CommerceSection({sku='campaign',onComplete,renderSelection,fullScreen=false,beforeSelection,initialCurrency='SKR',initialPromotionCode=''}:{sku?:ProductId;onComplete?:()=>void;renderSelection?:(locked:boolean,sku:ProductId)=>React.ReactNode;fullScreen?:boolean;beforeSelection?:React.ReactNode;initialCurrency?:PaymentCurrency;initialPromotionCode?:string}){
+ const [promotion,setPromotion]=useState<AppliedPromotion|null>(null),[promotionBusy,setPromotionBusy]=useState(false);
  const haptic=useHaptics(),confirmedOrder=useRef<string|null>(null);
  const {height,fontScale}=useWindowDimensions(),[index,setIndex]=useState(0);
  const [currency,setCurrency]=useState<PaymentCurrency>(initialCurrency),[prices,setPrices]=useState<ProductPricing>(),[priceError,setPriceError]=useState(''),[priceLoading,setPriceLoading]=useState(true),[refreshPrice,setRefreshPrice]=useState(0),[now,setNow]=useState(Date.now());
@@ -42,7 +44,7 @@ export default function CommerceSection({sku='campaign',onComplete,renderSelecti
   setMessage(failed&&!state.entitlements.includes(sku)?'Some payment checks are unavailable. Access is not confirmed yet; try Check payment again.':state.entitlements.includes(sku)?'Purchase restored for this wallet.':result.message);
  }
  async function quote(sku:ProductId){const s=await session();const state=await commerceApi.me(s.token);if(current.current!==s.wallet||!alive.current)return;if(state.entitlements.includes(sku)){await update(state);setMessage('Already purchased. Your item is restored.');return;}const prior=await SecureStore.getItemAsync(pendingKey(s.wallet));if(prior){const previous=await commerceApi.reconcile(s.token,prior);if(previous.status==='verifying'||previous.status==='needs_review'){setOrder(previous);setCurrency(previous.currency??'SKR');setMessage(previous.signature?'Your earlier payment is being confirmed. Tap Check payment.':'An earlier wallet request is being checked. Tap Check payment.');return;}}
-  const next=await commerceApi.quote(s.token,sku,crypto.randomUUID(),currency);await SecureStore.setItemAsync(pendingKey(s.wallet),next.id);if(current.current===s.wallet){setOrder(next);setCurrency(next.currency??'SKR');setMessage('');return next;}}
+  const next=await commerceApi.quote(s.token,sku,crypto.randomUUID(),currency,promotion?.code);await SecureStore.setItemAsync(pendingKey(s.wallet),next.id);if(current.current===s.wallet){setOrder(next);setCurrency(next.currency??'SKR');setMessage('');return next;}}
  async function pay(orderToPay=order){
   const order=orderToPay;
   if(!order||order.status==='fulfilled'||order.status==='needs_review')return;
@@ -67,16 +69,16 @@ export default function CommerceSection({sku='campaign',onComplete,renderSelecti
  const products=PRODUCTS.filter(p=>p.id===sku);
  const selected=products[index%products.length]!,product=order?PRODUCTS.find(p=>p.id===order.sku)??selected:selected;
  useEffect(()=>{
-  if(order||busy)return;
+  if(order||busy||promotion?.offer.percentOff===100)return;
   let active=true,timer:ReturnType<typeof setTimeout>|undefined;
   setPriceLoading(true);setPriceError('');setPriceUnavailable(false);
-  void commerceApi.pricing(product.id).then(p=>{
+  void (promotion?commerceApi.promotionPreview(promotion.code,product.id).then(p=>{if(!p.pricing)throw Error('Offer changed. Apply the code again.');return p.pricing;}):commerceApi.pricing(product.id)).then(p=>{
    if(!active)return;setPrices(p);setNow(Date.now());setPriceLoading(false);
    // Refresh before expiry. Returning from Phantom or the background also refreshes.
    timer=setTimeout(()=>setRefreshPrice(n=>n+1),Math.max(5000,new Date(p.expiresAt).getTime()-Date.now()-10000));
   }).catch(error=>{if(active){const failure=pricingFailure(error);setPriceLoading(false);setPriceError(failure.message);setPriceUnavailable(failure.unavailable);if(!failure.unavailable)timer=setTimeout(()=>setRefreshPrice(n=>n+1),15000);}});
   return()=>{active=false;if(timer)clearTimeout(timer);};
- },[product.id,refreshPrice,!!order,busy]);
+ },[product.id,refreshPrice,!!order,busy,promotion]);
  useEffect(()=>{const sub=AppState.addEventListener('change',state=>{if(state==='active'){setNow(Date.now());setRefreshPrice(n=>n+1);}});return()=>sub.remove();},[]);
  useEffect(()=>{const timer=setInterval(()=>setNow(Date.now()),5000);return()=>clearInterval(timer);},[]);
  const preview=prices?.sku===product.id?prices.options.find(p=>p.currency===currency):undefined,stale=!preview||!prices||now>=new Date(prices.expiresAt).getTime();
@@ -89,27 +91,32 @@ export default function CommerceSection({sku='campaign',onComplete,renderSelecti
  const pending=order?.status==='verifying'||order?.status==='needs_review';
  const compact=height<720||fontScale>1.2;
  function browse(delta:number){setIndex(i=>(i+delta+products.length)%products.length);setOrder(undefined);setMessage('');}
- const button=(label:string,onPress:()=>void,disabled=false)=><Pressable disabled={busy||disabled} accessibilityRole="button" accessibilityState={{disabled:busy||disabled,busy}} onPress={onPress} style={{minHeight:50,justifyContent:'center',padding:12,borderRadius:13,borderWidth:1,borderColor:'#CFFCEE',backgroundColor:'#B6F0DF',opacity:(busy||disabled)?0.5:1}}><Text style={{color:'#17382B',fontSize:14,fontWeight:'800',textAlign:'center'}}>{busy?'Please wait…':label}</Text></Pressable>;
+ const button=(label:string,onPress:()=>void,disabled=false)=><Pressable disabled={busy||promotionBusy||disabled} accessibilityRole="button" accessibilityState={{disabled:busy||promotionBusy||disabled,busy:busy||promotionBusy}} onPress={onPress} style={{minHeight:50,justifyContent:'center',padding:12,borderRadius:13,borderWidth:1,borderColor:'#CFFCEE',backgroundColor:'#B6F0DF',opacity:(busy||promotionBusy||disabled)?0.5:1}}><Text style={{color:'#17382B',fontSize:14,fontWeight:'800',textAlign:'center'}}>{busy?'Please wait…':label}</Text></Pressable>;
  // A lost wallet callback may still mean it submitted. Reconcile before retrying.
  const complete=order?.status==='fulfilled'||(product.kind==='access'&&owned);
  const mainLabel=complete?'Done':pending?'Check payment':owned?(product.kind==='access'?'Pass unlocked':equipped?'Equipped':product.kind==='outfit'?'Equip skin':'Equip item'):expired?'Get a new quote':order?`Pay ${amountText}`:priceLoading?'Updating price…':priceUnavailable?'Temporarily unavailable':stale?'Retry price':`Pay ${amountText}`;
- function primary(){if(complete){onComplete?.();return;}if(expired){void backToMethods();return;}if(!order&&!owned&&(stale||priceLoading||Date.now()>=new Date(prices!.expiresAt).getTime())){setRefreshPrice(n=>n+1);return;}void action(async()=>{if(pending){await restore();return;}if(owned){const s=await session();await update(await commerceApi.equip(s.token,product.id));setMessage(product.kind==='outfit'?'Skin equipped.':'Item equipped.');return;}if(order){await pay();return;}const next=await quote(product.id);if(next){if(matchesCheckoutPrice(next,product.id,preview,prices?.campaignOffer?.rebateSkr))await pay(next);else setMessage('Price or reward changed. Review the updated offer, then tap Pay.');}});}
+ function primary(){if(promotionBusy)return;if(complete){onComplete?.();return;}if(expired){void backToMethods();return;}if(!order&&!owned&&(stale||priceLoading||Date.now()>=new Date(prices!.expiresAt).getTime())){setRefreshPrice(n=>n+1);return;}void action(async()=>{if(pending){await restore();return;}if(owned){const s=await session();await update(await commerceApi.equip(s.token,product.id));setMessage(product.kind==='outfit'?'Skin equipped.':'Item equipped.');return;}if(order){await pay();return;}const next=await quote(product.id);if(next){if(matchesCheckoutPrice(next,product.id,preview,prices?.campaignOffer?.rebateSkr)&&next.promotion?.id===promotion?.offer.id&&next.promotion?.percentOff===promotion?.offer.percentOff&&JSON.stringify(next.promotion?.bonusSkus??[])===JSON.stringify(promotion?.offer.bonusSkus??[]))await pay(next);else setMessage('Price or reward changed. Review the updated offer, then tap Pay.');}});}
+ const freeOffer=promotion?.offer.percentOff===100;
  const content=<>{beforeSelection}
+ {product.id==='campaign'&&<PromotionEntry onBusyChange={setPromotionBusy} initialCode={initialPromotionCode} disabled={busy||!!order} onApply={p=>{setPromotion(p);setPrices(p?.offer.pricing);setRefreshPrice(n=>n+1);}}/>}
+ {!freeOffer&&<>
  {renderSelection?renderSelection(busy||!!order,product.id):<><View style={{flexDirection:'row',alignItems:'center',justifyContent:'space-between'}}><Text style={{color:'#A8C7BC',fontSize:10,letterSpacing:1.5,fontWeight:'700'}}>{product.kind==='access'?'GAME PASS':product.kind==='outfit'?'CHARACTER SKIN':'CREDIT PACK'}</Text><Text style={{color:'#8FAEA3',fontSize:10}}>{product.kind==='access'?'PAY ONCE':product.kind==='outfit'?'SAME STATS':'NO CASH VALUE'}</Text></View>
  <View style={{flexDirection:'row',alignItems:'center',gap:12,padding:12,backgroundColor:'#1D3031',borderRadius:17}}>
  {fontScale<=1.2&&(product.kind==='access'||product.kind==='outfit'?<CourierArt height={compact?66:96} outfit={product.kind==='outfit'?product.id:undefined}/>:<View style={{width:compact?55:78,height:compact?66:96,alignItems:'center',justifyContent:'center'}}><Text style={{color:'#C4F7DC',fontSize:44}}>◈</Text></View>)}
  <View style={{flex:1,gap:5}}><Text style={{color:'#F0F5E8',fontSize:19,fontWeight:'800'}}>{product.name}</Text><Text style={{color:'#B9D0C5',fontSize:12,lineHeight:17}}>{product.kind==='access'?'Ranked weekly competition. 3 missions, 5 chances each. Campaign is free.':product.description}</Text><Text style={{color:'#C4F7DC',fontSize:16,fontWeight:'800'}}>{owned?(equipped?'Equipped':'Owned'):price?`≈ ${usdLabel(price.usdCents)}`:order?amountText:'—'}</Text></View></View></>}
- {!owned&&!order&&<PaymentMethods currency={currency} onChange={setCurrency} prices={prices?.sku===product.id?prices:undefined} disabled={busy} large={fullScreen}/>}
+ {order?.promotion&&<Text style={{color:'#B6F0DF',fontSize:12}}>{order.promotion.label} · {order.promotion.percentOff}% off</Text>}
+ {!owned&&!order&&<PaymentMethods currency={currency} onChange={setCurrency} prices={prices?.sku===product.id?prices:undefined} disabled={busy||promotionBusy} large={fullScreen}/>}
  {!owned&&order&&<Text style={{color:'#BED7CA',fontSize:12,textAlign:'center'}}>{amountText}{order.pricing?` · ≈ ${usdLabel(order.pricing.usdCents)}`:' · Previous quote'}</Text>}
  {!owned&&!order&&!priceLoading&&!!priceError&&<Pressable accessibilityRole="button" onPress={()=>setRefreshPrice(n=>n+1)} style={{minHeight:32,justifyContent:'center'}}><Text style={{color:'#D8EADB',fontSize:11}}>{priceError}</Text></Pressable>}
+ </>}
  {!!message&&<Text accessibilityLiveRegion="polite" numberOfLines={3} style={{color:'#D8EADB',fontSize:12,lineHeight:17}}>{message}</Text>}
  </>;
- const footer=<>
+ const footer=freeOffer?<>{button(owned?'Back to game':'Back',()=>onComplete?.())}</>:<>
  {button(mainLabel,primary,(!complete&&!!owned&&(product.kind==='access'||equipped))||(!order&&!owned&&(priceLoading||priceUnavailable)))}
  <Text style={{color:'#8FAEA3',fontSize:10,lineHeight:14,textAlign:'center'}}>Approve in your wallet. {NETWORK_LABEL} · USD is an estimate · Network fee extra.</Text>
  <View style={{flexDirection:'row',justifyContent:'center',gap:18}}><Pressable disabled={busy} accessibilityRole="button" onLongPress={()=>void Share.share({message:walletReport()})} onPress={()=>action(restore)} style={{minHeight:44,justifyContent:'center'}}><Text style={{color:'#BED7CA',fontSize:12}}>Restore purchases</Text></Pressable>
  {order?.signature&&<Pressable accessibilityRole="link" onPress={()=>void Linking.openURL(transactionLink(order.signature!))} style={{minHeight:44,justifyContent:'center'}}><Text style={{color:'#BED7CA',fontSize:12}}>Receipt ↗</Text></Pressable>}
  {order&&!order.payment&&!pending&&<Pressable disabled={busy} accessibilityRole="button" onPress={()=>void backToMethods()} style={{minHeight:44,justifyContent:'center'}}><Text style={{color:'#BED7CA',fontSize:12}}>Change method</Text></Pressable>}</View>
  </>;
- return fullScreen?<View testID="wallet-purchase" style={{flex:1,minHeight:0}}><ScrollView testID="skin-checkout-scroll" style={{flex:1,minHeight:0}} contentContainerStyle={{gap:14,paddingBottom:18}} showsVerticalScrollIndicator={false}>{content}</ScrollView><View testID="skin-checkout-footer" style={{flexShrink:0,gap:8,paddingTop:12,borderTopWidth:1,borderColor:'#304238',backgroundColor:'#0B1612'}}>{footer}</View></View>:<View testID="wallet-purchase" style={{gap:compact?8:12}}>{content}{footer}</View>;
+ return fullScreen?<View testID="wallet-purchase" style={{flex:1,minHeight:0}}><ScrollView keyboardShouldPersistTaps="handled" testID="skin-checkout-scroll" style={{flex:1,minHeight:0}} contentContainerStyle={{gap:14,paddingBottom:18}} showsVerticalScrollIndicator={false}>{content}</ScrollView><View testID="skin-checkout-footer" style={{flexShrink:0,gap:8,paddingTop:12,borderTopWidth:1,borderColor:'#304238',backgroundColor:'#0B1612'}}>{footer}</View></View>:<View testID="wallet-purchase" style={{gap:compact?8:12}}>{content}{footer}</View>;
 }

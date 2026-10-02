@@ -1,0 +1,15 @@
+{
+  "commit": "3eafe396149ef134980c77081f6d5d4c69bfd8c8",
+  "branch": "main",
+  "pushed": true,
+  "railwayDeployment": "c9cd3c72-d8fc-4c53-ba94-66e252572e9c",
+  "status": "SUCCESS",
+  "activeManifestUnchanged": true,
+  "testPricing": false,
+  "apkBuilt": false,
+  "remoteSourceHashesMatch": true,
+  "appTests": 342,
+  "backendTests": 82,
+  "browserErrors": [],
+  "reportBrowserPreview": "File URL blocked by browser policy; game web preview was tested successfully."
+}

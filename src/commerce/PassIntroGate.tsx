@@ -11,5 +11,5 @@ export default function PassIntroGate({children}:{children:ReactNode}){
  // Dedicated mission QA URLs must still open the requested level directly.
  const diagnostic=Platform.OS==='web'&&typeof window!=='undefined'&&new URLSearchParams(window.location.search).has('testMission');
  if(!showPassIntro({dismissed,owned:economy.owned.includes('campaign'),diagnostic}))return <>{children}</>;
- return <SafeAreaView style={{flex:1,backgroundColor:'#071311'}}><Paywall local={account.preview} mediaActive={!economy.passCheckoutOpen} onSkip={()=>setDismissed(true)} onBuy={economy.openPass}/></SafeAreaView>;
+ return <SafeAreaView style={{flex:1,backgroundColor:'#071311'}}><Paywall local={account.preview} mediaActive={!economy.passCheckoutOpen} onSkip={()=>setDismissed(true)} onBuy={()=>economy.openPass()} onCode={economy.openPass}/></SafeAreaView>;
 }

@@ -1,0 +1,64 @@
+Applications Memory Usage (in Kilobytes):
+Uptime: 518579 Realtime: 518579
+
+** MEMINFO in pid 2428 [com.bluntbrain.stealaseeker] **
+                   Pss  Private  Private  SwapPss      Rss     Heap     Heap     Heap
+                 Total    Dirty    Clean    Dirty    Total     Size    Alloc     Free
+                ------   ------   ------   ------   ------   ------   ------   ------
+  Native Heap   100056   100028       16    84090   100828   212764   160339    48232
+  Dalvik Heap    22865    22732       84     8620    23332    47650    23825    23825
+ Dalvik Other     2147     1648        0      160     3064                           
+        Stack     1916     1916        0     1656     1920                           
+       Ashmem       76       32        0        0      220                           
+    Other dev       11        0        8        0      216                           
+     .so mmap     5992      192     2048      161    27220                           
+    .jar mmap     3581        0      920        0    22764                           
+    .apk mmap    19550       80    16500     1364    23500                           
+    .ttf mmap      867        0      636        0     1136                           
+    .dex mmap    16609        0    16564        0    17376                           
+    .oat mmap     1063        0      148        0     9120                           
+    .art mmap     3049      856     1320      331    17932                           
+   Other mmap      479      132      116        0     1140                           
+      Unknown    50779    50700       76     1966    51092                           
+        TOTAL   327388   178316    38436    98348   300860   260414   184164    72057
+ 
+ App Summary
+                       Pss(KB)                        Rss(KB)
+                        ------                         ------
+           Java Heap:    24908                          41264
+         Native Heap:   100028                         100828
+                Code:    37092                         102116
+               Stack:     1916                           1920
+            Graphics:        0                              0
+       Private Other:    52808
+              System:   110636
+             Unknown:                                   54732
+ 
+           TOTAL PSS:   327388            TOTAL RSS:   300860       TOTAL SWAP PSS:    98348
+ 
+ Objects
+               Views:      181         ViewRootImpl:        3
+         AppContexts:        5           Activities:        1
+              Assets:       23        AssetManagers:        0
+       Local Binders:      136        Proxy Binders:      145
+       Parcel memory:       26         Parcel count:      104
+    Death Recipients:        3             WebViews:        0
+ 
+ Native Allocations
+                         Count                       Total(kB)
+                        ------                         ------
+    Other (malloced):     2250                            213
+ Other (nonmalloced):      389                            238
+   Bitmap (malloced):       23                          38821
+ 
+ SQL
+         MEMORY_USED:       89
+  PAGECACHE_OVERFLOW:       29          MALLOC_SIZE:       46
+ 
+ DATABASES
+      pgsz     dbsz   Lookaside(b) cache hits cache misses cache size  Dbname
+PER CONNECTION STATS
+         4       32             51    12    21     5  /data/user/0/com.bluntbrain.stealaseeker/databases/exoplayer_internal.db
+POOL STATS
+     cache hits  cache misses    cache size  Dbname
+             12            22            34  /data/user/0/com.bluntbrain.stealaseeker/databases/exoplayer_internal.db

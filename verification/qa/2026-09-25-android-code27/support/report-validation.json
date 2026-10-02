@@ -1,0 +1,15 @@
+{
+  "references": 681,
+  "unique": 184,
+  "missing": [],
+  "browserVerification": {
+    "navigation": true,
+    "resultFilter": "6 failed records",
+    "combinedFilters": "1 record for Failed + Payments + P1",
+    "screenshotLightbox": true,
+    "ANRVideoSeek": "50.35 seconds, playing, ANR dialog visible",
+    "validVideosReady": 8,
+    "brokenLoadedImages": 0
+  },
+  "preservedCorruptRecording": "videos/02-tutorial-entry.mp4; excluded from playable proof"
+}

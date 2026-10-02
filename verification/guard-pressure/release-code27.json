@@ -1,0 +1,46 @@
+{
+  "verifiedAt": "2026-09-24T18:34:26.371Z",
+  "artifact": "releases/steal-a-seeker-mainnet-v0.3.24-code27.apk",
+  "application": {
+    "package": "com.bluntbrain.stealaseeker",
+    "version": "0.3.24",
+    "versionCode": 27
+  },
+  "bytes": 144947179,
+  "sha256": "ab3634620ba0a81302ee3bf378f1707abd6f61cc56f105df32ecd30aacf014ff",
+  "mainnet": true,
+  "apiUrl": "https://seeker-api-production-41b3.up.railway.app",
+  "signerSha256": "4fa3e9942238f110824fb67dc99438fc1d70ef48a273e4a79331d5f8a1e1e913",
+  "signerMatchesCode26": true,
+  "zipAlignment16Kb": true,
+  "sourceHashesVerified": 263,
+  "backend": {
+    "deploymentId": "1bdec248-532a-424c-a0e3-76971458d22c",
+    "status": "SUCCESS",
+    "health": true,
+    "paymentsHealth": true,
+    "rulesHash": "8325f1cc68a4847c185a412c1c95f5ec00d2e8b41d80950024b27307902d1d19",
+    "bundleVerified": true,
+    "replays": [
+      {
+        "mission": "practice",
+        "status": "won",
+        "score": 9866,
+        "hp": 100
+      },
+      {
+        "mission": "last-vault",
+        "status": "won",
+        "score": 9166,
+        "hp": 70
+      }
+    ]
+  },
+  "physicalDeviceTested": false,
+  "storeUploaded": false,
+  "cleanup": {
+    "deletedOldApks": 35,
+    "removedBytes": 3668871581,
+    "rollbackKept": "releases/steal-a-seeker-mainnet-v0.3.23-code26.apk"
+  }
+}

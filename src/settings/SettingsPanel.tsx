@@ -1,3 +1,5 @@
+import PromotionEntry from '../commerce/PromotionEntry';
+import {useEconomy} from '../commerce/EconomyProvider';
 import {useHaptics} from '../feedback/useHaptics';
 import {HapticPressable as Pressable} from '../feedback/HapticPressable';
 import PlaytestControls from '../telemetry/PlaytestControls';
@@ -10,6 +12,7 @@ import {IS_MAINNET} from '../wallet/config';
 import type {MissionId} from '../game/level';
 
 export default function SettingsPanel({visible, onClose, mission, onReplayTips}: {visible: boolean; onClose: () => void; mission?:MissionId;onReplayTips?:()=>void}) {
+  const economy=useEconomy();
   const {settings, ready, error, update, retry} = useSettings();
   const haptic=useHaptics(),previewWhenEnabled=useRef(false);
   useEffect(()=>{if(settings.haptics&&previewWhenEnabled.current){previewWhenEnabled.current=false;haptic('select');}},[settings.haptics,haptic]);
@@ -18,7 +21,7 @@ export default function SettingsPanel({visible, onClose, mission, onReplayTips}:
       <Switch accessibilityLabel={label} disabled={!ready} value={checked} onValueChange={on=>{if(label==='Vibration')previewWhenEnabled.current=on;else haptic('select');onChange(on);}} trackColor={{false: '#42584e', true: '#8abfad'}} thumbColor="#e1eee6"/>
     </View>;
   return <Modal visible={visible} transparent animationType={settings.reducedEffects ? 'none' : 'slide'} onRequestClose={onClose}>
-    <View style={styles.scrim}><View style={styles.panel}><ScrollView style={{flexGrow:0,flexShrink:1}} contentContainerStyle={{padding: 24, gap: 22}}>
+    <View style={styles.scrim}><View style={styles.panel}><ScrollView keyboardShouldPersistTaps="handled" style={{flexGrow:0,flexShrink:1}} contentContainerStyle={{padding: 24, gap: 22}}>
       <BrandWordmark/><Text style={styles.title}>Make yourself comfortable.</Text>
       {toggle('Game sound', 'Knife swings, guard gunfire, impacts and alarms.', settings.sound, sound => update({sound}))}
       <View style={{gap: 10}}><Text style={styles.label}>Volume · {Math.round(settings.volume * 100)}%</Text>
@@ -29,6 +32,7 @@ export default function SettingsPanel({visible, onClose, mission, onReplayTips}:
       {!!error && <View style={{gap: 10}}><Text accessibilityLiveRegion="polite" style={styles.detail}>{error}</Text><Pressable accessibilityRole="button" onPress={retry} style={styles.button}><Text style={styles.buttonText}>Save preferences again</Text></Pressable></View>}
       <View style={{gap: 10}}><Text style={styles.label}>Controls</Text><Text style={styles.detail}>Tap the floor to move. Tap a guard to approach and slash with your knife. Tap elsewhere to escape its aim. Tap the phone to collect it, then tap the exit. Walls stop bullets. Your outfit does not change combat stats. Older published weekly challenges keep their original ranged controls; follow the mission briefing.</Text><Text style={styles.detail}>Opening a menu pauses gameplay. Choose Resume when you return. Daily submission deadlines keep counting while paused.</Text></View>
       <View style={{gap:12}}><Text style={styles.label}>Help & privacy</Text><View style={{flexDirection:'row',flexWrap:'wrap',gap:8}}>{[['Support','support'],['Privacy','privacy'],['Terms','terms'],['Delete account','delete-account']].map(([label,path])=><Pressable key={path} accessibilityRole="link" accessibilityLabel={label} onPress={()=>{void Linking.openURL(`https://stealaseeker.bluntbrain.com/${path}`).catch(()=>Alert.alert('Could not open page','Visit stealaseeker.bluntbrain.com or email hello@kraneapps.com.'));}} style={{padding:12,borderRadius:10,backgroundColor:'#294139'}}><Text style={styles.label}>{label}</Text></Pressable>)}</View></View>
+      <PromotionEntry onDiscount={code=>{onClose();economy.openPass(code);}}/>
       <PlaytestControls/>
       {onReplayTips&&<Pressable accessibilityRole="button" onPress={onReplayTips} style={styles.button}><Text style={styles.buttonText}>Replay first-mission tips</Text></Pressable>}
       <Text style={styles.detail}>Version {app.expo.version} · {Platform.OS === 'web' ? 'Browser preview · no payments' : IS_MAINNET ? 'Solana Mainnet · real payments' : 'Devnet · test tokens'}{'\n'}Preferences are saved on this device.</Text>

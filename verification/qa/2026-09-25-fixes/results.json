@@ -1,0 +1,122 @@
+{
+  "date": "2026-09-25",
+  "scope": "Follow-up to code27 QA; fixes based on latest source, packaged as code30. Original report left unchanged.",
+  "application": {
+    "package": "com.bluntbrain.stealaseeker",
+    "version": "0.3.27",
+    "versionCode": 30
+  },
+  "sha256": "20f0e1db3e1269fc7c16aa80b60101c7e546eb1d1c15d3198018ae176c0f877a",
+  "bytes": 144975835,
+  "sourceFilesVerified": 269,
+  "automated": {
+    "passed": 321,
+    "failed": 0,
+    "typecheck": "passed",
+    "webExport": "passed",
+    "signedApk": "passed",
+    "zipalign16KiB": "passed"
+  },
+  "androidInstall": "passed on emulator-5556; data preserved",
+  "nativeUiRetest": "blocked pending explicit ADB/UIAutomator approval; computer-use tool cannot access emulator",
+  "physicalDevice": "not connected",
+  "walletPayments": "not performed",
+  "issues": [
+    {
+      "id": "ISS-01",
+      "title": "Checkout \u2192 Leaderboard ANR",
+      "status": "Mitigation implemented \u00b7 native retest pending",
+      "before": "Rapid Connect taps, Android Back and Leaderboard navigation produced a 5,112 ms input timeout on code27.",
+      "finding": "Recovered the original Android ANR trace. The main thread was waiting inside Skia OpenGLWindowContext::present / eglSwapBuffers / SurfaceTexture frame delivery. This identifies the blocking stack; it does not prove which driver, recorder or scheduling condition initiated the stall.",
+      "change": "Unmount hidden game canvases and stop the frame callback during menus/checkout. Release the phone renderer while checkout covers it. Pause pass video while connecting. Coalesce concurrent Connect requests into one MWA transport; keep an explicit retry after rejection.",
+      "tested": "20 concurrent Connect requests \u2192 one transport (unit test). Ten game \u2192 checkout \u2192 game/menu cycles: 2 canvases \u2192 0 \u2192 2 each time. Ten phone \u2192 checkout \u2192 phone cycles: covered viewer unmounted and restored each time. No fresh browser console errors after the final export.",
+      "remaining": "The exact missing-wallet Android sequence must still be repeated 20 times, recorded and unrecorded, on code30 and a physical phone. This issue is not closed as an Android ANR fix.",
+      "evidence": [
+        "logs/code27-commerce-anr-trace.txt",
+        "web-render-lifecycle.json",
+        "web-mission-checkout-cycles.json",
+        "web-phone-checkout-cycles.json"
+      ],
+      "beforeImage": "038-current.png",
+      "afterImage": "web-checkout-over-phone.png"
+    },
+    {
+      "id": "ISS-02",
+      "title": "Hideout grid leaves an empty column",
+      "status": "Fixed \u00b7 browser verified \u00b7 Android retest pending",
+      "before": "At 1080\u00d72400 / 420 dpi, Solana and Outfits wrapped to two narrow columns and left a large unused strip.",
+      "finding": "Card width was calculated from the window, not the measured scroll-content width. Fractional Android density made three cards plus gaps overflow.",
+      "change": "Measure the actual grid container. Divide the space after both gaps by three and round down to whole physical pixels. Preserve all seven Solana skins, outfit cards and the fixed bottom action.",
+      "tested": "Outfits measured at 360, 393 and 412 CSS px: three columns fit. Solana verified at 412 and final 393 CSS px. Beeman remains selectable; its Equip action stays visible. The automated matrix covers five densities and six measured widths, including 2.625 density.",
+      "remaining": "Recheck Android Yoga layout at the report\u2019s two physical resolutions and intermediate density. Browser measurements do not replace that check.",
+      "evidence": [
+        "web-grid-layout.json",
+        "logs/client-tests.txt"
+      ],
+      "beforeImage": "051-solana-scroll.png",
+      "afterImage": "web-hideout-412.png"
+    },
+    {
+      "id": "ISS-03",
+      "title": "Missing-wallet error is vague or inconsistent",
+      "status": "Fixed in code \u00b7 automated verification",
+      "before": "Pass and skin checkout showed a generic failure; Add Credits displayed a different/raw native error.",
+      "finding": "The error classifier missed the MWA SDK code ERROR_WALLET_NOT_FOUND and its \u201cFound no installed wallet\u2026\u201d message.",
+      "change": "One shared error view now serves credits, pass, skin and History connection. It explains that a compatible wallet is missing, tells the player to install/unlock Phantom and retry, and includes a Get Phantom link. Cancellation remains distinct from network failure.",
+      "tested": "Actual missing-wallet SDK code, native message variants, cancellation and network classification pass regression tests. Rapid requests and rejection/retry behavior pass. The APK includes the native implementation.",
+      "remaining": "No compatible wallet was installed or used. Native screenshots for all entry points, successful wallet handoff, signing and payment confirmation remain unverified.",
+      "evidence": [
+        "logs/client-tests.txt",
+        "../../../src/wallet/diagnostics.ts"
+      ],
+      "beforeImage": "002-pass-checkout.png",
+      "afterImage": null
+    },
+    {
+      "id": "ISS-04",
+      "title": "History has no local Connect action",
+      "status": "Implemented \u00b7 native flow retest pending",
+      "before": "Disconnected History asked the player to connect a wallet but offered no Connect button in that view.",
+      "finding": "The empty state was text only. The league refresh also swallowed interactive sign-in failures.",
+      "change": "History now offers Connect wallet / Sign in to view runs, waits for the selected account before sign-in, and displays retry/error recovery in place. Interactive league sign-in errors propagate to the view. It keeps the History tab mounted.",
+      "tested": "TypeScript and release bundle pass. Existing local browser history still renders its saved attempts. Browser preview uses a local account, so it does not exercise the native disconnected state.",
+      "remaining": "Connect, cancel, retry and real account-history retrieval require native wallet testing. Source review is not counted as a passed end-to-end connection test.",
+      "evidence": [
+        "logs/typecheck.txt"
+      ],
+      "beforeImage": "047-history-empty.png",
+      "afterImage": "web-history-preview.png"
+    },
+    {
+      "id": "ISS-05",
+      "title": "First phone preview shows an empty stage",
+      "status": "Implemented \u00b7 readiness tests pass \u00b7 native visual retest pending",
+      "before": "Frost first opened with a blank area and rotation instructions before the model appeared.",
+      "finding": "A decoded model and a few render callbacks did not guarantee phone geometry had reached a rendered frame.",
+      "change": "Show a phone poster and loading indicator. Hide/disable rotation controls until a rendered pick query confirms an entity belonging to the phone. Limit to one query in flight, stop after readiness or unmount, and handle released-view errors. After 15 seconds, use rendered turntable views with a Retry live 3D action.",
+      "tested": "Readiness tests cover empty/wrong entities, valid phone geometry, density conversion, overlapping queries, late callbacks after close and released native views. Frost renders in the browser; ten checkout cover/uncover cycles restore it.",
+      "remaining": "Cold-open all 12 native models on host-GPU emulator and physical hardware; verify the poster, first real frame, preset controls, timeout and retry. Browser Three.js is a different renderer from Filament.",
+      "evidence": [
+        "logs/client-tests.txt",
+        "web-phone-checkout-cycles.json"
+      ],
+      "beforeImage": "064-phone-frost.png",
+      "afterImage": "web-phone-frost.png"
+    },
+    {
+      "id": "ISS-06",
+      "title": "SwiftShader black lower frame",
+      "status": "Environment finding \u00b7 physical verification pending",
+      "before": "The original code27 report captured a black lower tutorial frame with swiftshader_indirect. Its later host-GPU run did not reproduce it.",
+      "finding": "Evidence is renderer-specific. The report does not establish the artifact on a physical Android GPU.",
+      "change": "Document host GPU (-gpu host) as the emulator QA baseline. Keep software-renderer results separate; do not lower physical-device rendering quality based on this emulator-only artifact.",
+      "tested": "The QA emulator was booted using host GPU. Code30 installed successfully with preserved data. Browser tutorial movement, cover and drone attack were exercised with a visible complete board.",
+      "remaining": "Code30 tutorial display and recording still require native UI testing, followed by physical Android verification. No claim is made that SwiftShader itself is fixed.",
+      "evidence": [
+        "logs/installed-build.txt"
+      ],
+      "beforeImage": "013-guide-next.png",
+      "afterImage": "web-tutorial-loaded.png"
+    }
+  ]
+}

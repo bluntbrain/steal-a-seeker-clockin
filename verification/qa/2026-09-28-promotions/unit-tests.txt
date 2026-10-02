@@ -1,0 +1,581 @@
+
+> steal-a-seeker-mvp@0.3.31 test
+> tsx --test tests/*.test.ts
+
+✔ cached access and equipment remain bound to the selected wallet (1.779667ms)
+✔ cloud restore preserves newer local bests and repeated merges do not add completions (0.170125ms)
+✔ a server-awarded Ghost Courier outfit survives account caching without a shop purchase (0.198083ms)
+✔ released native audio cannot throw through cleanup or volume updates (0.854791ms)
+✔ late seek callback cannot play after unmount (0.117ms)
+✔ a rejected native media operation is contained (4.54625ms)
+✔ turntable wraps both drag directions and preserves opposite views (0.121833ms)
+✔ older challenge copy is translated without changing manifests (0.153417ms)
+✔ local campaign and every cosmetic debit once, equip only owned items (1.680916ms)
+✔ local entry returns only once and never settles another ticket (1.791208ms)
+✔ completion rebate requires all twelve, pays once, keeps access, and never changes old purchase terms (0.263ms)
+✔ ranking distinguishes equal completion counts and never combines different attempts (0.152917ms)
+✔ new weekly passes have no completion rebate even after all twelve wins (0.109208ms)
+✔ angled camera joystick directions project back to their intended screen axes (0.877875ms)
+✔ campaign celebration requires all twelve wins and there is never a next mission after the last (2.684333ms)
+✔ campaign export labels real aggregated progress, never a weekly rank or cash prize (1.995916ms)
+✔ two phone instructions explain every pickup and delivery stage (0.367708ms)
+✔ celebration export fits its own dimensions and preserves equipped outfits (7.668417ms)
+✔ replaying earlier missions after campaign completion never opens the finale (0.535334ms)
+✔ foreground win and background importer share one receipt, including after remount (11.156833ms)
+✔ failed upload stays durable and a later retry succeeds (2.467292ms)
+✔ old upload cannot erase a newer win on the same mission (0.507458ms)
+✔ disk cleanup failure does not discard the confirmed award (0.296208ms)
+✔ failed historical replay does not block submitting the current win (6.258208ms)
+✔ uploads and receipts never cross wallet/session boundaries (2.6805ms)
+✔ connecting during a guest import shares the award and clears both queues (1.479583ms)
+✔ practice: authored routes stay clear, full input route extracts and retry resets (34.634417ms)
+✔ cone-lesson: authored routes stay clear, full input route extracts and retry resets (43.395334ms)
+✔ battery-dash: authored routes stay clear, full input route extracts and retry resets (17.756125ms)
+✔ crossing-signals: authored routes stay clear, full input route extracts and retry resets (110.970125ms)
+✔ sweep-window: authored routes stay clear, full input route extracts and retry resets (29.174708ms)
+✔ narrow-crossing: authored routes stay clear, full input route extracts and retry resets (190.601917ms)
+✔ false-footsteps: authored routes stay clear, full input route extracts and retry resets (77.915292ms)
+✔ warden-gate: authored routes stay clear, full input route extracts and retry resets (52.598958ms)
+✔ power-trade: authored routes stay clear, full input route extracts and retry resets (108.363791ms)
+✔ two-targets: authored routes stay clear, full input route extracts and retry resets (54.964833ms)
+✔ silent-circuit: authored routes stay clear, full input route extracts and retry resets (158.490292ms)
+✔ last-vault: authored routes stay clear, full input route extracts and retry resets (149.42575ms)
+✔ campaign missions have unique geometry and correctly bounded objectives (0.184416ms)
+✔ exact displayed price can continue to wallet approval (1.152416ms)
+✔ changed price, method or product requires another explicit review (21.65ms)
+✔ existing submitted, prepared and fulfilled orders never automatically pay again (16.5365ms)
+✔ a changed completion reward also requires review even when the payment is unchanged (1.100208ms)
+✔ a pass with no rebate can continue at the price selected by the player (0.413542ms)
+✔ quick clean kills form a chain, not extra score or credits (3.604708ms)
+✔ damage on a kill, pauses, restarts and restored kills never award a stale combo (1.156ms)
+✔ combat audio distinguishes outgoing hits from player damage and collapses bursts (1.339625ms)
+✔ KO replaces impact sound; resetting and routine taps are silent (0.084375ms)
+✔ all twelve combat maps have reachable phone and exit and valid guard routes (49.322542ms)
+✔ tap selects a guard, shoots, and permanently disables its attacks (6.128125ms)
+✔ tap movement replaces attack; repeated sequence never produces extra actions (78.677166ms)
+✔ walls block bullets and rejected attack leaves a valid move intact (0.577584ms)
+✔ guards warn before shooting and projectile damage replaces exposure death (0.716ms)
+✔ phone tap picks up, reserves activate after their countdown, exit completes (1.369792ms)
+✔ recorded combat replay verifies exactly and rejects forged inputs (6.278208ms)
+✔ short control lesson ends with the harder mission still to solve (44.863334ms)
+✔ all authored combat missions have honest input replays; local restore equals server result (6460.946791ms)
+✔ 52 weekly combat rotations are deterministic, connected and distinguish health from speed (670.080958ms)
+✔ tactical guards react to being shot and rear ambush damage is decided when fired (1.222458ms)
+✔ tactical alarm doubles pursuit speed while preserving a readable aim window (0.238125ms)
+✔ repeated phone taps do not restart the tactical pickup hold (0.164084ms)
+✔ close rear approach is unseen, while the front cone still detects at the same distance (1.326708ms)
+✔ rear opening defeats a sentry; an armored survivor cannot be stun-locked (0.246667ms)
+✔ 52 weeks have three reproducible contracts, clear targets, connected extraction and connected patrols (legacy generator) (487.747417ms)
+✔ current three contracts have winning full-physics replays and exact server parity (917.6795ms)
+✔ exit window prevents extraction while closed; failed runs cannot score (4.433167ms)
+✔ .skr identity rejects expired, short, and wrong-program data (1.843166ms)
+✔ all thirteen costumes have distinct portraits, eight poses and stable old inventory IDs (21.924ms)
+✔ courier direction indices and walking frame bounds match the atlas layout (0.143292ms)
+✔ campaign spawn shows the backpack and real movement selects the correct view in both control modes (71.614375ms)
+✔ only implemented outfits are on sale, and wallet inventory restores new outfits (1.207875ms)
+✔ card shows actual weekly totals, participant count and live status (3.92075ms)
+✔ local and unranked cards cannot imply a live rank or earned status (0.565375ms)
+✔ dates cross month and year boundaries in UTC, and timing rounds across minutes (0.192791ms)
+✔ export is self-contained, safely escapes identity and retains all layout data (3.488625ms)
+✔ share art follows the equipped outfit without changing scores (2.096625ms)
+✔ district pace increases only at levels 5 and 9 and never stacks on retry (35.952125ms)
+✔ actual movement and footstep distance receive the same boost unloaded and carrying (10.535875ms)
+✔ weekly play has fixed speed, even with new mechanics and a late-district number (2.25675ms)
+✔ code 28 retains its old movement and claim thresholds (4.0195ms)
+✔ verified replay with zero extra credits continues immediately (1.701917ms)
+✔ an improved replay still offers its actual additional credits (0.325041ms)
+✔ failed sync cannot trap a durably saved run or claim unverified credits (0.271959ms)
+✔ a slow verifier allows continuing only after the replay was saved (0.19625ms)
+✔ a failed local save must be retried before leaving (0.237916ms)
+✔ wallet connection stays available without blocking departure from a saved win (0.14725ms)
+✔ sustained scout sight shares a local snapshot with one nearby responder in early missions (53.536ms)
+✔ engaged guards retain close contact through a sidestep and continue aiming (12.934042ms)
+✔ close tracking does not grant an unaware guard rear vision (3.688708ms)
+✔ an engaged guard loses actual visibility behind cover and cannot update the hidden position (12.338667ms)
+✔ breaking contact stops hidden-player tracking, leads to search and then a patrol return (26.938583ms)
+✔ walls prevent the initial report and short glimpses do not instantly alert a room (2.291708ms)
+✔ authored home zones are reachable and seeded roaming is repeatable without fixed ping-pong routes (558.954625ms)
+✔ exit countdown shows time until closing/opening, including a seeded phase (1.54825ms)
+✔ Filament accepts a native thenable without a chained catch and releases late resources (11.725458ms)
+✔ Filament initializer failures reach recovery state instead of unhandled rejection (2.740709ms)
+✔ camera flag restores the original map and invalid zoom cannot break layout (47.248125ms)
+✔ camera clamps at every map edge and keeps the courier inside the viewport (2.7205ms)
+✔ follow is frame-rate independent, never overshoots and instantly restores overview (0.400708ms)
+✔ inverse projection preserves attack, phone, gate and floor taps on all twelve maps (1863.282417ms)
+✔ native overlay center-origin transform matches the Skia top-left transform (0.295917ms)
+✔ edge markers only appear outside the cropped map and stay inside the screen (0.295709ms)
+✔ full-height phone viewports keep map edges, tap projection and markers aligned (0.333791ms)
+✔ footsteps require travel, alternate feet, and do not replay on other UI renders (1.9755ms)
+✔ pause, mute, result, restart and a long gap discard accumulated footsteps (0.330042ms)
+✔ carrying pace is slower, stationary shooting and blocked travel are silent (37.498417ms)
+✔ cadence follows distance across HUD refresh rates without catch-up bursts (4.283167ms)
+✔ all defeated bodies and particles fully clear, including restored old deaths (3.1505ms)
+✔ reduced effects fade without flash, recoil, particles or rotation (0.269042ms)
+✔ collapse remains bounded and fade never reverses across many render frames (4.830625ms)
+✔ normal guard sight matches its shorter and narrower visible cone (2.821ms)
+✔ alerted drones close on a phone carrier without overtaking an unloaded sprint (5.894042ms)
+✔ pressure guards shoot sooner, harder, and keep closing during tracking aim (2.635875ms)
+✔ the final aim tell is committed and cover cancels a burst (3.384917ms)
+✔ the faster drone report remains interruptible with the same countdown used by its ring (1.882041ms)
+✔ campaign pursuit is grounded while alertness and opening pickup responses remain (16.87375ms)
+✔ all campaign enemies, including pickup reinforcements, use their role sight profile (17.799958ms)
+✔ Heavy has a readable front cone and a blind flank before it is alerted (6.327375ms)
+✔ codes 29–32 keep their campaign reward thresholds after role-specific vision (4.234708ms)
+✔ code 27 campaign claims retain the published thresholds after slowing pursuit (50.830625ms)
+✔ the shipped campaign still earns its original credits while the harder build rolls out (0.985375ms)
+✔ opening mission has a guard; legacy night shift retains two independent patrols (2.796125ms)
+✔ vision respects cone, range and cover in either direction (0.89725ms)
+✔ suspicion fills over time and breaking sight clears it (10.415375ms)
+✔ sustained sight catches courier; caught state freezes and retry clears it (17.963958ms)
+✔ guard capture takes priority over simultaneous extraction (0.422583ms)
+✔ patrol routes remain outside every blocker over repeated loops (22.992792ms)
+✔ night shift replays deterministically from the same inputs (4.172833ms)
+✔ night shift can be completed from spawn with movement inputs and timed cover (2.0545ms)
+✔ supported feedback does not double fire the fallback (6.44025ms)
+✔ unsupported Android effect falls back once and never interrupts navigation (0.439167ms)
+✔ disabling vibration or leaving the app prevents a late fallback (0.09975ms)
+✔ starting a run has its own bounded cue without suppressing a later back tap (0.281375ms)
+✔ automatic fire is bounded; damage interrupts it, not the reverse (0.769875ms)
+✔ coin landings and UI taps do not overwhelm confirmation or victory (0.17475ms)
+✔ scanner sweeps in place and its detection respects the same cover as its beam (7.055416ms)
+✔ closed timed gate blocks pushing; scheduled opening permits passage (9.375375ms)
+✔ gate waits for occupants to leave instead of closing on them (3.52775ms)
+✔ drone scan and report charge are separate; cover cancels the report before broadcasting (38.863209ms)
+✔ defeating a reporting drone cancels it; a completed broadcast alerts distant enemies too (2.783958ms)
+✔ confirmed radio sends every living deployed guard and drone toward the sighting (69.417417ms)
+✔ a drone keeps chasing after the broadcast animation and old cooldown finish (1.920458ms)
+✔ heavy recovery approaches the visible courier instead of an obsolete retreat waypoint (0.744417ms)
+✔ loss of sight follows the last observed position and keeps searching beyond the old three-second timeout (4.56375ms)
+✔ reacquisition broadcasts a fresh target and cancels old searches for the whole team (0.858917ms)
+✔ reinforcements join an existing hunt instead of investigating the old pedestal (2.436042ms)
+✔ a heavy stops its remaining burst when cover blocks actual sight (1.28875ms)
+✔ an investigating guard travels faster than its readable patrol speed (0.893458ms)
+✔ engaged heist guards retain a nearby sidestep but cannot see behind cover (3.396666ms)
+✔ pickup immediately starts a single warned reinforcement response and an occupied entrance remains safe (3.99875ms)
+✔ directional armor protects the front, keeps side damage and rewards the rear at impact (2.286125ms)
+✔ a noisy grate reports the crossing position once per cooldown, not the hidden moving player (1.044875ms)
+✔ a hidden guard cannot steal the tap intended for an objective in revision 10 (0.31925ms)
+✔ all heist pockets, entrances, route hints and guard anchors are traversable (329.425792ms)
+✔ heist movement, reports and reinforcements survive serialization deterministically (16.646458ms)
+✔ confirmed impact starts its audio and edge glow together, after the seek (2.433416ms)
+✔ impact completed after pause or restart cannot replay a sound or flash (0.09425ms)
+✔ campaign and weekly music use only the five approved tracks with safe fallbacks (0.22525ms)
+✔ noise causes investigation, a bounded search and a return to the patrol route (78.146833ms)
+✔ last-seen position is investigated after the courier breaks sight (3.476042ms)
+✔ decoy inputs consume once, stop at cover and reset with the mission (6.74325ms)
+✔ current weekly wins appear in recent attempts before weekly history finalizes (16.088667ms)
+✔ history does not award points for pending, rejected, lost or practice runs (0.269625ms)
+✔ an expired unsubmitted attempt is not presented as still in progress (0.096958ms)
+✔ podium preserves shared ranks and server order without mutating the board (1.714166ms)
+✔ empty and partial leaderboards do not fabricate winners or duplicate podium rows (0.09875ms)
+✔ rival prompt distinguishes points from time and never promises a rank gain (43.271542ms)
+✔ list standings include leaders, preserve ties and append an off-page personal score once (0.201958ms)
+✔ all-wallet Mainnet access is explicit and independent of pricing (4.090416ms)
+✔ Mainnet requires explicit enablement and tester allowlist; devnet remains the default (0.324417ms)
+✔ Mainnet test pass is one dollar in either token, cosmetics are ten times cheaper (1.343875ms)
+✔ a devnet client refuses a Mainnet payment before constructing or signing it (0.307209ms)
+✔ prices and rewards use validated environment settings (0.335166ms)
+✔ individual shop settings override the general discount (0.487666ms)
+✔ test pricing selects cheap quotes without overwriting the live profile or changing network (0.660875ms)
+✔ every mechanic keeps the courier on floor, clear of walls, and within the stage (160.264083ms)
+✔ drone lesson distinguishes charging, successful report and an earlier interrupted report (3.98625ms)
+✔ pickup warning precedes reinforcements and a carried phone precedes extraction (0.119458ms)
+✔ relay delivers two phones separately; exit timing and armor explain real restrictions (3.098083ms)
+✔ each campaign introduction after basic controls teaches a distinct mechanic (0.580667ms)
+✔ demo shows floor movement, stationary shooting, then pickup before extraction (3.263667ms)
+✔ demo feet stay on walkable floor and shot line stays clear of cover (29.318375ms)
+✔ each hit reduces enemy health; reduced-motion stills show their matching step (0.769625ms)
+✔ campaign lessons match actual collection, drones and mission mechanics (168.229417ms)
+✔ weekly lessons use current server-authored objectives, without promising collection rewards (2.951166ms)
+✔ welcome comparison follows both backend prices and rejects missing prices (1.624208ms)
+✔ investigation path detours around cover with robot clearance and deterministic waypoints (26.933458ms)
+✔ unreachable or obstructed noise does not teleport a guard through a barrier (0.261167ms)
+✔ a lost Start response recovers the original run from a pre-start marker; reinstall cannot reset it (2.450709ms)
+✔ serialized snapshots survive reload and delayed snapshots cannot roll back a paid run (0.602209ms)
+✔ a second installation cannot turn another Start request into an empty recovered run (0.235959ms)
+✔ failed storage blocks initialization or checkpoint, retains data and allows a serialized retry (1.202541ms)
+✔ wallet, run, rule and deadline mismatches cannot resume another attempt or overwrite corrupt data (1.001ms)
+✔ saved replays reject invalid axes, repeated action edges and oversized runs (0.240291ms)
+✔ restored partial runs continue with identical state and recording across all current campaign replays (811.248625ms)
+✔ optional launch offer never gates owners, skipped sessions or mission diagnostics (0.740417ms)
+✔ RPC retries a throttled read once and preserves sanitized failure diagnostics (1514.529167ms)
+✔ RPC retry is bounded and never rebroadcasts a write (1501.684125ms)
+✔ readiness coalesces callers, caches briefly, and rechecks treasury after expiry (9.40375ms)
+✔ readiness refuses an RPC for the wrong chain (0.964208ms)
+✔ payment diagnostics never include provider credentials or arbitrary exception messages (2.992583ms)
+✔ resuming an approval compiles identical bytes, with only the buyer required to sign (65.538958ms)
+✔ native SOL payment compiles a System transfer with exact lamports and buyer signature (4.750042ms)
+✔ native phone supports independent continuous horizontal and vertical rotation (1.656584ms)
+✔ orbit avoids pole singularities and bounds zoom even on extreme input (1.730083ms)
+✔ all mobile models preserve geometry while reducing primitives and bytes (0.87125ms)
+✔ unsupported server products do not endlessly retry exchange rates (1.781958ms)
+✔ rate and connection outages still offer retry without leaking diagnostics (0.459666ms)
+✔ campaign rounds both methods up to at least ten dollars, using integer arithmetic (2.436125ms)
+✔ cosmetics preserve SKR price and receive a SOL alternative (0.129292ms)
+✔ invalid, zero, and stale prices fail closed (0.416083ms)
+✔ rate provider caches fresh results, rejects mismatched currency, never serves expired cache after failure (118.069416ms)
+✔ preview refresh fetches new rates before the old one-minute quote expires (0.669583ms)
+✔ completion unlocks next mission; retries preserve independent personal bests (10.091375ms)
+✔ mastery needs clean time; malformed and future saves do not silently reset (2.717875ms)
+✔ three shop cards fit measured content even at fractional Android density (1.00075ms)
+✔ native missing-wallet transport errors receive specific recovery copy (0.754584ms)
+✔ rapid Connect requests share one transport and return the same account (44.935583ms)
+✔ a cancelled or missing-wallet connection permits an explicit retry (3.598834ms)
+✔ phone controls wait for actual model geometry and stop probing once visible (51.107958ms)
+✔ phone rendering probes never overlap or reveal a closed viewer (6.620083ms)
+✔ a released native phone view cannot cause an unhandled probe rejection (3.028459ms)
+✔ practice: quantized recording and verifier agree on the full route (82.610375ms)
+✔ cone-lesson: quantized recording and verifier agree on the full route (48.537959ms)
+✔ battery-dash: quantized recording and verifier agree on the full route (15.810083ms)
+✔ crossing-signals: quantized recording and verifier agree on the full route (12.007084ms)
+✔ sweep-window: quantized recording and verifier agree on the full route (1.932166ms)
+✔ narrow-crossing: quantized recording and verifier agree on the full route (32.236541ms)
+✔ false-footsteps: quantized recording and verifier agree on the full route (22.344125ms)
+✔ warden-gate: quantized recording and verifier agree on the full route (71.489333ms)
+✔ power-trade: quantized recording and verifier agree on the full route (52.118667ms)
+✔ two-targets: quantized recording and verifier agree on the full route (34.881209ms)
+✔ silent-circuit: quantized recording and verifier agree on the full route (45.646416ms)
+✔ last-vault: quantized recording and verifier agree on the full route (75.570542ms)
+✔ daily changes at midnight UTC and cycles across every campaign mission (2.512625ms)
+✔ coach follows movement, pickup and escape without changing simulation state (0.491625ms)
+✔ playtest recording defaults off, is bounded, deduplicates results and reports real retry counts (0.366917ms)
+✔ rival gap distinguishes score, time and a shared first place (0.098ms)
+✔ restore never claims ownership when no purchase was completed (2.131291ms)
+✔ restoration recovers a pending order even when its local pointer is missing (0.097541ms)
+✔ confirmed entitlement wins over stale local pending order (0.066708ms)
+✔ display path rounds a right-angle turn with tangent entry and exit (3.792292ms)
+✔ route rounding reduces its radius to keep the path outside inside-corner walls (0.261084ms)
+✔ consumed and duplicate points do not create invalid coordinates or backwards route segments (0.194208ms)
+✔ destination arrow points along the final segment in every direction (0.326ms)
+✔ new scout drones move, can be defeated in one shot, and never fire (8.423834ms)
+✔ scout reports need sustained sight and only alert nearby guards (1.822167ms)
+✔ levels 2–6 have moving drones, traversable patrol loops and screened regroup pockets (93.2755ms)
+✔ real pickup triggers alarm immediately and delivery does not reset it (2.353ms)
+✔ alarm increases actual patrol travel immediately and caps the escalation (1.585708ms)
+✔ all twelve missions have reinforcements and noise lures (0.133334ms)
+✔ a persistent beacon attracts a guard that enters range later, then holds its search (0.452666ms)
+✔ guards seeing the courier and fixed scanners ignore a noise lure (4.424083ms)
+✔ blocked throws are explained and the landing preview matches the real beacon (1.026459ms)
+✔ a guard on a valid narrow patrol lane can path to a decoy beside cover (0.25525ms)
+✔ theft reports send mobile guards toward the courier around cover, without teleporting (3.257875ms)
+✔ alarm pursuit keeps moving during detection instead of freezing in the cone (0.125292ms)
+✔ a decoy can override hidden phone reports and stationary scanners never chase (0.334709ms)
+✔ new settings and old factory volume start at 100%, preserving mute and accessibility choices (1.4355ms)
+✔ explicit volume choices survive restoration and malformed volume falls back safely (0.121125ms)
+✔ initial level is playable and routes are walkable (4.746041ms)
+✔ normalizes diagonal speed and decelerates within two ticks (1.351959ms)
+✔ all four walls hold during a long movement and dash cannot tunnel through a crate (8.929625ms)
+✔ pickup requires proximity, hold duration and standing; interruption resets progress (0.6215ms)
+✔ dash charges exactly once, respects cooldown and cannot overspend (0.579042ms)
+✔ zero battery can extract, holding exit completes once, terminal states freeze (0.291541ms)
+✔ empty-handed exit does not win; leaving the exit resets hold; timeout is final (0.191458ms)
+✔ same ordered inputs reproduce the same outcome (16.5405ms)
+✔ campaign credits reward first clears and only newly earned stars (0.8315ms)
+✔ first outfit needs five perfect clears or six ordinary clears, without repeat farming (0.360208ms)
+✔ reward rebalance preserves old credits and previously purchased outfits (0.603375ms)
+✔ local store atomically debits once and equips; insufficient funds are unchanged (0.105708ms)
+✔ live pass has two distinct choices and testing reduces both (2.062625ms)
+✔ credit pack quote uses dollars, never its credited quantity or cosmetic token price (0.662958ms)
+✔ backend price profiles validate overrides and keep test and live prices separate (1.200417ms)
+✔ guest redemption uses the displayed configured price and remains idempotent (0.177459ms)
+✔ Solana skins cost at least five times a classic outfit and use existing credit ownership (0.399375ms)
+✔ premium direct checkout has configurable SKR and converted SOL prices, independent of credits (0.390916ms)
+✔ every blocker, map corner and floor grid tap on all twelve maps resolves to reachable floor (1454.533375ms)
+✔ wall projection is close to the tapped surface and cannot cross disconnected regions or closed doors (3.986667ms)
+✔ a wall tap is recorded as its resolved destination and the existing server replay agrees (4.893875ms)
+✔ assisted taps preserve the introductory actions then release the player (6.83675ms)
+✔ Dark Circuit gate and switch label taps activate the linked switch and open the passage (6.865083ms)
+✔ rapid burst stays bounded, keeps newest intent and drains without a backlog (1.792792ms)
+✔ ordinary first tap is ready immediately; only short duplicate taps are ignored (0.13675ms)
+✔ off-centre teaching taps complete the short lesson without awarding a campaign win (59.633542ms)
+✔ every serialized tutorial checkpoint can resume into the unassisted mission (5.239875ms)
+✔ invalid taps are ignored; a nearby stop tap becomes the intended teaching move (1.074916ms)
+✔ power pad toggles door/scanner circuit once per press, and works while carrying (39.952833ms)
+✔ relay expires, holds for a body in the doorway, and can be reopened from either side (3.279375ms)
+✔ two targets need two deliveries and keep separate batteries; final charge controls reward score (4.330083ms)
+✔ shared edges disappear without losing exposed ends at a T junction (2.28575ms)
+✔ occlusion switches at the base, never at the raised top (0.2415ms)
+✔ presentation filtering preserves every campaign collision box and excludes perimeter (9.956916ms)
+✔ safe style default and legacy rollback (0.217875ms)
+✔ every actor gets a valid clip, including drones and the flat rollback (0.211667ms)
+[SeekerWallet] {"at":"2026-09-28T12:33:44.241Z","id":1,"stage":"test.safe","details":{"status":401,"accounts":2}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.245Z","id":2,"stage":"test.failure.failed","details":{"code":-32000}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.256Z","id":3,"stage":"test.success.start","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.257Z","id":4,"stage":"test.success.ok.3","details":{"durationMs":1}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.257Z","id":5,"stage":"test.error.start","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.258Z","id":6,"stage":"test.error.5.failed","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.259Z","id":7,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.259Z","id":8,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.259Z","id":9,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.259Z","id":10,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.259Z","id":11,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.259Z","id":12,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.259Z","id":13,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.259Z","id":14,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.259Z","id":15,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.259Z","id":16,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.259Z","id":17,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.259Z","id":18,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.259Z","id":19,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.259Z","id":20,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.259Z","id":21,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.259Z","id":22,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.259Z","id":23,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.259Z","id":24,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.259Z","id":25,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.259Z","id":26,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.259Z","id":27,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.259Z","id":28,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.259Z","id":29,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.259Z","id":30,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.259Z","id":31,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.259Z","id":32,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.259Z","id":33,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.259Z","id":34,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.259Z","id":35,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.259Z","id":36,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.259Z","id":37,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.259Z","id":38,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.259Z","id":39,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.259Z","id":40,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.259Z","id":41,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.259Z","id":42,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.259Z","id":43,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.259Z","id":44,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.259Z","id":45,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.259Z","id":46,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.260Z","id":47,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.260Z","id":48,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.260Z","id":49,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.260Z","id":50,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.260Z","id":51,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.260Z","id":52,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.260Z","id":53,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.260Z","id":54,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.260Z","id":55,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.260Z","id":56,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.260Z","id":57,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.260Z","id":58,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.260Z","id":59,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.260Z","id":60,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.260Z","id":61,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.260Z","id":62,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.260Z","id":63,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.260Z","id":64,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.260Z","id":65,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.260Z","id":66,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.260Z","id":67,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.260Z","id":68,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.260Z","id":69,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.260Z","id":70,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.260Z","id":71,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.260Z","id":72,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.260Z","id":73,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.260Z","id":74,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.260Z","id":75,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.260Z","id":76,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.260Z","id":77,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.260Z","id":78,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.260Z","id":79,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.260Z","id":80,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.260Z","id":81,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.260Z","id":82,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.260Z","id":83,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.260Z","id":84,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.260Z","id":85,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.260Z","id":86,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.260Z","id":87,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.260Z","id":88,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.260Z","id":89,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.260Z","id":90,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.260Z","id":91,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.260Z","id":92,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.260Z","id":93,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.260Z","id":94,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.260Z","id":95,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.260Z","id":96,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.260Z","id":97,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.260Z","id":98,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.260Z","id":99,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.260Z","id":100,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.260Z","id":101,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.260Z","id":102,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.260Z","id":103,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.260Z","id":104,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.260Z","id":105,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.260Z","id":106,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.260Z","id":107,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.260Z","id":108,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.260Z","id":109,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.260Z","id":110,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.260Z","id":111,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.260Z","id":112,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.260Z","id":113,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.260Z","id":114,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.260Z","id":115,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.260Z","id":116,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.260Z","id":117,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.260Z","id":118,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.260Z","id":119,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.260Z","id":120,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.260Z","id":121,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.260Z","id":122,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.260Z","id":123,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.260Z","id":124,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.260Z","id":125,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.260Z","id":126,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.260Z","id":127,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.260Z","id":128,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.260Z","id":129,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.260Z","id":130,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.260Z","id":131,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.261Z","id":132,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.261Z","id":133,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.261Z","id":134,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.261Z","id":135,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.261Z","id":136,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.261Z","id":137,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.261Z","id":138,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.261Z","id":139,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.261Z","id":140,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.261Z","id":141,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.261Z","id":142,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.261Z","id":143,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.261Z","id":144,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.261Z","id":145,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.261Z","id":146,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.261Z","id":147,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.261Z","id":148,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.261Z","id":149,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.261Z","id":150,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.261Z","id":151,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.261Z","id":152,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.261Z","id":153,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.261Z","id":154,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.261Z","id":155,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.261Z","id":156,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.261Z","id":157,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.261Z","id":158,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.261Z","id":159,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.261Z","id":160,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.261Z","id":161,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.261Z","id":162,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.261Z","id":163,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.261Z","id":164,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.261Z","id":165,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.261Z","id":166,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.261Z","id":167,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.261Z","id":168,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.261Z","id":169,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.261Z","id":170,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.261Z","id":171,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.261Z","id":172,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.261Z","id":173,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.261Z","id":174,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.261Z","id":175,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.261Z","id":176,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.261Z","id":177,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.261Z","id":178,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.261Z","id":179,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.261Z","id":180,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.261Z","id":181,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.261Z","id":182,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.261Z","id":183,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.261Z","id":184,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.261Z","id":185,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.261Z","id":186,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.261Z","id":187,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.261Z","id":188,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.261Z","id":189,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.261Z","id":190,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.261Z","id":191,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.261Z","id":192,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.261Z","id":193,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.262Z","id":194,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.262Z","id":195,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.262Z","id":196,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.262Z","id":197,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.262Z","id":198,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.262Z","id":199,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.262Z","id":200,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.262Z","id":201,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.262Z","id":202,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.262Z","id":203,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.262Z","id":204,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.262Z","id":205,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.262Z","id":206,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.262Z","id":207,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.262Z","id":208,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.262Z","id":209,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.262Z","id":210,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.262Z","id":211,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.262Z","id":212,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.262Z","id":213,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.262Z","id":214,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.262Z","id":215,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.262Z","id":216,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.262Z","id":217,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.262Z","id":218,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.262Z","id":219,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.262Z","id":220,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.262Z","id":221,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.262Z","id":222,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.262Z","id":223,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.262Z","id":224,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.262Z","id":225,"stage":"test.bounded","details":{}}
+[SeekerWallet] {"at":"2026-09-28T12:33:44.262Z","id":226,"stage":"test.bounded","details":{}}
+✔ diagnostics discard unknown fields and never serialize arbitrary SDK errors (14.253541ms)
+✔ network failure is not reported as user cancellation (0.654ms)
+✔ steps retain the original result and error without serializing them (2.707709ms)
+✔ diagnostic buffer stays bounded (4.165083ms)
+✔ official SDK sends SOL once and returns its receipt for server verification (94.775541ms)
+✔ official SDK sends SKR once and returns its receipt for server verification (7.070125ms)
+✔ a wallet send error never automatically opens a second payment or falls back to local broadcast (3.303708ms)
+✔ wrong payer and invalid receipts are rejected (4.063583ms)
+[SeekerWallet] {"at":"2026-09-28T12:33:44.719Z","id":1,"stage":"test.native-authorization.authorization-failed","details":{"code":-1}}
+✔ native rejected authorization becomes the protocol class used by SDK retry (2.62975ms)
+✔ native decline retains -3 and is not eligible for authorization retry (0.083292ms)
+✔ already normalized, transport and malformed errors are preserved (0.06575ms)
+✔ payment drops a stale authorization token while preserving chain and identity (1.234667ms)
+✔ wallet sessions serialize and a failed session does not block the next one (2.907791ms)
+✔ base64 MWA result passes the same SIWS verifier used by the server (74.49625ms)
+✔ wrong wallet, malformed base64 and wrong signature length fail closed (1.26ms)
+✔ changed nonce and tampered signature still fail verification (1.456458ms)
+✔ uses standard sign-in directly when supported (1.601208ms)
+✔ missing optional result falls back to signing the same challenge (1.18875ms)
+✔ does not retry declines, transport errors, or account changes (1.329542ms)
+✔ rejects modified, missing and truncated signed messages (0.363083ms)
+✔ campaign-only rules changes do not invalidate a supported weekly engine (12.72525ms)
+✔ unknown weekly mechanics fail closed even when the engine fingerprint matches (0.188ms)
+✔ the frozen active week has identical winning and delayed outcomes in its archived verifier (823.080875ms)
+✔ scout encounters preserve revision-6 weekly wins and delayed replay outcomes (367.097459ms)
+✔ revision 7 campaigns retain their archived verifier outcomes after roaming update (3720.555458ms)
+✔ revision 8 replays keep their published outcomes after combat contact is fixed (891.941917ms)
+✔ revision 9 campaign replays retain their published results after heist encounters (721.032333ms)
+✔ revision 10 outcomes and weekly eligibility survive the revision 11 pressure increase (2599.421125ms)
+✔ shipped revision 11 replays and frozen weeks keep their original movement (10664.310125ms)
+✔ revision 12 movement stays unchanged when district speed boosts ship (7432.117458ms)
+✔ 52 weekly packs: real geometry variation, no family repeat for four weeks, deterministic fair packs (396.014708ms)
+✔ 52 weeks: reachable objectives, collision-safe patrols, distinct starts and a safe opening (976.053708ms)
+✔ cutover leaves historical combat definitions on revision 6 (11.737458ms)
+✔ future browser preview is localhost-only and rejects malformed or non-Monday dates (0.719667ms)
+✔ weekly rollover uses Monday UTC across year boundaries (2.946ms)
+✔ actual compiled game modules initialize and run without forward worklet captures (2884.609041ms)
+✔ one worklet compiler for src/GameScreen.tsx (10.943291ms)
+✔ one worklet compiler for src/game/combat.ts (4.768125ms)
+✔ one worklet compiler for src/game/heist-guards.ts (6.191208ms)
+✔ one worklet compiler for src/components/QuadDrone.tsx (7.112667ms)
+✔ one worklet compiler for src/components/phone-filament/PhoneFilament.tsx (23.768833ms)
+✔ one worklet compiler for node_modules/react-native-filament/src/hooks/useModel.ts (7.408959ms)
+✔ one worklet compiler for node_modules/react-native-worklets-core/src/hooks/useWorklet.ts (4.913209ms)
+✔ captured defaults execute in an isolated worklet runtime: src/game/simulation.ts (13.368666ms)
+✔ captured defaults execute in an isolated worklet runtime: src/components/phone-filament/PhoneFilament.tsx (10.122ms)
+✔ Filament host objects retain identity across renders and worklet dependencies (5.788334ms)
+ℹ tests 342
+ℹ suites 0
+ℹ pass 342
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 32461.789333

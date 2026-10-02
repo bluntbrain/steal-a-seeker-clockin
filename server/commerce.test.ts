@@ -720,3 +720,66 @@ test('weekly variety publishes atomically at cutover and captures only one clock
  assert.equal((await pool.query('SELECT count(*)::integer AS n FROM league_weeks WHERE week=$1',[first.week])).rows[0].n,1);
  assert.deepEqual((await pool.query('SELECT manifest FROM league_weeks WHERE week=$1',[old.week])).rows[0].manifest,old);
 });
+
+// Synthetic fixtures only. Redeemable production codes are backend environment secrets.
+async function promotionHarness(percentOff=100,maxRedemptions=20){
+ const {parsePromotions}=await import('./promotions');
+ const id=`qa-${randomUUID()}`,code=`TEST_${randomUUID().replaceAll('-','')}`;
+ const promotions=parsePromotions(JSON.stringify([{id,code,label:'Test community offer',percentOff,sku:'campaign',bonusSkus:['solana-toly','solana-mert'],startsAt:new Date(Date.now()-60000).toISOString(),expiresAt:new Date(Date.now()+86400000).toISOString(),maxRedemptions,enabled:true}]));
+ const config={...service.config,promotions,usdPricing:true,campaignOffer:true,rebateSkr:25};
+ const commerce=new CommerceService(pool,chain,config,{rates:async()=>({SKR:'0.02',SOL:'100',at:Date.now()})});
+ return {id,code,config,commerce,offer:promotions[0]!};
+}
+test('promotion free claim authenticates, bypasses RPC/prices, grants once, restores and opens ranked play',async()=>{
+ const h=await promotionHarness(),user=await login();let chainCalls=0,priceCalls=0;
+ const free=new CommerceService(pool,{...chain,ready:async()=>{chainCalls++;throw Error('RPC down');}},h.config,{rates:async()=>{priceCalls++;throw Error('Rates down');}}),api=await createApp(free);
+ try{
+ const payload={code:h.code.toLowerCase(),sku:'campaign'};
+ assert.equal((await api.inject({method:'POST',url:'/promotions/claim',payload})).statusCode,401);
+ const preview=await api.inject({method:'POST',url:'/promotions/preview',payload});assert.equal(preview.statusCode,200);assert.equal(preview.json().percentOff,100);assert(!preview.body.includes(h.code));
+ const results=await Promise.all([1,2,3].map(()=>api.inject({method:'POST',url:'/promotions/claim',headers:user.headers,payload})));
+ for(const r of results){assert.equal(r.statusCode,200,r.body);assert.deepEqual(r.json().entitlements,['campaign','solana-mert','solana-toly']);}
+ assert.equal(chainCalls,0);assert.equal(priceCalls,0);
+ assert.equal(Number((await pool.query('SELECT count(*) FROM orders WHERE wallet=$1',[user.wallet])).rows[0].count),0);
+ assert.equal(Number((await pool.query('SELECT count(*) FROM campaign_rebates WHERE wallet=$1',[user.wallet])).rows[0].count),0);
+ assert.equal(Number((await pool.query('SELECT count(*) FROM promotion_redemptions WHERE wallet=$1',[user.wallet])).rows[0].count),1);
+ const restored=new CommerceService(pool,chain,{...h.config,promotions:[]});assert.deepEqual((await restored.me(user.wallet)).entitlements,['campaign','solana-mert','solana-toly']);
+ await restored.equip(user.wallet,'solana-toly');assert.equal((await restored.me(user.wallet)).equipment.outfit,'solana-toly');
+ const {LeagueService}=await import('./league-service'),league=new LeagueService(pool,ranked),manifest=await league.manifest();const ticket=await league.start(user.wallet,{contractId:manifest.contracts[0]!.id,rulesHash:manifest.rulesHash,requestKey:randomUUID()});assert(ticket.id);await ranked.abandon(user.wallet,ticket.id);
+ }finally{await api.close();}
+});
+test('promotion rejects forged discount, wrong product, expired and disabled codes',async()=>{
+ const h=await promotionHarness(),user=await login(),api=await createApp(h.commerce);
+ try{
+ assert.equal((await api.inject({method:'POST',url:'/promotions/claim',headers:user.headers,payload:{code:h.code,sku:'campaign',percentOff:100}})).statusCode,400);
+ await assert.rejects(h.commerce.claimPromotion(user.wallet,h.code,'solana-toly'),/not valid/);
+ h.offer.enabled=false;await assert.rejects(h.commerce.claimPromotion(user.wallet,h.code,'campaign'),/not active/);
+ h.offer.enabled=true;h.offer.expiresAt=new Date(Date.now()-1).toISOString();await assert.rejects(h.commerce.claimPromotion(user.wallet,h.code,'campaign'),/expired/);
+ assert.deepEqual((await h.commerce.me(user.wallet)).entitlements,[]);
+ }finally{await api.close();}
+});
+test('promotion capacity is atomic across wallets and existing owners keep paid ownership',async()=>{
+ const h=await promotionHarness(100,1),a=await login(),b=await login();
+ const results=await Promise.allSettled([a,b].map(u=>h.commerce.claimPromotion(u.wallet,h.code,'campaign')));assert.equal(results.filter(r=>r.status==='fulfilled').length,1);
+ const owner=await campaignOwner(),offer=await promotionHarness();const before=await pool.query("SELECT order_id FROM entitlements WHERE wallet=$1 AND sku='campaign'",[owner.wallet]);await offer.commerce.claimPromotion(owner.wallet,offer.code,'campaign');const after=await pool.query("SELECT order_id FROM entitlements WHERE wallet=$1 AND sku='campaign'",[owner.wallet]);assert.equal(after.rows[0].order_id,before.rows[0].order_id);
+});
+test('promotion refuses to replace unresolved payments and can claim after untouched quote cancellation',async()=>{
+ const h=await promotionHarness(),u=await login();const o=await h.commerce.createOrder(u.wallet,'campaign',randomUUID());await assert.rejects(h.commerce.claimPromotion(u.wallet,h.code,'campaign'),/existing checkout/);await h.commerce.cancelQuote(u.wallet,o.id);await h.commerce.claimPromotion(u.wallet,h.code,'campaign');
+ const v=await login(),o2=await service.createOrder(v.wallet,'campaign',randomUUID());await service.preparePayment(v.wallet,o2.id);await assert.rejects(h.commerce.claimPromotion(v.wallet,h.code,'campaign'),/existing checkout/);assert.deepEqual((await service.me(v.wallet)).entitlements,[]);
+});
+test('promotion discounts SKR and SOL, freezes quotes, suppresses rebates and consumes on verified payment',async()=>{
+ for(const currency of ['SKR','SOL'] as const){const h=await promotionHarness(50),u=await login(),base=await h.commerce.pricing('campaign'),original=base.options.find(p=>p.currency===currency)!;
+ const key=randomUUID(),o=await h.commerce.createOrder(u.wallet,'campaign',key,currency,h.code);assert.equal(o.amount,((BigInt(original.amount)+1n)/2n).toString());assert.equal(o.campaignTerms,undefined);assert.equal(o.promotion!.percentOff,50);assert.deepEqual((await h.commerce.me(u.wallet)).entitlements,[]);
+ await assert.rejects(h.commerce.createOrder(u.wallet,'campaign',key,currency),/another product/);
+ h.offer.percentOff=25;assert.equal((await h.commerce.createOrder(u.wallet,'campaign',key,currency,h.code)).amount,o.amount);
+ const p=await h.commerce.preparePayment(u.wallet,o.id),sig=b58(randomBytes(64));transactions.set(sig,currency==='SOL'?nativeTx(p,sig):paidTx(p,sig));await h.commerce.attach(u.wallet,o.id,sig);assert.equal((await h.commerce.getOrder(u.wallet,o.id)).status,'fulfilled');
+ assert.deepEqual((await h.commerce.me(u.wallet)).entitlements,['campaign','solana-mert','solana-toly']);assert.equal((await pool.query('SELECT state FROM promotion_redemptions WHERE order_id=$1',[o.id])).rows[0].state,'granted');
+ }
+});
+test('promotion capacity holds pending approvals and releases cancelled or expired untouched quotes',async()=>{
+ const h=await promotionHarness(25,1),a=await login(),b=await login();
+ const first=await h.commerce.createOrder(a.wallet,'campaign',randomUUID(),'SKR',h.code);await assert.rejects(h.commerce.createOrder(b.wallet,'campaign',randomUUID(),'SKR',h.code),/fully claimed/);
+ await h.commerce.cancelQuote(a.wallet,first.id);const second=await h.commerce.createOrder(b.wallet,'campaign',randomUUID(),'SKR',h.code);await pool.query("UPDATE orders SET expires_at=now()-interval '1 second' WHERE id=$1",[second.id]);
+ const third=await h.commerce.createOrder(a.wallet,'campaign',randomUUID(),'SKR',h.code);await h.commerce.preparePayment(a.wallet,third.id);await pool.query("UPDATE orders SET expires_at=now()-interval '1 second' WHERE id=$1",[third.id]);await assert.rejects(h.commerce.createOrder(b.wallet,'campaign',randomUUID(),'SKR',h.code),/fully claimed/);
+});
+test('promotion configuration fails closed without exposing codes',async()=>{const {parsePromotions}=await import('./promotions');assert.throws(()=>parsePromotions('{bad-private-value'),e=>e instanceof Error&&!e.message.includes('bad-private-value'));assert.deepEqual(parsePromotions(undefined),[]);});

@@ -1,0 +1,86 @@
+[
+  {
+    "mission": "Mission 1: First Pickup",
+    "lesson": "Watch. Then make your move.",
+    "bottomGap": 12,
+    "buttonVisible": true,
+    "canvases": 0
+  },
+  {
+    "mission": "Mission 2: Blind Corner",
+    "lesson": "Stop the scout drone",
+    "bottomGap": 12,
+    "buttonVisible": true,
+    "canvases": 0
+  },
+  {
+    "mission": "Mission 3: Crossfire",
+    "lesson": "Choose the crossing",
+    "bottomGap": 12,
+    "buttonVisible": true,
+    "canvases": 0
+  },
+  {
+    "mission": "Mission 4: Loading Lockdown",
+    "lesson": "Plan the way back",
+    "bottomGap": 12,
+    "buttonVisible": true,
+    "canvases": 0
+  },
+  {
+    "mission": "Mission 5: Skybridge",
+    "lesson": "Make the walls work for you",
+    "bottomGap": 12,
+    "buttonVisible": true,
+    "canvases": 0
+  },
+  {
+    "mission": "Mission 6: Heavy Watch",
+    "lesson": "Find the Heavy’s weak point",
+    "bottomGap": 12,
+    "buttonVisible": true,
+    "canvases": 0
+  },
+  {
+    "mission": "Mission 7: Split Route",
+    "lesson": "A shortcut is a choice",
+    "bottomGap": 12,
+    "buttonVisible": true,
+    "canvases": 0
+  },
+  {
+    "mission": "Mission 8: Twin Relay",
+    "lesson": "Two phones. Two trips.",
+    "bottomGap": 12,
+    "buttonVisible": true,
+    "canvases": 0
+  },
+  {
+    "mission": "Mission 9: Dark Circuit",
+    "lesson": "Switch first. Quiet feet.",
+    "bottomGap": 12,
+    "buttonVisible": true,
+    "canvases": 0
+  },
+  {
+    "mission": "Mission 10: Vault Window",
+    "lesson": "Watch the exit light",
+    "bottomGap": 12,
+    "buttonVisible": true,
+    "canvases": 0
+  },
+  {
+    "mission": "Mission 11: Security Grid",
+    "lesson": "Lose them between rooms",
+    "bottomGap": 12,
+    "buttonVisible": true,
+    "canvases": 0
+  },
+  {
+    "mission": "Mission 12: Last Seeker",
+    "lesson": "One last Seeker",
+    "bottomGap": 12,
+    "buttonVisible": true,
+    "canvases": 0
+  }
+]

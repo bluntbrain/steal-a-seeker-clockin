@@ -1,0 +1,75 @@
+{
+  "weeks": 52,
+  "missions": 156,
+  "layoutFamilies": 18,
+  "distinctWallGeometries": 63,
+  "enemyMixes": 13,
+  "firstTwoWeeks": [
+    {
+      "id": "2026-09-28:0:variety-v3",
+      "name": "Relay Court",
+      "modifier": "Blackout",
+      "version": 3,
+      "template": "relay-court",
+      "activeEnemies": 3,
+      "drones": 1,
+      "heavies": 0,
+      "reinforcements": 1
+    },
+    {
+      "id": "2026-09-28:1:variety-v3",
+      "name": "Broken Cross",
+      "modifier": "Double haul",
+      "version": 3,
+      "template": "broken-cross",
+      "activeEnemies": 3,
+      "drones": 1,
+      "heavies": 1,
+      "reinforcements": 1
+    },
+    {
+      "id": "2026-09-28:2:variety-v3",
+      "name": "Three Cargo",
+      "modifier": "Exit window",
+      "version": 3,
+      "template": "three-cargo",
+      "activeEnemies": 5,
+      "drones": 2,
+      "heavies": 2,
+      "reinforcements": 2
+    },
+    {
+      "id": "2026-10-05:0:variety-v3",
+      "name": "Diagonal Vault",
+      "modifier": "Blackout",
+      "version": 3,
+      "template": "diagonal-vault",
+      "activeEnemies": 3,
+      "drones": 1,
+      "heavies": 0,
+      "reinforcements": 1
+    },
+    {
+      "id": "2026-10-05:1:variety-v3",
+      "name": "Vault Teeth",
+      "modifier": "Exit window",
+      "version": 3,
+      "template": "vault-teeth",
+      "activeEnemies": 4,
+      "drones": 2,
+      "heavies": 1,
+      "reinforcements": 1
+    },
+    {
+      "id": "2026-10-05:2:variety-v3",
+      "name": "Offset Gates",
+      "modifier": "Double haul",
+      "version": 3,
+      "template": "offset-gates",
+      "activeEnemies": 4,
+      "drones": 1,
+      "heavies": 1,
+      "reinforcements": 2
+    }
+  ]
+}

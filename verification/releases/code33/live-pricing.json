@@ -1,0 +1,360 @@
+{
+  "/health": {
+    "ok": true,
+    "cluster": "solana:mainnet"
+  },
+  "/health/payments": {
+    "ok": true,
+    "cluster": "solana:mainnet"
+  },
+  "/catalog": {
+    "testPricing": false,
+    "creditStore": [
+      {
+        "id": "night-courier",
+        "name": "Night Courier",
+        "price": 300,
+        "kind": "outfit",
+        "description": "Charcoal hood and dark backpack."
+      },
+      {
+        "id": "signal-runner",
+        "name": "Frost Runner",
+        "price": 400,
+        "kind": "outfit",
+        "description": "Snowflake hood. Mint winter trim."
+      },
+      {
+        "id": "circuit-scout",
+        "name": "Circuit Scout",
+        "price": 500,
+        "kind": "outfit",
+        "description": "Mint circuit stripes on charcoal."
+      },
+      {
+        "id": "archive-keeper",
+        "name": "Archive Keeper",
+        "price": 600,
+        "kind": "outfit",
+        "description": "Cream jacket and tan satchel straps."
+      },
+      {
+        "id": "solana-toly",
+        "name": "Toly",
+        "price": 3000,
+        "kind": "outfit",
+        "description": "Premium character skin. Same gameplay stats."
+      },
+      {
+        "id": "solana-mert",
+        "name": "Mert",
+        "price": 3000,
+        "kind": "outfit",
+        "description": "Premium character skin. Same gameplay stats."
+      },
+      {
+        "id": "solana-chase",
+        "name": "Chase",
+        "price": 3000,
+        "kind": "outfit",
+        "description": "Premium character skin. Same gameplay stats."
+      },
+      {
+        "id": "solana-lily",
+        "name": "Lily",
+        "price": 3000,
+        "kind": "outfit",
+        "description": "Premium character skin. Same gameplay stats."
+      },
+      {
+        "id": "solana-vibhu",
+        "name": "Vibhu",
+        "price": 3000,
+        "kind": "outfit",
+        "description": "Premium character skin. Same gameplay stats."
+      },
+      {
+        "id": "solana-akshay",
+        "name": "Akshay Rajan",
+        "price": 3000,
+        "kind": "outfit",
+        "description": "Premium character skin. Same gameplay stats."
+      },
+      {
+        "id": "solana-beeman",
+        "name": "Beeman",
+        "price": 3000,
+        "kind": "outfit",
+        "description": "Premium character skin. Same gameplay stats."
+      }
+    ],
+    "cluster": "solana:mainnet",
+    "disclaimer": "Mainnet: payments use real money.",
+    "paymentCurrencies": [
+      "SKR",
+      "SOL"
+    ],
+    "products": [
+      {
+        "id": "campaign",
+        "name": "Game Pass",
+        "kind": "access",
+        "description": "Weekly ranked competition. One purchase per wallet. Campaign and practice are free.",
+        "usdCents": 1000,
+        "skrPrice": 500
+      },
+      {
+        "id": "night-courier",
+        "name": "Night Courier",
+        "kind": "outfit",
+        "description": "Charcoal and mint courier outfit. Same gameplay stats.",
+        "skrPrice": 20
+      },
+      {
+        "id": "signal-runner",
+        "name": "Frost Runner",
+        "kind": "outfit",
+        "description": "Snowflake hood and mint winter trim. Same gameplay stats.",
+        "skrPrice": 20
+      },
+      {
+        "id": "circuit-scout",
+        "name": "Circuit Scout",
+        "kind": "outfit",
+        "description": "Mint circuit stripes on charcoal. Same gameplay stats.",
+        "skrPrice": 20
+      },
+      {
+        "id": "archive-keeper",
+        "name": "Archive Keeper",
+        "kind": "outfit",
+        "description": "Cream jacket with tan satchel straps. Same gameplay stats.",
+        "skrPrice": 20
+      },
+      {
+        "id": "solana-toly",
+        "name": "Toly",
+        "kind": "outfit",
+        "description": "Permanent cosmetic character. Same gameplay stats.",
+        "skrPrice": 100
+      },
+      {
+        "id": "solana-mert",
+        "name": "Mert",
+        "kind": "outfit",
+        "description": "Permanent cosmetic character. Same gameplay stats.",
+        "skrPrice": 100
+      },
+      {
+        "id": "solana-chase",
+        "name": "Chase",
+        "kind": "outfit",
+        "description": "Permanent cosmetic character. Same gameplay stats.",
+        "skrPrice": 100
+      },
+      {
+        "id": "solana-lily",
+        "name": "Lily",
+        "kind": "outfit",
+        "description": "Permanent cosmetic character. Same gameplay stats.",
+        "skrPrice": 100
+      },
+      {
+        "id": "solana-vibhu",
+        "name": "Vibhu",
+        "kind": "outfit",
+        "description": "Permanent cosmetic character. Same gameplay stats.",
+        "skrPrice": 100
+      },
+      {
+        "id": "solana-akshay",
+        "name": "Akshay Rajan",
+        "kind": "outfit",
+        "description": "Permanent cosmetic character. Same gameplay stats.",
+        "skrPrice": 100
+      },
+      {
+        "id": "solana-beeman",
+        "name": "Beeman",
+        "kind": "outfit",
+        "description": "Permanent cosmetic character. Same gameplay stats.",
+        "skrPrice": 100
+      },
+      {
+        "id": "credits-500",
+        "name": "500 credits",
+        "kind": "credits",
+        "description": "Game currency for outfits and gear. No cash value.",
+        "credits": 500,
+        "usdCents": 100
+      },
+      {
+        "id": "credits-1500",
+        "name": "1,500 credits",
+        "kind": "credits",
+        "description": "Game currency for outfits and gear. No cash value.",
+        "credits": 1500,
+        "usdCents": 250
+      },
+      {
+        "id": "credits-3500",
+        "name": "3,500 credits",
+        "kind": "credits",
+        "description": "Game currency for outfits and gear. No cash value.",
+        "credits": 3500,
+        "usdCents": 500
+      }
+    ]
+  },
+  "/pricing/campaign": {
+    "sku": "campaign",
+    "expiresAt": "2026-09-25T11:15:26.099Z",
+    "options": [
+      {
+        "currency": "SKR",
+        "amount": "500000000",
+        "decimals": 6,
+        "usdCents": 1029,
+        "rateUsd": "0.020565",
+        "quotedAt": "2026-09-25T11:14:26.099Z",
+        "source": "Coinbase spot"
+      },
+      {
+        "currency": "SOL",
+        "amount": "82400000",
+        "decimals": 9,
+        "usdCents": 1001,
+        "rateUsd": "121.48",
+        "quotedAt": "2026-09-25T11:14:26.099Z",
+        "source": "Coinbase spot"
+      }
+    ],
+    "campaignOffer": {
+      "testPricing": false,
+      "usdCents": 1000,
+      "rebateSkr": 0,
+      "missions": 12,
+      "cluster": "solana:mainnet"
+    }
+  },
+  "/pricing/credits-500": {
+    "sku": "credits-500",
+    "expiresAt": "2026-09-25T11:15:26.099Z",
+    "options": [
+      {
+        "currency": "SKR",
+        "amount": "49000000",
+        "decimals": 6,
+        "usdCents": 101,
+        "rateUsd": "0.020565",
+        "quotedAt": "2026-09-25T11:14:26.099Z",
+        "source": "Coinbase spot"
+      },
+      {
+        "currency": "SOL",
+        "amount": "8300000",
+        "decimals": 9,
+        "usdCents": 101,
+        "rateUsd": "121.48",
+        "quotedAt": "2026-09-25T11:14:26.099Z",
+        "source": "Coinbase spot"
+      }
+    ]
+  },
+  "/pricing/credits-1500": {
+    "sku": "credits-1500",
+    "expiresAt": "2026-09-25T11:15:26.099Z",
+    "options": [
+      {
+        "currency": "SKR",
+        "amount": "122000000",
+        "decimals": 6,
+        "usdCents": 251,
+        "rateUsd": "0.020565",
+        "quotedAt": "2026-09-25T11:14:26.099Z",
+        "source": "Coinbase spot"
+      },
+      {
+        "currency": "SOL",
+        "amount": "20600000",
+        "decimals": 9,
+        "usdCents": 251,
+        "rateUsd": "121.48",
+        "quotedAt": "2026-09-25T11:14:26.099Z",
+        "source": "Coinbase spot"
+      }
+    ]
+  },
+  "/pricing/credits-3500": {
+    "sku": "credits-3500",
+    "expiresAt": "2026-09-25T11:15:26.099Z",
+    "options": [
+      {
+        "currency": "SKR",
+        "amount": "244000000",
+        "decimals": 6,
+        "usdCents": 502,
+        "rateUsd": "0.020565",
+        "quotedAt": "2026-09-25T11:14:26.099Z",
+        "source": "Coinbase spot"
+      },
+      {
+        "currency": "SOL",
+        "amount": "41200000",
+        "decimals": 9,
+        "usdCents": 501,
+        "rateUsd": "121.48",
+        "quotedAt": "2026-09-25T11:14:26.099Z",
+        "source": "Coinbase spot"
+      }
+    ]
+  },
+  "/pricing/night-courier": {
+    "sku": "night-courier",
+    "expiresAt": "2026-09-25T11:15:26.099Z",
+    "options": [
+      {
+        "currency": "SKR",
+        "amount": "20000000",
+        "decimals": 6,
+        "usdCents": 42,
+        "rateUsd": "0.020565",
+        "quotedAt": "2026-09-25T11:14:26.099Z",
+        "source": "Coinbase spot"
+      },
+      {
+        "currency": "SOL",
+        "amount": "3400000",
+        "decimals": 9,
+        "usdCents": 42,
+        "rateUsd": "121.48",
+        "quotedAt": "2026-09-25T11:14:26.099Z",
+        "source": "Coinbase spot"
+      }
+    ]
+  },
+  "/pricing/solana-akshay": {
+    "sku": "solana-akshay",
+    "expiresAt": "2026-09-25T11:15:26.099Z",
+    "options": [
+      {
+        "currency": "SKR",
+        "amount": "100000000",
+        "decimals": 6,
+        "usdCents": 206,
+        "rateUsd": "0.020565",
+        "quotedAt": "2026-09-25T11:14:26.099Z",
+        "source": "Coinbase spot"
+      },
+      {
+        "currency": "SOL",
+        "amount": "17000000",
+        "decimals": 9,
+        "usdCents": 207,
+        "rateUsd": "121.48",
+        "quotedAt": "2026-09-25T11:14:26.099Z",
+        "source": "Coinbase spot"
+      }
+    ]
+  }
+}
