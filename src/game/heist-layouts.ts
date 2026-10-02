@@ -227,11 +227,33 @@ const LAYOUTS:Layout[]=[
   back:[[7.8,9],[8,8.8],[10.15,8.8],[10.15,12.7],[10.15,13.6],[7.65,13.8],[7.65,16.8],[5.4,17.15],[3.5,17.15],[3.5,18.85]],
   pockets:[[5.45,16.65],[4.2,8.8],[7.7,9.6],[1.2,3.4],[7.5,1.25]],entries:[[1.2,3.7]],
   tip:'Recover the phone inside the central room, then the phone beyond the upper wall. Both side openings give flanking routes. The courtyard laser briefly alerts nearby guards; the first pickup brings one reinforcement. Return each phone to the bottom entrance.'},
- {spawn:[2,18],phone:[9.9,3],exit:[10,18],
-  walls:[[4.2,10,2.5,4],[3.5,4.5,3.2,2.4],[8.3,.65,.8,6.8],[1.1,8,2,1],[8.5,11.5,2.5,1.2],[2.5,14.8,1.5,1]],
-  cast:[['scout',[3.3,11.5],[3.3,10],[2,10]],['scout',[7.6,11],[7.6,9],[8.5,9]],['sentry',[7.5,5.2],[7.5,7.8],[6.2,8]],['scout',[10,5],[10,3.8],[10.6,3.8]]],
-  safe:[[1.4,13.5],[3.4,9.7],[3.2,7],[7.3,7.9],[10,8]],back:[[10,8],[7.4,9.5],[7.4,13.7],[7.7,16.6]],pockets:[[5.4,15.5],[5.4,8.1]],grates:[[7.1,10,1.2,1.1]],
-  tip:'Follow the cable to open the vault. The striped metal grate makes noise; take the quiet loop to avoid a search.'},
+ // Mission 9: long central aisle, staggered cargo and segmented side galleries.
+ // The switch opens the full-width upper vault gate; no side route bypasses it.
+ {spawn:[6,18.8],phone:[6,1.25],exit:[6,18.8],
+  walls:[
+   [.65,.65,2.55,2.15],[1.7,3.7,1.5,3.2],[.65,7.9,2.55,1.5],
+   [1.7,10.4,1.5,5.6],[.65,17,2.55,2.35],
+   [8.8,.65,2.55,3.4],[8.8,5.15,1.65,2.6],[8.8,7.75,.75,4.25],
+   [8.8,12,1.65,3.2],[8.8,16.3,2.55,3.05],
+   [5.8,11.4,.85,.85]
+  ],
+  crates:[
+   [3.3,4.45,.8,1.8],[5.35,3.8,1.85,1.65],
+   [4.5,7,1.9,2.2],[6.4,7.8,1.25,1.9],[5.5,9.2,.85,.7],
+   [3.3,11.75,.8,2.45],[7.8,10.8,.8,2.5],
+   [4.5,15.05,1.9,1.6],[3.3,18,.9,1.25],[7.85,17.3,.8,2.05]
+  ],
+  cast:[['scout',[7.3,14.6],[6.8,13.8],[5,13.8]],
+   ['scout',[4.5,6.2],[7.6,6.2],[7.6,4.8]],
+   ['heavy',[6.9,10.5],[7.1,11.7],[7.1,12.8]],
+   ['scout',[1.1,10],[1.1,7.3],[1.1,4]],
+   ['drone',[10.6,9.3],[10.6,11.3],[10.6,11.4]],
+   ['sentry',[7.7,3.3],[5,3.3],[4.6,3.3]]],
+  safe:[[4,17.3],[3.8,16.7],[3.8,15],[4.4,14.6],[4.7,10.5],[6.1,10.5],[7.3,10.25],[7.9,7],[7.8,3.2],[6,3.2],[6,1.25]],
+  back:[[4.6,3.3],[4.6,6.25],[3.8,7.4],[1.1,7.3],[1.1,10],[3.9,10],[4.4,14.6],[7,14.6],[7,17.3],[6,18.8]],
+  pockets:[[4,17.3],[4.7,10.5],[7.2,13.7],[4.6,6.25],[10.6,10]],
+  grates:[[7.7,8,.85,1.3]],
+  tip:'Weave around the cargo islands and activate the central switch to open the upper vault. Side galleries help you flank patrols. The striped shortcut makes noise. Recover the Seeker beyond the gate, then return to the bottom entrance.'},
  {spawn:[2,18],phone:[9.4,4],exit:[9.9,17.8],
   walls:[[4,10.5,3.2,3.8],[4,4,2.5,3],[8.5,13.5,1.8,1.8],[1.2,7.7,1.7,1.3],[7.8,1.5,1.2,1.1]],
   cast:[['scout',[3.1,12],[3.1,10],[2,10]],['sentry',[8,12],[8,10],[9.8,10]],['scout',[3.2,5.8],[3.2,3],[5.5,3]],['sentry',[7.6,6.5],[7.6,4],[9,3]],['drone',[10.4,7],[10.4,9],[9,9]]],
@@ -319,7 +341,7 @@ export function applyHeistLayout(l:LevelDefinition):LevelDefinition{
  });
  for(const entry of plan.entries??[]){const p=point(entry);l.patrols.push({route:[p,{x:p.x,y:p.y-.5}],roam:[p,{x:p.x,y:p.y-.5}],combatRole:'scout',reserveAfter:0,pickupWave:1,speed:.75,pursuitSpeed:2.6,range:4.1,halfAngle:Math.PI/3.6,spotSeconds:.35,pauseSeconds:.5,investigates:true});}
  l.encounter={islands:plan.walls.slice(0,2).map(box),grates:(plan.grates??[]).map(box),...(plan.lasers?{lasers:plan.lasers.map(box)}:{}),pockets:plan.pockets.map(point),junctions:[...plan.safe,...plan.back,...plan.pockets].map(point),routes:{approach:plan.safe.map(point),escape:plan.back.map(point),fast:[l.phone]}};
- if(l.number===9){l.switches=[{x:2,y:7,kind:'power'}];l.gates=[{box:{x:9.1,y:7,w:2.2,h:.6,kind:'wall'},mode:'power',power:1,period:10,openSeconds:5,phase:0}];}
+ if(l.number===9){l.switches=[{x:6.1,y:10.5,kind:'power'}];l.gates=[{box:{x:3.2,y:2.3,w:5.6,h:.5,kind:'wall'},mode:'power',power:1,period:10,openSeconds:5,phase:0}];}
  if(l.number===10)l.exitWindow={period:8,openSeconds:4,phase:0};
  l.targetSeconds=l.number<=3?65:l.number===8?115:l.number<=7?80:95;l.hardLimitSeconds=l.number===8?240:210;l.briefing=plan.tip;
  return applyPressure(l);
