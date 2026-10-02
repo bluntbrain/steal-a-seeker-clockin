@@ -783,3 +783,11 @@ test('promotion capacity holds pending approvals and releases cancelled or expir
  const third=await h.commerce.createOrder(a.wallet,'campaign',randomUUID(),'SKR',h.code);await h.commerce.preparePayment(a.wallet,third.id);await pool.query("UPDATE orders SET expires_at=now()-interval '1 second' WHERE id=$1",[third.id]);await assert.rejects(h.commerce.createOrder(b.wallet,'campaign',randomUUID(),'SKR',h.code),/fully claimed/);
 });
 test('promotion configuration fails closed without exposing codes',async()=>{const {parsePromotions}=await import('./promotions');assert.throws(()=>parsePromotions('{bad-private-value'),e=>e instanceof Error&&!e.message.includes('bad-private-value'));assert.deepEqual(parsePromotions(undefined),[]);});
+
+test('league start route accepts knife week contract ids longer than the old 32 character cap',async()=>{
+ const user=await login(),contractId='2026-10-05:0:variety-v3:knife-v16';
+ assert.equal(contractId.length,33);
+ const r=await app.inject({method:'POST',url:'/league/start',headers:user.headers,payload:{contractId,rulesHash:'a'.repeat(64),requestKey:randomUUID()}});
+ // the id must pass schema validation; the service then refuses it for other reasons
+ assert.notEqual(r.statusCode,400,r.body);
+});
