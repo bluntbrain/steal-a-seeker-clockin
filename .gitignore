@@ -72,3 +72,4 @@ design/visual-v2/credit-claim/preview.js
 # Heavy emulator QA media stays local; text evidence is tracked
 verification/qa/*/videos/
 verification/qa/*/screenshots/
+.gstack/

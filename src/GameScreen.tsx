@@ -204,8 +204,8 @@ export function Game({rankTicket,paidPlay,dailyReturn,paidReturn,onRankStart,onR
  const callBeginGuide=useCallback(()=>jsRef.current.beginGuide(),[]);
  const frameDriver=useFrameCallback(useCallback((frame:{timeSincePreviousFrame:number|null})=>{
    'worklet';
-   // a newly registered callback reports a null delta; count it as one display frame instead of dropping it
-   const raw=frame.timeSincePreviousFrame??1000/60;
+   // null marks the first callback after registration, which now happens once per mount
+   const raw=frame.timeSincePreviousFrame;if(raw===null)return;
    if(suspended.value||!sceneReady.value){pendingTap.value=null;accumulator.value=0;return;}
    tapElapsed.value+=raw;
    if(tapReady(pendingTap.value,tapElapsed.value)&&game.value.status==='playing'){
@@ -223,11 +223,14 @@ export function Game({rankTicket,paidPlay,dailyReturn,paidReturn,onRankStart,onR
      const sorted=[...samples.value].sort((a,b)=>a-b);const mean=samples.value.reduce((a,b)=>a+b,0)/Math.max(1,samples.value.length);
      runOnJS(callStats)({fps:1000/mean,p95:sorted[Math.max(0,Math.ceil(sorted.length*.95)-1)]??0,frames:frameTotal.value,slow:slowTotal.value});reportClock.value=0;
    }
-   const previousDamage=game.value.combat?.damageTaken??0,previousDecoys=game.value.decoysLeft,previousAlert=game.value.alert,previousPower=game.value.power,previousRelays=[...game.value.relayTimers],previousCarry=game.value.carrying,previousDashes=game.value.dashes,previousTool=game.value.toolSeen,previousStatus=game.value.status;
    accumulator.value=Math.min(accumulator.value+dt,TUNING.step*3);
-   if(accumulator.value+1e-9>=TUNING.step)game.modify(s=>{recording.modify(chunks=>{while(accumulator.value+1e-9>=TUNING.step){recordStep(s,input.value,chunks);accumulator.value-=TUNING.step;}return chunks;});return s;},true);
+   saveClock.value+=dt;hudClock.value+=dt;
+   // frames without a simulation step change nothing, so they only advance interpolation
+   if(accumulator.value+1e-9<TUNING.step){alpha.value=accumulator.value/TUNING.step;return;}
+   const previousDamage=game.value.combat?.damageTaken??0,previousDecoys=game.value.decoysLeft,previousAlert=game.value.alert,previousPower=game.value.power,previousRelays=[...game.value.relayTimers],previousCarry=game.value.carrying,previousDashes=game.value.dashes,previousTool=game.value.toolSeen,previousStatus=game.value.status;
+   game.modify(s=>{recording.modify(chunks=>{while(accumulator.value+1e-9>=TUNING.step){recordStep(s,input.value,chunks);accumulator.value-=TUNING.step;}return chunks;});return s;},true);
    alpha.value=accumulator.value/TUNING.step;
-   if(paidEntry){saveClock.value+=dt;if(saveClock.value>=1||previousStatus!==game.value.status){saveClock.value=0;runOnJS(callCheckpoint)({version:(combatMode?2:1) as 1|2,chunks:recording.value.map(c=>({...c}))});}}
+   if(paidEntry&&(saveClock.value>=1||previousStatus!==game.value.status)){saveClock.value=0;runOnJS(callCheckpoint)({version:(combatMode?2:1) as 1|2,chunks:recording.value.map(c=>({...c}))});}
    if(game.value.decoysLeft<previousDecoys)runOnJS(callEvent)('decoy');
    if(!combatMode&&previousAlert<=0&&game.value.alert>0)runOnJS(callEvent)('spot');
    if(game.value.power!==previousPower||game.value.relayTimers.some((v,i)=>v>(previousRelays[i]??0)))runOnJS(callEvent)('switch');
@@ -235,7 +238,6 @@ export function Game({rankTicket,paidPlay,dailyReturn,paidReturn,onRankStart,onR
    if(game.value.dashes>previousDashes)runOnJS(callEvent)('dash');
    if(game.value.status==='won'&&previousStatus!=='won')runOnJS(callEvent)('success');
    if(game.value.status==='caught'&&previousStatus!=='caught')runOnJS(callEvent)('caught');
-   hudClock.value+=dt;
    if(hudClock.value>=.12||previousDamage!==(game.value.combat?.damageTaken??0)||previousTool!==game.value.toolSeen||previousCarry!==game.value.carrying||previousStatus!==game.value.status||previousDashes!==game.value.dashes){runOnJS(callPublish)({...game.value},simulationEpoch.value);hudClock.value=0;}
  },[suspended,sceneReady,pendingTap,tapElapsed,game,input,guideStage,guideWaiting,clock,frameTotal,slowTotal,samples,reportClock,accumulator,recording,alpha,saveClock,hudClock,simulationEpoch,paidEntry,combatMode,callPublish,callStats,callEvent,callCheckpoint,callBeginGuide]));
  useEffect(()=>{frameDriver.setActive(renderGameSurface&&!paused);return()=>frameDriver.setActive(false);},[renderGameSurface,paused,frameDriver]);
