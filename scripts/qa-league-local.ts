@@ -9,7 +9,8 @@ import {solveCombat} from './qa-combat';
 import {solveWeeklyRush} from './qa-weekly-rush';
 import {contractPoints} from '../shared/contracts';
 const base=process.env.QA_API_URL??'http://127.0.0.1:8790',database=process.env.DATABASE_URL??'postgresql://localhost/seeker_clockin_devnet';
-assert(/127\.0\.0\.1|localhost/.test(base)&&/localhost|127\.0\.0\.1/.test(database),'local only');
+const loopback=new Set(['127.0.0.1','localhost','::1','[::1]']);
+assert(loopback.has(new URL(base).hostname)&&loopback.has(new URL(database).hostname),'local only: api and database hosts must be loopback');
 async function api(path:string,token?:string,body?:unknown,expect=200){const r=await fetch(base+path,{method:body?'POST':'GET',headers:{'content-type':'application/json',...(token?{authorization:`Bearer ${token}`}:{})},body:body?JSON.stringify(body):undefined});const json=await r.json().catch(()=>null);assert.equal(r.status,expect,`${path}: ${JSON.stringify(json)}`);return json as any;}
 const sleep=(ms:number)=>new Promise(r=>setTimeout(r,ms));
 async function main(){

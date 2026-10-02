@@ -42,21 +42,16 @@ export default function GuardLayer({game,alpha,index,clock,reduced=false,droneSp
  const width=useDerivedValue(()=>game.value.combat?(game.value.guards[index]?.hp??0)/(game.value.guards[index]?.maxHp??1)*barWidth:(game.value.guards[index]?.exposure??0)*barWidth);
  const hitFlash=useDerivedValue(()=>live.value?Math.min(1,(game.value.guards[index]?.flash??0)*5):fx.value.flash);
  const bar=useDerivedValue(()=>{const g=game.value.guards[index];return [{translateX:(g?.x??0)-barWidth/2},{translateY:(g?.y??0)-barLift}];});
- // rays are cast once per simulation tick from the guard's tick position and the endpoints stay on the walls they hit;
- // the per-frame path only moves the apex onto the interpolated sprite, so no wall is crossed by interpolation
- const coneRays=useDerivedValue(()=>{
-  const s=game.value,g=s.guards[index];if(!g||!live.value)return null;
-  const level={...stateLevel(s),blockers:s.blockers},x=g.x,y=g.y,points:number[]=[];
+ // the cone is cast once per simulation tick from the guard's tick position and drawn from there. it reads only
+ // `game`, so it does not rerun on interpolation frames, and a wall-clipped shape is never shifted off its clip.
+ // the apex trails the interpolated sprite by at most one tick of movement.
+ const cone=usePathValue(p=>{
+  'worklet';const s=game.value,g=s.guards[index];if(!g||!live.value)return;
+  const level={...stateLevel(s),blockers:s.blockers},x=g.x,y=g.y;p.moveTo(x,y);
   for(let i=0;i<=32;i++){
    const a=g.angle-g.halfAngle+2*g.halfAngle*i/32,dx=Math.cos(a),dy=Math.sin(a);
-   const d=sightDistance(x,y,dx,dy,g.range,level);points.push(x+dx*d,y+dy*d);
+   const d=sightDistance(x,y,dx,dy,g.range,level);p.lineTo(x+dx*d,y+dy*d);
   }
-  return points;
- });
- const cone=usePathValue(p=>{
-  'worklet';const rays=coneRays.value,g=game.value.guards[index];if(!rays||!g)return;
-  p.moveTo(g.px+(g.x-g.px)*alpha.value,g.py+(g.y-g.py)*alpha.value);
-  for(let i=0;i<rays.length;i+=2)p.lineTo(rays[i]!,rays[i+1]!);
   p.close();
  });
  const alertOpacity=useDerivedValue(()=>{const g=game.value.guards[index];return g?.brain&&g.active&&g.hp>0&&(g.seesPlayer&&g.exposure>=1||g.mode==='investigate'||g.mode==='search')?1:0;});
