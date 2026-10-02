@@ -338,7 +338,7 @@ const cone = usePathValue(p =&gt; {
         <li class="done"><b>db01340</b> Local league end to end script and a route test for long ids.</li>
         <li class="done"><b>8143d52</b> 75 sprite sheets to WebP at quality 90, floors to 768 pixels wide, message art to 1024, paywall video re-encoded; manifests and tests updated.</li>
         <li class="done"><b>6653274, ae1653a, 0226a04</b> Code 36 release receipt, this report with browser evidence, and WebP support in the design preview builders.</li>
-        <li class="done"><b>Price feed warm-up</b> Production <code>/catalog</code> answered in 0.56 s and then 10.35 s on 2026-10-02 because the 45 s rate cache expired under the request; the feed now refreshes every 30 s in the background.</li>
+        <li class="done"><b>Price feed warm-up (31bd8bd)</b> The market rate cache expired every 45 s and the next catalog or quote request waited on two exchange calls. With USD pricing on, the feed now refreshes every 30 s in the background. After the deploy, Railway's own request log shows every <code>/catalog</code> served in 1 to 24 ms. Two client-side observations of 10 to 20 s on 2026-10-02 had server durations of about 2 ms, so that residual delay sits in the network path to the edge, not in the app, and is listed as an open item.</li>
         <li class="done"><b>Railway</b> API deployed at 15:24 UTC with the current rule bundles and again after the price feed change; the active week stays pinned to its published revision.</li>
       </ul>
       <h3>Asset sizes</h3>
@@ -413,6 +413,7 @@ adb shell am start -W com.bluntbrain.stealaseeker/.MainActivity</code></pre>
             <tr><td>Pathfinding smoothing</td><td>Quadratic loop in <code>navigation.ts</code> drives the tap spikes</td><td>Inside the rules bundle: regenerate the manifest, commit the pinned bundle, deploy the API, then ship the APK</td></tr>
             <tr><td>Remaining per-frame work</td><td>80 loot transforms per frame when no loot is visible; 16 floor image draws in warehouse levels; full-screen RN alarm layers animating opacity</td><td>Measure on device first; each is a small, isolated change</td></tr>
             <tr><td>Knife weekly switch</td><td><code>KNIFE_WEEKLY_START</code> is unset; the id length bug that would have broken it is fixed</td><td>Set it only for a Monday after a backend deploy that holds the matching bundle</td></tr>
+            <tr><td>Intermittent slow first byte from Railway</td><td>Client requests occasionally took 10 to 20 s while the server logged 1 to 2 ms for the same request (2026-10-02, 15:38 to 15:46 UTC)</td><td>Edge or network path; capture with Railway HTTP logs and a client timing breakdown during a session on the phone before changing anything</td></tr>
             <tr><td>Legal</td><td>Real money entry and returns under the Indian statute noted in <code>rules.md</code></td><td>Open question for counsel; not resolved here</td></tr>
           </tbody>
         </table>
