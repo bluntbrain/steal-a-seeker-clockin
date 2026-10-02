@@ -1,0 +1,14 @@
+{
+  "fullSuite": "379 passed",
+  "typecheck": "passed",
+  "webExport": "passed",
+  "browser": "390x844: inspected twin walls and lower block; tapped across entrance, courier moved and camera followed; pause worked; no console errors",
+  "replay": "Ordinary-input winning run independently replay-verified",
+  "layout": "Parallel upper walls, narrow center corridor, two crate-lined outer lanes, connected upper and lower cross-links, large lower block and bottom entrance",
+  "laser": "Existing 1.5-second one-shot local alert; passable left crossing tested",
+  "limits": [
+    "No APK or physical Android test",
+    "No backend deployment",
+    "Automated win is not human difficulty evidence"
+  ]
+}

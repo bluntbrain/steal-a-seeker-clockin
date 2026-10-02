@@ -1,0 +1,549 @@
+{
+  "mission": "sweep-window",
+  "rules": "77efb541f8f64e55b6477981517159be26809f82504d7d140a2b4ef73e88965b",
+  "win": {
+    "strategy": 13,
+    "ticks": 417,
+    "hp": 19,
+    "kills": 2,
+    "score": 8181,
+    "replay": {
+      "version": 2,
+      "chunks": [
+        {
+          "x": 0,
+          "y": 0,
+          "buttons": 0,
+          "ticks": 1,
+          "command": {
+            "seq": 1,
+            "kind": "phone",
+            "target": 0,
+            "x": 5.25,
+            "y": 3.05
+          }
+        },
+        {
+          "x": 0,
+          "y": 0,
+          "buttons": 0,
+          "ticks": 14
+        },
+        {
+          "x": 0,
+          "y": 0,
+          "buttons": 0,
+          "ticks": 1,
+          "command": {
+            "seq": 2,
+            "kind": "move",
+            "target": -1,
+            "x": 7.444578572111352,
+            "y": 15.707389523718486
+          }
+        },
+        {
+          "x": 0,
+          "y": 0,
+          "buttons": 0,
+          "ticks": 14
+        },
+        {
+          "x": 0,
+          "y": 0,
+          "buttons": 0,
+          "ticks": 1,
+          "command": {
+            "seq": 3,
+            "kind": "move",
+            "target": -1,
+            "x": 7.444578572111352,
+            "y": 13.493389523718477
+          }
+        },
+        {
+          "x": 0,
+          "y": 0,
+          "buttons": 0,
+          "ticks": 14
+        },
+        {
+          "x": 0,
+          "y": 0,
+          "buttons": 0,
+          "ticks": 1,
+          "command": {
+            "seq": 4,
+            "kind": "phone",
+            "target": 0,
+            "x": 5.25,
+            "y": 3.05
+          }
+        },
+        {
+          "x": 0,
+          "y": 0,
+          "buttons": 0,
+          "ticks": 14
+        },
+        {
+          "x": 0,
+          "y": 0,
+          "buttons": 0,
+          "ticks": 1,
+          "command": {
+            "seq": 5,
+            "kind": "attack",
+            "target": 0,
+            "x": 5.25,
+            "y": 7.900000000000034
+          }
+        },
+        {
+          "x": 0,
+          "y": 0,
+          "buttons": 0,
+          "ticks": 14
+        },
+        {
+          "x": 0,
+          "y": 0,
+          "buttons": 0,
+          "ticks": 1,
+          "command": {
+            "seq": 6,
+            "kind": "phone",
+            "target": 0,
+            "x": 5.25,
+            "y": 3.05
+          }
+        },
+        {
+          "x": 0,
+          "y": 0,
+          "buttons": 0,
+          "ticks": 14
+        },
+        {
+          "x": 0,
+          "y": 0,
+          "buttons": 0,
+          "ticks": 1,
+          "command": {
+            "seq": 7,
+            "kind": "phone",
+            "target": 0,
+            "x": 5.25,
+            "y": 3.05
+          }
+        },
+        {
+          "x": 0,
+          "y": 0,
+          "buttons": 0,
+          "ticks": 14
+        },
+        {
+          "x": 0,
+          "y": 0,
+          "buttons": 0,
+          "ticks": 1,
+          "command": {
+            "seq": 8,
+            "kind": "phone",
+            "target": 0,
+            "x": 5.25,
+            "y": 3.05
+          }
+        },
+        {
+          "x": 0,
+          "y": 0,
+          "buttons": 0,
+          "ticks": 14
+        },
+        {
+          "x": 0,
+          "y": 0,
+          "buttons": 0,
+          "ticks": 1,
+          "command": {
+            "seq": 9,
+            "kind": "attack",
+            "target": 5,
+            "x": 6.202577034781121,
+            "y": 1.437497193503344
+          }
+        },
+        {
+          "x": 0,
+          "y": 0,
+          "buttons": 0,
+          "ticks": 14
+        },
+        {
+          "x": 0,
+          "y": 0,
+          "buttons": 0,
+          "ticks": 1,
+          "command": {
+            "seq": 10,
+            "kind": "move",
+            "target": -1,
+            "x": 7.727146166342625,
+            "y": 2.193775887229052
+          }
+        },
+        {
+          "x": 0,
+          "y": 0,
+          "buttons": 0,
+          "ticks": 14
+        },
+        {
+          "x": 0,
+          "y": 0,
+          "buttons": 0,
+          "ticks": 1,
+          "command": {
+            "seq": 11,
+            "kind": "phone",
+            "target": 0,
+            "x": 5.25,
+            "y": 3.05
+          }
+        },
+        {
+          "x": 0,
+          "y": 0,
+          "buttons": 0,
+          "ticks": 14
+        },
+        {
+          "x": 0,
+          "y": 0,
+          "buttons": 0,
+          "ticks": 1,
+          "command": {
+            "seq": 12,
+            "kind": "attack",
+            "target": 0,
+            "x": 5.407797348544529,
+            "y": 3.2395865816510443
+          }
+        },
+        {
+          "x": 0,
+          "y": 0,
+          "buttons": 0,
+          "ticks": 14
+        },
+        {
+          "x": 0,
+          "y": 0,
+          "buttons": 0,
+          "ticks": 1,
+          "command": {
+            "seq": 13,
+            "kind": "attack",
+            "target": 0,
+            "x": 5.41058150881424,
+            "y": 3.1503800182625104
+          }
+        },
+        {
+          "x": 0,
+          "y": 0,
+          "buttons": 0,
+          "ticks": 14
+        },
+        {
+          "x": 0,
+          "y": 0,
+          "buttons": 0,
+          "ticks": 1,
+          "command": {
+            "seq": 14,
+            "kind": "phone",
+            "target": 0,
+            "x": 5.25,
+            "y": 3.05
+          }
+        },
+        {
+          "x": 0,
+          "y": 0,
+          "buttons": 0,
+          "ticks": 14
+        },
+        {
+          "x": 0,
+          "y": 0,
+          "buttons": 0,
+          "ticks": 1,
+          "command": {
+            "seq": 15,
+            "kind": "phone",
+            "target": 0,
+            "x": 5.25,
+            "y": 3.05
+          }
+        },
+        {
+          "x": 0,
+          "y": 0,
+          "buttons": 0,
+          "ticks": 14
+        },
+        {
+          "x": 0,
+          "y": 0,
+          "buttons": 0,
+          "ticks": 1,
+          "command": {
+            "seq": 16,
+            "kind": "exit",
+            "target": 0,
+            "x": 5.25,
+            "y": 18.3
+          }
+        },
+        {
+          "x": 0,
+          "y": 0,
+          "buttons": 0,
+          "ticks": 14
+        },
+        {
+          "x": 0,
+          "y": 0,
+          "buttons": 0,
+          "ticks": 1,
+          "command": {
+            "seq": 17,
+            "kind": "exit",
+            "target": 0,
+            "x": 5.25,
+            "y": 18.3
+          }
+        },
+        {
+          "x": 0,
+          "y": 0,
+          "buttons": 0,
+          "ticks": 14
+        },
+        {
+          "x": 0,
+          "y": 0,
+          "buttons": 0,
+          "ticks": 1,
+          "command": {
+            "seq": 18,
+            "kind": "exit",
+            "target": 0,
+            "x": 5.25,
+            "y": 18.3
+          }
+        },
+        {
+          "x": 0,
+          "y": 0,
+          "buttons": 0,
+          "ticks": 14
+        },
+        {
+          "x": 0,
+          "y": 0,
+          "buttons": 0,
+          "ticks": 1,
+          "command": {
+            "seq": 19,
+            "kind": "exit",
+            "target": 0,
+            "x": 5.25,
+            "y": 18.3
+          }
+        },
+        {
+          "x": 0,
+          "y": 0,
+          "buttons": 0,
+          "ticks": 14
+        },
+        {
+          "x": 0,
+          "y": 0,
+          "buttons": 0,
+          "ticks": 1,
+          "command": {
+            "seq": 20,
+            "kind": "move",
+            "target": -1,
+            "x": 3.1299370448850725,
+            "y": 9.851620296655666
+          }
+        },
+        {
+          "x": 0,
+          "y": 0,
+          "buttons": 0,
+          "ticks": 14
+        },
+        {
+          "x": 0,
+          "y": 0,
+          "buttons": 0,
+          "ticks": 1,
+          "command": {
+            "seq": 21,
+            "kind": "exit",
+            "target": 0,
+            "x": 5.25,
+            "y": 18.3
+          }
+        },
+        {
+          "x": 0,
+          "y": 0,
+          "buttons": 0,
+          "ticks": 14
+        },
+        {
+          "x": 0,
+          "y": 0,
+          "buttons": 0,
+          "ticks": 1,
+          "command": {
+            "seq": 22,
+            "kind": "move",
+            "target": -1,
+            "x": 7.909409106862794,
+            "y": 14.315054603484883
+          }
+        },
+        {
+          "x": 0,
+          "y": 0,
+          "buttons": 0,
+          "ticks": 14
+        },
+        {
+          "x": 0,
+          "y": 0,
+          "buttons": 0,
+          "ticks": 1,
+          "command": {
+            "seq": 23,
+            "kind": "exit",
+            "target": 0,
+            "x": 5.25,
+            "y": 18.3
+          }
+        },
+        {
+          "x": 0,
+          "y": 0,
+          "buttons": 0,
+          "ticks": 14
+        },
+        {
+          "x": 0,
+          "y": 0,
+          "buttons": 0,
+          "ticks": 1,
+          "command": {
+            "seq": 24,
+            "kind": "exit",
+            "target": 0,
+            "x": 5.25,
+            "y": 18.3
+          }
+        },
+        {
+          "x": 0,
+          "y": 0,
+          "buttons": 0,
+          "ticks": 14
+        },
+        {
+          "x": 0,
+          "y": 0,
+          "buttons": 0,
+          "ticks": 1,
+          "command": {
+            "seq": 25,
+            "kind": "exit",
+            "target": 0,
+            "x": 5.25,
+            "y": 18.3
+          }
+        },
+        {
+          "x": 0,
+          "y": 0,
+          "buttons": 0,
+          "ticks": 14
+        },
+        {
+          "x": 0,
+          "y": 0,
+          "buttons": 0,
+          "ticks": 1,
+          "command": {
+            "seq": 26,
+            "kind": "exit",
+            "target": 0,
+            "x": 5.25,
+            "y": 18.3
+          }
+        },
+        {
+          "x": 0,
+          "y": 0,
+          "buttons": 0,
+          "ticks": 14
+        },
+        {
+          "x": 0,
+          "y": 0,
+          "buttons": 0,
+          "ticks": 1,
+          "command": {
+            "seq": 27,
+            "kind": "exit",
+            "target": 0,
+            "x": 5.25,
+            "y": 18.3
+          }
+        },
+        {
+          "x": 0,
+          "y": 0,
+          "buttons": 0,
+          "ticks": 14
+        },
+        {
+          "x": 0,
+          "y": 0,
+          "buttons": 0,
+          "ticks": 1,
+          "command": {
+            "seq": 28,
+            "kind": "exit",
+            "target": 0,
+            "x": 5.25,
+            "y": 18.3
+          }
+        },
+        {
+          "x": 0,
+          "y": 0,
+          "buttons": 0,
+          "ticks": 11
+        }
+      ]
+    }
+  },
+  "verified": "won"
+}
