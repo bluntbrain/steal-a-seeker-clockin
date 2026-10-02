@@ -51,6 +51,8 @@ Authenticated credits use a PostgreSQL ledger. Verified campaign replays and fin
 
 The latest browser tutorial check reached the win screen with 60 credits and continued to mission two. Earlier store QA covered free practice, pass gating, credit-pack cancellation/purchase, cosmetic debit/equip/unequip and persistence, with Hideout and packs at 360×640 and 390×844. That historical evidence is in the [store QA report](verification/free-store-ui/README.md); current tutorial evidence is in the [tutorial audit](docs/TUTORIAL-AUDIT-2026-09-17.md).
 
+2 October: the frame loop, guard cones, overlay panels, audio hooks and assets were reworked for smoothness and size; see [the performance report](docs/PERFORMANCE-PLAN-2026-10-02.html) for the findings, the evidence register and the remaining items. Code 36 is 90.7 MB against 150.4 MB for code 35, with 396 client and 90 server tests passing and the API redeployed with the current rule bundles. Browser evidence is in `verification/perf-2026-10-02/`.
+
 The updated APK builds. This revision still needs physical Android frame-pacing, sound/haptics, touch and real Phantom purchase verification. Weekly funded prize settlement and campaign-only health upgrades are not included. Do not advertise token winnings before settlement is implemented and funded.
 
 ## Source layout

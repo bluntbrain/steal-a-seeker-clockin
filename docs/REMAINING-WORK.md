@@ -136,6 +136,9 @@ The normal lifecycle and durable workers exist; synthetic chain tests are not a 
 
 ## 10. Measure performance and package assets — P1 release work
 
+> **2 October 2026:** frame loop, camera, overlay re-renders, guard cones, route rounding, audio hooks and asset packaging were fixed on `main`; see [PERFORMANCE-PLAN-2026-10-02.html](PERFORMANCE-PLAN-2026-10-02.html). Sprite sheets are WebP (57.8 MB to 7.8 MB), the paywall video is 2.3 MB, and the code 36 APK is 90.7 MB. Physical-device profiling, R8, Filament weight and the pathfinding bundle bump remain open below.
+
+
 - [ ] Profile the release APK, including late levels with several guards and an active alarm.
 - [ ] Measure frame times, input latency, cold start, memory and at least a 15-minute heat/battery session.
 - [ ] Measure opening/closing the 3D inspector repeatedly for memory/context leaks.
