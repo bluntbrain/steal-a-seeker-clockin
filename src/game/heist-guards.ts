@@ -71,6 +71,32 @@ export function shareHeistSighting(s:GameState,index:number,l:LevelDefinition){
  }
  return count;
 }
+/** Segment/AABB test catches a fast crossing even between two simulation ticks. */
+function crossesLaser(ax:number,ay:number,bx:number,by:number,r:{x:number;y:number;w:number;h:number},margin:number){
+ 'worklet';let enter=0,leave=1;
+ for(let axis=0;axis<2;axis++){
+  const a=axis?ay:ax,d=(axis?by:bx)-a,min=(axis?r.y:r.x)-margin,max=(axis?r.y+r.h:r.x+r.w)+margin;
+  if(Math.abs(d)<1e-9){if(a<min||a>max)return false;continue;}
+  const t1=(min-a)/d,t2=(max-a)/d;enter=Math.max(enter,Math.min(t1,t2));leave=Math.min(leave,Math.max(t1,t2));if(enter>leave)return false;
+ }
+ return true;
+}
+/** One local position report on entry. Standing in a beam does not spam guards,
+ * and the exit margin avoids rearming from tiny movements along its edge. */
+export function updateTripwires(s:GameState,l:LevelDefinition){
+ 'worklet';const lasers=l.encounter?.lasers;if(!lasers?.length||!s.combat||s.status!=='playing')return;
+ const event=s.combat.tripwire??(s.combat.tripwire={id:0,inside:lasers.map(()=>false),until:0,x:0,y:0,laser:-1});
+ for(let j=0;j<lasers.length;j++){
+  const r=lasers[j]!,touching=crossesLaser(s.px,s.py,s.x,s.y,r,.16);
+  if(event.inside[j]){if(!crossesLaser(s.x,s.y,s.x,s.y,r,.28))event.inside[j]=false;continue;}
+  if(!touching)continue;
+  event.inside[j]=true;event.id++;event.until=s.ticks+45;event.x=s.x;event.y=s.y;event.laser=j;s.spotted=true;
+  for(let i=0;i<s.guards.length;i++){
+   const g=s.guards[i]!;if(!g.spawned||!g.active||g.hp<=0||Math.hypot(g.x-s.x,g.y-s.y)>5)continue;
+   brain(g,i,l);if(!g.heist!.hunting&&!g.seesPlayer)investigate(g,event,s.ticks);
+  }
+ }
+}
 function roam(g:Guard,index:number,s:GameState,l:LevelDefinition){
  'worklet';const b=g.brain!,anchors=l.patrols[index]!.roam??l.patrols[index]!.route;let best=-Infinity,pick=0;
  for(let j=0;j<anchors.length;j++){const p=anchors[j]!,crowded=s.guards.some((o,k)=>k!==index&&o.active&&o.hp>0&&Math.hypot((o.brain?.goal?.x??o.x)-p.x,(o.brain?.goal?.y??o.y)-p.y)<1.1);

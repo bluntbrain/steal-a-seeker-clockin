@@ -1,0 +1,23 @@
+{
+  "checks": {
+    "typecheck": "pass",
+    "fullSuite": "373 passed",
+    "targetedLaserTests": "6 passed",
+    "webExport": "pass",
+    "browser": "Portrait 390x844: level-three layout, crossing alarm visible, warning later cleared, laser introduction with fixed Play button, no console errors",
+    "replay": "Ordinary-input simulation win; server replay verified"
+  },
+  "behavior": {
+    "alarmSeconds": 1.5,
+    "nearbyRadiusTiles": 5,
+    "trigger": "Once on entering a beam; rearm after fully leaving",
+    "damage": 0,
+    "report": "Crossing location snapshot; confirmed sighting can start normal shared pursuit"
+  },
+  "limits": [
+    "No physical Android test or APK build",
+    "No backend deployment",
+    "Browser run demonstrated alarm then guard sighting; isolated local alert semantics covered by simulation tests",
+    "Winning replay is an automated controller result, not human difficulty evidence"
+  ]
+}

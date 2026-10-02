@@ -1,10 +1,11 @@
 /** Slowed, presentation-only lessons. No game state, network calls or rewards. */
-export type Mechanic='drone'|'flank'|'reinforcements'|'cover'|'armor'|'routes'|'relay'|'switch'|'timed-exit'|'pursuit'|'finale';
+export type Mechanic='laser'|'drone'|'flank'|'reinforcements'|'cover'|'armor'|'routes'|'relay'|'switch'|'timed-exit'|'pursuit'|'finale';
 export const MECHANIC_DURATION=15;
 export type DemoPoint={x:number;y:number};
 export type DemoBox=DemoPoint&{width:number;height:number};
 export type DemoActor=DemoPoint&{kind:'guard'|'heavy'|'drone';visible:boolean;hp:number};
 export const MECHANIC_STEPS:Record<Mechanic,readonly {label:string;caption:string;badge:string}[]>={
+ laser:[{label:'Beam',caption:'Amber laser beams mark an alarm crossing. They do not block movement or deal damage.',badge:'TRIPWIRE · NOT A WALL'},{label:'Alarm',caption:'Cross once: the alarm flashes for 1.5 seconds and nearby guards investigate that crossing.',badge:'ONE CROSSING · ONE REPORT'},{label:'Relocate',caption:'Get behind cover. The guards check the crossing, not your hidden new position. A real sighting starts a chase.',badge:'BREAK SIGHT · KEEP MOVING'}],
  drone:[{label:'Scan',caption:'Scout drones do not shoot. They scan and charge a radio report.',badge:'SCOUT DRONE · NO GUN'},{label:'Report',caption:'If the amber ring fills, it shares your location. Other enemies join the hunt.',badge:'LOCATION SENT'},{label:'Interrupt',caption:'Instead, cut it down up close before it reports—or break sight. A sent alert stays active.',badge:'INSTEAD · STOP IT EARLY'}],
  flank:[{label:'Watch',caption:'Two guards cover one island. Rushing between them exposes you to both.',badge:'TWO GUARDS · ONE ISLAND'},{label:'Wait',caption:'Wait behind cover until the guards separate.',badge:'WAIT FOR A GAP'},{label:'Flank',caption:'Move around the island and attack one guard at a time.',badge:'ONE TARGET AT A TIME'}],
  reinforcements:[{label:'Plan',caption:'Plan your way back before you take the phone.',badge:'FIND YOUR ESCAPE ROUTE'},{label:'Response',caption:'The pickup triggers a warning at the marked security entrance. A guard arrives.',badge:'PICKUP CALLS SECURITY'},{label:'Escape',caption:'Move toward the exit through cover as the response arrives.',badge:'TAKE THE COVERED WAY OUT'}],
@@ -18,6 +19,7 @@ export const MECHANIC_STEPS:Record<Mechanic,readonly {label:string;caption:strin
  finale:[{label:'Warden',caption:'Flank the Warden and strike its mint rear panel.',badge:'FLANK THE WARDEN'},{label:'Drone',caption:'Stop the scout drone before its radio report brings everyone after you.',badge:'STOP THE RADIO'},{label:'Extract',caption:'The final pickup calls both security entrances. Take your escape route.',badge:'BOTH ENTRANCES RESPOND'}],
 };
 export const MECHANIC_COVER:Record<Mechanic,DemoBox[]>={
+ laser:[{x:140,y:142,width:65,height:40}],
  drone:[{x:54,y:240,width:58,height:36}],flank:[{x:130,y:145,width:60,height:65}],reinforcements:[{x:130,y:190,width:60,height:45}],cover:[{x:140,y:110,width:40,height:95},{x:200,y:190,width:65,height:32}],armor:[{x:145,y:190,width:50,height:50}],routes:[{x:140,y:135,width:55,height:75}],relay:[{x:140,y:170,width:45,height:50}],switch:[{x:206,y:55,width:12,height:55},{x:206,y:222,width:12,height:78}],'timed-exit':[{x:200,y:190,width:65,height:32}],pursuit:[{x:150,y:130,width:45,height:80}],finale:[{x:145,y:190,width:50,height:50}],
 };
 const clamp=(t:number)=>{'worklet';return Math.max(0,Math.min(1,t));};
@@ -31,7 +33,7 @@ function travel(points:DemoPoint[],progress:number){
 export function mechanicFrame(kind:Mechanic,seconds:number){
  'worklet';const t=Math.max(0,Math.min(MECHANIC_DURATION,seconds)),step=Math.min(2,Math.floor(t/5)),phase=t-step*5;
  const actor=(x:number,y:number,role:DemoActor['kind']='guard',visible=true):DemoActor=>({x,y,kind:role,visible,hp:1});
- const f={step,x:70,y:245,face:2,walking:false,frame:2,actors:[actor(250,120),actor(45,90,'guard',false),actor(280,240,'guard',false)],phone:point(250,155),secondPhone:point(250,115),phoneVisible:false,secondVisible:false,carried:false,delivered:0,exit:point(270,260),exitVisible:false,exitOpen:true,extracted:false,charge:0,radio:false,stopped:false,noise:false,gateOpen:false,entry:false,secondEntry:false,slash:-1,shot:{visible:false,x:0,y:0,angle:0,enemy:false},tap:point(0,0),tapVisible:false};
+ const f={laserAlarm:false,step,x:70,y:245,face:2,walking:false,frame:2,actors:[actor(250,120),actor(45,90,'guard',false),actor(280,240,'guard',false)],phone:point(250,155),secondPhone:point(250,115),phoneVisible:false,secondVisible:false,carried:false,delivered:0,exit:point(270,260),exitVisible:false,exitOpen:true,extracted:false,charge:0,radio:false,stopped:false,noise:false,gateOpen:false,entry:false,secondEntry:false,slash:-1,shot:{visible:false,x:0,y:0,angle:0,enemy:false},tap:point(0,0),tapVisible:false};
  const move=(points:DemoPoint[],start:number,end:number)=>{const p=travel(points,(t-start)/(end-start));f.x=p.x;f.y=p.y;f.face=p.face;f.walking=t>start&&t<end;};
  const shoot=(from:DemoPoint,to:DemoPoint,start:number,enemy=false)=>{
   const p=(t-start)/.38,angle=Math.atan2(to.y-from.y,to.x-from.x);
@@ -41,7 +43,13 @@ export function mechanicFrame(kind:Mechanic,seconds:number){
    f.x=f.x+(end.x-f.x)*q;f.y=f.y+(end.y-f.y)*q;f.walking=q<1;f.face=Math.cos(angle)>.5?3:Math.cos(angle)<-.5?1:Math.sin(angle)>0?0:2;
    if(p>=0&&p<=1){f.slash=p;f.shot={visible:true,x:f.x,y:f.y-14,angle:angle-.7+p*1.8,enemy:false};}}
  };
- if(kind==='drone'){
+ if(kind==='laser'){
+  f.actors=[actor(260,95),actor(40,65),actor(0,0,'guard',false)];f.x=100;f.y=230;
+  f.laserAlarm=t>=5.9&&t<7.4;
+  if(step===1){move([point(100,230),point(100,150)],5.2,6.3);if(t>=6.3)move([point(100,150),point(120,120),point(235,120),point(235,205)],6.3,9.8);}
+  if(step===2){f.x=235;f.y=205;}
+  if(t>=6)Object.assign(f.actors[0]!,travel([point(260,95),point(100,95),point(100,180)],(t-6)/7));
+ }else if(kind==='drone'){
   f.x=110;f.y=202;f.face=3;f.actors=[actor(210,132,'drone'),actor(45,95),actor(282,222)];
   f.charge=step===0?clamp((phase-1)/4):step===1?1:phase<1.75?clamp(phase/3):0;
   if(step===1){f.radio=true;for(const [i,end] of [[1,point(75,160)],[2,point(166,202)]] as const){const a=f.actors[i]!;Object.assign(a,travel([a,end],phase/4));}}

@@ -63,12 +63,15 @@ export default function MechanicDemo({kind,edition,reduced=false,busy=false}:{ki
  const bothDelivered=useAnimatedStyle(()=>({opacity:film.value.delivered===2?1:0}));
  const tap=useAnimatedStyle(()=>({opacity:film.value.tapVisible?1:0,transform:[{translateX:film.value.tap.x-15},{translateY:film.value.tap.y-15}]}));
  const rewind=useAnimatedStyle(()=>({opacity:(kind==='drone'||kind==='switch')&&time.value>=10&&time.value<10.9?1:0}));
+ const laserGlow=useAnimatedStyle(()=>({backgroundColor:film.value.laserAlarm?'#FF564F':'#FAAD58',opacity:film.value.laserAlarm?1:.65}));
+ const laserNotice=useAnimatedStyle(()=>({opacity:film.value.laserAlarm?1:0}));
  const actor=kind==='finale'?1:0;
  const select=(i:number)=>{cancelAnimation(time);time.value=i*5+(reduced?2.8:0);setStep(i);setPaused(false);setRevision(n=>n+1);};
  return <View style={s.demo}>
   <View testID="mechanic-demo-stage" accessibilityLabel={`${kind} illustrated lesson`} onLayout={e=>setWidth(e.nativeEvent.layout.width)} style={[s.stage,{height:width*300/320}]}>
    <View pointerEvents="none" aria-hidden accessible={false} accessibilityElementsHidden importantForAccessibility="no-hide-descendants" style={{position:'absolute',width:320,height:300,left:(width-320)/2,top:(width*300/320-300)/2,transform:[{scale:width/320}]}}>
     <Image source={require('../../assets/world-v3/floor.png')} resizeMode="cover" style={s.floor}/><View style={[s.floor,{backgroundColor:'#05100F30'}]}/>
+    {kind==='laser'&&<><Animated.View style={[{position:'absolute',left:65,top:178,width:70,height:4,boxShadow:'0 0 9px #FFAD58'},laserGlow]}/>{[60,132].map(x=><View key={x} style={{position:'absolute',left:x,top:172,width:8,height:16,borderRadius:3,backgroundColor:'#7D9691'}}/>)}<Animated.View style={[s.notice,{left:75,top:55,backgroundColor:'#512722',borderColor:'#FF8270'},laserNotice]}><Text style={s.noticeText}>ALARM · CROSSING REPORTED</Text></Animated.View></>}
     {kind==='routes'&&<><Route points={[{x:60,y:260},{x:220,y:260},{x:220,y:95},{x:255,y:95}]} color="#E3B677"/><Route points={[{x:60,y:260},{x:35,y:260},{x:35,y:75},{x:255,y:75},{x:255,y:95}]}/><Text style={[s.mapLabel,{left:38,top:58}]}>COVERED ROUTE</Text><Text style={[s.mapLabel,{left:201,top:232,color:'#E6C38B'}]}>SHORT</Text></>}
     {kind==='switch'&&<><Route points={[{x:70,y:220},{x:70,y:130},{x:180,y:130},{x:210,y:155}]} color="#B9A778"/><View style={s.grate}>{[0,1,2,3,4].map(i=><View key={i} style={{position:'absolute',left:5+i*9,width:3,height:23,backgroundColor:'#D8C093',transform:[{rotate:'20deg'}]}}/>)}</View><Animated.View style={[s.noise,noise]}/><Animated.View style={[s.gate,gate]}/><Animated.View style={[s.switch,switchLight]}><Text style={s.switchText}>ϟ</Text></Animated.View></>}
     {kind==='pursuit'&&step>0&&<View style={s.lastSeen}><Text style={s.mapLabel}>LAST SEEN</Text><Text style={{color:'#E5BE82',textAlign:'center'}}>⌖</Text></View>}

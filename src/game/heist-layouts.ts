@@ -5,7 +5,7 @@ import {guardPressure} from './guard-pressure';
 type XY=readonly [number,number];
 type Rect=readonly [number,number,number,number];
 type Cast=readonly [EnemyRole,...XY[]];
-type Layout={spawn:XY;phone:XY;exit:XY;walls:Rect[];crates?:Rect[];cast:Cast[];safe:XY[];back:XY[];pockets:XY[];entries?:XY[];grates?:Rect[];second?:XY;tip:string};
+type Layout={spawn:XY;phone:XY;exit:XY;walls:Rect[];crates?:Rect[];lasers?:Rect[];cast:Cast[];safe:XY[];back:XY[];pockets:XY[];entries?:XY[];grates?:Rect[];second?:XY;tip:string};
 const point=([x,y]:XY):Point=>{'worklet';return {x,y};};
 const box=([x,y,w,h]:Rect):Box=>{'worklet';return {x,y,w,h,kind:'wall'};};
 
@@ -37,11 +37,34 @@ const LAYOUTS:Layout[]=[
   back:[[3,4.5],[4.35,5.9],[4.35,11.95],[4.45,14.55],[4.45,17.6],[2.35,18.55]],
   pockets:[[7.8,15],[4.4,12.4],[2.1,17.65]],entries:[[10,4.7]],
   tip:'Use the staggered crates to break sight. The drone reports your position; flank it before crossing the upper yard. Recover the Seeker and return to the service entrance.'},
- {spawn:[6,18],phone:[6,2.7],exit:[2,18],
-  walls:[[4.5,11,3,3.2],[4.5,5,3,3.2],[1.2,8.5,2,1],[8.8,9.2,2.3,1],[8.7,15.8,1.5,1.1]],
-  cast:[['scout',[3.5,12],[3.5,10.5],[2.1,10.5]],['scout',[8.5,12],[8.5,14.8],[7.7,15.2]],['scout',[8.5,5.7],[8.5,4],[6.2,4]],['drone',[2.3,5],[2.3,3],[3.5,3]]],
-  safe:[[2.2,16.3],[2.2,11],[3.7,10.2],[3.7,4],[6,2.7]],back:[[8.1,3.5],[8.1,8.5],[7.9,10.4],[3.6,10.3],[3.5,15.5]],pockets:[[6,15.5],[6,9.3]],
-  entries:[[10.5,8]],tip:'Two guards share one island. Flank before striking: guard shots and longer sight make the open lane dangerous.'},
+ // Mission 3: entry yard, twin laser doorways, hooked spine and upper vault.
+ {spawn:[6.3,18.7],phone:[9.25,3.6],exit:[6.3,18.7],
+  walls:[
+   [.7,14.4,3.9,.65],[5.95,14.4,3.25,.65],[10.55,14.4,.75,.65],
+   [7.1,10.3,.85,4.1],
+   [1.4,1.1,3.25,.8],[3.85,1.1,.8,7.5],[3.85,7.8,4.25,.8],[7.3,7.8,.8,1.9],
+   [.9,3.1,2.1,.65],[.9,4.9,2.1,1.55],[.9,7.1,2.1,.65],
+   [.9,9.5,2.1,1.7],[.9,12.2,2.1,.7],
+   [6,1.1,5.3,.8],[7.05,1.9,.9,.9],[7.05,3.9,.85,1.7],[7.05,4.95,4.25,.65]
+  ],
+  crates:[
+   [1.5,1.95,2.15,.9],[6,3.9,.9,1.7],[10.15,2.05,.9,1.7],
+   [4.9,6.65,2.1,.9],[9.25,5.85,1.8,2.5],[10.2,8.35,.85,1.0],
+   [4,8.8,2.95,.8],[.7,6.55,1.05,.45],
+   [1,11.35,1.85,.65],[3.15,10.65,.8,2.3],
+   [6,11.45,.85,2.65],[8.15,10.35,.85,2.5],[10.25,12.1,.85,2.0],
+   [1.5,16.15,1.95,1.55],[5,17,.85,1.05],[7.45,16.15,2.1,1.55],[10.35,15.35,.7,1.1]
+  ],
+  lasers:[[4.6,14.65,1.35,.14],[9.2,14.65,1.35,.14]],
+  cast:[['scout',[4.85,12.7],[4.85,10.25],[5.6,10.25]],
+   ['scout',[9.65,11.7],[9.65,9.7],[8.7,9.7]],
+   ['scout',[3.4,6.6],[3.4,4.3],[1.5,4.3]],
+   ['scout',[5.4,5.7],[5.4,2.5],[5.4,1.0]],
+   ['drone',[9,3.35],[8.8,4.25],[8.4,3.35]]],
+  safe:[[4.5,18.5],[4.9,15.7],[5.25,14.7],[5.1,12.2],[4.9,10.15],[8.65,10],[8.65,6.1],[5.35,6],[5.35,2.8],[8.7,3.35],[9.25,3.6]],
+  back:[[8.7,3.35],[5.35,2.8],[5.35,6],[8.65,6.1],[8.65,9.7],[9.8,10],[9.8,14.7],[9.8,18],[6.3,18.7]],
+  pockets:[[4.9,15.7],[1.2,8.6],[5.1,10.2]],entries:[[1.2,8.6]],
+  tip:'Cross a laser and its alarm flashes for 1.5 seconds. Nearby guards investigate that crossing once. Move behind cover before they arrive; a real sighting starts a full chase.'},
  {spawn:[2,18],phone:[9.5,2.5],exit:[9.5,18],
   walls:[[3.4,12,3,2.4],[6.6,5.8,2.4,3.4],[2,8.2,2,1.3],[9.6,12,1.1,3],[1,3.7,3.2,1.2],[5.5,1.2,1,2.4]],
   cast:[['scout',[2.5,12.8],[2.5,11],[4,11]],['scout',[7.3,13.3],[7.3,11],[8.4,11]],['drone',[5.4,7.8],[5.4,5],[4.8,5]],['scout',[9.9,5],[9.9,3.8],[8,3.8]]],
@@ -158,7 +181,7 @@ export function applyHeistLayout(l:LevelDefinition):LevelDefinition{
    halfAngle:role==='drone'?Math.PI/4:Math.PI/3.6,spotSeconds:role==='drone'?.45:l.number<=3?.45:.32,pauseSeconds:.45+(index%2)*.25,investigates:true};
  });
  for(const entry of plan.entries??[]){const p=point(entry);l.patrols.push({route:[p,{x:p.x,y:p.y-.5}],roam:[p,{x:p.x,y:p.y-.5}],combatRole:'scout',reserveAfter:0,pickupWave:1,speed:.75,pursuitSpeed:2.6,range:4.1,halfAngle:Math.PI/3.6,spotSeconds:.35,pauseSeconds:.5,investigates:true});}
- l.encounter={islands:plan.walls.slice(0,2).map(box),grates:(plan.grates??[]).map(box),pockets:plan.pockets.map(point),junctions:[...plan.safe,...plan.back,...plan.pockets].map(point),routes:{approach:plan.safe.map(point),escape:plan.back.map(point),fast:[l.phone]}};
+ l.encounter={islands:plan.walls.slice(0,2).map(box),grates:(plan.grates??[]).map(box),...(plan.lasers?{lasers:plan.lasers.map(box)}:{}),pockets:plan.pockets.map(point),junctions:[...plan.safe,...plan.back,...plan.pockets].map(point),routes:{approach:plan.safe.map(point),escape:plan.back.map(point),fast:[l.phone]}};
  if(l.number===9){l.switches=[{x:2,y:7,kind:'power'}];l.gates=[{box:{x:9.1,y:7,w:2.2,h:.6,kind:'wall'},mode:'power',power:1,period:10,openSeconds:5,phase:0}];}
  if(l.number===10)l.exitWindow={period:8,openSeconds:4,phase:0};
  l.targetSeconds=l.number<=3?65:l.number===8?115:l.number<=7?80:95;l.hardLimitSeconds=l.number===8?240:210;l.briefing=plan.tip;

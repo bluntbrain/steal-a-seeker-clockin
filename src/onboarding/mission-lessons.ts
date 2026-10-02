@@ -6,7 +6,7 @@ export type MissionLesson={weapon?:'knife'|'ranged';id:string;kicker:string;titl
 const lessons=[
  ['Your first clean getaway','Tap the floor to move. Tap a guard to approach and attack with your knife. Take the phone, then reach the exit.','MOVE → TAKE → ESCAPE'],
  ['Stop the scout drone','Drones do not shoot. Their radio reveals your location. Cut them down up close or break sight before the amber ring fills. Each win adds a phone to Hideout → Phones.','SCAN → REPORT → INTERRUPT'],
- ['Choose the crossing','Paired guards watch different sides of cover. Wait for separation, take the longer flank, or break the drone’s sight before its radio ring fills.','WATCH → FLANK → CROSS'],
+ ['Watch the laser crossings','Crossing a laser flashes an alarm for 1.5 seconds. Nearby guards investigate that spot once. Keep moving into cover; if they see you, the full chase starts.','CROSS → ALARM → BREAK SIGHT'],
  ['Plan the way back','Taking the phone raises the alarm. Know your route to the exit before reinforcements arrive.','PHONE → COVER → EXIT'],
  ['Make the walls work for you','Walls stop shots. Move from one safe pocket to the next instead of crossing an open firing lane.','COVER → MOVE → COVER'],
  ['Find the Heavy’s weak point','The gold front plate blocks knife strikes. Circle the cover island and strike the mint panel on its back while it turns.','FRONT = ARMOR · REAR = WEAK POINT'],
@@ -17,7 +17,7 @@ const lessons=[
  ['Lose them between rooms','A confirmed sighting sends every guard and drone after you. Walls break vision, but enemies keep searching. Change rooms before they reach your last sighting.','BREAK SIGHT → CHANGE ROUTE'],
  ['One last Seeker','Flank the Warden’s armor and stop the drone report. Both security entrances respond when you take the final phone—plan your way out.','FLANK → TAKE → ESCAPE'],
 ] as const;
-const mechanics:readonly (Mechanic|undefined)[]=[undefined,'drone','flank','reinforcements','cover','armor','routes','relay','switch','timed-exit','pursuit','finale'];
+const mechanics:readonly (Mechanic|undefined)[]=[undefined,'drone','laser','reinforcements','cover','armor','routes','relay','switch','timed-exit','pursuit','finale'];
 export function campaignLesson(mission:MissionId):MissionLesson{
  const edition=CAMPAIGN_IDS.indexOf(mission),[title,body,cue]=lessons[edition]!;
  const tip=edition===1?'Drones do not shoot. Take them out first: a full amber ring reports your location. Breaking sight interrupts an unsent report. A sent alert stays active.':edition===0?'Tap the floor to move; tap an enemy to approach and slash. Scout drones do not shoot, but report your location. Take them out before the amber ring fills.':body;

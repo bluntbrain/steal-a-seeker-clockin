@@ -1,7 +1,7 @@
 import {knifeCombat,knifeReach,canKnifeHit,stepMelee,clearMelee,type MeleeState} from './melee';
 import type {GameState,Input} from './simulation';
 import {updateEncounterGuards} from './encounters';
-import {updateHeistGuards,directionalArmor} from './heist-guards';
+import {updateHeistGuards,updateTripwires,directionalArmor} from './heist-guards';
 import {TUNING,type LevelDefinition,type Point} from './level';
 import {findPath,walkableSegment} from './navigation';
 import {sightDistance,sees,type Guard} from './guards';
@@ -10,7 +10,7 @@ import {courierSpeedMultiplier} from './courier-speed';
 import type {EnemyRole} from './combat-levels';
 export type CombatCommand={seq:number;kind:'move'|'attack'|'phone'|'exit'|'switch'|'stop';x:number;y:number;target:number};
 export type Projectile={id:number;x:number;y:number;px:number;py:number;vx:number;vy:number;left:number;owner:number;damage:number};
-export type CombatState={melee?:MeleeState;hunt?:{x:number;y:number;tick:number};grateNoise?:{id:number;x:number;y:number;until:number;nextAt:number};attackPlan?:{x:number;y:number;nextTick:number;failedTarget?:number};version:2;hp:number;commandSeen:number;order:CombatCommand|null;path:Point[];pathIndex:number;cooldown:number;invulnerable:number;shots:number;enemyShots:number;kills:number;damageTaken:number;aimEvents:number;hitEvents:number;feedback:'none'|'move'|'target'|'blocked'|'cover'|'ambush';feedbackLeft:number;projectiles:Projectile[];nextShot:number;noise:Point;noiseLeft:number;flash:number;repath:number;};
+export type CombatState={tripwire?:{id:number;inside:boolean[];until:number;x:number;y:number;laser:number};melee?:MeleeState;hunt?:{x:number;y:number;tick:number};grateNoise?:{id:number;x:number;y:number;until:number;nextAt:number};attackPlan?:{x:number;y:number;nextTick:number;failedTarget?:number};version:2;hp:number;commandSeen:number;order:CombatCommand|null;path:Point[];pathIndex:number;cooldown:number;invulnerable:number;shots:number;enemyShots:number;kills:number;damageTaken:number;aimEvents:number;hitEvents:number;feedback:'none'|'move'|'target'|'blocked'|'cover'|'ambush';feedbackLeft:number;projectiles:Projectile[];nextShot:number;noise:Point;noiseLeft:number;flash:number;repath:number;};
 export const COMBAT={damage:25,range:4,shotTicks:12,bulletSpeed:16,maxProjectiles:48,playerHP:100,damageGrace:6};
 export function freshCombat():CombatState{'worklet';return {version:2,hp:100,commandSeen:0,order:null,path:[],pathIndex:0,cooldown:0,invulnerable:0,shots:0,enemyShots:0,kills:0,damageTaken:0,aimEvents:0,hitEvents:0,feedback:'none',feedbackLeft:0,projectiles:[],nextShot:1,noise:{x:0,y:0},noiseLeft:0,flash:0,repath:0};}
 export function enemyStats(role:EnemyRole,hard=false){'worklet';if(hard)return role==='drone'?{hp:25,aim:0,damage:0,burst:0,recover:90}:role==='scout'?{hp:50,aim:21,damage:25,burst:2,recover:25}:role==='sentry'?{hp:75,aim:18,damage:20,burst:3,recover:30}:role==='heavy'?{hp:150,aim:30,damage:22,burst:3,recover:36}:{hp:200,aim:27,damage:25,burst:5,recover:33};return role==='drone'?{hp:25,aim:0,damage:0,burst:0,recover:90}:role==='scout'?{hp:50,aim:27,damage:20,burst:1,recover:33}:role==='sentry'?{hp:75,aim:24,damage:15,burst:2,recover:33}:role==='heavy'?{hp:150,aim:36,damage:10,burst:3,recover:42}:{hp:200,aim:42,damage:15,burst:3,recover:42};}
@@ -178,6 +178,7 @@ export function stepCombat(s:GameState,input:Input,dt=TUNING.step){
   else clearOrder(c);
  }
  if((level.combat?.revision??0)>=10&&Math.hypot(s.vx,s.vy)>.1&&s.ticks>=(c.grateNoise?.nextAt??0)){for(const grate of level.encounter?.grates??[])if(intersectsBox(s.x,s.y,grate,.08)){c.grateNoise={id:(c.grateNoise?.id??0)+1,x:s.x,y:s.y,until:s.ticks+30,nextAt:s.ticks+45};break;}}
+ updateTripwires(s,level);
  enemies(s,dt,level);projectiles(s,dt,level);s.alert=s.guards.some(g=>g.active&&g.hp>0&&g.seesPlayer)?1:0;s.battery=c.hp;
  if(s.status!=='playing'){clearOrder(c);s.vx=0;s.vy=0;return;}
  const e=level.exit,w=level.exitWindow,open=!w||(s.elapsed+w.phase)%w.period<w.openSeconds;
