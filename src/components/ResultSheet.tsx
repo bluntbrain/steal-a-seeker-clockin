@@ -3,7 +3,7 @@ import React,{type ReactNode} from 'react';
 import {Image,StyleSheet,Text,View,useWindowDimensions} from 'react-native';
 export type MessageArt='success'|'caught'|'timeout'|'pause'|'recovery'|'pending';
 // One identity, distinct expressions for every outcome. Generated from the courier reference.
-export const messageArt:Record<MessageArt,ReturnType<typeof require>>={success:require('../../assets/messages/success.png'),caught:require('../../assets/messages/caught.png'),timeout:require('../../assets/messages/timeout.png'),pause:require('../../assets/messages/pause.png'),recovery:require('../../assets/messages/recovery.png'),pending:require('../../assets/messages/pending.png')};
+export const messageArt:Record<MessageArt,ReturnType<typeof require>>={success:require('../../assets/messages/success.webp'),caught:require('../../assets/messages/caught.webp'),timeout:require('../../assets/messages/timeout.webp'),pause:require('../../assets/messages/pause.webp'),recovery:require('../../assets/messages/recovery.webp'),pending:require('../../assets/messages/pending.webp')};
 type Action={label:string;accessibilityLabel?:string;onPress:()=>void;disabled?:boolean};
 export default function ResultSheet({art,eyebrow,title,detail,stats,stars,primary,secondary,utility,children,bottom=0,celebration=false,primarySide='right'}:{art:MessageArt;eyebrow:string;title:string;detail?:string;stats?:string;stars?:string;primary:Action;secondary?:Action;utility?:Action;children?:ReactNode;bottom?:number;celebration?:boolean;primarySide?:'left'|'right'}){
  const {width,height}=useWindowDimensions(),small=width<370||height<720;

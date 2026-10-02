@@ -44,7 +44,7 @@ export default function MissionDemo({edition,reduced=false,busy=false}:{edition:
  return <View style={s.demo}>
   <View testID="mission-demo-stage" onLayout={e=>setWidth(e.nativeEvent.layout.width)} style={[s.stage,{height:width*300/320}]}>
    <View pointerEvents="none" accessible={false} aria-hidden accessibilityElementsHidden importantForAccessibility="no-hide-descendants" style={{position:'absolute',width:320,height:300,left:(width-320)/2,top:(width*300/320-300)/2,transform:[{scale}]}}>
-    <Image source={require('../../assets/world-v3/floor.png')} resizeMode="cover" style={s.floor}/><View style={[s.floor,{backgroundColor:'rgba(5,15,15,.28)'}]}/>
+    <Image source={require('../../assets/world-v3/floor.webp')} resizeMode="cover" style={s.floor}/><View style={[s.floor,{backgroundColor:'rgba(5,15,15,.28)'}]}/>
     {DEMO_COVER.map((r,i)=><View key={i} style={[s.cover,{left:r.x,top:r.y,width:r.width,height:r.height}]}><Image source={require('../../assets/walls-v5/warehouse-cap.jpg')} resizeMode="stretch" style={s.floor}/></View>)}
     <Animated.View style={[s.floor,movePath]}><View style={{position:'absolute',left:48,top:133,height:105,borderLeftWidth:2,borderColor:'#AEF1D5',borderStyle:'dashed'}}/><View style={{position:'absolute',left:48,top:132,width:84,borderTopWidth:2,borderColor:'#AEF1D5',borderStyle:'dashed'}}/></Animated.View>
 

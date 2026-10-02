@@ -4,7 +4,7 @@ import {AppState,Image,StyleSheet,Text,View} from 'react-native';
 import {useVideoPlayer,VideoView} from 'expo-video';
 import RecoveryBoundary from '../components/RecoveryBoundary';
 const clips=[require('../../assets/paywall-video/close-call.mp4'),require('../../assets/paywall-video/last-second.mp4')];
-const poster=require('../../assets/paywall-v3/courier-heist.png');
+const poster=require('../../assets/paywall-v3/courier-heist.webp');
 const still=<Image source={poster} resizeMode="cover" style={[StyleSheet.absoluteFill,{width:'100%',height:'100%'}]}/>;
 function Clip({index,active,onEnd,onFailure}:{index:number;active:boolean;onEnd:()=>void;onFailure:()=>void}){
  const player=useVideoPlayer(clips[index],p=>{p.muted=true;p.loop=false;});

@@ -16,7 +16,7 @@ function Enemy({film,time,index,kind,reduced}:{film:Film;time:SharedValue<number
  const health=useAnimatedStyle(()=>({width:40*(film.value.actors[index]?.hp??0)}));
  const droneFacing=useAnimatedStyle(()=>{const d=film.value.actors[index];return {transform:[{rotate:`${d?Math.atan2(film.value.y-d.y,film.value.x-d.x):0}rad`},{scale:reduced?1:1+Math.sin(time.value*3)*.018}]};});
  return <Animated.View testID={`lesson-enemy-${index}`} style={[s.enemy,placement]}>
-  {kind==='drone'?<Animated.Image source={require('../../assets/drones-v2/scout.png')} resizeMode="contain" style={[{position:'absolute',left:-5,top:-5,width:58,height:58},droneFacing]}/>:<Image source={GUARD_SPRITES[kind]} resizeMode="contain" style={{position:'absolute',left:-6,top:-6,width:60,height:60,transform:[{rotate:'180deg'}]}}/>}
+  {kind==='drone'?<Animated.Image source={require('../../assets/drones-v2/scout.webp')} resizeMode="contain" style={[{position:'absolute',left:-5,top:-5,width:58,height:58},droneFacing]}/>:<Image source={GUARD_SPRITES[kind]} resizeMode="contain" style={{position:'absolute',left:-6,top:-6,width:60,height:60,transform:[{rotate:'180deg'}]}}/>}
   <View style={s.healthTrack}><Animated.View style={[s.health,health]}/></View>
  </Animated.View>;
 }
@@ -70,7 +70,7 @@ export default function MechanicDemo({kind,edition,reduced=false,busy=false}:{ki
  return <View style={s.demo}>
   <View testID="mechanic-demo-stage" accessibilityLabel={`${kind} illustrated lesson`} onLayout={e=>setWidth(e.nativeEvent.layout.width)} style={[s.stage,{height:width*300/320}]}>
    <View pointerEvents="none" aria-hidden accessible={false} accessibilityElementsHidden importantForAccessibility="no-hide-descendants" style={{position:'absolute',width:320,height:300,left:(width-320)/2,top:(width*300/320-300)/2,transform:[{scale:width/320}]}}>
-    <Image source={require('../../assets/world-v3/floor.png')} resizeMode="cover" style={s.floor}/><View style={[s.floor,{backgroundColor:'#05100F30'}]}/>
+    <Image source={require('../../assets/world-v3/floor.webp')} resizeMode="cover" style={s.floor}/><View style={[s.floor,{backgroundColor:'#05100F30'}]}/>
     {kind==='laser'&&<><Animated.View style={[{position:'absolute',left:65,top:178,width:70,height:4,boxShadow:'0 0 9px #FFAD58'},laserGlow]}/>{[60,132].map(x=><View key={x} style={{position:'absolute',left:x,top:172,width:8,height:16,borderRadius:3,backgroundColor:'#7D9691'}}/>)}<Animated.View style={[s.notice,{left:75,top:55,backgroundColor:'#512722',borderColor:'#FF8270'},laserNotice]}><Text style={s.noticeText}>ALARM · CROSSING REPORTED</Text></Animated.View></>}
     {kind==='routes'&&<><Route points={[{x:60,y:260},{x:220,y:260},{x:220,y:95},{x:255,y:95}]} color="#E3B677"/><Route points={[{x:60,y:260},{x:35,y:260},{x:35,y:75},{x:255,y:75},{x:255,y:95}]}/><Text style={[s.mapLabel,{left:38,top:58}]}>COVERED ROUTE</Text><Text style={[s.mapLabel,{left:201,top:232,color:'#E6C38B'}]}>SHORT</Text></>}
     {kind==='switch'&&<><Route points={[{x:70,y:220},{x:70,y:130},{x:180,y:130},{x:210,y:155}]} color="#B9A778"/><View style={s.grate}>{[0,1,2,3,4].map(i=><View key={i} style={{position:'absolute',left:5+i*9,width:3,height:23,backgroundColor:'#D8C093',transform:[{rotate:'20deg'}]}}/>)}</View><Animated.View style={[s.noise,noise]}/><Animated.View style={[s.gate,gate]}/><Animated.View style={[s.switch,switchLight]}><Text style={s.switchText}>ϟ</Text></Animated.View></>}

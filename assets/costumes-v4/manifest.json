@@ -1,84 +1,84 @@
 [
-  {
-    "name": "default",
-    "model": "gpt-image-2",
-    "source": "output/imagegen/costumes-v4/default-sheet.png",
-    "reference": "output/imagegen/costumes-v4/default-reference.png",
-    "prompt": "output/imagegen/costumes-v4/default.prompt.txt",
-    "atlas": "default-atlas.png",
-    "portrait": "default.png",
-    "frames": 8,
-    "frameWidth": 256,
-    "frameHeight": 384,
-    "sha256": "c7d9fca46f6b996ecbed7a727c6041fb26cef4f037f0d7f394ed5edbb361431a"
-  },
-  {
-    "name": "frost-runner",
-    "model": "gpt-image-2",
-    "source": "output/imagegen/costumes-v4/frost-runner-sheet.png",
-    "reference": "output/imagegen/costumes-v4/frost-runner-reference.png",
-    "prompt": "output/imagegen/costumes-v4/frost-runner.prompt.txt",
-    "atlas": "frost-runner-atlas.png",
-    "portrait": "frost-runner.png",
-    "frames": 8,
-    "frameWidth": 256,
-    "frameHeight": 384,
-    "sha256": "1f57428dc4ddda5b772b1f2a2da3524382c25d7a61e7043c1ac2c1430f7754bc"
-  },
-  {
-    "name": "night-courier",
-    "model": "gpt-image-2",
-    "source": "output/imagegen/costumes-v4/night-courier-sheet.png",
-    "reference": "output/imagegen/costumes-v4/night-courier-reference.png",
-    "prompt": "output/imagegen/costumes-v4/night-courier.prompt.txt",
-    "atlas": "night-courier-atlas.png",
-    "portrait": "night-courier.png",
-    "frames": 8,
-    "frameWidth": 256,
-    "frameHeight": 384,
-    "sha256": "5e196edf208dba3659bbc6b3c18147a58159c9d45c7951a5af90102bff515f59"
-  },
-  {
-    "name": "circuit-scout",
-    "model": "gpt-image-2",
-    "source": "output/imagegen/costumes-v4/circuit-scout-sheet.png",
-    "reference": "output/imagegen/costumes-v4/circuit-scout-reference.png",
-    "prompt": "output/imagegen/costumes-v4/circuit-scout.prompt.txt",
-    "atlas": "circuit-scout-atlas.png",
-    "portrait": "circuit-scout.png",
-    "frames": 8,
-    "frameWidth": 256,
-    "frameHeight": 384,
-    "sha256": "b65ef1bb93d1f6c7306ef1485cd928abef20b1aa8eb21631dd0ed55e93dcf24f"
-  },
-  {
-    "name": "archive-keeper",
-    "model": "gpt-image-2",
-    "source": "output/imagegen/costumes-v4/archive-keeper-sheet.png",
-    "reference": "output/imagegen/costumes-v4/archive-keeper-reference.png",
-    "prompt": "output/imagegen/costumes-v4/archive-keeper.prompt.txt",
-    "atlas": "archive-keeper-atlas.png",
-    "portrait": "archive-keeper.png",
-    "frames": 8,
-    "frameWidth": 256,
-    "frameHeight": 384,
-    "sha256": "a52e7518a1cf1d54303b4c4f6380feafb9bc08ca5d5ec993fd0b9e2a8c0a4c5e",
-    "mirroredSourceFrames": [
-      3,
-      7
-    ]
-  },
-  {
-    "name": "ghost-signal",
-    "model": "gpt-image-2",
-    "source": "output/imagegen/costumes-v4/ghost-signal-sheet.png",
-    "reference": "output/imagegen/costumes-v4/ghost-signal-reference.png",
-    "prompt": "output/imagegen/costumes-v4/ghost-signal.prompt.txt",
-    "atlas": "ghost-signal-atlas.png",
-    "portrait": "ghost-signal.png",
-    "frames": 8,
-    "frameWidth": 256,
-    "frameHeight": 384,
-    "sha256": "7118d7346f2e1b73edaf4df1674941da38287b9eec0593c7162727ee4f958831"
-  }
+ {
+  "name": "default",
+  "model": "gpt-image-2",
+  "source": "output/imagegen/costumes-v4/default-sheet.png",
+  "reference": "output/imagegen/costumes-v4/default-reference.png",
+  "prompt": "output/imagegen/costumes-v4/default.prompt.txt",
+  "atlas": "default-atlas.webp",
+  "portrait": "default.webp",
+  "frames": 8,
+  "frameWidth": 256,
+  "frameHeight": 384,
+  "sha256": "a483ecbdecd002121a0ab9a4735860ca57f4a8c6aa0d5442f93b10ee280ae8b3"
+ },
+ {
+  "name": "frost-runner",
+  "model": "gpt-image-2",
+  "source": "output/imagegen/costumes-v4/frost-runner-sheet.png",
+  "reference": "output/imagegen/costumes-v4/frost-runner-reference.png",
+  "prompt": "output/imagegen/costumes-v4/frost-runner.prompt.txt",
+  "atlas": "frost-runner-atlas.webp",
+  "portrait": "frost-runner.webp",
+  "frames": 8,
+  "frameWidth": 256,
+  "frameHeight": 384,
+  "sha256": "df64ceadb3a559da1ee54260a4e323e0208df1a473bc05d28d608fce77875c7a"
+ },
+ {
+  "name": "night-courier",
+  "model": "gpt-image-2",
+  "source": "output/imagegen/costumes-v4/night-courier-sheet.png",
+  "reference": "output/imagegen/costumes-v4/night-courier-reference.png",
+  "prompt": "output/imagegen/costumes-v4/night-courier.prompt.txt",
+  "atlas": "night-courier-atlas.webp",
+  "portrait": "night-courier.webp",
+  "frames": 8,
+  "frameWidth": 256,
+  "frameHeight": 384,
+  "sha256": "522c04dae7c49c43d8e71873b2a9c5b2e7d17a54c2f6964f6a337555a1c8003b"
+ },
+ {
+  "name": "circuit-scout",
+  "model": "gpt-image-2",
+  "source": "output/imagegen/costumes-v4/circuit-scout-sheet.png",
+  "reference": "output/imagegen/costumes-v4/circuit-scout-reference.png",
+  "prompt": "output/imagegen/costumes-v4/circuit-scout.prompt.txt",
+  "atlas": "circuit-scout-atlas.webp",
+  "portrait": "circuit-scout.webp",
+  "frames": 8,
+  "frameWidth": 256,
+  "frameHeight": 384,
+  "sha256": "603d982e7152a05f55714a5d0d0cc026c91297bcb4aef70d11387d18e00fe5a6"
+ },
+ {
+  "name": "archive-keeper",
+  "model": "gpt-image-2",
+  "source": "output/imagegen/costumes-v4/archive-keeper-sheet.png",
+  "reference": "output/imagegen/costumes-v4/archive-keeper-reference.png",
+  "prompt": "output/imagegen/costumes-v4/archive-keeper.prompt.txt",
+  "atlas": "archive-keeper-atlas.webp",
+  "portrait": "archive-keeper.webp",
+  "frames": 8,
+  "frameWidth": 256,
+  "frameHeight": 384,
+  "sha256": "92ebd610c1b6c7c87ba2255681723b6e8d6c4c9ca031dbcd39bad5875167a23e",
+  "mirroredSourceFrames": [
+   3,
+   7
+  ]
+ },
+ {
+  "name": "ghost-signal",
+  "model": "gpt-image-2",
+  "source": "output/imagegen/costumes-v4/ghost-signal-sheet.png",
+  "reference": "output/imagegen/costumes-v4/ghost-signal-reference.png",
+  "prompt": "output/imagegen/costumes-v4/ghost-signal.prompt.txt",
+  "atlas": "ghost-signal-atlas.webp",
+  "portrait": "ghost-signal.webp",
+  "frames": 8,
+  "frameWidth": 256,
+  "frameHeight": 384,
+  "sha256": "f469db0019c0f98b5ca9664bff57aae92f9ad51016f294c07f7cd9cffa30cd01"
+ }
 ]

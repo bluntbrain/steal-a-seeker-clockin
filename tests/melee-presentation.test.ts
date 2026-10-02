@@ -16,7 +16,7 @@ test('every purchasable and earned appearance has twenty bounded alpha frames un
  const packing=JSON.parse(fs.readFileSync('assets/melee-v2/packing.json','utf8'));
  assert.equal(packing.length,COSTUMES.length);
  for(const c of COSTUMES){
-  const path=`assets/melee-v2/${c.asset.replace('solana-','')}-atlas.png`,meta=await sharp(path).metadata();
+  const path=`assets/melee-v2/${c.asset.replace('solana-','')}-atlas.webp`,meta=await sharp(path).metadata();
   assert(meta.hasAlpha,c.id);assert.equal(meta.width,768);assert.equal(meta.height,960);assert(meta.width!*meta.height!*4<3*1024*1024);
   for(const f of MELEE_FRAMES){assert(f.x+f.width<=meta.width!&&f.y+f.height<=meta.height!);const {data}=await sharp(path).extract({left:f.x,top:f.y,width:f.width,height:f.height}).extractChannel('alpha').raw().toBuffer({resolveWithObject:true});assert(data.some(a=>a===0));assert(data.some(a=>a>250),`${c.id}: empty frame`);}
  }

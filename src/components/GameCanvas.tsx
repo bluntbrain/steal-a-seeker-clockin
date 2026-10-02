@@ -47,9 +47,9 @@ export default memo(function GameCanvas({camera,size,height=size*20/12,input,gam
  const world=useMemo(()=>wallTexture?makeWarehouse(false,level,wallTexture,wallStyle):null,[level,wallTexture,wallStyle]);
  const wallOcclusion=useMemo(()=>makeWallOcclusion(interiorWalls(level.blockers,level.width,level.height),wallStyle),[level,wallStyle]);
  const courierClip=useDerivedValue(()=>wallActorClip(wallOcclusion,game.value.py+(game.value.y-game.value.py)*alpha.value));
- const floor=useImage(district==='rooftops'?require('../../assets/world-v4/rooftop-floor.png'):district==='powerworks'?require('../../assets/world-v4/powerworks-floor.png'):require('../../assets/world-v3/floor.png'),onLoadError);
- const phones=useImage(require('../../assets/world-v3/phones.png'),onLoadError);
- const droneSprite=useImage(require('../../assets/drones-v2/scout.png'),onLoadError);
+ const floor=useImage(district==='rooftops'?require('../../assets/world-v4/rooftop-floor.webp'):district==='powerworks'?require('../../assets/world-v4/powerworks-floor.webp'):require('../../assets/world-v3/floor.webp'),onLoadError);
+ const phones=useImage(require('../../assets/world-v3/phones.webp'),onLoadError);
+ const droneSprite=useImage(require('../../assets/drones-v2/scout.webp'),onLoadError);
  const guardSprite=useImage(GUARD_SPRITES.guard,onLoadError),heavySprite=useImage(GUARD_SPRITES.heavy,onLoadError);
  const phoneIndex=editionIndex(level.mission),phoneFrame=phoneAtlas.frames[phoneIndex]!;
  const phoneScale=1.18/phoneFrame.height;

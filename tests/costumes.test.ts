@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
+import sharp from 'sharp';
 import {createHash} from 'node:crypto';
 import {COSTUMES,costumeFor,costumeFrame} from '../shared/costumes';
 import {STORE_ITEMS,emptyInventory,redeemCredits,isStoreItemForSale} from '../shared/store';
@@ -14,11 +15,11 @@ import {combatLevel} from '../src/game/combat-levels';
 import {combatTap} from '../src/game/combat';
 import {initialState,idleInput,step} from '../src/game/simulation';
 
-test('all thirteen costumes have distinct portraits, eight poses and stable old inventory IDs',()=>{
+test('all thirteen costumes have distinct portraits, eight poses and stable old inventory IDs',async()=>{
  assert.equal(COSTUMES.length,13);assert.equal(manifest.length,6);assert.equal(frames.length,8);
  assert.deepEqual(premium.map(p=>p.name).sort(),COSTUMES.filter(c=>c.id.startsWith('solana-')).map(c=>c.id).sort(),'Every selectable Solana skin has a verified sprite atlas');
- for(const c of COSTUMES.filter(c=>!c.id.startsWith('solana-'))){const entry=manifest.find(m=>m.name===c.asset);assert(entry&&entry.frames===8);assert(readFileSync(`assets/costumes-v4/${c.asset}.png`).length>10000);assert.equal(createHash('sha256').update(readFileSync(`assets/costumes-v4/${c.asset}-atlas.png`)).digest('hex'),entry.sha256,`${c.asset} matches the validated atlas`);}
- for(const c of premium){const bytes=readFileSync(`assets/solana-skins/${c.file}`);assert.equal(createHash('sha256').update(bytes).digest('hex'),c.sha256);assert.equal(bytes.readUInt32BE(16),1024);assert.equal(bytes.readUInt32BE(20),768);assert.equal(c.frames,8);}
+ for(const c of COSTUMES.filter(c=>!c.id.startsWith('solana-'))){const entry=manifest.find(m=>m.name===c.asset);assert(entry&&entry.frames===8);assert(readFileSync(`assets/costumes-v4/${c.asset}.webp`).length>10000);assert.equal(createHash('sha256').update(readFileSync(`assets/costumes-v4/${c.asset}-atlas.webp`)).digest('hex'),entry.sha256,`${c.asset} matches the validated atlas`);}
+ for(const c of premium){const path=`assets/solana-skins/${c.file}`,bytes=readFileSync(path),meta=await sharp(path).metadata();assert.equal(createHash('sha256').update(bytes).digest('hex'),c.sha256);assert.equal(meta.width,1024);assert.equal(meta.height,768);assert.equal(c.frames,8);}
  assert.equal(costumeFor('signal-runner').name,'Frost Runner');assert.equal(costumeFor('ghost-courier').name,'Ghost Signal');
  assert.equal(costumeFor('unknown').id,'default');
  const base={week:'2026-09-14',rank:null,points:0,cleared:0,ticks:0,domain:null,wallet:'test',final:false,local:true,earned:false};

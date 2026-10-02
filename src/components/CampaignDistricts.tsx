@@ -9,9 +9,9 @@ import frames from '../../assets/district-map/frames.json';
 
 type Point={x:number;y:number};
 const districts=[
- {id:'warehouse',name:'WAREHOUSE',art:require('../../assets/district-map/warehouse.png'),ratio:frames.warehouse.width/frames.warehouse.height,anchors:[[.13,.51],[.38,.61],[.63,.75],[.88,.53]],icon:'M3 21 V9 L12 3 L21 9 V21 H15 V14 H9 V21 Z M7 10 H9 M15 10 H17'},
- {id:'rooftops',name:'ROOFTOPS',art:require('../../assets/district-map/rooftops.png'),ratio:frames.rooftops.width/frames.rooftops.height,anchors:[[.13,.53],[.38,.40],[.63,.76],[.88,.60]],icon:'M3 21 V10 H21 V21 Z M7 10 V6 H17 V10 M12 6 V2 M7 14 V16 M12 14 V16 M17 14 V16'},
- {id:'powerworks',name:'POWERWORKS',art:require('../../assets/district-map/powerworks.png'),ratio:frames.powerworks.width/frames.powerworks.height,anchors:[[.13,.58],[.38,.48],[.63,.72],[.88,.54]],icon:'M14 2 L4 14 H11 L9 23 L21 10 H14 Z'},
+ {id:'warehouse',name:'WAREHOUSE',art:require('../../assets/district-map/warehouse.webp'),ratio:frames.warehouse.width/frames.warehouse.height,anchors:[[.13,.51],[.38,.61],[.63,.75],[.88,.53]],icon:'M3 21 V9 L12 3 L21 9 V21 H15 V14 H9 V21 Z M7 10 H9 M15 10 H17'},
+ {id:'rooftops',name:'ROOFTOPS',art:require('../../assets/district-map/rooftops.webp'),ratio:frames.rooftops.width/frames.rooftops.height,anchors:[[.13,.53],[.38,.40],[.63,.76],[.88,.60]],icon:'M3 21 V10 H21 V21 Z M7 10 V6 H17 V10 M12 6 V2 M7 14 V16 M12 14 V16 M17 14 V16'},
+ {id:'powerworks',name:'POWERWORKS',art:require('../../assets/district-map/powerworks.webp'),ratio:frames.powerworks.width/frames.powerworks.height,anchors:[[.13,.58],[.38,.48],[.63,.72],[.88,.54]],icon:'M14 2 L4 14 H11 L9 23 L21 10 H14 Z'},
 ] as const;
 
 export default function CampaignDistricts({progress,onSelect}:{progress:Progress;onSelect:(mission:MissionId)=>void}){

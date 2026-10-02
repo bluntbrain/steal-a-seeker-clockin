@@ -4,7 +4,7 @@ import {HapticPressable as Pressable} from '../feedback/HapticPressable';
 import {CREDIT_PACKS,type CreditPackId} from '../../shared/store';
 import {useEconomy} from './EconomyProvider';
 import {useAccount} from './account-context';
-const artwork=[require('../../assets/store/credit-pouch.png'),require('../../assets/store/credit-case.png'),require('../../assets/store/credit-vault.png')];
+const artwork=[require('../../assets/store/credit-pouch.webp'),require('../../assets/store/credit-case.webp'),require('../../assets/store/credit-vault.webp')];
 export default function CreditPackCards({selected,onSelect,locked=false}:{selected:CreditPackId;onSelect:(id:CreditPackId)=>void;locked?:boolean}){
  const economy=useEconomy(),account=useAccount(),{height,fontScale}=useWindowDimensions(),compact=height<740;
  return <View accessibilityRole="radiogroup" accessibilityLabel="Credit packs" style={{gap:10,marginVertical:8}}>{CREDIT_PACKS.map((pack,i)=>{
