@@ -7,14 +7,14 @@ function Bar({game,alpha,index,font}:{game:Props['game'];alpha:Props['alpha'];in
  const courier=index<0,g=game.value.guards[index],armored=g?.combatRole==='heavy'||g?.combatRole==='warden';
  const width=courier?1.22:armored?1.36:1.14;
  const lift=courier?.28:g?.combatRole==='drone'?.60:armored?.76:.55;
+ // position interpolates every frame; health, label and text layout only change on simulation ticks
+ const transform=useDerivedValue(()=>{const s=game.value,a=index<0?s:s.guards[index];if(!a)return [];return [{translateX:a.px+(a.x-a.px)*alpha.value-width/2},{translateY:a.py+(a.y-a.py)*alpha.value+lift}];});
  const state=useDerivedValue(()=>{
   const s=game.value,a=index<0?s:s.guards[index];
-  if(!a)return {x:0,y:0,hp:0,max:1,opacity:0};
-  return {x:a.px+(a.x-a.px)*alpha.value,y:a.py+(a.y-a.py)*alpha.value,
-   hp:index<0?s.combat?.hp??0:s.guards[index]!.hp,max:index<0?100:s.guards[index]!.maxHp,
+  if(!a)return {hp:0,max:1,opacity:0};
+  return {hp:index<0?s.combat?.hp??0:s.guards[index]!.hp,max:index<0?100:s.guards[index]!.maxHp,
    opacity:index<0?(s.combat?1:0):s.guards[index]!.active&&s.guards[index]!.hp>0?1:0};
  });
- const transform=useDerivedValue(()=>[{translateX:state.value.x-width/2},{translateY:state.value.y+lift}]);
  const opacity=useDerivedValue(()=>state.value.opacity),fill=useDerivedValue(()=>Math.max(0,Math.min(1,state.value.hp/state.value.max))*(width-.08));
  const label=useDerivedValue(()=>String(Math.max(0,Math.ceil(state.value.hp))));
  const digitWidths=useMemo(()=>font.getGlyphWidths(font.getGlyphIDs('0123456789')),[font]);

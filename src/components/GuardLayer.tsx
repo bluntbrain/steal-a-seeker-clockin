@@ -1,5 +1,5 @@
 import React from 'react';
-import {Circle,Group,Image,Oval,Path,DashPathEffect,RoundedRect,Skia,type SkImage} from '@shopify/react-native-skia';
+import {Circle,Group,Image,Oval,Path,DashPathEffect,RoundedRect,usePathValue,type SkImage} from '@shopify/react-native-skia';
 import {useAnimatedReaction,useSharedValue,useDerivedValue,type SharedValue} from 'react-native-reanimated';
 import {wallActorClip} from '../art/wall-depth';
 import type {WallOcclusion} from '../art/wall-depth-art';
@@ -32,8 +32,9 @@ export default function GuardLayer({game,alpha,index,clock,reduced=false,droneSp
  });
  const burst=useDerivedValue(()=>!live.value?fx.value.burst:0),radius=useDerivedValue(()=>fx.value.radius);
  const burstPose=useDerivedValue(()=>[{translateX:death.value.x},{translateY:death.value.y}]);
- const sparks=useDerivedValue(()=>{const p=Skia.Path.Make();if(live.value||fx.value.burst<=0)return p;const r=fx.value.radius;for(let i=0;i<6;i++){const a=i*Math.PI/3+index*.7;p.moveTo(Math.cos(a)*r,Math.sin(a)*r);p.lineTo(Math.cos(a)*(r+.10),Math.sin(a)*(r+.10));}return p;});
- const aim=useDerivedValue(()=>{const p=Skia.Path.Make(),g=game.value.guards[index];if(!game.value.combat||!g?.active||g.hp<=0||g.gunPhase!=='aim')return p;const d=sightDistance(g.x,g.y,Math.cos(g.shotAngle),Math.sin(g.shotAngle),g.range,{...stateLevel(game.value),blockers:game.value.blockers});p.moveTo(g.x,g.y);p.lineTo(g.x+Math.cos(g.shotAngle)*d,g.y+Math.sin(g.shotAngle)*d);return p;});
+ // paths are reused through usePathValue; sparks only draw during a defeat burst
+ const sparks=usePathValue(p=>{'worklet';if(live.value||fx.value.burst<=0)return;const r=fx.value.radius;for(let i=0;i<6;i++){const a=i*Math.PI/3+index*.7;p.moveTo(Math.cos(a)*r,Math.sin(a)*r);p.lineTo(Math.cos(a)*(r+.10),Math.sin(a)*(r+.10));}});
+ const aim=usePathValue(p=>{'worklet';const g=game.value.guards[index];if(!game.value.combat||!g?.active||g.hp<=0||g.gunPhase!=='aim')return;const d=sightDistance(g.x,g.y,Math.cos(g.shotAngle),Math.sin(g.shotAngle),g.range,{...stateLevel(game.value),blockers:game.value.blockers});p.moveTo(g.x,g.y);p.lineTo(g.x+Math.cos(g.shotAngle)*d,g.y+Math.sin(g.shotAngle)*d);});
  const color=useDerivedValue(()=>{const g=game.value.guards[index];return !live.value?'#31424A':drone?(g?.heist?.broadcastUntil??0)>game.value.ticks?'#FF9477':g?.heist?.charge?'#EAD083':'#92D7C9':g?.seesPlayer?'#ff8169':'#dba961';});
  const armorFront=useDerivedValue(()=>armor&&game.value.guards[index]?.heist?.armorHit==='front'?Math.min(1,(game.value.guards[index]?.flash??0)*7):0);
  const armorRear=useDerivedValue(()=>armor&&game.value.guards[index]?.heist?.armorHit==='rear'?Math.min(1,(game.value.guards[index]?.flash??0)*7):0);
@@ -41,23 +42,26 @@ export default function GuardLayer({game,alpha,index,clock,reduced=false,droneSp
  const width=useDerivedValue(()=>game.value.combat?(game.value.guards[index]?.hp??0)/(game.value.guards[index]?.maxHp??1)*barWidth:(game.value.guards[index]?.exposure??0)*barWidth);
  const hitFlash=useDerivedValue(()=>live.value?Math.min(1,(game.value.guards[index]?.flash??0)*5):fx.value.flash);
  const bar=useDerivedValue(()=>{const g=game.value.guards[index];return [{translateX:(g?.x??0)-barWidth/2},{translateY:(g?.y??0)-barLift}];});
- const cone=useDerivedValue(()=>{
-  const p=Skia.Path.Make(),g=game.value.guards[index];if(!g||!live.value)return p;
-  const x=g.px+(g.x-g.px)*alpha.value,y=g.py+(g.y-g.py)*alpha.value;p.moveTo(x,y);
+ // the cone is cast once per simulation tick from the guard's tick position; it reads only `game`, so it does not rerun on
+ // interpolation frames. coneShift slides it onto the interpolated sprite position each frame.
+ const cone=usePathValue(p=>{
+  'worklet';const s=game.value,g=s.guards[index];if(!g||!live.value)return;
+  const level={...stateLevel(s),blockers:s.blockers},x=g.x,y=g.y;p.moveTo(x,y);
   for(let i=0;i<=32;i++){
    const a=g.angle-g.halfAngle+2*g.halfAngle*i/32,dx=Math.cos(a),dy=Math.sin(a);
-   const d=sightDistance(x,y,dx,dy,g.range,{...stateLevel(game.value),blockers:game.value.blockers});p.lineTo(x+dx*d,y+dy*d);
+   const d=sightDistance(x,y,dx,dy,g.range,level);p.lineTo(x+dx*d,y+dy*d);
   }
-  p.close();return p;
+  p.close();
  });
+ const coneShift=useDerivedValue(()=>{const g=game.value.guards[index];if(!g)return [];const k=1-alpha.value;return [{translateX:(g.px-g.x)*k},{translateY:(g.py-g.y)*k}];});
  const alertOpacity=useDerivedValue(()=>{const g=game.value.guards[index];return g?.brain&&g.active&&g.hp>0&&(g.seesPlayer&&g.exposure>=1||g.mode==='investigate'||g.mode==='search')?1:0;});
  const alertColor=useDerivedValue(()=>game.value.guards[index]?.seesPlayer?'#FF886F':'#E1C381');
- const lurePath=useDerivedValue(()=>{const p=Skia.Path.Make(),g=game.value.guards[index];if(!g||!g.active||g.seesPlayer||game.value.decoy.ttl<=0||g.lureId!==game.value.decoy.id||g.mode!=='investigate')return p;p.moveTo(g.x,g.y);for(let i=g.pathIndex;i<g.path.length;i++)p.lineTo(g.path[i]!.x,g.path[i]!.y);return p;});
+ const lurePath=usePathValue(p=>{'worklet';const g=game.value.guards[index];if(!g||!g.active||g.seesPlayer||game.value.decoy.ttl<=0||g.lureId!==game.value.decoy.id||g.mode!=='investigate')return;p.moveTo(g.x,g.y);for(let i=g.pathIndex;i<g.path.length;i++)p.lineTo(g.path[i]!.x,g.path[i]!.y);});
  const listening=useDerivedValue(()=>{const g=game.value.guards[index];return g&&g.active&&!g.seesPlayer&&game.value.decoy.ttl>0&&g.lureId===game.value.decoy.id&&(g.mode==='investigate'||g.mode==='search')?1:0;});
  return <Group>
   <Group opacity={visible}>
-  <Path path={lurePath} color="#CFE6E4" style="stroke" strokeWidth={.035} opacity={.65}><DashPathEffect intervals={[.12,.12]}/></Path><Path path={cone} color={color} opacity={opacity}/>
-  <Path path={cone} color={color} opacity={opacity} style="stroke" strokeWidth={.025}/>
+  <Path path={lurePath} color="#CFE6E4" style="stroke" strokeWidth={.035} opacity={.65}><DashPathEffect intervals={[.12,.12]}/></Path><Group transform={coneShift}><Path path={cone} color={color} opacity={opacity}/>
+  <Path path={cone} color={color} opacity={opacity} style="stroke" strokeWidth={.025}/></Group>
   <Path path={aim} color="#FF886F" style="stroke" strokeWidth={.045}><DashPathEffect intervals={[.13,.08]}/></Path><Group clip={wallClip}><Group transform={pose}><Group transform={[{scale:artScale}]}>
    <Oval x={-.42} y={-.39} width={.84} height={.84} color="#06080B" opacity={.65}/>
    {drone?<QuadDrone game={game} index={index} clock={clock} reduced={reduced} sprite={droneSprite}/>:<Image image={armor||kind==='warden'?heavySprite:guardSprite} x={armor||kind==='warden'?-.59:-.52} y={armor||kind==='warden'?-.59:-.52} width={armor||kind==='warden'?1.18:1.04} height={armor||kind==='warden'?1.18:1.04} fit="contain"/>}

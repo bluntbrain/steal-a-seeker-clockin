@@ -1,6 +1,6 @@
 import React from 'react';
 import {Circle,Group,Line,Path,RoundedRect} from '@shopify/react-native-skia';
-import {useDerivedValue,withTiming,type SharedValue} from 'react-native-reanimated';
+import {useAnimatedReaction,useDerivedValue,useSharedValue,withTiming,type SharedValue} from 'react-native-reanimated';
 import type {GameState} from '../game/simulation';
 import type {LevelDefinition} from '../game/level';
 import {gateSwitchIndex} from '../controls/mechanisms';
@@ -9,7 +9,9 @@ const AMBER='#F2C16C',MINT='#AFE5D0';
 /** Crisp, scalable mechanical assets. Their lights follow actual collision state. */
 export function GateAsset({game,level,index,reduced}:Props){
  const box=level.gates![index]!.box,horizontal=box.w>=box.h,w=Math.max(box.w,box.h),d=Math.min(box.w,box.h);
- const open=useDerivedValue(()=>withTiming(game.value.closedGates[index]?0:1,{duration:reduced?0:300}));
+ // one timing animation per state change; a derived withTiming would restart every simulation tick
+ const open=useSharedValue(game.value.closedGates[index]?0:1);
+ useAnimatedReaction(()=>game.value.closedGates[index],(closed,previous)=>{if(previous!==null&&closed!==previous)open.value=withTiming(closed?0:1,{duration:reduced?0:300});},[index,reduced]);
  const color=useDerivedValue(()=>game.value.closedGates[index]?AMBER:MINT);
  const panelWidth=useDerivedValue(()=>(w/2-.12)*(1-open.value)+.07),right=useDerivedValue(()=>w/2-.08-panelWidth.value);
  const locked=useDerivedValue(()=>1-open.value);

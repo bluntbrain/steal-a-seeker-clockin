@@ -1,18 +1,20 @@
 import React from 'react';
-import {Circle,Path,Skia} from '@shopify/react-native-skia';
+import {Circle,Path,usePathValue} from '@shopify/react-native-skia';
 import {useDerivedValue,type SharedValue} from 'react-native-reanimated';
 import type {Input,GameState} from '../game/simulation';
 import {roundedRoute,TAP_RADIUS} from './routeGeometry';
 export default function CombatLayer({game,alpha,input,reduced=false}:{game:SharedValue<GameState>;alpha:SharedValue<number>;input:SharedValue<Input>;reduced?:boolean}){
- const geometry=useDerivedValue(()=>{const s=game.value,c=s.combat;return roundedRoute({x:s.px+(s.x-s.px)*alpha.value,y:s.py+(s.y-s.py)*alpha.value},s.status==='playing'?c?.path??[]:[],c?.pathIndex??0,s.blockers);});
- const route=useDerivedValue(()=>{const p=Skia.Path.Make(),g=geometry.value;p.moveTo(g.start.x,g.start.y);for(const segment of g.segments){if(segment.kind==='curve')p.quadTo(segment.control.x,segment.control.y,segment.to.x,segment.to.y);else p.lineTo(segment.to.x,segment.to.y);}return p;});
- const arrow=useDerivedValue(()=>{const p=Skia.Path.Make(),points=geometry.value.arrow;if(points.length===3){p.moveTo(points[0]!.x,points[0]!.y);p.lineTo(points[1]!.x,points[1]!.y);p.lineTo(points[2]!.x,points[2]!.y);p.close();}return p;});
- const shots=(enemy:boolean)=>useDerivedValue(()=>{const p=Skia.Path.Make();for(const b of game.value.combat?.projectiles??[]){if((b.owner>=0)!==enemy)continue;const x=b.px+(b.x-b.px)*alpha.value,y=b.py+(b.y-b.py)*alpha.value;p.moveTo(x,y);p.lineTo(x-b.vx*.018,y-b.vy*.018);}return p;});
+ // corner rounding checks every blocker, so it runs once per simulation tick from the tick position;
+ // only the first point is interpolated per frame
+ const geometry=useDerivedValue(()=>{const s=game.value,c=s.combat;return roundedRoute({x:s.x,y:s.y},s.status==='playing'?c?.path??[]:[],c?.pathIndex??0,s.blockers);});
+ const route=usePathValue(p=>{'worklet';const s=game.value,g=geometry.value;p.moveTo(s.px+(s.x-s.px)*alpha.value,s.py+(s.y-s.py)*alpha.value);for(const segment of g.segments){if(segment.kind==='curve')p.quadTo(segment.control.x,segment.control.y,segment.to.x,segment.to.y);else p.lineTo(segment.to.x,segment.to.y);}});
+ const arrow=usePathValue(p=>{'worklet';const points=geometry.value.arrow;if(points.length===3){p.moveTo(points[0]!.x,points[0]!.y);p.lineTo(points[1]!.x,points[1]!.y);p.lineTo(points[2]!.x,points[2]!.y);p.close();}});
+ const shots=(enemy:boolean)=>usePathValue(p=>{'worklet';for(const b of game.value.combat?.projectiles??[]){if((b.owner>=0)!==enemy)continue;const x=b.px+(b.x-b.px)*alpha.value,y=b.py+(b.y-b.py)*alpha.value;p.moveTo(x,y);p.lineTo(x-b.vx*.018,y-b.vy*.018);}});
  const friendly=shots(false),hostile=shots(true);
  const target=useDerivedValue(()=>{const s=game.value,c=s.combat,o=(input.value.command&&(input.value.command.seq>(c?.commandSeen??0))?input.value.command:c?.order);if(!o||s.status!=='playing')return {x:0,y:0,opacity:0,attack:false};const g=o.kind==='attack'?s.guards[o.target]:null;return {x:g?g.px+(g.x-g.px)*alpha.value:o.x,y:g?g.py+(g.y-g.py)*alpha.value:o.y,opacity:g&&(!g.active||g.hp<=0)?0:1,attack:!!g};});
  const tx=useDerivedValue(()=>target.value.x),ty=useDerivedValue(()=>target.value.y),opacity=useDerivedValue(()=>target.value.attack?0:target.value.opacity);
- const reticle=useDerivedValue(()=>{
-  const p=Skia.Path.Make(),t=target.value;if(!t.attack||!t.opacity)return p;
+ const reticle=usePathValue(p=>{
+  'worklet';const t=target.value;if(!t.attack||!t.opacity)return;
   const pulse=reduced?0:Math.sin(game.value.elapsed*7)*.035;
   for(let i=0;i<4;i++){
    const angle=Math.PI/4+i*Math.PI/2,dx=Math.cos(angle),dy=Math.sin(angle);
@@ -20,7 +22,7 @@ export default function CombatLayer({game,alpha,input,reduced=false}:{game:Share
    p.moveTo(t.x+dx*tip,t.y+dy*tip);
    p.lineTo(t.x+dx*base-dy*half,t.y+dy*base+dx*half);
    p.lineTo(t.x+dx*base+dy*half,t.y+dy*base-dx*half);p.close();
-  }return p;
+  }
  });
  const routeColor=useDerivedValue(()=>target.value.attack?'#FFB52E':'#92D9C3');
  const flash=useDerivedValue(()=>Math.max(0,game.value.combat?.flash??0)*2.5);

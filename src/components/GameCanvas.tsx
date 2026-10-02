@@ -91,7 +91,7 @@ export default memo(function GameCanvas({camera,size,height=size*20/12,input,gam
  const glow=useDerivedValue(()=>reduced?.12:.12+Math.sin(clock.value*2)*.035);
  const extract=useDerivedValue(()=>game.value.extraction/TUNING.extractHold*level.exit.w);
  const pickupWidth=useDerivedValue(()=>game.value.pickup/TUNING.pickupHold*1.1);
- return <Canvas style={{width:size,height}} accessible={false}>
+ return <Canvas style={{width:size,height}} accessible={false} opaque>
   <Group transform={cameraTransform}>
    {district==='warehouse'?Array.from({length:16},(_,i)=><Image key={i} image={floor} x={(i%4)*3} y={Math.floor(i/4)*5} width={3} height={5} fit="fill"/>):<Image image={floor} x={0} y={0} width={12} height={20} fit="fill"/>}
    <RoundedRect x={0} y={0} width={12} height={20} r={0} color={environment.tint}/>
