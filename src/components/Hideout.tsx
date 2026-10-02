@@ -20,8 +20,8 @@ import MissionBriefing from './MissionBriefing';
 import WeeklyBoard,{useWeekly} from '../ranked/WeeklyBoard';
 import PhoneInspector from './PhoneInspector';
 import PhoneArt from './PhoneArt';import HideoutBalance from './HideoutBalance';
-type Props={onContractStart:(ticket:import('../../shared/ranked').RunTicket)=>void;initialTab?:'map'|'leaderboard'|'rack';visible:boolean;onClose:()=>void;onStart:(id:MissionId)=>void;onShop:()=>void;onSync:()=>void;onDaily:()=>void;onPaid:()=>void;onSettings:()=>void;progress:Progress;syncStatus:string};
-export default function Hideout({onContractStart,initialTab='map',visible,onClose,onStart,onShop,onSync,onDaily,onPaid,onSettings,progress,syncStatus}:Props){
+type Props={onContractStart:(ticket:import('../../shared/ranked').RunTicket)=>void;initialTab?:'map'|'leaderboard'|'rack';mapRequest?:number;visible:boolean;onClose:()=>void;onStart:(id:MissionId)=>void;onShop:()=>void;onSync:()=>void;onDaily:()=>void;onPaid:()=>void;onSettings:()=>void;progress:Progress;syncStatus:string};
+export default function Hideout({onContractStart,initialTab='map',mapRequest=0,visible,onClose,onStart,onShop,onSync,onDaily,onPaid,onSettings,progress,syncStatus}:Props){
  const economy=useEconomy();
  const judge=process.env.EXPO_PUBLIC_JUDGE_PREVIEW==='1';
  const {account,preview}=useAccount(),equipment=account?.equipment??{},themed=equipment.rack==='rack-theme',framed=equipment.frame==='profile-frame';
@@ -32,6 +32,8 @@ export default function Hideout({onContractStart,initialTab='map',visible,onClos
  const rackPhoneHeight=Math.max(12,Math.min(68,((roomW*.59-18)/4-8)*388/212,((roomH*.48-18)*.88/3-8)));
  const weekly=useWeekly(visible);
  const [tab,setTab]=useState<'rack'|'map'|'leaderboard'|'briefing'|'complete'>(initialTab),[selected,setSelected]=useState<MissionId>('practice');
+ // A run exit requests the district map without resetting ordinary Hideout navigation.
+ useEffect(()=>{if(mapRequest>0){setTab('map');setInspection(null);setWeeklyDetail(false);}},[mapRequest]);
  // Returning from the teaching screen must keep the mission the player chose.
  useEffect(()=>{if(visible){if(tab!=='briefing')setSelected(next);setInspection(null);}},[visible,completed,next,tab]);
  const level=useMemo(()=>combatLevel(selected),[selected]),nextLevel=useMemo(()=>combatLevel(next),[next]),edition=phoneEdition(selected),best=progress.missions[selected],available=unlocked(progress,selected);
