@@ -7,7 +7,7 @@ const lessons=[
  ['Your first clean getaway','Tap the floor to move. Tap a guard to approach and attack with your knife. Take the phone, then reach the exit.','MOVE → TAKE → ESCAPE'],
  ['Stop the scout drone','Drones do not shoot. Their radio reveals your location. Cut them down up close or break sight before the amber ring fills. Each win adds a phone to Hideout → Phones.','SCAN → REPORT → INTERRUPT'],
  ['Watch the laser crossings','Crossing a laser flashes an alarm for 1.5 seconds. Nearby guards investigate that spot once. Keep moving into cover; if they see you, the full chase starts.','CROSS → ALARM → BREAK SIGHT'],
- ['Plan the way back','Taking the phone raises the alarm. Know your route to the exit before reinforcements arrive.','PHONE → COVER → EXIT'],
+ ['Plan the way back','Taking the phone raises the alarm. Know your route through the central pillars before reinforcements arrive. Side-lane lasers briefly alert nearby guards.','PHONE → COVER → EXIT'],
  ['Make the walls work for you','Walls stop shots. Move from one safe pocket to the next instead of crossing an open firing lane.','COVER → MOVE → COVER'],
  ['Find the Heavy’s weak point','The gold front plate blocks knife strikes. Circle the cover island and strike the mint panel on its back while it turns.','FRONT = ARMOR · REAR = WEAK POINT'],
  ['A shortcut is a choice','Watch the patrols before you cross. A longer route behind cover can be safer than the shortest path.','WATCH → CHOOSE → MOVE'],
