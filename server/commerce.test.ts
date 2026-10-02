@@ -10,6 +10,7 @@ import {createApp} from './app';
 import {verifyPayment,TOKEN_PROGRAM,MEMO_PROGRAM,type PaymentChain} from './chain';
 import type {Order,PaymentQuote,SignInChallenge} from '../shared/commerce';
 import {RankedService,dailyMission} from './ranked-service';
+import {CoinbasePriceFeed} from './pricing';
 import {fixtureReplay} from '../tests/fixtures/replay';
 import {PaidService} from './paid-service';
 import {OperatorReview,type ReviewRequest} from './operator-review';
@@ -790,4 +791,14 @@ test('league start route accepts knife week contract ids longer than the old 32 
  const r=await app.inject({method:'POST',url:'/league/start',headers:user.headers,payload:{contractId,rulesHash:'a'.repeat(64),requestKey:randomUUID()}});
  // the id must pass schema validation; the service then refuses it for other reasons
  assert.notEqual(r.statusCode,400,r.body);
+});
+
+test('price feed warming refreshes ahead of expiry and dedupes concurrent fetches',async()=>{
+ let calls=0,clock=1_000_000;
+ const fetcher=(async(url:string|URL|Request)=>{calls++;const currency=String(url).includes('SKR')?'SKR':'SOL';return {ok:true,json:async()=>({data:{base:currency,currency:'USD',amount:currency==='SKR'?'0.02':'100'}})} as unknown as Response;}) as unknown as typeof fetch;
+ const feed=new CoinbasePriceFeed(fetcher,()=>clock);
+ const [a,b]=await Promise.all([feed.rates(),feed.rates()]);assert.equal(calls,2,'concurrent reads share one fetch');assert.deepEqual(a,b);
+ clock+=30_000;await feed.refresh();assert.equal(calls,4,'an explicit refresh fetches even while the cache is fresh');
+ clock+=20_000;const c=await feed.rates();assert.equal(calls,4,'a warmed cache serves without a fetch');assert.equal(c.at,1_030_000);
+ feed.warm(60_000);feed.stopWarming();
 });

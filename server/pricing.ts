@@ -24,17 +24,24 @@ export function priceProduct(sku:ProductId,currency:PaymentCurrency,rates:Rates,
 }
 export interface PriceFeed{rates():Promise<Rates>}
 export class CoinbasePriceFeed implements PriceFeed{
- private cached?:Rates;private pending?:Promise<Rates>;
+ private cached?:Rates;private pending?:Promise<Rates>;private timer?:ReturnType<typeof setInterval>;
  constructor(private fetcher:typeof fetch=fetch,private now=Date.now){}
+ // refreshes every 30 s so the 45 s cache never expires under a request; failures keep the previous rates
+ warm(intervalMs=30000){this.stopWarming();const tick=()=>{this.refresh().catch(()=>{});};tick();this.timer=setInterval(tick,intervalMs);this.timer.unref?.();return this;}
+ stopWarming(){if(this.timer!==undefined)clearInterval(this.timer);this.timer=undefined;}
  async rates():Promise<Rates>{
   if(this.cached&&this.now()-this.cached.at<45000)return this.cached;
+  return this.refresh();
+ }
+ refresh():Promise<Rates>{
   if(this.pending)return this.pending;
   this.pending=(async()=>{const at=this.now();const values=await Promise.all((['SKR','SOL'] as const).map(async currency=>{
    const r=await this.fetcher(`https://api.coinbase.com/v2/prices/${currency}-USD/spot`,{signal:AbortSignal.timeout(8000)});
    if(!r.ok)throw new Error('Market prices unavailable.');const body=await r.json() as {data?:{base?:string;currency?:string;amount?:string}};
    if(body.data?.base!==currency||body.data.currency!=='USD'||!body.data.amount)throw new Error('Invalid price response.');rateUnits(body.data.amount);return body.data.amount;
   }));const next={SKR:values[0]!,SOL:values[1]!,at};this.cached=next;return next;})();
-  try{return await this.pending;}finally{this.pending=undefined;}
+  const settle=async()=>{try{return await this.pending!;}finally{this.pending=undefined;}};
+  return settle();
  }
 }
 export async function productPricing(sku:ProductId,feed:PriceFeed,decimals:number,divisor=1,campaignUsdCents?:number,shopPrices:Record<string,string>={},passSkr?:number,creditPackPrices:Record<string,number>={}):Promise<ProductPricing>{const rates=await feed.rates();return {sku,expiresAt:new Date(rates.at+60000).toISOString(),options:(['SKR','SOL'] as const).map(currency=>priceProduct(sku,currency,rates,decimals,Date.now(),divisor,campaignUsdCents,shopPrices,passSkr,creditPackPrices))};}

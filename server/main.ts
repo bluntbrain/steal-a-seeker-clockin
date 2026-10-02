@@ -13,6 +13,7 @@ import {assertRulesCurrent} from './rules-version';
 import {ReturnService} from './returns';
 import {DevnetReturnChain,loadReturnSigner,loadReturnSignerJson} from './return-chain';
 import {PaidService} from './paid-service';
+import {CoinbasePriceFeed} from './pricing';
 async function main(){
  const network=networkConfig(process.env);
  const mint=address(network.mint),recipient=address(network.recipient),decimals=network.decimals;
@@ -20,7 +21,7 @@ async function main(){
  const [destination]=await findAssociatedTokenPda({owner:recipient,mint,tokenProgram:address(TOKEN_PROGRAM)});
  const config={promotions:parsePromotions(process.env.PROMOTIONS_JSON),creditPackPrices:network.creditPackPrices,storeCreditPrices:network.storeCreditPrices,passSkr:network.passSkr,testPricing:network.testPricing,cluster:network.cluster,shopPrices:network.shopPrices,priceDivisor:network.priceDivisor,campaignUsdCents:network.campaignUsdCents,rebateSkr:network.rebateSkr,allowlist:network.allowlist,allowAllWallets:network.allowAllWallets,mint,recipient,decimals,destination,campaignOffer:true,usdPricing:true,identityUri:process.env.APP_IDENTITY_URI||'https://stealaseeker.bluntbrain.com'};
  const chain=new DevnetChain({...config,rpcUrl:network.rpcUrl});
- await assertRulesCurrent();const pool=database(process.env.DATABASE_URL||'postgresql://localhost/seeker_clockin_devnet');await migrate(pool);await bindDatabaseNetwork(pool,network.cluster);const service=new CommerceService(pool,chain,config),ranked=new RankedService(pool);
+ await assertRulesCurrent();const pool=database(process.env.DATABASE_URL||'postgresql://localhost/seeker_clockin_devnet');await migrate(pool);await bindDatabaseNetwork(pool,network.cluster);const service=new CommerceService(pool,chain,config,config.usdPricing?new CoinbasePriceFeed().warm():new CoinbasePriceFeed()),ranked=new RankedService(pool);
  const returnConfig={cluster:network.cluster,mint,treasury:recipient,source:destination,decimals},returns=new ReturnService(pool,undefined,returnConfig);
  if(network.returnsEnabled){
   const path=network.signerPath,json=network.signerJson;
