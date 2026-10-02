@@ -5,18 +5,38 @@ import {guardPressure} from './guard-pressure';
 type XY=readonly [number,number];
 type Rect=readonly [number,number,number,number];
 type Cast=readonly [EnemyRole,...XY[]];
-type Layout={spawn:XY;phone:XY;exit:XY;walls:Rect[];cast:Cast[];safe:XY[];back:XY[];pockets:XY[];entries?:XY[];grates?:Rect[];second?:XY;tip:string};
+type Layout={spawn:XY;phone:XY;exit:XY;walls:Rect[];crates?:Rect[];cast:Cast[];safe:XY[];back:XY[];pockets:XY[];entries?:XY[];grates?:Rect[];second?:XY;tip:string};
 const point=([x,y]:XY):Point=>{'worklet';return {x,y};};
 const box=([x,y,w,h]:Rect):Box=>{'worklet';return {x,y,w,h,kind:'wall'};};
 
 // Each map has authored observation pockets, a covered approach and watched
 // shortcuts. These are distinct encounters rather than repeated wall mazes.
 const LAYOUTS:Layout[]=[
- {spawn:[2,18],phone:[9.6,3],exit:[2,18],
-  walls:[[4,9,2.4,4.2],[1,14,2.2,1.2],[8,13.6,2.3,1.2],[7.8,5.8,2.5,2],[3.2,3.3,2,3]],
-  cast:[['scout',[3.2,11],[3.2,9],[2.4,9]],['drone',[7.3,11.5],[7.3,9],[8.6,9]],['scout',[9.7,4.7],[7,4.7],[7,3]]],
-  safe:[[2,16.3],[2,12.5],[2,8],[6.7,8],[6.7,3]],back:[[6.7,3],[6.7,8],[2,8],[2,16.3]],pockets:[[2,16.3],[5.2,14.4]],
-  entries:[[10.4,10.8]],tip:'Stay behind cover: guards spot you quickly and pursue together. Interrupt the drone report and plan for the pickup response.'},
+ // Mission 2: left service lane, staggered cover and two right-hand rooms.
+ // Doorways stay open floor; the reference's light strips are not closed gates.
+ {spawn:[2.35,18.55],phone:[2.6,1.8],exit:[2.35,18.55],
+  walls:[
+   [4,.65,.65,3.4],[.65,3.4,1.25,.65],[3.25,3.4,1.4,.65],
+   [5.3,6,5.35,.65],[5.3,6,.65,3.1],[5.3,10.25,.65,1.35],
+   [5.3,10.95,3.5,.65],[10,6,.65,3.1],[10,10.25,.65,1.35],
+   [5.3,13.3,5.35,.65],[5.3,15.15,.65,2.6],[5.3,17.1,5.35,.65],[10,13.3,.65,2.65]
+  ],
+  crates:[
+   [6.2,1.2,2.5,.85],[6.2,2.15,.95,.95],[8.25,2.15,.95,.95],[7.35,3.2,1.85,.85],
+   [1.0,4.95,1.45,1.1],[2.7,6.5,.95,.95],[2.7,8.35,.95,.95],[2.7,10.2,.95,.95],
+   [.7,7.1,.85,1.8],[.7,10.4,.85,1.35],
+   [6.15,6.95,.85,1.5],[8.85,8.1,.75,1.1],[6.15,10,.85,.75],
+   [2.7,12.15,.95,.95],[5.3,12,.95,.95],[8.0,11.65,2.65,1.3],
+   [2.7,14.25,.95,.95],[2.7,16.2,.95,.95],[.7,14,.85,2.2],
+   [6.1,16,2.6,.85],[9,14.1,.8,.8],[4.2,18.15,2.6,.8]
+  ],
+  cast:[['scout',[4.35,10],[4.35,7.3],[4.35,5]],
+   ['scout',[8.1,9.65],[8.1,7.5],[8.1,7.0]],
+   ['drone',[5.35,3],[5.35,4.7],[8.5,4.7]]],
+  safe:[[4.45,17.6],[4.45,14.55],[6.5,14.6],[8,15.25],[9.4,15.55],[10.95,16.5],[10.95,9.65],[8,9.65],[4.35,9.65],[4.35,5.9],[4.95,4.75],[3,4.5],[2.55,2.7]],
+  back:[[3,4.5],[4.35,5.9],[4.35,11.95],[4.45,14.55],[4.45,17.6],[2.35,18.55]],
+  pockets:[[7.8,15],[4.4,12.4],[2.1,17.65]],entries:[[10,4.7]],
+  tip:'Use the staggered crates to break sight. The drone reports your position; flank it before crossing the upper yard. Recover the Seeker and return to the service entrance.'},
  {spawn:[6,18],phone:[6,2.7],exit:[2,18],
   walls:[[4.5,11,3,3.2],[4.5,5,3,3.2],[1.2,8.5,2,1],[8.8,9.2,2.3,1],[8.7,15.8,1.5,1.1]],
   cast:[['scout',[3.5,12],[3.5,10.5],[2.1,10.5]],['scout',[8.5,12],[8.5,14.8],[7.7,15.2]],['scout',[8.5,5.7],[8.5,4],[6.2,4]],['drone',[2.3,5],[2.3,3],[3.5,3]]],
@@ -128,7 +148,7 @@ export function applyHeistLayout(l:LevelDefinition):LevelDefinition{
  }
  const plan=LAYOUTS[l.number-2]!;l.combat={version:2,revision:10};
  l.spawn=point(plan.spawn);l.phone=point(plan.phone);const exit=point(plan.exit);l.exit={x:exit.x-.65,y:exit.y-.55,w:1.3,h:1.1};
- l.blockers=[...l.blockers.slice(0,4),...plan.walls.map(box)];l.gates=undefined;l.switches=undefined;l.exitWindow=undefined;
+ l.blockers=[...l.blockers.slice(0,4),...plan.walls.map(box),...(plan.crates??[]).map(v=>({...box(v),kind:'crate' as const}))];l.gates=undefined;l.switches=undefined;l.exitWindow=undefined;
  l.targets=plan.second?[l.phone,point(plan.second)]:undefined;
  l.patrols=plan.cast.map(([role,...anchors],index):GuardSpec=>{
   const route=anchors.map(point),heavy=role==='heavy'||role==='warden';
