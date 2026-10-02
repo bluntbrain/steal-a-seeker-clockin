@@ -75,6 +75,8 @@ import {LEVEL,getLevel,TUNING,MISSIONS,type MissionId} from './game/level';
 type Stats={fps:number;p95:number;frames:number;slow:number};
 const zeroStats={fps:0,p95:0,frames:0,slow:0};
 const time=(n:number)=>`${Math.floor(n/60).toString().padStart(2,'0')}:${Math.floor(n%60).toString().padStart(2,'0')}`;
+// memoised so hud publishes do not re-render the hidden overlay panels
+const RewardsPanelMemo=React.memo(RewardsPanel),WalletPanelMemo=React.memo(WalletPanel),HideoutMemo=React.memo(Hideout),SettingsPanelMemo=React.memo(SettingsPanel),DailyPanelMemo=React.memo(DailyPanel),PaidPanelMemo=React.memo(PaidPanel);
 export default function GameScreen(){return <GestureHandlerRootView style={{flex:1}}><SafeAreaProvider><LaunchSplash><WalletProvider><AccountProvider><SettingsProvider><EconomyProvider><CampaignGate><WalletGame/></CampaignGate></EconomyProvider></SettingsProvider></AccountProvider></WalletProvider></LaunchSplash></SafeAreaProvider></GestureHandlerRootView>;}
 function WalletGame(){
  const account=useAccount(),[session,setSession]=useState<{ticket?:RunTicket;paid?:PaidPlay;dailyReturn?:boolean;paidReturn?:boolean}>({});
@@ -122,11 +124,11 @@ export function Game({rankTicket,paidPlay,dailyReturn,paidReturn,onRankStart,onR
  const availableHeight=Math.max(240,height-insets.top-insets.bottom-(combatMode?0:48));
  const size=fullViewport?width-2:Math.max(144,Math.min(width-16,(height-insets.top-insets.bottom-(combatMode?16:174))*.6,480));
  const boardHeight=fullViewport?availableHeight-2:size*20/12;
- const camera=useFollowCamera(game,alpha,!fullViewport,boardHeight*12/size);
+ const renderGameSurface=!introMission&&!hideoutOpen&&!walletOpen&&!settingsOpen&&!dailyOpen&&!paidOpen&&!rewardsOpen&&!economy.checkoutOpen;
+ const camera=useFollowCamera(game,alpha,!fullViewport,boardHeight*12/size,renderGameSurface&&!paused);
  const worldOverlayStyle=useAnimatedStyle(()=>{const c=camera.value,scale=size/12*c.zoom;return {transform:[{translateX:(c.zoom-1)*size/2-c.x*scale},{translateY:(c.zoom-1)*boardHeight/2-c.y*scale},{scale:c.zoom}]};});
  const damagePulse=useSharedValue(0);
  const showDamage=useCallback(()=>{haptic('damage');damagePulse.value=settingsRef.current.reducedEffects?.45:1;damagePulse.value=withTiming(0,{duration:settingsRef.current.reducedEffects?160:280});},[damagePulse,haptic]);
- const renderGameSurface=!introMission&&!hideoutOpen&&!walletOpen&&!settingsOpen&&!dailyOpen&&!paidOpen&&!rewardsOpen&&!economy.checkoutOpen;
  const showGameplayHeader=paused||hud.status!=='playing';
  const gameplayVisible=renderGameSurface&&!introMission&&!sceneLoading&&!paused&&!hideoutOpen&&!walletOpen&&!mapOpen&&!settingsOpen&&!dailyOpen&&!paidOpen&&!rewardsOpen;
  useCombatAudio(hud,settings.sound&&gameplayVisible,settings.volume,showDamage,gameplayVisible,haptic);
@@ -193,8 +195,17 @@ export function Game({rankTicket,paidPlay,dailyReturn,paidReturn,onRankStart,onR
   runOnUI(()=>{'worklet';try{const state=restorePaidState(paidPlay.entry.manifest.mission,paidPlay.replay);game.value=state;input.value={...idleInput(),dash:state.dashSeen,tool:state.toolSeen};runOnJS(restored)({...state});}catch{runOnJS(restoreFailed)();}})();
  },[paidPlay,game,input,restored,restoreFailed]);
  useEffect(()=>{if(!paidEntry?.run)return;const check=()=>{const left=Math.max(0,Math.ceil((new Date(paidEntry.run!.expiresAt).getTime()-Date.now())/1000));setSubmissionSeconds(left);if(left===0){setDeadlinePassed(true);suspended.value=true;if(game.value.status==='playing')setPaused(true);}};check();const timer=setInterval(check,1000);return()=>clearInterval(timer);},[paidEntry,suspended,game]);
- const frameDriver=useFrameCallback(frame=>{
-   const raw=frame.timeSincePreviousFrame;if(raw===null)return;
+ // latest js callbacks behind one ref so the frame worklet keeps a single identity
+ const jsRef=useRef({publish,publishStats,event,checkpoint,beginGuide});jsRef.current={publish,publishStats,event,checkpoint,beginGuide};
+ const callPublish=useCallback((snapshot:GameState,epoch?:number)=>jsRef.current.publish(snapshot,epoch),[]);
+ const callStats=useCallback((value:Stats)=>jsRef.current.publishStats(value),[]);
+ const callEvent=useCallback((kind:Parameters<typeof event>[0])=>jsRef.current.event(kind),[]);
+ const callCheckpoint=useCallback((replay:Replay)=>jsRef.current.checkpoint(replay),[]);
+ const callBeginGuide=useCallback(()=>jsRef.current.beginGuide(),[]);
+ const frameDriver=useFrameCallback(useCallback((frame:{timeSincePreviousFrame:number|null})=>{
+   'worklet';
+   // a newly registered callback reports a null delta; count it as one display frame instead of dropping it
+   const raw=frame.timeSincePreviousFrame??1000/60;
    if(suspended.value||!sceneReady.value){pendingTap.value=null;accumulator.value=0;return;}
    tapElapsed.value+=raw;
    if(tapReady(pendingTap.value,tapElapsed.value)&&game.value.status==='playing'){
@@ -202,7 +213,7 @@ export function Game({rankTicket,paidPlay,dailyReturn,paidReturn,onRankStart,onR
     const seq=Math.max(game.value.combat?.commandSeen??0,input.value.command?.seq??0)+1;
     const tapped=assistedCombatTap(game.value,point.x,point.y,seq);
     const command=guideStage.value>=0?guideCommand(guideStage.value,tapped):tapped;
-    if(command){input.modify(v=>{v.command=command;return v;});if(guideWaiting.value){guideWaiting.value=false;runOnJS(beginGuide)();}}
+    if(command){input.modify(v=>{v.command=command;return v;});if(guideWaiting.value){guideWaiting.value=false;runOnJS(callBeginGuide)();}}
    }
    if(guideWaiting.value){accumulator.value=0;return;}
    const dt=Math.min(raw/1000,.1);clock.value+=dt;
@@ -210,23 +221,23 @@ export function Game({rankTicket,paidPlay,dailyReturn,paidReturn,onRankStart,onR
    samples.modify(v=>{v.push(raw);if(v.length>120)v.shift();return v;});reportClock.value+=raw;
    if(reportClock.value>=1000){
      const sorted=[...samples.value].sort((a,b)=>a-b);const mean=samples.value.reduce((a,b)=>a+b,0)/Math.max(1,samples.value.length);
-     runOnJS(publishStats)({fps:1000/mean,p95:sorted[Math.max(0,Math.ceil(sorted.length*.95)-1)]??0,frames:frameTotal.value,slow:slowTotal.value});reportClock.value=0;
+     runOnJS(callStats)({fps:1000/mean,p95:sorted[Math.max(0,Math.ceil(sorted.length*.95)-1)]??0,frames:frameTotal.value,slow:slowTotal.value});reportClock.value=0;
    }
    const previousDamage=game.value.combat?.damageTaken??0,previousDecoys=game.value.decoysLeft,previousAlert=game.value.alert,previousPower=game.value.power,previousRelays=[...game.value.relayTimers],previousCarry=game.value.carrying,previousDashes=game.value.dashes,previousTool=game.value.toolSeen,previousStatus=game.value.status;
    accumulator.value=Math.min(accumulator.value+dt,TUNING.step*3);
    if(accumulator.value+1e-9>=TUNING.step)game.modify(s=>{recording.modify(chunks=>{while(accumulator.value+1e-9>=TUNING.step){recordStep(s,input.value,chunks);accumulator.value-=TUNING.step;}return chunks;});return s;},true);
    alpha.value=accumulator.value/TUNING.step;
-   if(paidEntry){saveClock.value+=dt;if(saveClock.value>=1||previousStatus!==game.value.status){saveClock.value=0;runOnJS(checkpoint)({version:(combatMode?2:1) as 1|2,chunks:recording.value.map(c=>({...c}))});}}
-   if(game.value.decoysLeft<previousDecoys)runOnJS(event)('decoy');
-   if(!combatMode&&previousAlert<=0&&game.value.alert>0)runOnJS(event)('spot');
-   if(game.value.power!==previousPower||game.value.relayTimers.some((v,i)=>v>(previousRelays[i]??0)))runOnJS(event)('switch');
-   if(game.value.carrying&&!previousCarry)runOnJS(event)('pickup');
-   if(game.value.dashes>previousDashes)runOnJS(event)('dash');
-   if(game.value.status==='won'&&previousStatus!=='won')runOnJS(event)('success');
-   if(game.value.status==='caught'&&previousStatus!=='caught')runOnJS(event)('caught');
+   if(paidEntry){saveClock.value+=dt;if(saveClock.value>=1||previousStatus!==game.value.status){saveClock.value=0;runOnJS(callCheckpoint)({version:(combatMode?2:1) as 1|2,chunks:recording.value.map(c=>({...c}))});}}
+   if(game.value.decoysLeft<previousDecoys)runOnJS(callEvent)('decoy');
+   if(!combatMode&&previousAlert<=0&&game.value.alert>0)runOnJS(callEvent)('spot');
+   if(game.value.power!==previousPower||game.value.relayTimers.some((v,i)=>v>(previousRelays[i]??0)))runOnJS(callEvent)('switch');
+   if(game.value.carrying&&!previousCarry)runOnJS(callEvent)('pickup');
+   if(game.value.dashes>previousDashes)runOnJS(callEvent)('dash');
+   if(game.value.status==='won'&&previousStatus!=='won')runOnJS(callEvent)('success');
+   if(game.value.status==='caught'&&previousStatus!=='caught')runOnJS(callEvent)('caught');
    hudClock.value+=dt;
-   if(hudClock.value>=.12||previousDamage!==(game.value.combat?.damageTaken??0)||previousTool!==game.value.toolSeen||previousCarry!==game.value.carrying||previousStatus!==game.value.status||previousDashes!==game.value.dashes){runOnJS(publish)({...game.value},simulationEpoch.value);hudClock.value=0;}
- });
+   if(hudClock.value>=.12||previousDamage!==(game.value.combat?.damageTaken??0)||previousTool!==game.value.toolSeen||previousCarry!==game.value.carrying||previousStatus!==game.value.status||previousDashes!==game.value.dashes){runOnJS(callPublish)({...game.value},simulationEpoch.value);hudClock.value=0;}
+ },[suspended,sceneReady,pendingTap,tapElapsed,game,input,guideStage,guideWaiting,clock,frameTotal,slowTotal,samples,reportClock,accumulator,recording,alpha,saveClock,hudClock,simulationEpoch,paidEntry,combatMode,callPublish,callStats,callEvent,callCheckpoint,callBeginGuide]));
  useEffect(()=>{frameDriver.setActive(renderGameSurface&&!paused);return()=>frameDriver.setActive(false);},[renderGameSurface,paused,frameDriver]);
  const pause=useCallback((value:boolean)=>{
   if(!value&&paidEntry&&(!recoveryReady||recoveryError||deadlinePassed))return;
@@ -271,10 +282,12 @@ export function Game({rankTicket,paidPlay,dailyReturn,paidReturn,onRankStart,onR
  const sceneFailed=useCallback(()=>{if(sceneEpoch.current===sceneVersion)setSceneError('Could not load the map. Try again.');},[sceneVersion]);
  useEffect(()=>{if(!sceneLoading||!renderGameSurface)return;const timer=setTimeout(()=>setSceneError('The map is taking longer to load. Retry to reload its artwork.'),12000);return()=>clearTimeout(timer);},[sceneLoading,sceneVersion,renderGameSurface]);
  const appearance=useMemo(()=>({...economy.equipment,reducedEffects:settings.reducedEffects}),[economy.equipment.outfit,economy.equipment.trail,economy.equipment.frame,economy.equipment.rack,settings.reducedEffects]);
- const joystick=Gesture.Pan().minDistance(0).onBegin(e=>{const dx=(e.x-54)/36,dy=(e.y-54)/36,m=Math.max(1,Math.hypot(dx,dy));input.modify(v=>{v.x=dx/m;v.y=dy/m;return v;});}).onUpdate(e=>{const dx=(e.x-54)/36,dy=(e.y-54)/36,m=Math.max(1,Math.hypot(dx,dy));input.modify(v=>{v.x=dx/m;v.y=dy/m;return v;});}).onFinalize(()=>{input.modify(v=>{v.x=0;v.y=0;return v;});});
- const take=Gesture.LongPress().minDuration(0).maxDistance(100).onBegin(()=>{input.modify(v=>{v.interact=true;return v;});}).onFinalize(()=>{input.modify(v=>{v.interact=false;return v;});});
- const dash=Gesture.Tap().onBegin(()=>{input.modify(v=>{v.dash++;return v;});});
- const tool=Gesture.Tap().onBegin(()=>{input.modify(v=>{v.tool=(v.tool??0)+1;return v;});});
+ // gesture objects are memoised; rebuilding them each render reconfigures the detectors on every hud publish
+ const joystick=useMemo(()=>Gesture.Pan().minDistance(0).onBegin(e=>{const dx=(e.x-54)/36,dy=(e.y-54)/36,m=Math.max(1,Math.hypot(dx,dy));input.modify(v=>{v.x=dx/m;v.y=dy/m;return v;});}).onUpdate(e=>{const dx=(e.x-54)/36,dy=(e.y-54)/36,m=Math.max(1,Math.hypot(dx,dy));input.modify(v=>{v.x=dx/m;v.y=dy/m;return v;});}).onFinalize(()=>{input.modify(v=>{v.x=0;v.y=0;return v;});}),[input]);
+ const take=useMemo(()=>Gesture.LongPress().minDuration(0).maxDistance(100).onBegin(()=>{input.modify(v=>{v.interact=true;return v;});}).onFinalize(()=>{input.modify(v=>{v.interact=false;return v;});}),[input]);
+ const dash=useMemo(()=>Gesture.Tap().onBegin(()=>{input.modify(v=>{v.dash++;return v;});}),[input]);
+ const tool=useMemo(()=>Gesture.Tap().onBegin(()=>{input.modify(v=>{v.tool=(v.tool??0)+1;return v;});}),[input]);
+ const noTap=useMemo(()=>Gesture.Tap().enabled(false),[]);
  const stickStyle=useAnimatedStyle(()=>({transform:[{translateX:input.value.x*31},{translateY:input.value.y*31}]}));
  const switchIndex=nearSwitch(hud),pad=level.switches?.[switchIndex];
  const activeTake=(nearPhone(hud)||switchIndex>=0)&&hud.status==='playing',activeDash=hud.carrying&&hud.battery>=20&&hud.cooldown<=.05&&hud.status==='playing';
@@ -285,7 +298,29 @@ export function Game({rankTicket,paidPlay,dailyReturn,paidReturn,onRankStart,onR
  const damageStyle=useAnimatedStyle(()=>({opacity:damagePulse.value}));
  const alarmWash=useAnimatedStyle(()=>({opacity:(game.value.securityAlarm||(game.value.combat?.tripwire?.until??0)>game.value.ticks)&&game.value.status==='playing'&&!suspended.value&&!settings.reducedEffects?.025+.04*(.5+.5*Math.sin(clock.value*2.5)):0}));
  const alarmBorder=useAnimatedStyle(()=>({opacity:(game.value.securityAlarm||(game.value.combat?.tripwire?.until??0)>game.value.ticks)&&game.value.status==='playing'&&!suspended.value?(settings.reducedEffects?.35:.4+.25*(.5+.5*Math.sin(clock.value*2.5))):0}));
- return <SafeAreaView style={s.screen} edges={['top','bottom']}><StatusBar style="light"/><RewardsPanel onLegacy={()=>{setRewardsOpen(false);setPaidOpen(true);}} visible={rewardsOpen} onClose={()=>closeOverlay(setRewardsOpen)}/><WalletPanel visible={walletOpen} onClose={()=>closeOverlay(setWalletOpen)}/><Hideout onContractStart={ticket=>{setHideoutOpen(false);onRankStart(ticket);}} initialTab={dailyReturn?'leaderboard':economy.tab} mapRequest={missionMapRequest} visible={hideoutOpen} onStart={introduceMission} onClose={()=>setHideoutOpen(false)} onShop={()=>{setReturnHome(true);setHideoutOpen(false);setWalletOpen(true);}} progress={progress.progress} syncStatus={progress.syncStatus} onSync={()=>void progress.retrySync()} onSettings={()=>{setReturnHome(true);setHideoutOpen(false);setSettingsOpen(true);}} onDaily={()=>{setHideoutOpen(false);setDailyOpen(true);}} onPaid={()=>{setReturnHome(true);setHideoutOpen(false);setRewardsOpen(true);}}/><SettingsPanel onReplayTips={()=>{setReturnHome(false);combatMode?guide.replay():coach.replay();setSettingsOpen(false);setHideoutOpen(false);restart("practice");}} mission={mission} visible={settingsOpen} onClose={()=>closeOverlay(setSettingsOpen)}/><DailyPanel visible={dailyOpen} onClose={()=>{setDailyOpen(false);setHideoutOpen(true);}} onStart={ticket=>{setDailyOpen(false);onRankStart(ticket);}}/><PaidPanel visible={paidOpen} onClose={()=>closeOverlay(setPaidOpen)} onStart={play=>{setPaidOpen(false);onPaidStart(play);}}/><View style={[s.shell,{width:fullViewport?width:Math.max(size+16,Math.min(width,460)),paddingHorizontal:fullViewport?0:8}]}>
+ // latest callbacks behind one ref so the memoised panels receive stable handlers
+ const live=useRef({closeOverlay,onRankStart,onPaidStart,retrySync:progress.retrySync,guideReplay:guide.replay,coachReplay:coach.replay,restart,introduceMission});
+ live.current={closeOverlay,onRankStart,onPaidStart,retrySync:progress.retrySync,guideReplay:guide.replay,coachReplay:coach.replay,restart,introduceMission};
+ const handlers=useMemo(()=>({
+  rewardsLegacy:()=>{setRewardsOpen(false);setPaidOpen(true);},
+  rewardsClose:()=>live.current.closeOverlay(setRewardsOpen),
+  walletClose:()=>live.current.closeOverlay(setWalletOpen),
+  hideoutContract:(ticket:RunTicket)=>{setHideoutOpen(false);live.current.onRankStart(ticket);},
+  hideoutStart:(next:MissionId)=>live.current.introduceMission(next),
+  hideoutClose:()=>setHideoutOpen(false),
+  hideoutShop:()=>{setReturnHome(true);setHideoutOpen(false);setWalletOpen(true);},
+  hideoutSync:()=>{void live.current.retrySync();},
+  hideoutSettings:()=>{setReturnHome(true);setHideoutOpen(false);setSettingsOpen(true);},
+  hideoutDaily:()=>{setHideoutOpen(false);setDailyOpen(true);},
+  hideoutPaid:()=>{setReturnHome(true);setHideoutOpen(false);setRewardsOpen(true);},
+  settingsReplay:()=>{setReturnHome(false);if(combatMode)live.current.guideReplay();else live.current.coachReplay();setSettingsOpen(false);setHideoutOpen(false);live.current.restart('practice');},
+  settingsClose:()=>live.current.closeOverlay(setSettingsOpen),
+  dailyClose:()=>{setDailyOpen(false);setHideoutOpen(true);},
+  dailyStart:(ticket:RunTicket)=>{setDailyOpen(false);live.current.onRankStart(ticket);},
+  paidClose:()=>live.current.closeOverlay(setPaidOpen),
+  paidStart:(play:PaidPlay)=>{setPaidOpen(false);live.current.onPaidStart(play);},
+ }),[combatMode]);
+ return <SafeAreaView style={s.screen} edges={['top','bottom']}><StatusBar style="light"/><RewardsPanelMemo onLegacy={handlers.rewardsLegacy} visible={rewardsOpen} onClose={handlers.rewardsClose}/><WalletPanelMemo visible={walletOpen} onClose={handlers.walletClose}/><HideoutMemo onContractStart={handlers.hideoutContract} initialTab={dailyReturn?'leaderboard':economy.tab} mapRequest={missionMapRequest} visible={hideoutOpen} onStart={handlers.hideoutStart} onClose={handlers.hideoutClose} onShop={handlers.hideoutShop} progress={progress.progress} syncStatus={progress.syncStatus} onSync={handlers.hideoutSync} onSettings={handlers.hideoutSettings} onDaily={handlers.hideoutDaily} onPaid={handlers.hideoutPaid}/><SettingsPanelMemo onReplayTips={handlers.settingsReplay} mission={mission} visible={settingsOpen} onClose={handlers.settingsClose}/><DailyPanelMemo visible={dailyOpen} onClose={handlers.dailyClose} onStart={handlers.dailyStart}/><PaidPanelMemo visible={paidOpen} onClose={handlers.paidClose} onStart={handlers.paidStart}/><View style={[s.shell,{width:fullViewport?width:Math.max(size+16,Math.min(width,460)),paddingHorizontal:fullViewport?0:8}]}>
    <View testID="gameplay-topbar" pointerEvents={showGameplayHeader?'auto':'none'} accessibilityElementsHidden={!showGameplayHeader} importantForAccessibility={showGameplayHeader?'auto':'no-hide-descendants'} aria-hidden={!showGameplayHeader} style={[s.header,s.overlayHeader,fullViewport&&{paddingHorizontal:8},!showGameplayHeader&&{display:'none'}]}>
     <Pressable accessibilityRole="button" accessibilityLabel={paidEntry?'Save and leave paid attempt':rankTicket?(rankTicket.manifest.contract?'Leave weekly mission':'Leave daily challenge'):'Open missions'} onPress={()=>{if(timedRun)restart();else if(trial.active){pause(true);trial.finish();}else backToMissions();}} style={s.iconButton}><Text style={s.iconText}>‹</Text></Pressable>
     <View style={s.missionHeading}><Text style={s.levelName} numberOfLines={1}>{testMission?'TEST / '+String(level.number).padStart(2,'0'):process.env.EXPO_PUBLIC_JUDGE_PREVIEW==='1'?'JUDGE / '+String(level.number).padStart(2,'0'):trial.active?'TRIAL':rankTicket?(rankTicket.practice?'PRACTICE':rankTicket.manifest.contract?'RANKED':'DAILY'):String(level.number).padStart(2,'0')} · {level.title}</Text><View style={s.runMetrics}>
@@ -298,7 +333,7 @@ export function Game({rankTicket,paidPlay,dailyReturn,paidReturn,onRankStart,onR
     <Pressable accessibilityRole="button" accessibilityLabel={paused?'Resume game':'Pause game'} disabled={hud.status!=='playing'} onPress={()=>{if(game.value.status==='playing')pause(!paused);}} style={s.iconButton}><Text style={s.iconText}>{paused?'▷':'Ⅱ'}</Text></Pressable>
    </View>
    {!showGameplayHeader&&renderGameSurface&&!sceneLoading&&<Pressable testID="gameplay-pause" accessibilityRole="button" accessibilityLabel="Pause game" onPress={()=>pause(true)} style={s.floatingPause}><Text style={s.iconText}>Ⅱ</Text></Pressable>}
-   <View style={{width:size+2,height:boardHeight+2}}><GestureDetector gesture={combatMode?tapBoard:Gesture.Tap().enabled(false)}><View testID="game-board" style={[s.board,{width:size+2,height:boardHeight+2}]}>
+   <View style={{width:size+2,height:boardHeight+2}}><GestureDetector gesture={combatMode?tapBoard:noTap}><View testID="game-board" style={[s.board,{width:size+2,height:boardHeight+2}]}>
     {renderGameSurface&&<GameCanvas key={sceneVersion} onReady={sceneLoaded} onLoadError={sceneFailed} camera={camera} size={size} height={boardHeight} input={input} game={game} alpha={alpha} clock={clock} level={level} appearance={appearance}/>}
     {renderGameSurface&&!settings.reducedEffects&&<MissionFocus progress={focusProgress} game={game} camera={camera} width={size} height={boardHeight}/>}
     <Animated.View pointerEvents="none" testID="camera-world-overlays" style={[{position:'absolute',left:0,top:0,width:size,height:boardHeight},worldOverlayStyle]}>

@@ -13,8 +13,11 @@ export function frameCourier(x:number,y:number,zoom:number,viewportHeight=20):Ca
 export function followCamera(current:Camera,target:Camera,dt:number):Camera{
  'worklet';
  if(current.zoom!==target.zoom)return target;
+ const dx=target.x-current.x,dy=target.y-current.y;
+ // below a millionth of a tile the camera is still; the same object lets renderers skip the frame
+ if(Math.abs(dx)<1e-6&&Math.abs(dy)<1e-6)return current;
  const t=1-Math.exp(-Math.max(0,Math.min(dt,.1))*10);
- return {x:current.x+(target.x-current.x)*t,y:current.y+(target.y-current.y)*t,zoom:target.zoom};
+ return {x:current.x+dx*t,y:current.y+dy*t,zoom:target.zoom};
 }
 export function screenToWorld(x:number,y:number,size:number,c:Camera){
  'worklet';return {x:c.x+x*12/size/c.zoom,y:c.y+y*12/size/c.zoom};
