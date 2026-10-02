@@ -1,0 +1,35 @@
+{
+  "build": "fair-guards-v16",
+  "automated": {
+    "tests": 383,
+    "passed": 383,
+    "typecheck": "pass",
+    "webExport": "pass",
+    "archivedReplayCompatibility": "revisions 3-15; revision 15 tested across 12 campaign definitions"
+  },
+  "behaviour": {
+    "radioRadius": 5,
+    "searchSeconds": 5,
+    "searchSpeed": "patrol speed",
+    "coneDetection": "always",
+    "staleInvestigationLimitSeconds": 12,
+    "remoteAlertRelay": false,
+    "droneChargeInterruptible": true
+  },
+  "browser": {
+    "mission": "sweep-window",
+    "verified": [
+      "page loads",
+      "tap movement and camera follow",
+      "guard damage while exposed",
+      "retry",
+      "pause at 100 health"
+    ],
+    "consoleErrors": 0,
+    "limitations": "Detailed detection and search timing verified in deterministic simulation tests; no Android device test."
+  },
+  "delivery": {
+    "apk": false,
+    "backendDeployment": false
+  }
+}

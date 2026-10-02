@@ -34,7 +34,7 @@ test('mid-swing serialization continues identically; revision 14 still fires',()
  const l=arena();l.combat={version:2,revision:14};const old=initialState(l.mission,l);step(old,{...idleInput(),command:combatTap(old,8,10,1)});tick(old,100);assert(old.combat!.shots>0);assert.equal(old.combat!.melee,undefined);
 });
 test('future weekly knife switch is explicit and never changes an earlier week',()=>{
- const date=new Date('2026-10-05T00:00:00Z');const legacy=makeReleaseContracts(date),future=makeReleaseContracts(date,'2026-10-05');assert(legacy.every(c=>(c.level.combat?.revision??0)<15));assert(future.every(c=>c.level.combat?.revision===15));assert.deepEqual(makeReleaseContracts(new Date('2026-09-28'),'2026-10-05'),makeReleaseContracts(new Date('2026-09-28')));assert.throws(()=>makeReleaseContracts(date,'2026-10-06'));
+ const date=new Date('2026-10-05T00:00:00Z');const legacy=makeReleaseContracts(date),future=makeReleaseContracts(date,'2026-10-05');assert(legacy.every(c=>(c.level.combat?.revision??0)<15));assert(future.every(c=>c.level.combat?.revision===16));assert.deepEqual(makeReleaseContracts(new Date('2026-09-28'),'2026-10-05'),makeReleaseContracts(new Date('2026-09-28')));assert.throws(()=>makeReleaseContracts(date,'2026-10-06'));
 });
 
 test('repeated taps on an unreachable enemy reuse the failed route cooldown',()=>{

@@ -5,7 +5,7 @@ export type GuardSpec = {pursuitSpeed?:number;pickupWave?:number;roam?:Point[];c
 export type EncounterLayout={lasers?:Box[];junctions:Point[];pockets:Point[];islands:Box[];grates:Box[];routes:{approach:Point[];escape:Point[];fast:Point[]}};
 export type GateSpec={box:Box;period:number;openSeconds:number;phase:number;mode?:'power'|'relay';power?:0|1;relay?:number};
 export type SwitchSpec=Point & {kind:'power'|'relay';channel?:number;duration?:number};
-export type LevelDefinition = {encounter?:EncounterLayout;combat?:{version:2;revision?:3|4|5|6|7|8|9|10|11|12|13|14|15};id:string;mission:MissionId;title:string;number:number;briefing:string;width:number;height:number;spawn:Point;phone:Point;exit:Point & {w:number;h:number};targetSeconds:number;hardLimitSeconds:number;blockers:Box[];patrols:GuardSpec[];floorColor:string;gates?:GateSpec[];decoys?:number;switches?:SwitchSpec[];targets?:Point[];exitWindow?:{period:number;openSeconds:number;phase:number}};
+export type LevelDefinition = {encounter?:EncounterLayout;combat?:{version:2;revision?:3|4|5|6|7|8|9|10|11|12|13|14|15|16};id:string;mission:MissionId;title:string;number:number;briefing:string;width:number;height:number;spawn:Point;phone:Point;exit:Point & {w:number;h:number};targetSeconds:number;hardLimitSeconds:number;blockers:Box[];patrols:GuardSpec[];floorColor:string;gates?:GateSpec[];decoys?:number;switches?:SwitchSpec[];targets?:Point[];exitWindow?:{period:number;openSeconds:number;phase:number}};
 export const PATROLS = [
   [{x:3.7,y:10.5},{x:6.6,y:10.5},{x:6.6,y:7.6},{x:4.3,y:7.6},{x:4.3,y:10.5}],
   [{x:7.3,y:4.2},{x:10.5,y:4.2},{x:10.5,y:7.1},{x:7.3,y:7.1}],

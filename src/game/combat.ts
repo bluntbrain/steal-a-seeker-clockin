@@ -2,6 +2,7 @@ import {knifeCombat,knifeReach,canKnifeHit,stepMelee,clearMelee,type MeleeState}
 import type {GameState,Input} from './simulation';
 import {updateEncounterGuards} from './encounters';
 import {updateHeistGuards,updateTripwires,directionalArmor} from './heist-guards';
+import {updateHeistGuards as updateLegacyHeistGuards,updateTripwires as updateLegacyTripwires} from './heist-guards-legacy';
 import {TUNING,type LevelDefinition,type Point} from './level';
 import {findPath,walkableSegment} from './navigation';
 import {sightDistance,sees,type Guard} from './guards';
@@ -83,7 +84,7 @@ function walkActor(a:Point,p:Point,speed:number,dt:number,l:LevelDefinition){'wo
 function spawnShot(s:GameState,from:Point,angle:number,owner:number,damage:number){'worklet';const c=s.combat!;if(owner<0&&knifeCombat(s.definition!))return;if(c.projectiles.length>=COMBAT.maxProjectiles)return;const speed=owner<0?(tacticalCombat(s.definition!)?18:16):(s.definition!.combat?.revision??0)>=11?16:tacticalCombat(s.definition!)?13:10;c.projectiles.push({id:c.nextShot++,x:from.x,y:from.y,px:from.x,py:from.y,vx:Math.cos(angle)*speed,vy:Math.sin(angle)*speed,left:owner<0?COMBAT.range:7,owner,damage});if(owner<0){c.shots++;c.noise={x:s.x,y:s.y};c.noiseLeft=tacticalCombat(s.definition!)?1.5:1.2;}else c.enemyShots++;}
 function gates(s:GameState){'worklet';const l=s.definition!;let changed=false;s.relayTimers=s.relayTimers.map(t=>Math.max(0,t-TUNING.step));for(let i=0;i<(l.gates?.length??0);i++){const g=l.gates![i]!,closed=g.mode==='power'?s.power!==g.power:g.mode==='relay'?(s.relayTimers[g.relay??0]??0)<=0:(s.elapsed+g.phase)%g.period>=g.openSeconds;const occupied=intersectsBox(s.x,s.y,g.box,.4)||s.guards.some(a=>a.active&&a.hp>0&&intersectsBox(a.x,a.y,g.box,.4));if((!closed||!occupied)&&s.closedGates[i]!==closed){s.closedGates[i]=closed;changed=true;}}if(changed)s.blockers=[...l.blockers,...(l.gates??[]).filter((_,i)=>s.closedGates[i]).map(g=>g.box)];}
 function enemies(s:GameState,dt:number,l:LevelDefinition){
- 'worklet';if((l.combat?.revision??0)>=10){updateHeistGuards(s,dt,l,spawnShot);return;}if((l.combat?.revision??0)>=8){updateEncounterGuards(s,dt,l,spawnShot);return;}const c=s.combat!;
+ 'worklet';if((l.combat?.revision??0)>=16){updateHeistGuards(s,dt,l,spawnShot);return;}if((l.combat?.revision??0)>=10){updateLegacyHeistGuards(s,dt,l,spawnShot);return;}if((l.combat?.revision??0)>=8){updateEncounterGuards(s,dt,l,spawnShot);return;}const c=s.combat!;
  for(let i=0;i<s.guards.length;i++){
   const g=s.guards[i]!,spec=l.patrols[i]!,stats=enemyStats(g.combatRole,tacticalCombat(l));g.px=g.x;g.py=g.y;
   if(g.hp<=0){g.active=false;g.seesPlayer=false;continue;}
@@ -178,7 +179,7 @@ export function stepCombat(s:GameState,input:Input,dt=TUNING.step){
   else clearOrder(c);
  }
  if((level.combat?.revision??0)>=10&&Math.hypot(s.vx,s.vy)>.1&&s.ticks>=(c.grateNoise?.nextAt??0)){for(const grate of level.encounter?.grates??[])if(intersectsBox(s.x,s.y,grate,.08)){c.grateNoise={id:(c.grateNoise?.id??0)+1,x:s.x,y:s.y,until:s.ticks+30,nextAt:s.ticks+45};break;}}
- updateTripwires(s,level);
+ if((level.combat?.revision??0)>=16)updateTripwires(s,level);else updateLegacyTripwires(s,level);
  enemies(s,dt,level);projectiles(s,dt,level);s.alert=s.guards.some(g=>g.active&&g.hp>0&&g.seesPlayer)?1:0;s.battery=c.hp;
  if(s.status!=='playing'){clearOrder(c);s.vx=0;s.vy=0;return;}
  const e=level.exit,w=level.exitWindow,open=!w||(s.elapsed+w.phase)%w.period<w.openSeconds;

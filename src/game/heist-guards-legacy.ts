@@ -1,24 +1,21 @@
 import type {GameState} from './simulation';
 import type {Guard} from './guards';
-import {sees} from './guards';
+import {sees,sightDistance} from './guards';
 import type {GuardBrain} from './encounters';
 import {findPath,walkableSegment} from './navigation';
 import type {LevelDefinition,Point} from './level';
 import {guardPressure,pressureCombat,droneReportTicks} from './guard-pressure';
 
-// Revision 16 and newer. Older guard engines are intentionally retained for
+// Frozen revisions 10–15. Do not change this implementation. The older encounter engine is intentionally retained for
 // published replays. Every decision here depends on ticks, authored data and RNG.
 export type HeistMemory={
  role:'patrol'|'pursuer'|'interceptor';charge:number;broadcastUntil:number;cooldownUntil:number;
  arrivalUntil:number;heardGrate:number;armorHit:'none'|'front'|'side'|'rear';
- hunting?:boolean;radioAt?:number;searchCycle?:number;searchNext?:number;
+ hunting?:boolean;radioAt?:number;searchCycle?:number;
 };
 type Shot=(s:GameState,from:Point,angle:number,owner:number,damage:number)=>void;
 export const DRONE_REPORT_TICKS=27;
 export const ENTRY_WARNING_TICKS=24;
-export const RADIO_RADIUS=5;
-export const SEARCH_TICKS=150;
-const INVESTIGATE_TICKS=360;
 function random(b:GuardBrain){'worklet';b.rng=(Math.imul(b.rng,1664525)+1013904223)>>>0;return b.rng/4294967296;}
 function brain(g:Guard,index:number,l:LevelDefinition){
  'worklet';
@@ -31,13 +28,16 @@ function brain(g:Guard,index:number,l:LevelDefinition){
 function face(g:Guard,angle:number,dt:number){'worklet';const delta=Math.atan2(Math.sin(angle-g.angle),Math.cos(angle-g.angle));const speed=g.combatRole==='heavy'||g.combatRole==='warden'?Math.PI*1.2:Math.PI*1.8;g.angle+=Math.max(-speed*dt,Math.min(speed*dt,delta));}
 function destination(g:Guard,p:Point,mode:Guard['mode']){'worklet';const b=g.brain!;if(!b.goal||Math.hypot(b.goal.x-p.x,b.goal.y-p.y)>.45||g.mode!==mode||!b.plan&&g.pathIndex>=g.path.length&&Math.hypot(p.x-g.x,p.y-g.y)>.25){b.goal={x:p.x,y:p.y};b.plan=true;}g.mode=mode;g.wait=0;}
 function investigate(g:Guard,p:Point,tick:number,role:HeistMemory['role']='pursuer'){
- 'worklet';g.lastSeen={x:p.x,y:p.y};g.heist!.role=role;destination(g,p,'investigate');g.brain!.searchUntil=0;g.brain!.alertUntil=tick+INVESTIGATE_TICKS;
+ 'worklet';g.lastSeen={x:p.x,y:p.y};g.heist!.role=role;destination(g,p,'investigate');g.brain!.searchUntil=0;g.brain!.alertUntil=tick+180;
  if(!g.alerted){g.alerted=true;g.reactionTicks=Math.max(g.reactionTicks,8);}
 }
 
-/** Detection always matches the rendered cone, including during a chase. */
+/** First detection uses the cone. An engaged enemy keeps visible contact in
+ * every direction, but walls and range still block sight. No hidden tracking. */
 function contact(g:Guard,p:Point,l:LevelDefinition){
- 'worklet';return sees(g,p.x,p.y,l);
+ 'worklet';if(!g.heist?.hunting)return sees(g,p.x,p.y,l);
+ const dx=p.x-g.x,dy=p.y-g.y,d=Math.hypot(dx,dy);
+ return d<=g.range+.8&&(d<1e-6||sightDistance(g.x,g.y,dx/d,dy/d,d,l)>=d-1e-7);
 }
 // Track while closing on a visible courier, then plant for the final committed
 // aim and burst. This does not plan paths or move through an occluding wall.
@@ -55,19 +55,17 @@ function trackedShot(g:Guard,s:GameState,dt:number,hard:boolean){
  return Math.atan2(s.y-g.y+(s.y-s.py)/dt*lead,s.x-g.x+(s.x-s.px)/dt*lead);
 }
 function pursue(g:Guard,p:Point,tick:number){
- 'worklet';investigate(g,p,tick);g.heist!.hunting=true;g.brain!.trackingUntil=tick+30;
+ 'worklet';investigate(g,p,tick);g.heist!.hunting=true;g.brain!.trackingUntil=tick+90;
 }
-/** Only direct observers send local radio reports. Recipients do not relay them
- * or read a global position, so alerts cannot cascade across the map. */
+/** A confirmed sighting reaches every living, deployed enemy, including drones.
+ * Only actual observers publish updates. Shared positions remain snapshots. */
 export function shareHeistSighting(s:GameState,index:number,l:LevelDefinition){
  'worklet';const reporter=s.guards[index]!,b=brain(reporter,index,l);
  if(s.ticks<b.reportAt)return 0;b.reportAt=s.ticks+12;
  const snapshot={x:reporter.lastSeen.x,y:reporter.lastSeen.y,tick:s.ticks};s.combat!.hunt=snapshot;s.spotted=true;
  let count=0;
  for(let i=0;i<s.guards.length;i++){
-  const g=s.guards[i]!;if(!g.spawned||!g.active||g.hp<=0||Math.hypot(g.x-reporter.x,g.y-reporter.y)>RADIO_RADIUS)continue;
-  // Keep another observer on its own fresh sighting instead of stealing its aim.
-  if(i!==index&&g.seesPlayer)continue;
+  const g=s.guards[i]!;if(!g.spawned||!g.active||g.hp<=0)continue;
   brain(g,i,l);pursue(g,snapshot,s.ticks);g.heist!.radioAt=s.ticks;
   if(i!==index)count++;
  }
@@ -107,9 +105,10 @@ function roam(g:Guard,index:number,s:GameState,l:LevelDefinition){
  b.lastAnchor=pick;g.heist!.role='patrol';destination(g,anchors[pick]!,'patrol');
 }
 function search(g:Guard,tick:number){
- 'worklet';const b=g.brain!;g.mode='search';g.path=[];g.pathIndex=0;b.goal=null;b.plan=false;b.searchStep=0;b.searchUntil=tick+SEARCH_TICKS;g.heist!.searchNext=tick;g.heist!.searchCycle=0;g.searchAngle=g.angle;
+ 'worklet';const b=g.brain!;g.mode='search';g.path=[];g.pathIndex=0;b.goal=null;b.plan=false;b.searchStep=0;b.searchUntil=tick+90;g.searchAngle=g.angle;
 }
-/** Sweep corners around the last report without extending the search deadline. */
+/** Sweep reachable corners around the last report. A hunt never silently
+ * expires back to patrol, and no search destination reads the hidden courier. */
 function searchCorner(g:Guard,index:number,s:GameState,l:LevelDefinition){
  'worklet';const b=g.brain!,h=g.heist!,cycle=h.searchCycle??0;h.searchCycle=cycle+1;
  const angle=(index*.618+cycle*.381966+random(b)*.12)*Math.PI*2,radius=1.5+cycle%3;
@@ -120,7 +119,7 @@ function searchCorner(g:Guard,index:number,s:GameState,l:LevelDefinition){
  }
  if(!point){const anchors=l.encounter?.junctions??l.patrols[index]!.route;point=anchors[(index+cycle)%anchors.length];}
  if(point){b.goal={x:point.x,y:point.y};b.plan=true;}
- h.searchNext=s.ticks+45;g.wait=0;
+ b.searchUntil=s.ticks+90;g.wait=0;
 }
 
 export function updateHeistGuards(s:GameState,dt:number,l:LevelDefinition,shoot:Shot){
@@ -138,7 +137,9 @@ export function updateHeistGuards(s:GameState,dt:number,l:LevelDefinition,shoot:
    investigate(g,pickup,s.ticks);b.pickupSeen=s.thefts;g.reactionTicks=Math.max(g.reactionTicks,12);
   }
   g.active=true;g.clock+=dt;g.flash=Math.max(0,g.flash-dt);g.range=spec.range;
-  const drone=g.combatRole==='drone',rawSeen=contact(g,s,l),reacquired=rawSeen&&!!h.hunting&&s.ticks-b.lastSight<=30;
+  const report=c.hunt;
+  if(report&&(h.radioAt??-1)<report.tick){pursue(g,report,s.ticks);h.radioAt=report.tick;}
+  const drone=g.combatRole==='drone',rawSeen=contact(g,s,l),reacquired=rawSeen&&!!h.hunting;
   g.seesPlayer=rawSeen;b.seenFor=rawSeen?Math.min(1,b.seenFor+dt):0;g.exposure=rawSeen?(reacquired?1:Math.min(1,b.seenFor/Math.max(hard?.15:.3,spec.spotSeconds))):Math.max(0,g.exposure-dt*3);
   const confirmed=rawSeen&&g.exposure>=1;
   if(rawSeen){g.lastSeen={x:s.x,y:s.y};b.lastSight=s.ticks;}
@@ -149,7 +150,7 @@ export function updateHeistGuards(s:GameState,dt:number,l:LevelDefinition,shoot:
    if(!h.hunting||s.ticks>=g.nextChase||g.mode!=='investigate'){
     pursue(g,g.lastSeen,s.ticks);g.nextChase=s.ticks+6;
    }
-   if(!drone){shareHeistSighting(s,i,l);h.charge=0;}
+   if(!drone||c.hunt){shareHeistSighting(s,i,l);h.charge=0;}
    else if(s.ticks>=h.cooldownUntil){
     h.charge++;
     if(h.charge>=droneReportTicks(l)){h.charge=0;h.broadcastUntil=s.ticks+21;h.cooldownUntil=s.ticks+120;shareHeistSighting(s,i,l);}
@@ -163,8 +164,6 @@ export function updateHeistGuards(s:GameState,dt:number,l:LevelDefinition,shoot:
   const noise=c.grateNoise;
   if(noise&&noise.id>h.heardGrate){h.heardGrate=noise.id;if(!h.hunting&&!rawSeen&&noise.until>=s.ticks&&Math.hypot(noise.x-g.x,noise.y-g.y)<4.5)investigate(g,noise,s.ticks);}
   if(!rawSeen&&h.hunting&&b.lastSight===s.ticks-1)destination(g,g.lastSeen,'investigate');
-  // An unreachable report must not trap an enemy in investigation forever.
-  if(!rawSeen&&g.mode==='investigate'&&s.ticks>=b.alertUntil)search(g,s.ticks);
   if(g.reactionTicks>0){g.reactionTicks--;continue;}
   // Notice the courier before continuing a patrol turn away from the cone.
   if(rawSeen&&!confirmed){face(g,Math.atan2(s.y-g.y,s.x-g.x),dt);continue;}
@@ -194,19 +193,17 @@ export function updateHeistGuards(s:GameState,dt:number,l:LevelDefinition,shoot:
    g.path=[];g.pathIndex=0;b.goal={...g.lastSeen};b.plan=false;continue;
   }
   if(g.mode==='search'){
-   if(s.ticks>=b.searchUntil){
-    h.hunting=false;h.role='patrol';h.charge=0;h.broadcastUntil=0;
-    g.alerted=false;g.exposure=0;b.seenFor=0;b.trackingUntil=0;
-    g.gunPhase='ready';g.gunTicks=0;g.burstLeft=0;
-    destination(g,spec.route[0]!,'return');
-   }else if(!b.goal||s.ticks>=(h.searchNext??0))searchCorner(g,i,s,l);
+   if(h.hunting){
+    if(!b.goal||s.ticks>=b.searchUntil)searchCorner(g,i,s,l);
+   }else if(s.ticks>=b.searchUntil){g.alerted=false;h.role='patrol';destination(g,spec.route[0]!,'return');}
+   else face(g,g.searchAngle+Math.sin((s.ticks-b.searchUntil)*.045)*1.4,dt);
   }
   if(g.wait>0){g.wait=Math.max(0,g.wait-dt);face(g,g.searchAngle+Math.sin(g.clock*2)*.25,dt);continue;}
   if(!b.goal&&g.mode==='patrol')roam(g,i,s,l);
   if(b.plan&&b.goal&&s.ticks>=b.nextPlan&&paths>0){paths--;g.path=findPath(g,b.goal,l);g.pathIndex=0;b.plan=false;b.nextPlan=s.ticks+12;if(!g.path.length){b.goal=null;g.wait=.3;if(g.mode==='return')g.mode='patrol';if(g.mode==='investigate')search(g,s.ticks);}}
   if(b.plan)continue;
   const p=g.path[g.pathIndex];
-  if(p){const dx=p.x-g.x,dy=p.y-g.y,d=Math.hypot(dx,dy),speed=g.mode==='investigate'?(spec.pursuitSpeed??2.25):spec.speed,travel=Math.min(d,speed*dt);
+  if(p){const dx=p.x-g.x,dy=p.y-g.y,d=Math.hypot(dx,dy),speed=h.hunting||g.mode==='investigate'?(spec.pursuitSpeed??2.25):spec.speed,travel=Math.min(d,speed*dt);
    if(d>.01&&!confirmed)face(g,Math.atan2(dy,dx),dt);
    const next={x:d?g.x+dx/d*travel:g.x,y:d?g.y+dy/d*travel:g.y};
    if(walkableSegment(g,next,l)){g.x=next.x;g.y=next.y;b.blockedFor=0;if(d<=travel+1e-8)g.pathIndex++;}
@@ -219,7 +216,6 @@ export function updateHeistGuards(s:GameState,dt:number,l:LevelDefinition,shoot:
    else if(g.mode==='patrol'){b.goal=null;g.path=[];g.wait=spec.pauseSeconds;g.searchAngle=g.angle;}
   }
  }
- if(c.hunt&&!s.guards.some(g=>g.active&&g.hp>0&&g.heist?.hunting))c.hunt=undefined;
 }
 
 export function directionalArmor(g:Guard,vx:number,vy:number,damage:number){

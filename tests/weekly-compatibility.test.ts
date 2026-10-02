@@ -179,3 +179,28 @@ test('revision 14 targeting replays retain archived results after knife rollout'
   assert.deepEqual(verifyReplay(level.mission,replay,level),archived.verifyReplay(level.mission,replay,level));
  }
 });
+
+
+test('revision 15 guard replays remain identical to the archived verifier after fair pursuit ships',async()=>{
+ const {CAMPAIGN_IDS}=await import('../src/game/level');
+ const {combatLevel}=await import('../src/game/combat-levels');
+ const {combatTap}=await import('../src/game/combat');
+ const hash='77efb541f8f64e55b6477981517159be26809f82504d7d140a2b4ef73e88965b';
+ const archived=await import((await checkRuleBundle(hash)).href);
+ for(const id of CAMPAIGN_IDS){
+  const level=combatLevel(id);level.combat={version:2,revision:15};
+  for(const mode of ['phone','attack'] as const){
+   const state=initialState(id,level),replay:Replay={version:2,chunks:[]};
+   for(let tick=0;tick<600&&state.status==='playing';tick++){
+    const enemy=state.guards.find(g=>g.active&&g.hp>0),target=mode==='attack'&&enemy?enemy:level.phone;
+    const command=tick%30===0?combatTap(state,target.x,target.y,tick+1):undefined;
+    recordStep(state,{...idleInput(),command},replay.chunks);
+   }
+   assert.deepEqual(verifyReplay(id,replay,level),archived.verifyReplay(id,replay,level),`${id}: ${mode}`);
+  }
+ }
+ const week=JSON.parse(JSON.stringify(manifest));week.rulesHash=hash;week.engineHash=LEGACY_WEEKLY_ENGINES[hash];
+ week.contracts[0].level={...combatLevel('sweep-window'),combat:{version:2,revision:15}};
+ assert(isWeeklyCompatible(week));delete week.engineHash;assert(isWeeklyCompatible(week));
+ week.contracts[0].level.combat.revision=16;assert(!isWeeklyCompatible(week),'Fair pursuit must not alter a pinned revision-15 week');
+});

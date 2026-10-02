@@ -135,7 +135,7 @@ const LAYOUTS:Layout[]=[
   walls:[[3,10.5,2.3,4],[7.4,6.7,2.3,4],[2.5,3.8,2,2],[7,2.8,3,1],[7.5,14,2,2],[1.1,8,1.6,1]],
   cast:[['scout',[2,12.5],[2,10],[1.3,10]],['sentry',[6.2,12.5],[6.2,9.3],[6,8]],['scout',[6.3,5.5],[6.3,4.2],[5.3,4.2]],['scout',[10.5,9],[10.5,6],[9,5.5]],['drone',[2.2,2],[4,2],[4.8,2.5]]],
   safe:[[1.5,16.5],[1.5,10],[3,9.6],[3.1,7],[1.4,6.8],[1.4,2]],back:[[5.5,4],[5.8,7],[6.2,15.5],[2,16]],pockets:[[4,16],[8.5,12]],entries:[[10.5,17.7]],
-  tip:'Choose the fast middle lane or covered outer route. A confirmed sighting sends every guard and drone after you.'},
+  tip:'Choose the fast middle lane or covered outer route. A confirmed sighting alerts nearby enemies. Break sight and relocate until their search ends.'},
  {spawn:[6,18],phone:[2,3],second:[10,3],exit:[6,18],
   walls:[[4.5,11,3,3.5],[4.5,4.8,3,3.2],[1.2,8.5,2.5,1],[8.5,8.5,2.5,1],[1.5,14.5,1.5,1],[8.6,15.3,1.7,1]],
   cast:[['scout',[3.5,12.5],[3.5,10.2],[2,10.2]],['scout',[8.5,12.5],[8.5,10.2],[9.8,10.2]],['sentry',[3.5,6],[3.5,4],[2,4]],['scout',[8.5,6],[8.5,4],[10,4]],['drone',[6,3],[6,2],[7.8,2]]],
@@ -155,7 +155,7 @@ const LAYOUTS:Layout[]=[
   walls:[[6.2,12,3,2.6],[2.8,7.4,3,3],[6.2,2.8,3,3.5],[1,12.5,2,1],[9.5,8.5,1.6,1],[3.5,15.8,2,1]],
   cast:[['scout',[5.2,12.8],[5.2,11.3],[3.8,11.3]],['scout',[10.2,12.8],[10.2,11],[9,10.5]],['sentry',[7.2,8],[7.2,10.2],[8.8,10.2]],['scout',[2,6],[2,4.7],[1.3,4.7]],['drone',[4,3.3],[4,5.5],[5,5.5]],['sentry',[10.3,4],[10.3,2],[9.6,2]]],
   safe:[[5.8,17.5],[3,15],[3.8,11.4],[6.5,11.1],[6.6,7],[5.2,6.5],[5,3]],back:[[2,5.7],[1.6,10.8],[3.6,11.6],[3.6,14.6],[2,16]],pockets:[[7.4,16],[4.3,12.3]],entries:[[10.5,2]],grates:[[6.4,8.8,1.2,1.2]],
-  tip:'Break contact between rooms. Every guard and drone joins a confirmed chase. They search your last sighting when you break contact.'},
+  tip:'Break contact between rooms. Nearby enemies join a confirmed chase. They search your last sighting for five seconds before returning to patrol.'},
  {spawn:[6,18],phone:[6,2.4],exit:[10,18],
   walls:[[4.3,9.5,3.3,4],[4.2,4.8,3.6,2.8],[1.2,13.5,1.8,1.2],[8.8,14.5,2.1,1.2],[1.1,5.4,1.8,2.2],[9.1,6.5,1.8,2],[5.3,15.4,1.4,1.1]],
   cast:[['scout',[3.4,11],[3.4,8.4],[2.5,8.4]],['sentry',[8.5,11],[8.5,13.5],[7.9,14]],['warden',[6,8.4],[8.3,8.4],[8.3,4.1],[6,3.7]],['scout',[8.7,3],[8.7,2],[7.4,2]],['drone',[3.3,4],[3.3,2],[4.7,2]]],
@@ -164,7 +164,7 @@ const LAYOUTS:Layout[]=[
 ];
 
 function applyPressure(l:LevelDefinition):LevelDefinition{
- 'worklet';l.combat={version:2,revision:15};const p=guardPressure(l);
+ 'worklet';l.combat={version:2,revision:16};const p=guardPressure(l);
  for(const g of l.patrols){
   const heavy=g.combatRole==='heavy'||g.combatRole==='warden',drone=g.combatRole==='drone';
   g.pursuitSpeed=p.pursuit+(drone?.3:heavy?-.45:0);
