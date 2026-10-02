@@ -15,7 +15,7 @@ for name,variation in [('coins-a','Five bright small gold coins spill with a cri
         except urllib.error.HTTPError as e:
             detail=e.read().decode('utf-8','replace').replace(key,'[redacted]')
             raise SystemExit('ElevenLabs generation failed: HTTP '+str(e.code)+' '+detail[:700])
-    subprocess.run(['ffmpeg','-y','-v','error','-i',str(raw),'-af','silenceremove=start_periods=1:start_duration=0.005:start_threshold=-45dB,highpass=f=180,lowpass=f=9000,loudnorm=I=-20:TP=-4:LRA=6,afade=t=out:st=1.02:d=0.13','-t','1.15','-ar','32000','-ac','1',str(out)],check=True)
-    manifest.append(dict(file=out.name,prompt=prompt,provider='ElevenLabs',model='eleven_text_to_sound_v2',duration=1.15,sha256=hashlib.sha256(out.read_bytes()).hexdigest()))
+    subprocess.run(['ffmpeg','-y','-v','error','-i',str(raw),'-af','silenceremove=start_periods=1:start_duration=0.005:start_threshold=-45dB,highpass=f=180,lowpass=f=9000,atempo=1.7,loudnorm=I=-19:TP=-4:LRA=6,afade=t=out:st=0.57:d=0.10','-t','0.68','-ar','32000','-ac','1',str(out)],check=True)
+    manifest.append(dict(file=out.name,prompt=prompt,provider='ElevenLabs',model='eleven_text_to_sound_v2',source_duration=1.15,duration=.68,tempo=1.7,sha256=hashlib.sha256(out.read_bytes()).hexdigest()))
     print('Ready:',out.name,flush=True)
 (root/'manifest.json').write_text(json.dumps(manifest,indent=2)+'\n')

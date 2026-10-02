@@ -4,15 +4,19 @@
     "prompt": "Five bright small gold coins spill with a crisp metallic clatter. Isolated arcade pickup, 1.15s. Instant pop and coin scatter in first 0.25s. Soft suction whoosh draws coins inward, rising metallic tinks at 0.65-0.95s, one gentle final ping. Dry close sound, crisp on phone speakers. No speech, music, ambience, gunshot, casino jackpot or long reverb.",
     "provider": "ElevenLabs",
     "model": "eleven_text_to_sound_v2",
-    "duration": 1.15,
-    "sha256": "c99a1b4d92d53c8b272edeba4c9608db9c5a4389e18352c1d5b3078fa2186771"
+    "source_duration": 1.15,
+    "duration": 0.68,
+    "tempo": 1.7,
+    "sha256": "e5f5cb4e158e050625a380326753079a0bda577360c58d62ece97e517a3e921a"
   },
   {
     "file": "coins-b.wav",
     "prompt": "A handful of six little metal coins scatter with a slightly lower, warmer clinking rattle. Isolated arcade pickup, 1.15s. Instant pop and coin scatter in first 0.25s. Soft suction whoosh draws coins inward, rising metallic tinks at 0.65-0.95s, one gentle final ping. Dry close sound, crisp on phone speakers. No speech, music, ambience, gunshot, casino jackpot or long reverb.",
     "provider": "ElevenLabs",
     "model": "eleven_text_to_sound_v2",
-    "duration": 1.15,
-    "sha256": "8c7921c3d10d87ae7b20310767f0d5eb90f03ffaaad3656cee44522f5b8a8ad9"
+    "source_duration": 1.15,
+    "duration": 0.68,
+    "tempo": 1.7,
+    "sha256": "50beb642356bb192a9932da61defb5c429b3aaf790f84516b67f4d97de23999e"
   }
 ]
