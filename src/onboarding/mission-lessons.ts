@@ -10,7 +10,7 @@ const lessons=[
  ['Plan the way back','Taking the phone raises the alarm. Know your route through the central pillars before reinforcements arrive. Side-lane lasers briefly alert nearby guards.','PHONE → COVER → EXIT'],
  ['Make the walls work for you','The twin walls stop shots. Choose the exposed center corridor or move between crates along an outer lane. The left laser briefly alerts nearby guards.','COVER → MOVE → COVER'],
  ['Find the Heavy’s weak point','The gold front plate blocks knife strikes. Use the staggered cargo islands to circle behind a Heavy and strike its mint rear panel. The offset upper openings lead to the Seeker.','FRONT = ARMOR · REAR = WEAK POINT'],
- ['A shortcut is a choice','Watch the patrols before you cross. A longer route behind cover can be safer than the shortest path.','WATCH → CHOOSE → MOVE'],
+ ['A shortcut is a choice','Cross-walls split the route. Lasers report where you crossed. Take the shorter central lane or a longer flank behind cover. Move before nearby guards arrive.','WATCH → CHOOSE → MOVE'],
  ['Two phones. Two trips.','Recover and extract each phone. The first pickup brings a response, so save health and use the middle pocket before your second trip.','TAKE → EXTRACT → REPEAT'],
  ['Switch first. Quiet feet.','Follow the cable to open the vault gate. Striped metal grates make noise and draw guards; the covered detour stays quiet.','SWITCH → CHOOSE YOUR ROUTE → PHONE'],
  ['Watch the exit light','The exit opens and closes on a timer. Wait behind cover, then move when it opens.','COVER → GREEN LIGHT → GO'],

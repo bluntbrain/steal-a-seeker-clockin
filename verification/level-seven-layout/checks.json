@@ -1,0 +1,34 @@
+{
+  "mission": "false-footsteps",
+  "reference": "photo_2026-10-02 16.05.52.jpeg",
+  "layout": "Stacked cross-walls, two lower entries, long central vertical laser and upper-left horizontal laser",
+  "validation": {
+    "testsPassed": 389,
+    "testsFailed": 0,
+    "typecheck": "pass",
+    "webExport": "pass",
+    "quietRoute": "A longer route avoids both lasers on approach and return",
+    "navigation": "All objective, pocket, patrol and reinforcement points connected",
+    "opening": "100 health after five seconds idle",
+    "verticalLaser": "Passable; single 1.5-second local alert; no damage or global hunt"
+  },
+  "automatedWin": {
+    "seconds": 22.733333333333334,
+    "hp": 72,
+    "kills": 3,
+    "serverReplayVerified": true,
+    "note": "Ordinary-input solver, not a human difficulty rating"
+  },
+  "browser": {
+    "checked": [
+      "Level loads",
+      "Entry cross-walls render",
+      "Tap routes through central entry gap",
+      "Camera follows",
+      "Pause shows 100 health"
+    ],
+    "consoleErrors": 0
+  },
+  "apkBuilt": false,
+  "backendDeployed": false
+}
