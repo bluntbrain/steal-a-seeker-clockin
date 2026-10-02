@@ -6,7 +6,7 @@ import {useGameAudio} from './useGameAudio';
 export function useFootstepAudio(state: GameState, enabled: boolean, volume: number) {
   const left = useGameAudio(require('../../assets/audio-footsteps/step-a.wav'));
   const right = useGameAudio(require('../../assets/audio-footsteps/step-b.wav'));
-  const tracker = useRef(freshFootsteps()), epoch = useRef(0), allowed = useRef(false);
+  const tracker = useRef(freshFootsteps()), epoch = useRef(0), allowed = useRef(false), lastGain = useRef(-1), wasMoving = useRef(false);
   allowed.current = enabled && volume > 0 && state.status === 'playing';
 
   useEffect(() => () => {
@@ -20,12 +20,14 @@ export function useFootstepAudio(state: GameState, enabled: boolean, volume: num
     tracker.current = result.tracker;
     // Slightly duck under combat and alarms; keep the targeting cue intelligible.
     const gain = Math.max(0, Math.min(1, volume)) * (state.alert > 0 ? .28 : state.securityAlarm ? .36 : .46);
-    left.volume = gain; right.volume = gain;
+    // native volume writes and pauses only on change; this effect runs on every hud publish
+    if (gain !== lastGain.current) { lastGain.current = gain; left.volume = gain; right.volume = gain; }
     if (!result.moving) {
-      epoch.current++;
-      left.pause(); right.pause();
+      if (wasMoving.current) { epoch.current++; left.pause(); right.pause(); }
+      wasMoving.current = false;
       return;
     }
+    wasMoving.current = true;
     if (result.cue === null) return;
     const player = result.cue === 0 ? left : right, run = ++epoch.current;
     void player.seekTo(0).then(() => {

@@ -19,13 +19,14 @@ export function useCombatAudio(state:GameState,enabled:boolean,volume:number,onD
  const previousHP=useRef<number[]>([]);
  const aim=useGameAudio(require('../../assets/audio-combat-v3/aim.wav'));
  const grate=useGameAudio(require('../../assets/audio/switch.wav')),lastGrate=useRef(0);
- const previous=useRef<CombatSoundCounters>(zero),lastTick=useRef(0),lastAim=useRef(-100),epoch=useRef(0),allowed=useRef(enabled);
+ const previous=useRef<CombatSoundCounters>(zero),lastTick=useRef(0),lastAim=useRef(-100),epoch=useRef(0),allowed=useRef(enabled),wasEnabled=useRef(enabled);
  const damageFeedback=useRef(onDamage);damageFeedback.current=onDamage;
  allowed.current=enabled;
  useEffect(()=>()=>{allowed.current=false;epoch.current++;},[]);
  useEffect(()=>{
-  const players=[swing,swingB,slash,clang,shotA,shotB,enemyA,enemyB,hit,damage,knockout,knockoutB,heavyKO,droneKO,aim,grate,lootA,lootB];
-  if(!enabled||state.ticks<lastTick.current){epoch.current++;for(const p of players)p.pause();}
+  // pause everything once when sound stops or the run restarts; this effect runs on every hud publish
+  if((!enabled&&wasEnabled.current)||state.ticks<lastTick.current){epoch.current++;for(const p of [swing,swingB,slash,clang,shotA,shotB,enemyA,enemyB,hit,damage,knockout,knockoutB,heavyKO,droneKO,aim,grate,lootA,lootB])p.pause();}
+  wasEnabled.current=enabled;
   const c=state.combat??zero,events=combatSoundEvents(previous.current,c);
   const grateId=state.combat?.grateNoise?.id??0;
   if(state.ticks>=lastTick.current&&grateId>lastGrate.current){
