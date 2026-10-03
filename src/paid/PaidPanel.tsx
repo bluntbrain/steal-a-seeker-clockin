@@ -1,5 +1,6 @@
 import React,{useEffect,useRef,useState} from 'react';
 import {Modal,Pressable,ScrollView,Switch,Text,View} from 'react-native';
+import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import type {PaidChallenge,PaidEntry} from '../../shared/paid';
 import {tokenAmount} from '../../shared/commerce';
 import {useAccount} from '../commerce/account-context';
@@ -45,7 +46,8 @@ export default function PaidPanel({visible,onClose,onStart}:{visible:boolean;onC
  }
  async function cancel(active:Active){if(!selected)return;const s=await session();if(!active())return;const entry=await paidApi.cancel(s.token,selected.id);if(active()){setToken(s.token);apply(entry);}}
  const button=(label:string,fn:(active:Active)=>Promise<void>,disabled=false)=><Pressable accessibilityRole="button" disabled={busy||disabled} onPress={()=>void act(fn)} style={{padding:14,borderRadius:11,backgroundColor:'#cfe6e4',opacity:(busy||disabled)?0.45:1}}><Text style={{color:'#17392d',fontWeight:'700',textAlign:'center'}}>{label}</Text></Pressable>;
- return <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}><View style={{flex:1,backgroundColor:'#081210ed',padding:20,justifyContent:'center'}}><ScrollView style={{flexGrow:0,maxHeight:'94%',backgroundColor:'#142722',borderRadius:24}} contentContainerStyle={{padding:22,gap:16}}>
+ const insets=useSafeAreaInsets();
+ return <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}><View style={{flex:1,backgroundColor:'#081210ed',padding:20,paddingTop:20+insets.top,paddingBottom:20+insets.bottom,justifyContent:'center'}}><View style={{flexGrow:0,flexShrink:1,maxHeight:'94%',backgroundColor:'#142722',borderRadius:24,overflow:'hidden'}}><ScrollView style={{flexGrow:0,flexShrink:1}} contentContainerStyle={{padding:22,gap:16}}>
   <Text style={{color:'#a8ecd7',letterSpacing:2,fontSize:11}}>SEPARATE DEVNET CHALLENGE</Text><Text style={{color:'#edf2e8',fontSize:29,fontWeight:'800'}}>One entry. One escape.</Text>
   <Text style={{color:'#c5ddce',lineHeight:22}}>10 TEST SKR to enter. Escape to get 10 TEST SKR back. A verified capture or timeout returns zero. Network fees are excluded.</Text>
   <Text style={{color:'#abc6b5',fontSize:12,lineHeight:19}}>Campaign retries stay unlimited. This optional mode uses test tokens with no monetary value.</Text>
@@ -63,6 +65,6 @@ export default function PaidPanel({visible,onClose,onStart}:{visible:boolean;onC
    <PaidReceipt entry={selected}/>
   </View>}
   {entries.length>1&&<><Text style={{color:'#dcece2',fontSize:18}}>Recent entries</Text>{entries.map(e=><Pressable key={e.id} disabled={busy} accessibilityRole="button" onPress={()=>{setSelected(e);setAccepted(false);}} style={{padding:12,borderWidth:1,borderColor:'#365747',borderRadius:10}}><Text style={{color:'#c8dfcf'}}>{e.status.replaceAll('_',' ')} · {e.id.slice(0,8)}</Text></Pressable>)}</>}
-  <Pressable accessibilityRole="button" onPress={onClose} style={{padding:14}}><Text style={{color:'#bde8d2',textAlign:'center'}}>Back to game</Text></Pressable>
- </ScrollView></View></Modal>;
+
+ </ScrollView><Pressable accessibilityRole="button" onPress={onClose} style={{padding:14,borderTopWidth:1,borderColor:'#1F3A32'}}><Text style={{color:'#bde8d2',textAlign:'center',fontWeight:'700'}}>Back to game</Text></Pressable></View></View></Modal>;
 }

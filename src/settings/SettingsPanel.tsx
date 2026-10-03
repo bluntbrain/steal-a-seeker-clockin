@@ -5,6 +5,7 @@ import {HapticPressable as Pressable} from '../feedback/HapticPressable';
 import PlaytestControls from '../telemetry/PlaytestControls';
 import React,{useEffect,useRef} from 'react';
 import {Alert, Linking, Modal, Platform, ScrollView, StyleSheet, Switch, Text, View} from 'react-native';
+import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {useSettings} from './SettingsProvider';
 import app from '../../app.json';
 import BrandWordmark from '../components/BrandWordmark';
@@ -20,8 +21,9 @@ export default function SettingsPanel({visible, onClose, mission, onReplayTips}:
     <View style={styles.row}><View style={{flex: 1, gap: 5}}><Text style={styles.label}>{label}</Text><Text style={styles.detail}>{detail}</Text></View>
       <Switch accessibilityLabel={label} disabled={!ready} value={checked} onValueChange={on=>{if(label==='Vibration')previewWhenEnabled.current=on;else haptic('select');onChange(on);}} trackColor={{false: '#42584e', true: '#8abfad'}} thumbColor="#e1eee6"/>
     </View>;
+  const insets = useSafeAreaInsets();
   return <Modal visible={visible} transparent animationType={settings.reducedEffects ? 'none' : 'slide'} onRequestClose={onClose}>
-    <View style={styles.scrim}><View style={styles.panel}><ScrollView keyboardShouldPersistTaps="handled" style={{flexGrow:0,flexShrink:1}} contentContainerStyle={{padding: 24, gap: 22}}>
+    <View style={[styles.scrim, {paddingTop: 12 + insets.top, paddingBottom: 12 + insets.bottom}]}><View style={styles.panel}><ScrollView keyboardShouldPersistTaps="handled" style={{flexGrow:0,flexShrink:1}} contentContainerStyle={{padding: 24, gap: 22}}>
       <BrandWordmark/><Text style={styles.title}>Make yourself comfortable.</Text>
       {toggle('Game sound', 'Knife swings, guard gunfire, impacts and alarms.', settings.sound, sound => update({sound}))}
       <View style={{gap: 10}}><Text style={styles.label}>Volume · {Math.round(settings.volume * 100)}%</Text>
