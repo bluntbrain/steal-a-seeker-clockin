@@ -1,11 +1,11 @@
 import DefeatLootLayer from './DefeatLootLayer';
 import {meleeAtlas} from './meleeAssets';
-import {MELEE_FRAMES,meleeFrame} from './melee-presentation';
+import {MELEE_FRAMES,meleeFrame,attackPose} from './melee-presentation';
 import {knifeCombat} from '../game/melee';
 import ActorHealthBars from './ActorHealthBars';
 import React,{memo,useMemo,useEffect} from 'react';
 import {Canvas,Group,Picture,Image,Atlas,Circle,RoundedRect,Oval,Line,Path,Skia,DashPathEffect,useImage,useRSXformBuffer} from '@shopify/react-native-skia';
-import {useDerivedValue,type SharedValue} from 'react-native-reanimated';
+import {useAnimatedReaction,useDerivedValue,useSharedValue,type SharedValue} from 'react-native-reanimated';
 import {makeWarehouse} from '../game/art';
 import {currentWallStyle} from '../art/wall-style';
 import {interiorWalls,wallActorClip,type WallStyle} from '../art/wall-depth';
@@ -16,7 +16,8 @@ import {targetPhone,decoyLanding,type GameState,type Input} from '../game/simula
 import {editionIndex} from '../game/collection';
 import phoneAtlas from '../../assets/world-v3/phones.frames.json';
 import frames from '../../assets/costumes-v4/frames.json';
-import {costumeAtlas} from './costumeAssets';
+import {costumeAtlas,topdownAtlas} from './costumeAssets';
+import topdownFrames from '../../assets/courier-topdown-v1/frames.json';
 import {costumeFrame} from '../../shared/costumes';
 import GuardLayer from './GuardLayer';
 import {GUARD_SPRITES} from './enemy-presentation';
@@ -40,6 +41,7 @@ function DecoyLayer({game,input,reduced}:{game:SharedValue<GameState>;input:Shar
  <Group opacity={opacity}><Circle cx={x} cy={y} r={radius} style="stroke" strokeWidth={.045} color="#CFE6E4" opacity={.65}/><Circle cx={x} cy={y} r={.26} color="#152D37"/><Circle cx={x} cy={y} r={.18} color="#CFE6E4"/><Circle cx={x} cy={y} r={.07} color="#304E56"/></Group>
  </>;
 }
+const TOP_FRAMES=topdownFrames as {name:string;x:number;y:number;width:number;height:number}[];
 export default memo(function GameCanvas({camera,size,height=size*20/12,input,game,alpha,clock,level,appearance={},onReady,onLoadError,wallStyle=currentWallStyle()}:Props){
  const cameraTransform=useDerivedValue(()=>{const c=camera?.value??{x:0,y:0,zoom:1},scale=size/12*c.zoom;return [{translateX:-c.x*scale},{translateY:-c.y*scale},{scale}];});
  const district=districtFor(level.number),environment=environmentFor(level);
@@ -56,9 +58,10 @@ export default memo(function GameCanvas({camera,size,height=size*20/12,input,gam
  const phoneSprites=useMemo(()=>[phoneFrame],[phoneIndex]);
  const phoneTransforms=useMemo(()=>[Skia.RSXform(phoneScale,0,-phoneFrame.width/2*phoneScale,0)],[phoneIndex]);
  const carryTransforms=useMemo(()=>[Skia.RSXform(.48/phoneFrame.height,0,0,0)],[]);
+ // knife levels draw the courier strictly top-down and rotate one sprite like the guards; older levels keep the directional sheet
  const knifeMode=knifeCombat(level),actorFrames=knifeMode?MELEE_FRAMES:frames;
  const lootCoin=useImage(require('../../assets/loot-v1/coin.png'),onLoadError);
- const sprite=useImage(knifeMode?meleeAtlas(appearance.outfit):costumeAtlas(appearance.outfit),onLoadError);
+ const sprite=useImage(knifeMode?topdownAtlas(appearance.outfit):costumeAtlas(appearance.outfit),onLoadError);
  // Each scene is keyed by the parent. Never acknowledge a previous district's
  // retained image while a new source is decoding. Let the new canvas paint first.
  useEffect(()=>{
@@ -71,11 +74,18 @@ export default memo(function GameCanvas({camera,size,height=size*20/12,input,gam
  const y=useDerivedValue(()=>game.value.py+(game.value.y-game.value.py)*alpha.value);
  const attack=useDerivedValue(()=>{const s=game.value,m=s.combat?.melee;return knifeMode&&m&&s.status==='playing'?meleeFrame(s.ticks-m.started,m.angle):-1;});
  const frame=useDerivedValue(()=>{const s=game.value;if(attack.value>=0)return attack.value;return costumeFrame(s.facing,Math.hypot(s.vx,s.vy)>.1 && Math.floor(s.walked*3.5)%2===1);});
- const sprites=useDerivedValue(()=>[actorFrames[frame.value]!]);
+ // heading is presentation only: the attack angle while slashing, otherwise the movement direction; it holds while idle
+ const heading=useSharedValue(-Math.PI/2);
+ useAnimatedReaction(()=>{const s=game.value,m=s.combat?.melee;if(knifeMode&&m&&s.status==='playing'&&s.ticks-m.started<11)return m.angle;return Math.hypot(s.vx,s.vy)>.1?Math.atan2(s.vy,s.vx):NaN;},(angle)=>{if(!Number.isNaN(angle))heading.value=angle;},[knifeMode]);
+ const topFrame=useDerivedValue(()=>{const s=game.value,m=s.combat?.melee;if(m&&s.status==='playing'){const pose=attackPose(s.ticks-m.started);if(pose>=0)return 4+pose;}if(s.carrying)return 7;if(Math.hypot(s.vx,s.vy)<=.1)return 0;const phase=Math.floor(s.walked*4)%4;return phase===0?1:phase===1?2:phase===2?3:2;});
+ const sprites=useDerivedValue(()=>[knifeMode?TOP_FRAMES[topFrame.value]!:actorFrames[frame.value]!]);
  const transforms=useRSXformBuffer(1,(transform)=>{
-  'worklet';const f=actorFrames[frame.value]!;const scale=1.62/f.height;const bob=reduced||attack.value>=0?0:Math.hypot(game.value.vx,game.value.vy)>.1?Math.abs(Math.sin(game.value.walked*11))*.045:Math.sin(clock.value*2)*.012;transform.set(scale,0,x.value-f.width*scale/2,y.value-f.height*scale+.12-bob);});
- const shadow=useDerivedValue(()=>({x:x.value-.36,y:y.value-.02,width:.72,height:.22}));
- const carry=useDerivedValue(()=>game.value.carrying?1:0);
+  'worklet';
+  if(knifeMode){const f=TOP_FRAMES[topFrame.value]!,scale=1.5/f.width,rot=heading.value+Math.PI/2,a=Math.cos(rot)*scale,b=Math.sin(rot)*scale,ax=f.width/2,ay=f.height/2;transform.set(a,b,x.value-ax*a+ay*b,y.value-ay*a-ax*b);return;}
+  const f=actorFrames[frame.value]!;const scale=1.62/f.height;const bob=reduced||attack.value>=0?0:Math.hypot(game.value.vx,game.value.vy)>.1?Math.abs(Math.sin(game.value.walked*11))*.045:Math.sin(clock.value*2)*.012;transform.set(scale,0,x.value-f.width*scale/2,y.value-f.height*scale+.12-bob);});
+ const shadow=useDerivedValue(()=>knifeMode?{x:x.value-.4,y:y.value-.34,width:.8,height:.8}:{x:x.value-.36,y:y.value-.02,width:.72,height:.22});
+ // the top-down carry frame already shows the phone in hand
+ const carry=useDerivedValue(()=>!knifeMode&&game.value.carrying?1:0);
  const target=useDerivedValue(()=>game.value.carrying||game.value.delivered>=(level.targets?.length??1)?0:1);
  const phonePosition=useDerivedValue(()=>[{translateX:targetPhone(game.value).x},{translateY:targetPhone(game.value).y}]);
  const phoneGlow=useDerivedValue(()=>reduced?.34:.22+.22*(.5+.5*Math.sin(clock.value*2.2)));

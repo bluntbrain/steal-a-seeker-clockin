@@ -1,0 +1,11 @@
+[
+ {
+  "name": "default",
+  "file": "default.webp",
+  "model": "gpt-image-2",
+  "source": "output/imagegen/courier-topdown-v1/default-sheet.png",
+  "frames": 8,
+  "cell": 256,
+  "sha256": "6a3c67a16dfdb75b3a5f99db8840d67f9828df86d636cc3165d9b3d01b07720b"
+ }
+]
