@@ -21,7 +21,8 @@ export const STORE_ITEMS=[
  {id:'rack-theme',name:'Vault finish',price:250,kind:'rack',description:'A mint-lit finish for your collection.'},
 ] as const;
 export type StoreItemId=typeof STORE_ITEMS[number]['id'];
-export const RETIRED_ITEMS:readonly string[]=['escape-trail','profile-frame','rack-theme'];
+// the seven community characters are no longer sold as skins; they appear as bosses. owners keep and equip them
+export const RETIRED_ITEMS:readonly string[]=['escape-trail','profile-frame','rack-theme','solana-toly','solana-mert','solana-chase','solana-lily','solana-vibhu','solana-akshay','solana-beeman'];
 export const isStoreItemForSale=(id:string)=>STORE_ITEMS.some(i=>i.id===id)&&!RETIRED_ITEMS.includes(id);
 export type CreditPackId=typeof CREDIT_PACKS[number]['id'];
 // The 300-credit starter outfit takes five perfect clears or six basic clears.

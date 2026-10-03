@@ -43,11 +43,11 @@ test('campaign spawn shows the backpack and real movement selects the correct vi
  }
 });
 test('only implemented outfits are on sale, and wallet inventory restores new outfits',()=>{
- const items=STORE_ITEMS.filter(i=>isStoreItemForSale(i.id));assert.equal(items.length,11);
+ const items=STORE_ITEMS.filter(i=>isStoreItemForSale(i.id));assert.equal(items.length,4);
  for(const id of ['profile-frame','rack-theme','escape-trail'] as const)assert.throws(()=>redeemCredits({...emptyInventory(),balance:10000},id),/no longer/);
- let inventory={...emptyInventory(),balance:22800};
+ let inventory={...emptyInventory(),balance:1800};
  for(const item of items.filter(i=>i.kind==='outfit'))inventory=redeemCredits(inventory,item.id);
- assert.equal(inventory.balance,0);assert.equal(inventory.equipment.outfit,'solana-beeman');
+ assert.equal(inventory.balance,0);assert.equal(inventory.equipment.outfit,'archive-keeper');
  const account=readAccount({wallet:'test',credits:0,entitlements:inventory.owned,equipment:inventory.equipment,progress:{}},'test');
- assert.equal(account?.equipment.outfit,'solana-beeman');assert(!account?.entitlements.includes('campaign'));
+ assert.equal(account?.equipment.outfit,'archive-keeper');assert(!account?.entitlements.includes('campaign'));
 });
