@@ -2,6 +2,7 @@ import {paymentDiagnostic,unavailableMessage} from './payment-errors';
 import {registerSite} from './site';
 import {STORE_ITEMS,RETIRED_ITEMS} from '../shared/store';
 import {CampaignService} from './campaign-service';
+import {LEVEL_PAGE} from './campaign-levels';
 import {CAMPAIGN_IDS,type MissionId} from '../src/game/level';
 import {CONTRACT_ID_MAX} from '../shared/contracts';
 import Fastify from 'fastify';
@@ -66,7 +67,9 @@ export async function createApp(service:CommerceService,ranked=new RankedService
  app.get('/campaign',async req=>campaign.summary((await account(req.headers.authorization)).wallet));
  app.get('/campaign/leaderboard',async()=>campaign.leaderboard());
  app.post('/campaign/claim',async req=>{z.object({}).strict().parse(req.body);return campaign.claim((await account(req.headers.authorization)).wallet);});
- app.post('/campaign/runs',{bodyLimit:1024*1024,config:{rateLimit:{max:12,timeWindow:'1 minute'}}},async req=>{const a=await account(req.headers.authorization),b=z.object({mission:z.enum(CAMPAIGN_IDS as [MissionId,...MissionId[]]),rulesHash,replay:z.unknown()}).strict().parse(req.body);return campaign.submit(a.wallet,b.mission,b.rulesHash,b.replay);});
+ app.post('/campaign/runs',{bodyLimit:1024*1024,config:{rateLimit:{max:12,timeWindow:'1 minute'}}},async req=>{const a=await account(req.headers.authorization),b=z.object({mission:z.enum(CAMPAIGN_IDS as [MissionId,...MissionId[]]).optional(),level:z.number().int().min(13).max(1000000).optional(),rulesHash,replay:z.unknown()}).strict().refine(v=>(v.mission===undefined)!==(v.level===undefined),'Name one mission or one level.').parse(req.body);return campaign.submit(a.wallet,b.level!==undefined?{level:b.level}:{mission:b.mission!},b.rulesHash,b.replay);});
+ // published levels are public and immutable, so clients may cache them by number
+ app.get('/campaign/levels',async req=>{const q=z.object({from:z.coerce.number().int().min(13).default(13),to:z.coerce.number().int().min(13).optional()}).parse(req.query);const latest=await campaign.levels.latest();const to=Math.min(q.to??q.from+LEVEL_PAGE-1,q.from+LEVEL_PAGE-1);return {latest,levels:await campaign.levels.list(q.from,to)};});
  app.get('/paid/challenge',async()=>paid.challenge());
  app.get('/paid/entries',async req=>paid.list((await account(req.headers.authorization)).wallet));
  app.post('/paid/entries',{config:{rateLimit:{max:12,timeWindow:'1 minute'}}},async req=>{const a=await account(req.headers.authorization),b=z.object({requestKey:uuid,termsVersion:z.literal('devnet-v1')}).strict().parse(req.body);return paid.quote(a.wallet,b.requestKey,b.termsVersion);});

@@ -30,6 +30,10 @@ export type CreditPackId=typeof CREDIT_PACKS[number]['id'];
 export const CAMPAIGN_CLEAR_CREDITS=50;
 export const CAMPAIGN_STAR_BONUS=5;
 export function creditReward(stars:number){return stars>=1&&stars<=3&&Number.isInteger(stars)?CAMPAIGN_CLEAR_CREDITS+(stars-1)*CAMPAIGN_STAR_BONUS:0;}
+// published levels past the authored twelve pay less per clear so a hundred levels do not flood the credit economy; bosses pay double
+export const PUBLISHED_CLEAR_CREDITS=20;
+export const BOSS_CLEAR_CREDITS=40;
+export function publishedCreditReward(stars:number,boss:boolean){return stars>=1&&stars<=3&&Number.isInteger(stars)?(boss?BOSS_CLEAR_CREDITS:PUBLISHED_CLEAR_CREDITS)+(stars-1)*CAMPAIGN_STAR_BONUS:0;}
 export type LocalInventory={version:1;balance:number;stars:Record<string,number>;owned:StoreItemId[];equipment:Record<string,string>};
 export const emptyInventory=():LocalInventory=>({version:1,balance:0,stars:{},owned:[],equipment:{}});
 export function earnCredits(s:LocalInventory,mission:string,stars:number):LocalInventory{const old=s.stars[mission]??0,delta=creditReward(stars)-creditReward(old);return delta>0?{...s,balance:s.balance+delta,stars:{...s.stars,[mission]:stars}}:s;}

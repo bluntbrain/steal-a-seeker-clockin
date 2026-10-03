@@ -378,12 +378,12 @@ test('campaign v2 reserves before approval, verifies all missions and settles on
  // A fabricated cloud save never authorizes the rebate.
  await commerce.syncProgress(h.user.wallet,{version:1,missions:Object.fromEntries(CAMPAIGN_IDS.map(id=>[id,{stars:3,seconds:1,score:99999,battery:100,completions:1}]))});
  await assert.rejects(campaign.claim(h.user.wallet),/12 missions/);
- await campaign.submit(h.other.wallet,'practice',rules.rulesHash,fixtureReplay().replay); // Free campaign requires no pass.
- await assert.rejects(campaign.submit(h.user.wallet,'practice',rules.rulesHash,{version:1,chunks:[{ticks:1,x:0,y:0,buttons:0}]}),/extraction/);
- for(const mission of CAMPAIGN_IDS){const {state,replay}=fixtureReplay(mission);assert.equal(state.status,'won',mission);await campaign.submit(h.user.wallet,mission,rules.rulesHash,replay);}
+ await campaign.submit(h.other.wallet,{mission:'practice'},rules.rulesHash,fixtureReplay().replay); // Free campaign requires no pass.
+ await assert.rejects(campaign.submit(h.user.wallet,{mission:'practice'},rules.rulesHash,{version:1,chunks:[{ticks:1,x:0,y:0,buttons:0}]}),/extraction/);
+ for(const mission of CAMPAIGN_IDS){const {state,replay}=fixtureReplay(mission);assert.equal(state.status,'won',mission);await campaign.submit(h.user.wallet,{mission},rules.rulesHash,replay);}
  const completedBalance=(await commerce.me(h.user.wallet)).credits;
  for(const mission of ['practice','last-vault'] as const){
-  const replayed=await campaign.submit(h.user.wallet,mission,rules.rulesHash,fixtureReplay(mission).replay);
+  const replayed=await campaign.submit(h.user.wallet,{mission},rules.rulesHash,fixtureReplay(mission).replay);
   assert.equal(replayed.creditAward.credits,0,'A replay after all twelve clears returns a resolved zero-credit reward');
   assert.equal(replayed.creditAward.balance,completedBalance);
  }
@@ -592,9 +592,9 @@ test('free campaign grants verified credits once; forged progress and invalid re
  const {CampaignService}=await import('./campaign-service'),rules=(await import('../shared/rules-manifest.json')).default;
  const u=await login(),campaign=new CampaignService(pool,new ReturnService(pool,undefined,{mint:service.config.mint,treasury:service.config.recipient,source:service.config.destination,decimals:6}));
  await service.syncProgress(u.wallet,{version:1,missions:{practice:{stars:3,seconds:1,score:99999,battery:100,completions:999}}});assert.equal((await service.me(u.wallet)).credits,0);
- await assert.rejects(campaign.submit(u.wallet,'practice',rules.rulesHash,{version:1,chunks:[{ticks:1,x:0,y:0,buttons:0}]}),/extraction/);
- const replay=fixtureReplay().replay;const receipts=await Promise.all([campaign.submit(u.wallet,'practice',rules.rulesHash,replay),campaign.submit(u.wallet,'practice',rules.rulesHash,replay)]);assert.equal(receipts.filter(r=>r.creditAward.credits>0).length,1);assert(receipts.every(r=>r.creditAward.mission==='practice'));assert(receipts.some(r=>r.creditAward.credits===0));
- const balance=(await service.me(u.wallet)).credits!;assert(balance>=50&&balance<=60);assert.equal(receipts.reduce((n,r)=>n+r.creditAward.credits,0),balance);assert.equal((await campaign.submit(u.wallet,'practice',rules.rulesHash,replay)).creditAward.credits,0);assert.equal((await service.me(u.wallet)).credits,balance);assert(receipts.every(r=>r.creditAward.balance===balance));assert.equal((await campaign.submit(u.wallet,'practice',rules.rulesHash,replay)).creditAward.balance,balance);assert(!(await service.me(u.wallet)).entitlements.includes('campaign'));
+ await assert.rejects(campaign.submit(u.wallet,{mission:'practice'},rules.rulesHash,{version:1,chunks:[{ticks:1,x:0,y:0,buttons:0}]}),/extraction/);
+ const replay=fixtureReplay().replay;const receipts=await Promise.all([campaign.submit(u.wallet,{mission:'practice'},rules.rulesHash,replay),campaign.submit(u.wallet,{mission:'practice'},rules.rulesHash,replay)]);assert.equal(receipts.filter(r=>r.creditAward.credits>0).length,1);assert(receipts.every(r=>r.creditAward.mission==='practice'));assert(receipts.some(r=>r.creditAward.credits===0));
+ const balance=(await service.me(u.wallet)).credits!;assert(balance>=50&&balance<=60);assert.equal(receipts.reduce((n,r)=>n+r.creditAward.credits,0),balance);assert.equal((await campaign.submit(u.wallet,{mission:'practice'},rules.rulesHash,replay)).creditAward.credits,0);assert.equal((await service.me(u.wallet)).credits,balance);assert(receipts.every(r=>r.creditAward.balance===balance));assert.equal((await campaign.submit(u.wallet,{mission:'practice'},rules.rulesHash,replay)).creditAward.balance,balance);assert(!(await service.me(u.wallet)).entitlements.includes('campaign'));
 });
 
 test('the previous APK can still earn verified credits without double claiming after update',async()=>{
@@ -603,9 +603,9 @@ test('the previous APK can still earn verified credits without double claiming a
  // The tutorial is unchanged between these releases; the archived worker still
  // verifies the old hash independently before the same per-mission credit lock.
  const replay=fixtureReplay().replay;
- const old=await campaign.submit(u.wallet,'practice',PRE_SCOUT_RULES,replay);
+ const old=await campaign.submit(u.wallet,{mission:'practice'},PRE_SCOUT_RULES,replay);
  assert(old.creditAward.credits>=50&&old.creditAward.credits<=60);
- const updated=await campaign.submit(u.wallet,'practice',rules.rulesHash,replay);
+ const updated=await campaign.submit(u.wallet,{mission:'practice'},rules.rulesHash,replay);
  assert.equal(updated.creditAward.credits,0);assert.equal(updated.creditAward.balance,old.creditAward.balance);
 });
 
@@ -614,9 +614,9 @@ test('0.3.18 roaming campaign credits survive the contact fix without allowing a
  const rules=(await import('../shared/rules-manifest.json')).default,{solveCombat}=await import('../scripts/qa-combat'),{combatLevel}=await import('../src/game/combat-levels');
  const u=await login(),campaign=new CampaignService(pool,new ReturnService(pool,undefined,{mint:service.config.mint,treasury:service.config.recipient,source:service.config.destination,decimals:6}));
  const level=old.levels[1] as import('../src/game/level').LevelDefinition,win=solveCombat(level);assert(win);
- const first=await campaign.submit(u.wallet,level.mission,old.rulesHash,win.replay);assert.equal(first.creditAward.credits,60);
+ const first=await campaign.submit(u.wallet,{mission:level.mission},old.rulesHash,win.replay);assert.equal(first.creditAward.credits,60);
  const current=solveCombat(combatLevel(level.mission));assert(current);
- const second=await campaign.submit(u.wallet,level.mission,rules.rulesHash,current.replay);assert.equal(second.creditAward.credits,0);assert.equal(second.creditAward.balance,60);
+ const second=await campaign.submit(u.wallet,{mission:level.mission},rules.rulesHash,current.replay);assert.equal(second.creditAward.credits,0);assert.equal(second.creditAward.balance,60);
 });
 
 
@@ -800,4 +800,30 @@ test('price feed warming refreshes ahead of expiry and dedupes concurrent fetche
  clock+=30_000;await feed.refresh();assert.equal(calls,4,'an explicit refresh fetches even while the cache is fresh');
  clock+=20_000;const c=await feed.rates();assert.equal(calls,4,'a warmed cache serves without a fetch');assert.equal(c.at,1_030_000);
  feed.warm(60_000);feed.stopWarming();
+});
+
+test('published campaign levels verify against the frozen row, pay the published rate once and list publicly',async()=>{
+ const {CampaignService}=await import('./campaign-service'),{buildPublishable}=await import('../scripts/publish-campaign-levels'),{PUBLISHED_CLEAR_CREDITS,BOSS_CLEAR_CREDITS,CAMPAIGN_STAR_BONUS}=await import('../shared/store');
+ const u=await login(),campaign=new CampaignService(pool,new ReturnService(pool,undefined,{mint:service.config.mint,treasury:service.config.recipient,source:service.config.destination,decimals:6}));
+ const plain=buildPublishable(13,1),boss=buildPublishable(15,1);assert.equal(plain.boss,null);assert.equal(boss.boss,'toly');
+ const strip=({ticks:_t,strategy:_s,salt:_a,...row}:typeof plain)=>row;
+ assert.deepEqual(await campaign.levels.publish([strip(plain),strip(boss)]),[13,15]);
+ assert.deepEqual(await campaign.levels.publish([{...strip(plain),title:'tampered'}]),[],'a published row never changes');
+ assert.equal((await campaign.levels.get(13))!.title,plain.title);
+ const {solveCombat}=await import('../scripts/qa-combat'),win=solveCombat(plain.definition)!,bossWin=solveCombat(boss.definition)!;
+ await assert.rejects(campaign.submit(u.wallet,{level:14},'0'.repeat(64),win.replay),/Unknown campaign level/);
+ const first=await campaign.submit(u.wallet,{level:13},'ignored-client-hash',win.replay);
+ const stars=1+Number(first.runs[0]!.battery>=60)+Number(win.ticks<=plain.definition.targetSeconds*30);
+ assert.equal(first.creditAward.mission,'campaign:13');assert.equal(first.creditAward.credits,PUBLISHED_CLEAR_CREDITS+(stars-1)*CAMPAIGN_STAR_BONUS);
+ assert.equal((await campaign.submit(u.wallet,{level:13},'ignored-client-hash',win.replay)).creditAward.credits,0,'a repeat clear pays nothing more');
+ const bossReceipt=await campaign.submit(u.wallet,{level:15},'x',bossWin.replay);assert(bossReceipt.creditAward.credits>=BOSS_CLEAR_CREDITS);
+ await assert.rejects(campaign.submit(u.wallet,{level:15},'x',win.replay),/extraction|Replay|match/,'a replay for another room cannot claim a boss level');
+ assert.equal((await service.me(u.wallet)).credits,first.creditAward.credits+bossReceipt.creditAward.credits);
+ // progress sync keeps published keys beside the authored twelve
+ await service.syncProgress(u.wallet,{version:1,missions:{'campaign:13':{stars,seconds:win.ticks/30,score:win.score,battery:80,completions:1}}});
+ assert.equal(((await service.me(u.wallet)).progress as {missions:Record<string,{stars:number}>}).missions['campaign:13']?.stars,stars);
+ const listed=await app.inject({method:'GET',url:'/campaign/levels?from=13&to=40'});assert.equal(listed.statusCode,200);
+ const body=listed.json();assert.equal(body.latest,15);assert.deepEqual(body.levels.map((l:{number:number})=>l.number),[13,15]);assert.equal(body.levels[1].boss,'toly');assert.equal(body.levels[0].definition.id,'campaign:13');
+ const bad=await app.inject({method:'POST',url:'/campaign/runs',headers:u.headers,payload:{mission:'practice',level:13,rulesHash:'0'.repeat(64),replay:{}}});assert.equal(bad.statusCode,400);
+ const viaApi=await app.inject({method:'POST',url:'/campaign/runs',headers:u.headers,payload:{level:13,rulesHash:'0'.repeat(64),replay:win.replay}});assert.equal(viaApi.statusCode,200,viaApi.body);assert.equal(viaApi.json().creditAward.credits,0);
 });
