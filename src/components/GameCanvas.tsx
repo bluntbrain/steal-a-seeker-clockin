@@ -99,6 +99,8 @@ export default memo(function GameCanvas({camera,size,height=size*20/12,input,gam
  const escapeOpacity=useDerivedValue(()=>!reduced&&appearance.trail==='escape-trail'&&game.value.carrying&&Math.hypot(game.value.vx,game.value.vy)>.1?.48:0);
  const escapeTransform=useDerivedValue(()=>[{translateX:x.value},{translateY:y.value},{rotate:Math.atan2(game.value.vy,game.value.vx)}]);
  const glow=useDerivedValue(()=>reduced?.12:.12+Math.sin(clock.value*2)*.035);
+ // red ring while any live guard has the courier in sight; pulses unless effects are reduced
+ const spotted=useDerivedValue(()=>{const s=game.value;if(s.status!=='playing'||!s.combat)return 0;for(let i=0;i<s.guards.length;i++){const g=s.guards[i]!;if(g.active&&g.hp>0&&g.seesPlayer)return reduced?.7:.5+.35*(.5+.5*Math.sin(clock.value*9));}return 0;});
  const extract=useDerivedValue(()=>game.value.extraction/TUNING.extractHold*level.exit.w);
  const pickupWidth=useDerivedValue(()=>game.value.pickup/TUNING.pickupHold*1.1);
  return <Canvas style={{width:size,height}} accessible={false} opaque>
@@ -129,6 +131,8 @@ export default memo(function GameCanvas({camera,size,height=size*20/12,input,gam
     <RoundedRect x={-1.5} y={.24} width={1.1} height={.07} r={.035} color="#90CBCB"/>
    </Group>
    <Circle cx={x} cy={y} r={footRadius} color="#CFE6E4" style="stroke" strokeWidth={.055} opacity={burst}/>
+   <Circle cx={x} cy={y} r={.82} color="#FF4A3D" style="stroke" strokeWidth={.07} opacity={spotted}/>
+   <Circle cx={x} cy={y} r={.96} color="#FF4A3D" style="stroke" strokeWidth={.025} opacity={spotted}/>
 
    <Group clip={courierClip}>
    <Oval rect={shadow} color="#070c0d" opacity={.7}/>

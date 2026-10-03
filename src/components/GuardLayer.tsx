@@ -54,8 +54,10 @@ export default function GuardLayer({game,alpha,index,clock,reduced=false,droneSp
   }
   p.close();
  });
- const alertOpacity=useDerivedValue(()=>{const g=game.value.guards[index];return g?.brain&&g.active&&g.hp>0&&(g.seesPlayer&&g.exposure>=1||g.mode==='investigate'||g.mode==='search')?1:0;});
- const alertColor=useDerivedValue(()=>game.value.guards[index]?.seesPlayer?'#FF886F':'#E1C381');
+ // "?" while the guard is turning toward a glimpse or walking to a noise, "!" once the courier is confirmed or the guard hunts
+ const exclaimOpacity=useDerivedValue(()=>{const g=game.value.guards[index];return g?.brain&&g.active&&g.hp>0&&(g.seesPlayer&&g.exposure>=1||!!g.heist?.hunting)?1:0;});
+ const questionOpacity=useDerivedValue(()=>{const g=game.value.guards[index];if(!g?.brain||!g.active||g.hp<=0||g.seesPlayer&&g.exposure>=1||g.heist?.hunting)return 0;return g.seesPlayer&&g.exposure>0||g.mode==='investigate'||g.mode==='search'?1:0;});
+ const questionMark=usePathValue(p=>{'worklet';const cx=barWidth/2,cy=-.33;p.moveTo(cx-.085,cy-.07);p.quadTo(cx-.085,cy-.17,cx,cy-.17);p.quadTo(cx+.09,cy-.17,cx+.09,cy-.08);p.quadTo(cx+.09,cy-.01,cx+.01,cy);p.lineTo(cx,cy+.035);});
  const lurePath=usePathValue(p=>{'worklet';const g=game.value.guards[index];if(!g||!g.active||g.seesPlayer||game.value.decoy.ttl<=0||g.lureId!==game.value.decoy.id||g.mode!=='investigate')return;p.moveTo(g.x,g.y);for(let i=g.pathIndex;i<g.path.length;i++)p.lineTo(g.path[i]!.x,g.path[i]!.y);});
  const listening=useDerivedValue(()=>{const g=game.value.guards[index];return g&&g.active&&!g.seesPlayer&&game.value.decoy.ttl>0&&g.lureId===game.value.decoy.id&&(g.mode==='investigate'||g.mode==='search')?1:0;});
  return <Group>
@@ -71,7 +73,7 @@ export default function GuardLayer({game,alpha,index,clock,reduced=false,droneSp
     <Circle cx={-.39} cy={0} r={.3} color="#C8FFE2" opacity={armorRear}/>
    </>}
   </Group></Group></Group>
-  <Group transform={bar} opacity={live}><Group opacity={alertOpacity}><Circle cx={barWidth/2} cy={-.32} r={.19} color="#14221F"/><RoundedRect x={barWidth/2-.025} y={-.45} width={.05} height={.16} r={.02} color={alertColor}/><Circle cx={barWidth/2} cy={-.22} r={.03} color={alertColor}/></Group><Circle cx={barWidth/2} cy={-.18} r={.13} color="#CFE6E4" opacity={listening}/><Circle cx={barWidth/2} cy={-.18} r={.065} color="#243F48" opacity={listening}/>
+  <Group transform={bar} opacity={live}><Group opacity={exclaimOpacity}><Circle cx={barWidth/2} cy={-.32} r={.19} color="#14221F"/><RoundedRect x={barWidth/2-.03} y={-.45} width={.06} height={.16} r={.025} color="#FF6B5A"/><Circle cx={barWidth/2} cy={-.21} r={.035} color="#FF6B5A"/></Group><Group opacity={questionOpacity}><Circle cx={barWidth/2} cy={-.32} r={.19} color="#14221F"/><Path path={questionMark} color="#F2C96B" style="stroke" strokeWidth={.045} strokeCap="round" strokeJoin="round"/><Circle cx={barWidth/2} cy={-.22} r={.032} color="#F2C96B"/></Group><Circle cx={barWidth/2} cy={-.18} r={.13} color="#CFE6E4" opacity={listening}/><Circle cx={barWidth/2} cy={-.18} r={.065} color="#243F48" opacity={listening}/>
    {!game.value.combat&&<RoundedRect x={0} y={0} width={barWidth} height={.10} r={.04} color="#152023"/>}
    {!game.value.combat&&<RoundedRect x={0} y={0} width={width} height={.10} r={.04} color="#ff8169"/>}
   </Group>
