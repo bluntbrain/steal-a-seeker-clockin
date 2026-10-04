@@ -271,13 +271,15 @@ export function Game({onSnapshot}:{onSnapshot?:(state:GameState)=>void}){
   previousTap.value=tap;pendingTap.value=tap;
  }),[size,camera,suspended,sceneReady,game,pendingTap,previousTap]);
  // the loader stays up at least LOADER_MIN_MS so a fast scene load does not flash it
- const loadedScene=useRef(-1),loaderShownAt=useRef(Date.now());
+ const loadedScene=useRef(-1),loaderShownAt=useRef(Date.now()),loaderTimer=useRef<ReturnType<typeof setTimeout>|null>(null);
  useEffect(()=>{if(sceneLoading)loaderShownAt.current=Date.now();},[sceneLoading,sceneVersion]);
+ useEffect(()=>()=>{if(loaderTimer.current)clearTimeout(loaderTimer.current);},[]);
  const finishSceneLoading=useCallback((expected:number)=>{
   if(sceneEpoch.current!==expected)return;
   const wait=LOADER_MIN_MS-(Date.now()-loaderShownAt.current);
-  if(wait>0){setTimeout(()=>finishSceneLoading(expected),wait);return;}
-  setSceneError('');setSceneLoading(false);
+  if(loaderTimer.current)clearTimeout(loaderTimer.current);
+  if(wait>0){loaderTimer.current=setTimeout(()=>finishSceneLoading(expected),wait);return;}
+  loaderTimer.current=null;setSceneError('');setSceneLoading(false);
  },[]);
  // Release simulation only after React has removed the loading overlay.
  useEffect(()=>{if(!sceneLoading)sceneReady.value=true;},[sceneLoading,sceneReady]);
@@ -384,8 +386,8 @@ export function Game({onSnapshot}:{onSnapshot?:(state:GameState)=>void}){
   detail={finaleVisible?'Your campaign is complete. Keep the card.':trial.active&&!paused?'Your free attempt is complete. Unlock the campaign for all 12 missions and unlimited retries.':paused?(combatMode?((level.combat?.revision??0)>=15?'Tap the floor to move. Tap a guard to approach and slash. Flank armored guards. Tap the phone, then the exit.':'Tap the floor to move. Tap a guard to approach and shoot. Tap the phone, then the exit.'):'Drag to move. Stop and hold TAKE. Use ACT at switches. More help in Settings.'):hud.status==='won'?(`${entry.number>12?`Level ${entry.number} cleared.`:`${phoneEdition(mission).name} added to your rack.`}${earnedNotice?' '+earnedNotice:''}`):hud.status==='caught'?(combatMode?'Move when a guard aims. Cover stops their shots.':level.decoys?'Use cover. Tap DISTRACT, then go the other way.':'Break line of sight behind cover. Dash after taking the phone.'):'Take the phone and reach the mint exit.'}
   stats={!finaleVisible&&hud.status==='won'&&!paused?`${time(hud.elapsed)} · ${hud.battery}% ${combatMode?'health':'charge'} · ${hud.score.toLocaleString()} pts`:undefined}
   stars={!finaleVisible&&hud.status==='won'&&!paused?'★'.repeat(starsFor(hud))+'☆'.repeat(3-starsFor(hud)):undefined}
-  primary={finaleVisible?{label:'Share card ↗',accessibilityLabel:'Share campaign completion card on X',disabled:!shareReady,onPress:()=>void shareAction.current?.()}:{label:trial.active&&!paused?'View campaign pass':paused?'Resume':hud.status==='won'?(nextMission?'Next mission ↗':'Missions'):'Retry ↗',accessibilityLabel:trial.active&&!paused?'Finish free trial':paused?'Resume run':hud.status==='won'?(nextMission?'View next mission':'View missions'):'Retry level',disabled:false,onPress:()=>trial.active&&!paused?trial.finish():paused?pause(false):hud.status==='won'?(nextMission?introduceMission(nextMission):backToMissions()):restart()}}
-  secondary={trial.active?undefined:paused?{label:'Restart',accessibilityLabel:'Restart level',onPress:()=>restart()}:{label:hud.status==='won'?'Replay':'Back to missions',accessibilityLabel:hud.status==='won'?'Retry level':'View missions',onPress:()=>hud.status==='won'?restart():backToMissions()}}
+  primary={finaleVisible?{label:'Share card ↗',accessibilityLabel:'Share campaign completion card on X',disabled:!shareReady,onPress:()=>void shareAction.current?.()}:{label:trial.active&&!paused?'View campaign pass':paused?'Resume':hud.status==='won'?(nextMission?'Next mission ↗':'Missions'):'Retry ↗',accessibilityLabel:trial.active&&!paused?'Finish free trial':paused?'Resume run':hud.status==='won'?(nextMission?'View next mission':'View missions'):'Retry level',disabled:false,spinner:!paused&&!trial.active,onPress:()=>trial.active&&!paused?trial.finish():paused?pause(false):hud.status==='won'?(nextMission?introduceMission(nextMission):backToMissions()):restart()}}
+  secondary={trial.active?undefined:paused?{label:'Restart',accessibilityLabel:'Restart level',spinner:true,onPress:()=>restart()}:{label:hud.status==='won'?'Replay':'Back to missions',accessibilityLabel:hud.status==='won'?'Retry level':'View missions',spinner:true,onPress:()=>hud.status==='won'?restart():backToMissions()}}
   utility={trial.active?paused?{label:'Exit trial',onPress:()=>trial.finish()}:undefined:(paused||hud.status==='won')?{label:'Back to missions',onPress:backToMissions}:undefined}
  >{finaleVisible&&<CompletionCard data={completionData} reduced={!!settings.reducedEffects} registerShare={registerShare}/>} {paused&&<Pressable accessibilityRole="button" accessibilityLabel="Toggle frame statistics" onPress={()=>setDetails(!details)}><Text style={s.stats}>{details?`${Math.round(stats.fps)} FPS · p95 ${stats.p95.toFixed(1)}ms · ${stats.slow} slow frames`:'Performance details'}</Text></Pressable>}</ResultSheet>}
  {!testMission&&!trial.active&&!guide.active&&guide.retries===0&&hud.status==='won'&&completedReplay&&!paused&&<View style={{position:'absolute',bottom:insets.bottom+3,zIndex:46}}><CampaignSubmission state={hud} replay={completedReplay} target={entry.number>12?{level:entry.number}:{mission:entry.mission}} quiet retrySignal={rewardRetry} onReward={account.preview?undefined:rewardResolved}/></View>}

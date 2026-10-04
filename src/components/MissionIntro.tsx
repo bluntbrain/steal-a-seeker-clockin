@@ -18,7 +18,7 @@ export default function MissionIntro({lesson,onPlay,onBack,busy=false,error}:{le
   {/* A Modal owns a separate native window: measure its insets, not the screen behind it. */}
   <SafeAreaProvider style={s.screen}><SafeAreaView edges={['top','bottom','left','right']} style={s.safe}>
    <View style={s.shell}>
-    <View style={s.top}><Pressable accessibilityRole="button" accessibilityLabel="Back from mission tip" disabled={busy} onPress={onBack} style={s.smallButton}><Text style={s.smallText}>‹ Back</Text></Pressable><Text style={s.kicker}>{lesson.kicker}</Text><Pressable accessibilityRole="button" accessibilityLabel="Skip tip and start mission" disabled={busy} hapticCue="start" onPress={onPlay} style={s.smallButton}><Text style={s.smallText}>Skip ›</Text></Pressable></View>
+    <View style={s.top}><Pressable accessibilityRole="button" accessibilityLabel="Back from mission tip" disabled={busy} onPress={onBack} style={s.smallButton}><Text style={s.smallText}>‹ Back</Text></Pressable><Text style={s.kicker}>{lesson.kicker}</Text><Pressable accessibilityRole="button" accessibilityLabel="Skip tip and start mission" disabled={busy} hapticCue="start" spinner onPress={onPlay} style={s.smallButton}><Text style={s.smallText}>Skip ›</Text></Pressable></View>
     <ScrollView testID="mission-intro-scroll" style={s.scroll} contentContainerStyle={[s.content,compact&&{gap:14,paddingTop:6}]} showsVerticalScrollIndicator keyboardShouldPersistTaps="handled">
      <View style={{gap:7}}><Text accessibilityRole="header" style={[s.title,compact&&{fontSize:25,lineHeight:29}]}>{legacy?lesson.title:mechanic==='drone'?'Stop the scout drone':mechanic?lesson.title:'Watch. Then make your move.'}</Text><Text style={s.subtitle}>{legacy?'This published weekly challenge uses its original ranged controls.':mechanic==='drone'?'It does not shoot. It tells the guards where you are.':mechanic?'Watch the threat. Learn how to get past it.':'Tap the floor to move. Tap an enemy to approach and slash.'}</Text></View>
      {legacy?<View style={s.tip}><Text style={s.tipBody}>Tap the floor to move. Tap a guard to approach and shoot. Move behind cover to dodge guard fire. Collect the phone and reach extraction.</Text></View>:mechanic?<MechanicDemo key={lesson.id+mechanic} kind={mechanic} edition={lesson.edition} reduced={settings.reducedEffects} busy={busy}/>:<MissionDemo key={lesson.id} edition={lesson.edition} reduced={settings.reducedEffects} busy={busy}/>}
@@ -29,7 +29,7 @@ export default function MissionIntro({lesson,onPlay,onBack,busy=false,error}:{le
     {/* Keep the CTA outside scrolling content: long tips and font scaling cannot bury it. */}
     <View testID="mission-intro-footer" style={s.footer}>
      {!!error&&<Text accessibilityLiveRegion="polite" style={s.error}>{error}</Text>}
-     <Pressable testID="mission-intro-start" accessibilityRole="button" accessibilityLabel="Start mission after tip" accessibilityState={{busy,disabled:busy}} hapticCue="start" disabled={busy} onPress={onPlay} style={[s.play,busy&&{opacity:.6}]}><Text style={s.playText}>{busy?'Starting…':lesson.playLabel??'PLAY MISSION  →'}</Text></Pressable>
+     <Pressable testID="mission-intro-start" accessibilityRole="button" accessibilityLabel="Start mission after tip" accessibilityState={{busy,disabled:busy}} hapticCue="start" spinner disabled={busy} onPress={onPlay} style={[s.play,busy&&{opacity:.6}]}><Text style={s.playText}>{busy?'Starting…':lesson.playLabel??'PLAY MISSION  →'}</Text></Pressable>
     </View>
    </View>
   </SafeAreaView></SafeAreaProvider>
