@@ -100,8 +100,8 @@ android {
         manifestPlaceholders = [appLabel: diagnosticBuild ? 'Seeker QA — No Payments' : judgeBuild ? 'Steal a Seeker Judge' : 'Steal a Seeker']
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 41
-        versionName "0.3.38"
+        versionCode 42
+        versionName "0.3.39"
 
         buildConfigField "String", "REACT_NATIVE_RELEASE_LEVEL", "\"${findProperty('reactNativeReleaseLevel') ?: 'stable'}\""
     }
