@@ -70,7 +70,6 @@ export default function GuardLayer({game,alpha,index,clock,reduced=false,droneSp
   <Path path={lurePath} color="#CFE6E4" style="stroke" strokeWidth={.035} opacity={.65}><DashPathEffect intervals={[.12,.12]}/></Path><Path path={cone} color={color} opacity={opacity}/>
   <Path path={cone} color={color} opacity={opacity} style="stroke" strokeWidth={.025}/>
   <Path path={aim} color="#FF886F" style="stroke" strokeWidth={.045}><DashPathEffect intervals={[.13,.08]}/></Path><Group transform={bloodPose} opacity={blood}><Oval x={-.52} y={-.34} width={1.04} height={.68} color="#5A0F12"/><Oval x={-.3} y={-.2} width={.46} height={.3} color="#7A1418"/></Group><Group clip={wallClip}><Group transform={pose}><Group transform={[{scale:artScale}]}>
-   <Oval x={-.42} y={-.39} width={.84} height={.84} color="#06080B" opacity={.65}/>
    {drone?<QuadDrone game={game} index={index} clock={clock} reduced={reduced} sprite={droneSprite}/>:<Image image={boss?bossSprite:armor||kind==='warden'?heavySprite:guardSprite} x={boss||armor||kind==='warden'?-.59:-.52} y={boss||armor||kind==='warden'?-.59:-.52} width={boss||armor||kind==='warden'?1.18:1.04} height={boss||armor||kind==='warden'?1.18:1.04} fit="contain"/>}
    <Circle cx={0} cy={0} r={.43} color="#F2FFDA" opacity={hitFlash}/>
    {armor&&(game.value.definition?.combat?.revision??0)>=10&&<>

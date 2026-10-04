@@ -4,7 +4,7 @@ import {MELEE_FRAMES,meleeFrame} from './melee-presentation';
 import {knifeCombat} from '../game/melee';
 import ActorHealthBars from './ActorHealthBars';
 import React,{memo,useMemo,useEffect} from 'react';
-import {Canvas,Group,Picture,Image,Atlas,Circle,RoundedRect,Oval,Line,Path,Skia,DashPathEffect,useImage,useRSXformBuffer} from '@shopify/react-native-skia';
+import {Canvas,Group,Picture,Image,Atlas,Circle,RoundedRect,Line,Path,Skia,DashPathEffect,useImage,useRSXformBuffer} from '@shopify/react-native-skia';
 import {useAnimatedReaction,useDerivedValue,useSharedValue,type SharedValue} from 'react-native-reanimated';
 import {makeWarehouse} from '../game/art';
 import {currentWallStyle} from '../art/wall-style';
@@ -84,7 +84,6 @@ export default memo(function GameCanvas({camera,size,height=size*20/12,input,gam
   'worklet';
   if(knifeMode){const f=TOP_FRAMES[topFrame.value]!,scale=1.5/f.width,rot=heading.value+Math.PI/2,a=Math.cos(rot)*scale,b=Math.sin(rot)*scale,ax=f.width/2,ay=f.height/2;transform.set(a,b,x.value-ax*a+ay*b,y.value-ay*a-ax*b);return;}
   const f=actorFrames[frame.value]!;const scale=1.62/f.height;const bob=reduced||attack.value>=0?0:Math.hypot(game.value.vx,game.value.vy)>.1?Math.abs(Math.sin(game.value.walked*11))*.045:Math.sin(clock.value*2)*.012;transform.set(scale,0,x.value-f.width*scale/2,y.value-f.height*scale+.12-bob);});
- const shadow=useDerivedValue(()=>knifeMode?{x:x.value-.4,y:y.value-.34,width:.8,height:.8}:{x:x.value-.36,y:y.value-.02,width:.72,height:.22});
  // Only the idle carry frame has a baked-in phone; running keeps its full leg cycle.
  const carry=useDerivedValue(()=>(knifeMode?courierNeedsPhone(game.value.carrying,topFrame.value):game.value.carrying)?1:0);
  const target=useDerivedValue(()=>game.value.carrying||game.value.delivered>=(level.targets?.length??1)?0:1);
@@ -136,7 +135,6 @@ export default memo(function GameCanvas({camera,size,height=size*20/12,input,gam
    <Circle cx={x} cy={y} r={.96} color="#FF4A3D" style="stroke" strokeWidth={.025} opacity={spotted}/>
 
    <Group clip={courierClip}>
-   <Oval rect={shadow} color="#070c0d" opacity={.7}/>
    {sprite && <Atlas image={sprite} sprites={sprites} transforms={transforms}/>}
    <Group transform={carriedTransform} opacity={carry}>
     <Atlas image={phones} sprites={phoneSprites} transforms={carryTransforms}/>
