@@ -121,3 +121,11 @@ The user asked to remove weekly missions completely and rank players by the poin
 Removed: the league, daily and paid routes, services and workers; the weekly board, daily and paid panels and submissions; the weekly contract generator and compatibility list; the related tests and scripts. Kept: the return service for the campaign rebate, the 18 generated rooms (`shared/weekly-layouts.ts`) that feed the level generator, the frozen weekly fixtures as archived-engine regression data (`tests/engine-compatibility.test.ts`).
 
 Added: `GET /campaign/leaderboard` returns the top fifty by total points plus the caller's own row; the pass grants its bundle once on payment and on a free promotion, and existing pass owners receive it at boot; the Ghost Signal outfit is owned through the pass and equippable like any outfit; a campaign board on the Leaderboard tab with a share button to the level card.
+
+## 9. Smoothness pass after Codex's art and leaderboard work (4 October, late)
+
+Pulled Codex's commits (illustrated level map, courier sheet v2 with walking while carrying, footstep onset, .skr names on the board, code 39). Typecheck, rules check and 384 tests passed on the pulled tree. The web build measured 120 fps with a p95 interval of 8.6 ms on the boss level, so the device is the real question; without a Seeker the changes below are structural.
+
+Changes: the level map scenes are plain images with the zone crossfade baked into the art (no Skia surface inside the scroll view, which is where Android scroll stutter comes from); the UI thread's HUD snapshot no longer carries the level definition or the guards' routes and planner memory (the JS side reattaches the level it holds); frame samples use a fixed ring; the relay comparison copies nothing per step; the follow camera allocates nothing while the courier stands still. Verified in the browser: the HUD still names the level (`campaign:15`), guard routes are empty in the snapshot, metrics still report.
+
+Still open: a physical device run with Perfetto or gfxinfo, Codex's P1 items (first-tap acknowledgement on the next frame, cached walkable grids in navigation, which needs a rules revision), and the AI livestream proposal, which is not implemented.
