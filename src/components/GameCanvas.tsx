@@ -17,7 +17,7 @@ import {editionIndex} from '../game/collection';
 import phoneAtlas from '../../assets/world-v3/phones.frames.json';
 import frames from '../../assets/costumes-v4/frames.json';
 import {costumeAtlas,topdownAtlas} from './costumeAssets';
-import topdownFrames from '../../assets/courier-topdown-v1/frames.json';
+import topdownFrames from '../../assets/courier-topdown-v2/frames.json';
 import {costumeFrame} from '../../shared/costumes';
 import GuardLayer from './GuardLayer';
 import {GUARD_SPRITES,BOSS_SPRITES} from './enemy-presentation';
