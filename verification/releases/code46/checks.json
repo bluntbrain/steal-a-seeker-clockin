@@ -66,5 +66,6 @@
     "apiUrl": "https://seeker-api-production-41b3.up.railway.app",
     "cluster": "solana:mainnet",
     "identityUri": "https://stealaseeker.bluntbrain.com"
-  }
+  },
+  "emulatorUpgrade": "Unverified: adb install -r did not finish in approximately two minutes; stopped client; last package readback code45"
 }
