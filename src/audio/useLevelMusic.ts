@@ -1,15 +1,14 @@
 import {useEffect} from 'react';
 import {useGameAudio} from './useGameAudio';
-import {musicIndex} from './music';
+import {musicIndex,musicGain} from './music';
 const tracks=[
- require('../../assets/music-v1/02-blind-corner.m4a'),
- require('../../assets/music-v1/03-crossfire.m4a'),require('../../assets/music-v1/04-loading-lockdown.m4a'),
- require('../../assets/music-v1/10-vault-window.m4a'),require('../../assets/music-v1/12-last-seeker.m4a'),
+ require('../../assets/music-spy-v2/01-vault-infiltration.m4a'),
+ require('../../assets/music-spy-v2/02-midnight-pursuit.m4a'),
 ];
 /** One player at a time. Weekly maps reuse their authored level's track. */
 export function useLevelMusic(levelNumber:number,enabled:boolean,volume:number,alarm:boolean){
  const source=tracks[musicIndex(levelNumber)]!,player=useGameAudio(source);
- const target=enabled?volume*(alarm?.48:.42):0;
+ const target=enabled?musicGain(volume,alarm):0;
  useEffect(()=>{
   player.loop=true;player.volume=0;
   if(!enabled){player.pause();return;}

@@ -3,7 +3,7 @@ import LaunchSplash from './components/LaunchSplash';
 import {exitWindowSeconds} from './controls/exit-window';
 import TutorialHand from './components/TutorialHand';
 import MissionIntro from './components/MissionIntro';
-import MissionChaseLoader,{warmMissionChaseSprites} from './components/MissionChaseLoader';
+import MissionChaseLoader,{warmMissionLoader} from './components/MissionChaseLoader';
 import {campaignLesson,publishedLesson} from './onboarding/mission-lessons';
 import {authoredEntry,campaignEntries,nextEntry,type CampaignEntry} from './campaign/levels';
 import {publishedLevels} from './campaign/client';
@@ -67,7 +67,6 @@ import {alarmSpeedPercent,decoyMessage} from './game/feedback';
 import {initialState,idleInput,step,nearPhone,nearSwitch,exitOpen,stateLevel,type GameState} from './game/simulation';
 import {LEVEL,getLevel,TUNING,MISSIONS,type MissionId,type Point} from './game/level';
 type Stats={fps:number;p95:number;frames:number;slow:number};
-const LOADER_MIN_MS=2000;
 const zeroStats={fps:0,p95:0,frames:0,slow:0};
 const time=(n:number)=>`${Math.floor(n/60).toString().padStart(2,'0')}:${Math.floor(n%60).toString().padStart(2,'0')}`;
 // memoised so hud publishes do not re-render the hidden overlay panels
@@ -77,7 +76,7 @@ function relaySum(timers:readonly number[]){'worklet';let total=0;for(let i=0;i<
 function anyHunting(s:GameState){'worklet';for(let i=0;i<s.guards.length;i++){const g=s.guards[i]!;if(g.active&&g.hp>0&&g.heist?.hunting)return true;}return false;}
 function countSuspicious(s:GameState){'worklet';let n=0;for(let i=0;i<s.guards.length;i++){const g=s.guards[i]!;if(g.active&&g.hp>0&&(g.heist as {suspicious?:boolean}|undefined)?.suspicious)n++;}return n;}
 const RewardsPanelMemo=React.memo(RewardsPanel),WalletPanelMemo=React.memo(WalletPanel),HideoutMemo=React.memo(Hideout),SettingsPanelMemo=React.memo(SettingsPanel);
-export default function GameScreen(){useEffect(()=>{void warmMissionChaseSprites();},[]);return <GestureHandlerRootView style={{flex:1}}><SafeAreaProvider><LaunchSplash><WalletProvider><AccountProvider><SettingsProvider><EconomyProvider><CampaignGate><WalletGame/></CampaignGate></EconomyProvider></SettingsProvider></AccountProvider></WalletProvider></LaunchSplash></SafeAreaProvider></GestureHandlerRootView>;}
+export default function GameScreen(){useEffect(()=>{void warmMissionLoader();},[]);return <GestureHandlerRootView style={{flex:1}}><SafeAreaProvider><LaunchSplash><WalletProvider><AccountProvider><SettingsProvider><EconomyProvider><CampaignGate><WalletGame/></CampaignGate></EconomyProvider></SettingsProvider></AccountProvider></WalletProvider></LaunchSplash></SafeAreaProvider></GestureHandlerRootView>;}
 function WalletGame(){
  const account=useAccount();
  // connecting a guest must preserve the win; switching away from a wallet still resets its game
@@ -100,7 +99,7 @@ export function Game({onSnapshot}:{onSnapshot?:(state:GameState)=>void}){
  const [missionMapRequest,setMissionMapRequest]=useState(0);
  const [walletOpen,setWalletOpen]=useState(false),[mapOpen,setMapOpen]=useState(false),[hideoutOpen,setHideoutOpen]=useState(homeFirst),[settingsOpen,setSettingsOpen]=useState(false);
  const initial=useMemo(()=>initialState(startMission,startEntry.definition),[]);
- const sceneEpoch=useRef(0),[sceneVersion,setSceneVersion]=useState(0),[sceneLoading,setSceneLoading]=useState(true),[sceneError,setSceneError]=useState('');
+ const sceneEpoch=useRef(0),[sceneVersion,setSceneVersion]=useState(0),[sceneLoading,setSceneLoading]=useState(true),[sceneError,setSceneError]=useState(''),[sceneProgress,setSceneProgress]=useState(0);
  const [bossEntrance,setBossEntrance]=useState(!!startEntry.boss);
  const finishBossEntrance=useCallback(()=>setBossEntrance(false),[]);
  const sceneReady=useSharedValue(false),simulationEpoch=useSharedValue(0),focusProgress=useSharedValue(1);
@@ -251,7 +250,7 @@ export function Game({onSnapshot}:{onSnapshot?:(state:GameState)=>void}){
   input.value=idleInput();game.modify(s=>{'worklet';s.vx=0;s.vy=0;s.px=s.x;s.py=s.y;s.dashSeen=0;s.toolSeen=0;return s;});
   setPaused(value);
  },[suspended,input,game,pendingTap,previousTap]);
- const restart=useCallback((next:CampaignEntry=entryRef.current)=>{if(trial.active){trial.finish();return;}sceneReady.value=false;suspended.value=true;pendingTap.value=null;previousTap.value=null;tapElapsed.value=TAP_INTERVAL_MS;simulationEpoch.value=++sceneEpoch.current;setSceneVersion(sceneEpoch.current);setSceneLoading(true);setBossEntrance(!!next.boss);setSceneError('');recording.value=[];setCompletedReplay(undefined);rewardEpoch.current++;setEarnedNotice('');setCreditReward({amount:null});setRewardClaimed(false);setAutoClaim(false);setRewardRetry(0);connectClaimPending.current=false;recorded.current=false;setMission(next.mission);setEntry(next);levelRef.current=next.definition;const fresh=(next.key==='practice'?guide.start('practice'):null)??initialState(next.mission,combatMode?next.definition:undefined);game.value=fresh;input.value=idleInput();accumulator.value=0;alpha.value=0;clock.value=0;sampleIndex.value=0;sampleCount.value=0;frameTotal.value=0;slowTotal.value=0;reportClock.value=0;hudClock.value=0;setHud(fresh);latest.current=fresh;suspended.value=false;setPaused(false);setStats(zeroStats);},[game,input,accumulator,alpha,clock,samples,frameTotal,slowTotal,reportClock,hudClock,suspended,recording,trial,guide.start,combatMode,sceneReady,pendingTap,previousTap,tapElapsed,simulationEpoch]);
+ const restart=useCallback((next:CampaignEntry=entryRef.current)=>{if(trial.active){trial.finish();return;}sceneReady.value=false;suspended.value=true;pendingTap.value=null;previousTap.value=null;tapElapsed.value=TAP_INTERVAL_MS;simulationEpoch.value=++sceneEpoch.current;setSceneVersion(sceneEpoch.current);setSceneLoading(true);setSceneProgress(0);setBossEntrance(!!next.boss);setSceneError('');recording.value=[];setCompletedReplay(undefined);rewardEpoch.current++;setEarnedNotice('');setCreditReward({amount:null});setRewardClaimed(false);setAutoClaim(false);setRewardRetry(0);connectClaimPending.current=false;recorded.current=false;setMission(next.mission);setEntry(next);levelRef.current=next.definition;const fresh=(next.key==='practice'?guide.start('practice'):null)??initialState(next.mission,combatMode?next.definition:undefined);game.value=fresh;input.value=idleInput();accumulator.value=0;alpha.value=0;clock.value=0;sampleIndex.value=0;sampleCount.value=0;frameTotal.value=0;slowTotal.value=0;reportClock.value=0;hudClock.value=0;setHud(fresh);latest.current=fresh;suspended.value=false;setPaused(false);setStats(zeroStats);},[game,input,accumulator,alpha,clock,samples,frameTotal,slowTotal,reportClock,hudClock,suspended,recording,trial,guide.start,combatMode,sceneReady,pendingTap,previousTap,tapElapsed,simulationEpoch]);
  // Explicit exits must open the map even when Hideout remembers a briefing or store tab.
  const backToMissions=()=>{pause(true);economy.setTab('map');setMissionMapRequest(n=>n+1);setHideoutOpen(true);};
  const introduceMission=(next:CampaignEntry)=>{if(!next.playable)return;if(testMission){restart(next);return;}pause(true);setHideoutOpen(false);setIntroMission(next);};
@@ -276,22 +275,19 @@ export function Game({onSnapshot}:{onSnapshot?:(state:GameState)=>void}){
   if(isDuplicateTap(previousTap.value,tap))return;
   previousTap.value=tap;pendingTap.value=tap;
  }),[size,camera,suspended,sceneReady,game,pendingTap,previousTap]);
- // the loader stays up at least LOADER_MIN_MS so a fast scene load does not flash it
- const loadedScene=useRef(-1),loaderShownAt=useRef(Date.now()),loaderTimer=useRef<ReturnType<typeof setTimeout>|null>(null);
- useEffect(()=>{if(sceneLoading)loaderShownAt.current=Date.now();},[sceneLoading,sceneVersion]);
- useEffect(()=>()=>{if(loaderTimer.current)clearTimeout(loaderTimer.current);},[]);
+ const loadedScene=useRef(-1);
+ const reportSceneProgress=useCallback((progress:number)=>{
+  if(sceneEpoch.current===sceneVersion)setSceneProgress(previous=>Math.max(previous,progress));
+ },[sceneVersion]);
  const finishSceneLoading=useCallback((expected:number)=>{
   if(sceneEpoch.current!==expected)return;
-  const wait=LOADER_MIN_MS-(Date.now()-loaderShownAt.current);
-  if(loaderTimer.current)clearTimeout(loaderTimer.current);
-  if(wait>0){loaderTimer.current=setTimeout(()=>finishSceneLoading(expected),wait);return;}
-  loaderTimer.current=null;setSceneError('');setSceneLoading(false);
+  setSceneError('');setSceneLoading(false);
  },[]);
  // Release simulation only after React has removed the loading overlay.
  useEffect(()=>{if(!sceneLoading&&!bossEntrance)sceneReady.value=true;},[sceneLoading,bossEntrance,sceneReady]);
  const sceneLoaded=useCallback(()=>{
   const expected=sceneVersion;if(sceneEpoch.current!==expected||loadedScene.current===expected)return;
-  loadedScene.current=expected;setSceneError('');
+  loadedScene.current=expected;setSceneError('');setSceneProgress(1);
   const reduced=!!settingsRef.current.reducedEffects;
   runOnUI(()=>{'worklet';
    if(simulationEpoch.value!==expected||sceneReady.value)return;
@@ -351,7 +347,7 @@ export function Game({onSnapshot}:{onSnapshot?:(state:GameState)=>void}){
    {!showGameplayHeader&&renderGameSurface&&!sceneLoading&&combatMode&&<View testID="gameplay-kills" pointerEvents="none" accessibilityLabel={`Guards down ${downed} of ${hud.guards.length}`} style={s.killPill}><ActionIcon kind="target" color="#86EFAC"/><Text style={s.killText}>{downed}<Text style={{color:'#7FA393'}}>/{hud.guards.length}</Text></Text></View>}
    {!showGameplayHeader&&renderGameSurface&&!sceneLoading&&<Pressable testID="gameplay-pause" accessibilityRole="button" accessibilityLabel="Pause game" onPress={()=>pause(true)} style={s.floatingPause}><Text style={s.iconText}>Ⅱ</Text></Pressable>}
    <View style={{width:size+2,height:boardHeight+2}}><GestureDetector gesture={combatMode?tapBoard:noTap}><View testID="game-board" style={[s.board,{width:size+2,height:boardHeight+2}]}>
-    {renderGameSurface&&<GameCanvas key={sceneVersion} onReady={sceneLoaded} onLoadError={sceneFailed} camera={camera} size={size} height={boardHeight} input={input} game={game} alpha={alpha} clock={clock} level={level} appearance={appearance}/>}
+    {renderGameSurface&&<GameCanvas key={sceneVersion} onReady={sceneLoaded} onProgress={reportSceneProgress} onLoadError={sceneFailed} camera={camera} size={size} height={boardHeight} input={input} game={game} alpha={alpha} clock={clock} level={level} appearance={appearance}/>}
     {renderGameSurface&&!settings.reducedEffects&&<MissionFocus progress={focusProgress} game={game} camera={camera} width={size} height={boardHeight}/>}
     <Animated.View pointerEvents="none" testID="camera-world-overlays" style={[{position:'absolute',left:0,top:0,width:size,height:boardHeight},worldOverlayStyle]}>
     {combatMode&&<SecurityEntrances level={level} state={hud} size={size} reduced={!!settings.reducedEffects}/>}
@@ -401,8 +397,8 @@ export function Game({onSnapshot}:{onSnapshot?:(state:GameState)=>void}){
  {claimVisible&&<CreditClaim requiresWallet={!account.preview&&!account.wallet&&guide.retries===0} connecting={connectingClaim} onConnect={connectToClaim} autoClaim={autoClaim} reward={creditReward} balance={economy.balance} onRetry={creditReward.amount===null?(account.preview?saveLocalReward:()=>{rewardResolved(null);setRewardRetry(n=>n+1);}):undefined} stars={starsFor(hud)} mission={level.title} onDone={()=>setRewardClaimed(true)}/>}
  {introMission&&<MissionIntro lesson={introMission.number>12?publishedLesson(introMission):campaignLesson(introMission.mission)} onBack={()=>{setIntroMission(null);setHideoutOpen(true);}} onPlay={()=>{const next=introMission;setIntroMission(null);restart(next);}}/>}
  {bossEntrance&&entry.boss&&!sceneLoading&&renderGameSurface&&!paused&&<BossEntrance key={sceneVersion} boss={entry.boss} reduced={!!settings.reducedEffects} onDone={finishBossEntrance}/>}
- {sceneLoading&&renderGameSurface&&<MissionChaseLoader reduced={!!settings.reducedEffects} error={sceneError}
-  onRetry={()=>{sceneReady.value=false;simulationEpoch.value=++sceneEpoch.current;setSceneVersion(sceneEpoch.current);setSceneError('');}}
+ {sceneLoading&&renderGameSurface&&<MissionChaseLoader progress={sceneProgress} reduced={!!settings.reducedEffects} error={sceneError}
+  onRetry={()=>{sceneReady.value=false;simulationEpoch.value=++sceneEpoch.current;setSceneVersion(sceneEpoch.current);setSceneProgress(0);setSceneError('');}}
   onExit={backToMissions}/>}
  {finaleVisible&&<CampaignConfetti reduced={!!settings.reducedEffects}/>}
  <Animated.View pointerEvents="none" testID="alarm-wash" style={[StyleSheet.absoluteFill,{backgroundColor:'#FF253E'},alarmWash]}/><Animated.View pointerEvents="none" testID="alarm-border" style={[StyleSheet.absoluteFill,{borderWidth:7,borderColor:'#FF4255'},alarmBorder]}/><View pointerEvents="none" style={StyleSheet.absoluteFill}><Animated.Image testID="damage-glow" source={require('../assets/ui/damage-vignette.png')} resizeMode="stretch" style={[StyleSheet.absoluteFill,{width:'100%',height:'100%'},damageStyle]}/></View></SafeAreaView>;
