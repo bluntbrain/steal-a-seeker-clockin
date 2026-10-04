@@ -269,7 +269,7 @@ export function Game({onSnapshot}:{onSnapshot?:(state:GameState)=>void}){
   if(isDuplicateTap(previousTap.value,tap))return;
   previousTap.value=tap;pendingTap.value=tap;
  }),[size,camera,suspended,sceneReady,game,pendingTap,previousTap]);
- // Finish the existing intro under the chase artwork; do not add a separate loading timer.
+ // Finish the existing intro under the courier artwork; do not add a separate loading timer.
  const loadedScene=useRef(-1);
  const finishSceneLoading=useCallback((expected:number)=>{
   if(sceneEpoch.current!==expected)return;
@@ -387,7 +387,7 @@ export function Game({onSnapshot}:{onSnapshot?:(state:GameState)=>void}){
  {!testMission&&!trial.active&&!guide.active&&guide.retries===0&&hud.status==='won'&&completedReplay&&!paused&&<View style={{position:'absolute',bottom:insets.bottom+3,zIndex:46}}><CampaignSubmission state={hud} replay={completedReplay} target={entry.number>12?{level:entry.number}:{mission:entry.mission}} quiet retrySignal={rewardRetry} onReward={account.preview?undefined:rewardResolved}/></View>}
  {claimVisible&&<CreditClaim requiresWallet={!account.preview&&!account.wallet&&guide.retries===0} connecting={connectingClaim} onConnect={connectToClaim} autoClaim={autoClaim} reward={creditReward} balance={economy.balance} onRetry={creditReward.amount===null?(account.preview?saveLocalReward:()=>{rewardResolved(null);setRewardRetry(n=>n+1);}):undefined} stars={starsFor(hud)} mission={level.title} onDone={()=>setRewardClaimed(true)}/>}
  {introMission&&<MissionIntro lesson={introMission.number>12?publishedLesson(introMission):campaignLesson(introMission.mission)} onBack={()=>{setIntroMission(null);setHideoutOpen(true);}} onPlay={()=>{const next=introMission;setIntroMission(null);restart(next);}}/>}
- {sceneLoading&&renderGameSurface&&<MissionChaseLoader number={entry.number} title={level.title} boss={!!entry.boss} reduced={!!settings.reducedEffects} error={sceneError}
+ {sceneLoading&&renderGameSurface&&<MissionChaseLoader reduced={!!settings.reducedEffects} error={sceneError}
   onRetry={()=>{sceneReady.value=false;simulationEpoch.value=++sceneEpoch.current;setSceneVersion(sceneEpoch.current);setSceneError('');}}
   onExit={backToMissions}/>}
  {finaleVisible&&<CampaignConfetti reduced={!!settings.reducedEffects}/>}

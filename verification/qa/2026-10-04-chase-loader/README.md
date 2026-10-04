@@ -27,3 +27,9 @@
 | Actual network-failure retry | Not tested | Error UI tested via fixture; no forced asset network failure |
 
 Local screenshot: `screenshots/mission-restart.png`. Screenshot files remain local per repository QA policy.
+
+## Minimal revision requested after review
+
+The final loader now shows only one 120 px running courier and “Loading mission…”, centered on the dark background. The crew, city, road, glow, level heading, tagline and progress bar are removed. Only the 62,826-byte courier strip is imported/preloaded; the other generated assets remain archived in the repository. Reduced motion, failure actions and readiness behavior are preserved.
+
+The preview is clean by default; add `&controls=1` for QA controls. Typecheck and web export passed again. Browser inspection confirmed one courier and one loading text, with no additional preview UI.
