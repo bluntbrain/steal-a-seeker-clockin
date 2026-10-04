@@ -836,3 +836,13 @@ test('published campaign levels verify against the frozen row, pay the published
  assert.equal(await seedCampaignLevels(pool,()=>{}),1,'level 14 has no run and is replaced; level 15 was claimed and stays');
  assert.equal((await campaign.levels.get(14))!.rulesHash,plain.rulesHash);assert.equal((await campaign.levels.get(15))!.rulesHash,'0000');
 });
+
+test('the code 36 build keeps earning campaign credits through the archived revision 16 bundle after revision 17 ships',async()=>{
+ const {CampaignService}=await import('./campaign-service'),frozen=(await import('../tests/fixtures/campaign-revision16.json')).default,{solveCombat}=await import('../scripts/qa-combat'),{combatLevel}=await import('../src/game/combat-levels'),rules=(await import('../shared/rules-manifest.json')).default;
+ assert.notEqual(frozen.rulesHash,rules.rulesHash);
+ const u=await login(),campaign=new CampaignService(pool,new ReturnService(pool,undefined,{mint:service.config.mint,treasury:service.config.recipient,source:service.config.destination,decimals:6}));
+ const level=frozen.levels[1] as import('../src/game/level').LevelDefinition,win=solveCombat(level);assert(win);
+ const old=await campaign.submit(u.wallet,{mission:level.mission},frozen.rulesHash,win.replay);assert(old.creditAward.credits>=50&&old.creditAward.credits<=60,'the old hash still pays its thresholds');
+ const current=solveCombat(combatLevel(level.mission));assert(current);
+ const updated=await campaign.submit(u.wallet,{mission:level.mission},rules.rulesHash,current.replay);assert.equal(updated.creditAward.credits,0,'the same mission is not paid twice across the update');
+});
