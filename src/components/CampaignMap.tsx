@@ -1,6 +1,5 @@
-// Illustrated journey; virtualized rows share continuous district artwork and a legible route.
-// the art is plain images: a skia canvas per row would put several gpu surfaces inside the scroll view and stutter on
-// android. the crossfade into the zone above is baked into the top of each image at pack time (scripts/pack-world-art.mjs).
+// Static artwork and mission nodes share the same continuous Bezier road.
+// FlatList keeps GPU surfaces and decoded images bounded while scrolling.
 import {useHaptics} from '../feedback/useHaptics';
 import React,{useCallback,useMemo} from 'react';
 import {FlatList,Image,Pressable,StyleSheet,Text,View} from 'react-native';
@@ -11,9 +10,7 @@ import {bossPortrait} from './costumeAssets';
 import {campaignMapLayout,type MapScene} from './campaignMapLayout';
 
 const NODE=40,BOSS_NODE=52;
-const art={warehouse:require('../../assets/campaign-world-v2/warehouse.webp'),rooftops:require('../../assets/campaign-world-v2/rooftops.webp'),powerworks:require('../../assets/campaign-world-v2/powerworks.webp')};
-// the topmost scene has no zone above it, so it draws the opaque copy instead of fading into the background
-const artFull={warehouse:require('../../assets/campaign-world-v2/warehouse-full.webp'),rooftops:require('../../assets/campaign-world-v2/rooftops-full.webp'),powerworks:require('../../assets/campaign-world-v2/powerworks-full.webp')};
+const art={warehouse:require('../../assets/campaign-world-v3/warehouse.webp'),rooftops:require('../../assets/campaign-world-v3/rooftops.webp'),powerworks:require('../../assets/campaign-world-v3/powerworks.webp')};
 export default function CampaignMap({entries,progress,current,onSelect}:{entries:readonly CampaignEntry[];progress:Progress;current:CampaignEntry;onSelect:(entry:CampaignEntry)=>void}){
  const haptic=useHaptics();
  const [{width,height},setSize]=React.useState({width:0,height:0});
@@ -28,10 +25,8 @@ export default function CampaignMap({entries,progress,current,onSelect}:{entries
  },[width,height,entries.length,scenes,currentScene,current.key]);
  const getItemLayout=useCallback((_:unknown,index:number)=>({length:scenes[index]?.height??0,offset:scenes[index]?.offset??0,index}),[scenes]);
  const render=useCallback(({item}:{item:MapScene})=>{
-  // the row above shows its bottom strip under this image's faded top, which keeps the road continuous
   return <View style={{height:item.height,overflow:'hidden'}}>
-   {item.previousZone&&<Image accessible={false} source={art[item.previousZone]} resizeMode="contain" style={{position:'absolute',left:0,top:-(item.imageHeight-item.fade),width,height:item.imageHeight}}/>}
-   <Image accessible={false} source={item.previousZone?art[item.zone]:artFull[item.zone]} resizeMode="contain" style={{position:'absolute',left:0,top:0,width,height:item.imageHeight}}/>
+   <Image accessible={false} source={art[item.zone]} resizeMode="contain" style={{position:'absolute',left:0,top:0,width,height:item.imageHeight}}/>
    {item.nodes.map(({entry,index,x,y})=>{
     const open=entryUnlocked(progress,entries,index)&&entry.playable,best=progress.missions[entry.key],isCurrent=entry.key===current.key,boss=entry.boss,size=boss?BOSS_NODE:NODE;
     return <Pressable key={entry.key} testID={`mission-node-${entry.number}`} accessibilityRole="button" accessibilityLabel={`Level ${entry.number}: ${boss?`${BOSS_NAMES[boss]} boss fight`:entry.title}${open?'':'. Locked'}`} accessibilityState={{selected:isCurrent}} onPress={()=>{haptic(open?'select':'error');onSelect(entry);}} style={({pressed})=>[s.target,{left:x-30,top:y-size/2-4,opacity:pressed?.7:1}]}>
@@ -50,7 +45,7 @@ export default function CampaignMap({entries,progress,current,onSelect}:{entries
  </View>;
 }
 const s=StyleSheet.create({
- list:{flex:1,minHeight:0,overflow:'hidden',backgroundColor:'#152B26'},
+ list:{flex:1,minHeight:0,overflow:'hidden',backgroundColor:'#16352F'},
  target:{position:'absolute',width:60,alignItems:'center',paddingTop:4},
  node:{borderWidth:2,borderColor:'#A0BCAF',backgroundColor:'#18342E',alignItems:'center',justifyContent:'center',overflow:'hidden'},
  open:{borderColor:'#B7E5D4',backgroundColor:'#19352F',shadowColor:'#9BE8CE',shadowRadius:7,shadowOpacity:.55,shadowOffset:{width:0,height:0}},
