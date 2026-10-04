@@ -11,7 +11,8 @@ import campaign16 from './fixtures/campaign-revision16.json';
 import type {LevelDefinition} from '../src/game/level';
 import engine from '../shared/weekly-engine.json';
 import rules from '../shared/rules-manifest.json';
-import {isWeeklyCompatible,LEGACY_WEEKLY_ENGINES,PRESERVED_REVISION_3_ENGINE,type WeeklyCompatibility} from '../shared/weekly-compatibility';
+// frozen weekly manifests stay as fixtures of published rooms whose archived verifiers must keep agreeing with the live source
+type WeeklyCompatibility={rulesHash:string;engineHash?:string;contracts:{name:string;level:LevelDefinition}[]};
 import {currentWeeklyEngine} from '../server/rules-version';
 import {checkRuleBundle} from '../server/rule-bundle';
 import {verifyReplay} from '../server/replay';
@@ -21,23 +22,11 @@ import {initialState,idleInput} from '../src/game/simulation';
 import {recordStep} from '../src/game/recording';
 
 const manifest=frozen as unknown as WeeklyCompatibility;
-test('campaign-only rules changes do not invalidate a supported weekly engine',async()=>{
+test('the engine fingerprint matches the hashed rule files',async()=>{
  assert.deepEqual(await currentWeeklyEngine(),engine);
  assert.notEqual(manifest.rulesHash,rules.rulesHash);
- assert(isWeeklyCompatible(manifest));
- assert(isWeeklyCompatible({...manifest,rulesHash:'different-campaign-map-version',engineHash:engine.engineHash}));
- assert(!isWeeklyCompatible({...manifest,rulesHash:'unknown-old-version'}));
- assert(!isWeeklyCompatible({...manifest,engineHash:'unknown-engine'}));
-});
-test('unknown weekly mechanics fail closed even when the engine fingerprint matches',()=>{
- const copy=JSON.parse(JSON.stringify(manifest));copy.contracts[0].level.combat.revision=999;
- assert(!isWeeklyCompatible({...copy,engineHash:engine.engineHash}));
- copy.contracts[0].level.combat.revision=5;
- assert(!isWeeklyCompatible(copy)); // Legacy proof covers revision 3 only.
- assert(!isWeeklyCompatible({...manifest,contracts:manifest.contracts.slice(0,2)}));
 });
 test('the frozen active week has identical winning and delayed outcomes in its archived verifier',async()=>{
- assert.equal(LEGACY_WEEKLY_ENGINES[manifest.rulesHash],PRESERVED_REVISION_3_ENGINE,'Preserved engine must have an archived verifier.');
  const archived=await import((await checkRuleBundle(manifest.rulesHash)).href);
  for(const c of manifest.contracts){
   const win=solveCombat(c.level);assert(win,`${c.name}: no winning input sequence`);
@@ -52,9 +41,8 @@ test('the frozen active week has identical winning and delayed outcomes in its a
  }
 });
 
-test('scout encounters preserve revision-6 weekly wins and delayed replay outcomes',async()=>{
+test('scout encounters preserve revision-6 published wins and delayed replay outcomes',async()=>{
  const week=frozen6 as unknown as WeeklyCompatibility;
- assert(isWeeklyCompatible(week));
  const archived=await import((await checkRuleBundle(week.rulesHash)).href);
  for(const c of week.contracts){
   const win=solveCombat(c.level);assert(win);
@@ -64,8 +52,6 @@ test('scout encounters preserve revision-6 weekly wins and delayed replay outcom
    assert.deepEqual(verifyReplay(c.level.mission,replay,c.level),archived.verifyReplay(c.level.mission,replay,c.level));
   }
  }
- const unsupported=JSON.parse(JSON.stringify(week));unsupported.contracts[0].level.combat.revision=7;
- assert(!isWeeklyCompatible(unsupported),'An old engine must not accept the new drone mechanics');
 });
 
 test('revision 7 campaigns retain their archived verifier outcomes after roaming update',async()=>{
@@ -99,9 +85,6 @@ test('revision 9 campaign replays retain their published results after heist enc
    assert.deepEqual(verifyReplay(level.mission,replay,level),archived.verifyReplay(level.mission,replay,level),`${level.title}: delay ${delay}`);
   }
  }
- const oldWeek=JSON.parse(JSON.stringify(manifest));oldWeek.rulesHash=campaign9.rulesHash;delete oldWeek.engineHash;
- assert(isWeeklyCompatible(oldWeek));oldWeek.contracts[0].level.combat.revision=10;
- assert(!isWeeklyCompatible(oldWeek),'The old engine cannot accept new heist mechanics');
 });
 
 test('revision 10 outcomes and weekly eligibility survive the revision 11 pressure increase',async()=>{
@@ -114,10 +97,6 @@ test('revision 10 outcomes and weekly eligibility survive the revision 11 pressu
    assert.deepEqual(verifyReplay(level.mission,replay,level),archived.verifyReplay(level.mission,replay,level),`${level.title}: delay ${delay}`);
   }
  }
- const week=JSON.parse(JSON.stringify(manifest));week.rulesHash=campaign10.rulesHash;week.engineHash=campaign10.engineHash;
- week.contracts[0].level=campaign10.levels[1];assert(isWeeklyCompatible(week));
- week.contracts[0].level={...week.contracts[0].level,combat:{version:2,revision:11}};
- assert(!isWeeklyCompatible(week),'New pressure rules cannot run under the previous engine');
 });
 
 test('shipped revision 11 replays and frozen weeks keep their original movement',async()=>{
@@ -130,11 +109,6 @@ test('shipped revision 11 replays and frozen weeks keep their original movement'
    assert.deepEqual(verifyReplay(level.mission,replay,level),archived.verifyReplay(level.mission,replay,level),`${level.title}: delay ${delay}`);
   }
  }
- const week=JSON.parse(JSON.stringify(manifest));week.rulesHash=campaign11.rulesHash;week.engineHash=campaign11.engineHash;
- week.contracts[0].level=campaign11.levels[1];assert(isWeeklyCompatible(week));
- delete week.engineHash;assert(isWeeklyCompatible(week));
- week.contracts[0].level={...week.contracts[0].level,combat:{version:2,revision:12}};
- assert(!isWeeklyCompatible(week),'Slower pursuit must not alter a week pinned to the faster engine');
 });
 
 test('revision 12 movement stays unchanged when district speed boosts ship',async()=>{
@@ -147,11 +121,6 @@ test('revision 12 movement stays unchanged when district speed boosts ship',asyn
    assert.deepEqual(verifyReplay(level.mission,replay,level),archived.verifyReplay(level.mission,replay,level),`${level.title}: delay ${delay}`);
   }
  }
- const week=JSON.parse(JSON.stringify(manifest));week.rulesHash=campaign12.rulesHash;week.engineHash=campaign12.engineHash;
- week.contracts[0].level=campaign12.levels[1];assert(isWeeklyCompatible(week));
- delete week.engineHash;assert(isWeeklyCompatible(week));
- week.contracts[0].level={...week.contracts[0].level,combat:{version:2,revision:13}};
- assert(!isWeeklyCompatible(week),'Campaign speed boosts must not alter published weekly play');
 });
 
 test('revision 13 replays and active weeks remain unchanged after target following ships',async()=>{
@@ -161,11 +130,6 @@ test('revision 13 replays and active weeks remain unchanged after target followi
   const win=solveCombat(level);assert(win,level.title);
   assert.deepEqual(verifyReplay(level.mission,win.replay,level),archived.verifyReplay(level.mission,win.replay,level));
  }
- const week=JSON.parse(JSON.stringify(manifest));week.rulesHash=fixture.rulesHash;week.engineHash=fixture.engineHash;
- week.contracts[0].level=fixture.levels[1];assert(isWeeklyCompatible(week));
- delete week.engineHash;assert(isWeeklyCompatible(week));
- week.contracts[0].level={...week.contracts[0].level,combat:{version:2,revision:14}};
- assert(!isWeeklyCompatible(week),'Target-following cannot change the mechanics of a frozen week');
 });
 
 test('revision 14 targeting replays retain archived results after knife rollout',async()=>{
@@ -200,15 +164,10 @@ test('revision 15 guard replays remain identical to the archived verifier after 
    assert.deepEqual(verifyReplay(id,replay,level),archived.verifyReplay(id,replay,level),`${id}: ${mode}`);
   }
  }
- const week=JSON.parse(JSON.stringify(manifest));week.rulesHash=hash;week.engineHash=LEGACY_WEEKLY_ENGINES[hash];
- week.contracts[0].level={...combatLevel('sweep-window'),combat:{version:2,revision:15}};
- assert(isWeeklyCompatible(week));delete week.engineHash;assert(isWeeklyCompatible(week));
- week.contracts[0].level.combat.revision=16;assert(!isWeeklyCompatible(week),'Fair pursuit must not alter a pinned revision-15 week');
 });
 
 test('revision 16 guards stay unchanged when the revision 17 engine ships',async()=>{
- const {PRESERVED_REVISION_16_ENGINE}=await import('../shared/weekly-compatibility');
- assert.equal(campaign16.engineHash,PRESERVED_REVISION_16_ENGINE);assert.notEqual(engine.engineHash,PRESERVED_REVISION_16_ENGINE);
+ assert.equal(campaign16.engineHash,'2dff16c1583573a1d66fa23b3249529d77224ca8da0b997de4834e593cb729f4');assert.notEqual(engine.engineHash,campaign16.engineHash);
  const archived=await import((await checkRuleBundle(campaign16.rulesHash)).href);
  for(const level of campaign16.levels as LevelDefinition[]){
   assert.equal(level.combat?.revision,16);const win=solveCombat(level);assert(win,level.title);
@@ -218,8 +177,4 @@ test('revision 16 guards stay unchanged when the revision 17 engine ships',async
    assert.deepEqual(verifyReplay(level.mission,replay,level),archived.verifyReplay(level.mission,replay,level),`${level.title}: delay ${delay}`);
   }
  }
- const week=JSON.parse(JSON.stringify(manifest));week.rulesHash=campaign16.rulesHash;week.engineHash=campaign16.engineHash;
- week.contracts[0].level=campaign16.levels[1];assert(isWeeklyCompatible(week));
- delete week.engineHash;assert(isWeeklyCompatible(week));
- week.contracts[0].level={...week.contracts[0].level,combat:{version:2,revision:17}};assert(!isWeeklyCompatible(week),'a revision 17 room cannot run on the preserved revision 16 engine');
 });

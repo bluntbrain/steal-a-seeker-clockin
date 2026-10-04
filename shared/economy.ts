@@ -8,6 +8,8 @@ export type CampaignPerformance={mission:string;score:number;ticks:number;batter
 export function compareRun(a:CampaignPerformance,b:CampaignPerformance){return b.score-a.score||a.ticks-b.ticks||Number(a.spotted)-Number(b.spotted)||b.battery-a.battery;}
 export function campaignStats(runs:CampaignPerformance[]){const best=new Map<string,CampaignPerformance>();for(const run of runs){const old=best.get(run.mission);if(!old||compareRun(run,old)<0)best.set(run.mission,run);}const selected=[...best.values()];return {cleared:selected.length,score:selected.reduce((n,r)=>n+r.score,0),ticks:selected.reduce((n,r)=>n+r.ticks,0),clean:selected.filter(r=>!r.spotted).length,battery:selected.reduce((n,r)=>n+r.battery,0)};}
 export type CampaignStats=ReturnType<typeof campaignStats>;
-export function compareCampaign(a:CampaignStats,b:CampaignStats){return b.cleared-a.cleared||b.score-a.score||a.ticks-b.ticks||b.clean-a.clean||b.battery-a.battery;}
+// total points first: the best verified score per level already rewards speed and remaining health
+export function compareCampaign(a:CampaignStats,b:CampaignStats){return b.score-a.score||b.cleared-a.cleared||a.ticks-b.ticks||b.clean-a.clean||b.battery-a.battery;}
 export type CampaignSummary={creditAward?:{mission:string;credits:number;balance?:number};runs:CampaignPerformance[];rebate:number;state:'legacy'|'locked'|'ready'|'queued'|'pending'|'settled'|'review';returnId?:string;signature?:string};
 export type CampaignRank=CampaignStats&{wallet:string;rank:number};
+export type CampaignBoard={board:CampaignRank[];personal:CampaignRank|null;participants:number};

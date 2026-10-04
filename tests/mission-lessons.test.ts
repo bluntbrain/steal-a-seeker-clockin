@@ -2,8 +2,7 @@ import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {CAMPAIGN_IDS} from '../src/game/level';
 import {combatLevel} from '../src/game/combat-levels';
-import {campaignLesson,publishedLesson,weeklyLesson} from '../src/onboarding/mission-lessons';
-import {makeCombatContracts} from '../shared/contracts';
+import {campaignLesson,publishedLesson} from '../src/onboarding/mission-lessons';
 import {welcomeOffer} from '../src/commerce/welcome-offer';
 test('campaign lessons match actual collection, drones and mission mechanics',()=>{
  const lessons=CAMPAIGN_IDS.map(campaignLesson);
@@ -15,9 +14,6 @@ test('campaign lessons match actual collection, drones and mission mechanics',()
  assert.equal(combatLevel(CAMPAIGN_IDS[7]!).targets?.length,2);
  assert.ok(combatLevel(CAMPAIGN_IDS[8]!).switches?.length);
  assert.ok(combatLevel(CAMPAIGN_IDS[9]!).exitWindow);
-});
-test('weekly lessons use current server-authored objectives, without promising collection rewards',()=>{
- for(const c of makeCombatContracts(new Date('2026-09-21T00:00:00Z'))){const l=weeklyLesson(c);assert.equal(l.body,c.objective);assert.equal(l.title,c.name);assert.equal(l.collection,false);assert.match(l.footer,/only when you start/);}
 });
 test('welcome comparison follows both backend prices and rejects missing prices',()=>{
  assert.deepEqual(welcomeOffer(500,1000),{skr:500,usdCents:1000,plannedSkr:1000,plannedUsdCents:2000});

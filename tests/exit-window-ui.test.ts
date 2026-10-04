@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {exitWindowSeconds} from '../src/ranked/exit-window';
+import {exitWindowSeconds} from '../src/controls/exit-window';
 test('exit countdown shows time until closing/opening, including a seeded phase',()=>{
  const window={period:8,openSeconds:4,phase:2};
  assert.equal(exitWindowSeconds(window,0),2);

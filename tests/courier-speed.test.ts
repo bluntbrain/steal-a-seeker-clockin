@@ -6,7 +6,6 @@ import {courierSpeedBonus,courierSpeedMultiplier} from '../src/game/courier-spee
 import {initialState,idleInput} from '../src/game/simulation';
 import {stepCombat} from '../src/game/combat';
 import {campaignCreditTarget} from '../server/campaign-credit-versions';
-import {makeCombatContracts} from '../shared/contracts';
 
 function travel(level:LevelDefinition,carrying=false){
  const arena={...level,spawn:{x:6,y:10},patrols:[],blockers:level.blockers.slice(0,4),gates:undefined,switches:undefined};
@@ -32,14 +31,6 @@ test('actual movement and footstep distance receive the same boost unloaded and 
    assert(Math.abs(moved.distance-expected)<1e-8,`${id}, carrying ${carrying}`);
    assert(Math.abs(moved.walked-expected)<1e-8,'Step cadence follows actual distance');
   }
- }
-});
-test('weekly play has fixed speed, even with new mechanics and a late-district number',()=>{
- for(const c of makeCombatContracts(new Date('2026-09-21'))){
-  assert.equal(courierSpeedBonus(c.level),0);
-  const future={...c.level,combat:{version:2 as const,revision:13 as const},number:12};
-  assert.equal(courierSpeedMultiplier(future),1);
-  assert(Math.abs(travel(future).distance-4.1)<1e-8);
  }
 });
 test('code 28 retains its old movement and claim thresholds',()=>{

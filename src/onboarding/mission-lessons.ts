@@ -1,6 +1,5 @@
 import {CAMPAIGN_IDS,type MissionId} from '../game/level';
 import {phoneEdition} from '../game/collection';
-import type {Contract} from '../../shared/contracts';
 import type {Mechanic} from './mechanic-demo';
 import {BOSS_NAMES} from '../../shared/campaign-levels';
 import type {CampaignEntry} from '../campaign/levels';
@@ -28,7 +27,4 @@ export function campaignLesson(mission:MissionId):MissionLesson{
 export function publishedLesson(entry:CampaignEntry):MissionLesson{
  const n=String(entry.number).padStart(2,'0'),boss=entry.boss;
  return {weapon:'knife',id:entry.key,kicker:`LEVEL ${n}${boss?' · BOSS':''}`,title:boss?`${BOSS_NAMES[boss]} holds this room`:entry.title,body:entry.definition.briefing,cue:boss?'FLANK THE ARMOR → TAKE → ESCAPE':'BREAK SIGHT → TAKE → ESCAPE',edition:(entry.number-1)%12,collection:false,footer:boss?'Boss levels pay double credits. Take the Seeker and get out.':'Each clear pays credits and opens the next level on the map.',playLabel:`PLAY LEVEL ${n}  →`};
-}
-export function weeklyLesson(c:Contract):MissionLesson{
- return {weapon:(c.level.combat?.revision??0)>=15?'knife':'ranged',id:c.id,kicker:`WEEKLY MISSION · ${c.modifier.toUpperCase()}`,title:c.name,body:c.objective,cue:'FASTER ESCAPE + MORE HEALTH = MORE POINTS',edition:Math.min(11,c.slot*4),collection:false,footer:'One ranked chance is used only when you start. Best complete run counts.'};
 }

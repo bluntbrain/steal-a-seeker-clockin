@@ -6,7 +6,7 @@ import {initialState,idleInput,stateLevel} from '../src/game/simulation';
 import {combatTap,type CombatCommand} from '../src/game/combat';
 import {recordStep} from '../src/game/recording';
 import {sightDistance} from '../src/game/guards';
-import {makeCombatContracts} from '../shared/contracts';
+import bundled from '../src/campaign/published-levels.json';
 import {verifyReplay} from '../server/replay';
 import type {ReplayChunk} from '../shared/replay';
 // Produces ordinary recorded taps. No position, health, damage or score overrides.
@@ -35,6 +35,6 @@ export function solveCombat(level:LevelDefinition){
  return solveTactical(level);
 }
 if(process.argv[1]?.endsWith('qa-combat.ts')){
- const results=[...CAMPAIGN_IDS.map(combatLevel),...makeCombatContracts().map(c=>c.level)].map(level=>{const win=solveCombat(level);if(win){const r=verifyReplay(level.mission,win.replay,level);if(r.status!=='won'||r.score!==win.score)throw Error('Replay mismatch');}console.log(level.title,win?`${win.ticks/30}s · ${win.hp} HP · ${win.kills} KOs`:'NO WIN FOUND');return {id:level.id,win};});
+ const results=[...CAMPAIGN_IDS.map(combatLevel),...bundled.levels.map(l=>l.definition as LevelDefinition)].map(level=>{const win=solveCombat(level);if(win){const r=verifyReplay(level.mission,win.replay,level);if(r.status!=='won'||r.score!==win.score)throw Error('Replay mismatch');}console.log(level.title,win?`${win.ticks/30}s · ${win.hp} HP · ${win.kills} KOs`:'NO WIN FOUND');return {id:level.id,win};});
  mkdirSync('verification/combat',{recursive:true});writeFileSync('verification/combat/solvability.json',JSON.stringify(results));if(results.some(r=>!r.win))process.exitCode=1;
 }

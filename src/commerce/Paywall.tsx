@@ -9,11 +9,13 @@ import {commerceApi} from './client';
 import {usdLabel} from '../../shared/pricing';
 
 type Props={local:boolean;onCode?:(code:string)=>void;mediaActive?:boolean;onBuy:()=>void;onSkip:()=>void};
-/** Optional weekly offer. Purchases open checkout; community codes may connect a wallet and grant a free offer. */
+/** Optional pass offer. Purchases open checkout; community codes may connect a wallet and grant a free offer. */
 export default function Paywall({local,mediaActive=true,onBuy,onSkip,onCode}:Props){
  const {height,fontScale}=useWindowDimensions(),compact=height<720;
- const [price,setPrice]=useState<{skr:number;usdCents:number;test:boolean}>();
- useEffect(()=>{let active=true;void commerceApi.catalog().then(c=>{const p=c.products.find(p=>p.id==='campaign');if(active&&p?.skrPrice&&p.usdCents)setPrice({skr:Number(p.skrPrice),usdCents:p.usdCents,test:!!c.testPricing});}).catch(()=>{});return()=>{active=false;};},[local]);
+ const [price,setPrice]=useState<{skr:number;usdCents:number;test:boolean}>(),[rebate,setRebate]=useState(0);
+ useEffect(()=>{let active=true;void commerceApi.catalog().then(c=>{const p=c.products.find(p=>p.id==='campaign');if(active&&p?.skrPrice&&p.usdCents)setPrice({skr:Number(p.skrPrice),usdCents:p.usdCents,test:!!c.testPricing});}).catch(()=>{});
+  // the completion rebate is a server offer; the screen promises it only when the live offer carries one
+  void commerceApi.pricing('campaign').then(p=>{if(active)setRebate(p.campaignOffer?.rebateSkr??0);}).catch(()=>{});return()=>{active=false;};},[local]);
  const offer=price?welcomeOffer(price.skr,price.usdCents):null;
  // the primary action lives in a pinned footer so it is visible on landing; the offer above it scrolls
  const body=<View style={s.card}>
@@ -25,14 +27,14 @@ export default function Paywall({local,mediaActive=true,onBuy,onSkip,onCode}:Pro
   </View>
   <View style={[s.content,{gap:compact?12:18}]}>
    <Text style={s.eyebrow}>WELCOME OFFER · GAME PASS</Text>
-   <View><Text accessibilityRole="header" style={[s.title,{fontSize:compact?32:39,lineHeight:compact?35:42}]}>Your next heist.{'\n'}Your name on top.</Text><Text style={s.subtitle}>Get the Game Pass. Make every escape count.</Text></View>
-   <View style={s.stats}>{[['3','weekly missions'],['5','chances each'],['1','best run counts*']].map(([value,label],i)=><View key={value} style={[s.stat,i>0&&s.divider]}><Text style={s.number}>{value}</Text><Text style={s.statLabel}>{label}</Text></View>)}</View>
-   <View style={s.pass}><View style={{flex:1}}><Text style={s.passTitle}>Game Pass</Text><Text style={s.passNote}>Buy once · Compete every week</Text></View><View style={{alignItems:'flex-end'}}>{offer&&<><Text style={[s.passNote,{fontSize:9}]}>Planned regular price</Text><Text accessibilityLabel={`Planned regular price: ${offer.plannedSkr} SKR or ${usdLabel(offer.plannedUsdCents)} in SOL`} style={[s.passNote,{textDecorationLine:'line-through'}]}>{offer.plannedSkr} SKR / {usdLabel(offer.plannedUsdCents)}</Text></>}<Text style={s.price}>{offer?`${offer.skr} SKR`:'SKR / SOL'}</Text><Text style={s.passNote}>{offer?`or ≈ ${usdLabel(offer.usdCents)} in SOL`:'Live price at checkout'}</Text></View></View>
+   <View><Text accessibilityRole="header" style={[s.title,{fontSize:compact?32:39,lineHeight:compact?35:42}]}>Your next heist.{'\n'}Your name on top.</Text><Text style={s.subtitle}>Get the Game Pass. Gear up before the first heist.</Text></View>
+   <View style={s.stats}>{[['3,500','credits'],['1','exclusive outfit'],rebate>0?['25%','back after 12 heists*']:['1','purchase, yours to keep']].map(([value,label],i)=><View key={value} style={[s.stat,i>0&&s.divider]}><Text style={s.number}>{value}</Text><Text style={s.statLabel}>{label}</Text></View>)}</View>
+   <View style={s.pass}><View style={{flex:1}}><Text style={s.passTitle}>Game Pass</Text><Text style={s.passNote}>Buy once · Keep every perk</Text></View><View style={{alignItems:'flex-end'}}>{offer&&<><Text style={[s.passNote,{fontSize:9}]}>Planned regular price</Text><Text accessibilityLabel={`Planned regular price: ${offer.plannedSkr} SKR or ${usdLabel(offer.plannedUsdCents)} in SOL`} style={[s.passNote,{textDecorationLine:'line-through'}]}>{offer.plannedSkr} SKR / {usdLabel(offer.plannedUsdCents)}</Text></>}<Text style={s.price}>{offer?`${offer.skr} SKR`:'SKR / SOL'}</Text><Text style={s.passNote}>{offer?`or ≈ ${usdLabel(offer.usdCents)} in SOL`:'Live price at checkout'}</Text></View></View>
    <PromotionEntry onDiscount={onCode}/>
-   <Text style={s.detail}>*Your best escape on each mission adds to your rank. New missions every Monday. Clear all three to earn an outfit.</Text>
+   <Text style={s.detail}>{rebate>0?'*Clear the first 12 heists and 25% of the price comes back to your wallet. ':''}The credits unlock outfits in the hideout. The Ghost Signal outfit comes with the pass.</Text>
   </View>
   </ScrollView>
-  <View testID="paywall-footer" style={[s.footer,{gap:compact?6:8}]}><Pressable accessibilityRole="button" onPress={onBuy} style={s.primary}><Text style={s.primaryText}>{local?'Preview Game Pass':'Get Game Pass'}  →</Text></Pressable><Text style={s.free}>All 12 campaign missions are free. Skip to play.</Text><Text style={s.fine}>{local?'Browser demo · No real payment':`${price?.test?'Test price · ':''}Pay in SKR or SOL · Network fee extra`}{'\n'}Weekly token prizes are not active.</Text></View>
+  <View testID="paywall-footer" style={[s.footer,{gap:compact?6:8}]}><Pressable accessibilityRole="button" onPress={onBuy} style={s.primary}><Text style={s.primaryText}>{local?'Preview Game Pass':'Get Game Pass'}  →</Text></Pressable><Text style={s.free}>The whole campaign is free. Skip to play.</Text><Text style={s.fine}>{local?'Browser demo · No real payment':`${price?.test?'Test price · ':''}Pay in SKR or SOL · Network fee extra`}</Text></View>
  </View>;
  return <View style={s.page}>{body}</View>;
 }

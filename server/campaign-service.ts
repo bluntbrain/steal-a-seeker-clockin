@@ -6,13 +6,12 @@ import {campaignCreditTarget} from './campaign-credit-versions';
 import {createHash,randomUUID} from 'node:crypto';
 import type {Pool} from 'pg';
 import {CAMPAIGN_IDS,type MissionId} from '../src/game/level';
-import {compareRun,type CampaignPerformance,type CampaignSummary,type CampaignRank} from '../shared/economy';
+import {compareRun,type CampaignPerformance,type CampaignSummary,type CampaignRank,type CampaignBoard} from '../shared/economy';
 import {ServiceError} from './service';
 import {ReturnService} from './returns';
 import {transaction} from './db';
 import {replayInput} from './replay';
 import {verifyReplayInWorker} from './replay-runner';
-import rules from '../shared/rules-manifest.json';
 export class CampaignService{
  constructor(public pool:Pool,public returns:ReturnService,public levels=new CampaignLevelStore(pool)){}
  async owned(wallet:string){if(!(await this.pool.query("SELECT 1 FROM entitlements WHERE wallet=$1 AND sku='campaign'",[wallet])).rowCount)throw new ServiceError(403,'Campaign pass required.');}
@@ -61,14 +60,18 @@ export class CampaignService{
    await this.returns.allocateInTransaction(db,row.rows[0].reservation_id,'success');
   });return this.summary(wallet);
  }
- async leaderboard():Promise<CampaignRank[]>{
-  // Aggregate in SQL before transferring results. Rank uses a single best replay
-  // for each mission; exact performance ties share the same displayed rank.
+ /** total points across every verified run, one best replay per level, any rules hash. the top fifty plus the
+  * caller's own row when it ranks lower; exact ties share a rank */
+ async leaderboard(wallet?:string):Promise<CampaignBoard>{
   const rows=await this.pool.query(`WITH best AS (
-    SELECT DISTINCT ON(wallet,mission) wallet,mission,result FROM campaign_runs WHERE rules_hash=$1
+    SELECT DISTINCT ON(wallet,mission) wallet,mission,result FROM campaign_runs WHERE result->>'status'='won'
     ORDER BY wallet,mission,(result->>'score')::int DESC,(result->>'ticks')::int ASC,(result->>'spotted')::boolean ASC,(result->>'battery')::int DESC,id
-   ), totals AS (SELECT wallet,count(*)::int AS cleared,sum((result->>'score')::int)::int AS score,sum((result->>'ticks')::int)::int AS ticks,sum(CASE WHEN (result->>'spotted')::boolean THEN 0 ELSE 1 END)::int AS clean,sum((result->>'battery')::int)::int AS battery FROM best GROUP BY wallet)
-   SELECT *,rank() OVER(ORDER BY cleared DESC,score DESC,ticks ASC,clean DESC,battery DESC)::int AS rank FROM totals ORDER BY cleared DESC,score DESC,ticks ASC,clean DESC,battery DESC,wallet LIMIT 50`,[rules.rulesHash]);
-  return rows.rows;
+   ), totals AS (SELECT wallet,count(*)::int AS cleared,sum((result->>'score')::int)::int AS score,sum((result->>'ticks')::int)::int AS ticks,sum(CASE WHEN (result->>'spotted')::boolean THEN 0 ELSE 1 END)::int AS clean,sum((result->>'battery')::int)::int AS battery FROM best GROUP BY wallet),
+   ranked AS (SELECT *,rank() OVER(ORDER BY score DESC,cleared DESC,ticks ASC,clean DESC,battery DESC)::int AS rank,count(*) OVER()::int AS participants FROM totals)
+   SELECT * FROM ranked WHERE rank<=50 OR wallet=$1 ORDER BY rank,wallet`,[wallet??'']);
+  const all=rows.rows as (CampaignRank&{participants:number})[],participants=all[0]?.participants??0;
+  const personal=wallet?all.find(r=>r.wallet===wallet)??null:null;
+  const strip=({participants:_p,...r}:CampaignRank&{participants:number}):CampaignRank=>r;
+  return {board:all.filter(r=>r.rank<=50).map(strip),personal:personal?strip(personal):null,participants};
  }
 }

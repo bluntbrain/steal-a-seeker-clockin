@@ -8,16 +8,16 @@ The game uses **2D Skia in React Native** on Android and React Native Web in the
 
 - All 12 campaign missions are free. No wallet is needed to start. The first mission teaches movement, cover, knife takedowns and extraction.
 - First clears earn 50 credits; each extra star earns another 5. Up to 720 campaign credits. Identical repeats do not grant credits again.
-- Hideout is the store and collection: Outfits, Gear and Collection. Cosmetics use credits; packs can be bought with SKR or SOL. Bought items never improve weekly performance.
+- Hideout is the store and collection: Outfits, Gear and Collection. Cosmetics use credits; packs can be bought with SKR or SOL. Bought items never change gameplay.
 - Leaderboard rankings and practice are free. A one-time Game Pass unlocks ranked attempts: three missions per week, five attempts each. No buying extra attempts. Best complete runs count; faster runs break score ties.
 - Live pass targets: **500 SKR or $10 worth of SOL**. These are different payment options, not an exchange-rate claim. The existing Mainnet service has **TEST_PRICING=true**: 1 SKR or a $0.10 SOL target, with rounding and network fees shown at checkout.
-- Weekly token prizes are **not active**. New passes do not include the old 25 SKR campaign rebate. Earlier reserved purchase terms remain recoverable.
+- The Game Pass is a one-time bundle: 3,500 credits and the Ghost Signal outfit, plus the completion rebate when the live offer carries one. Earlier reserved purchase terms remain recoverable. Weekly missions were removed on 4 October 2026; the leaderboard ranks total campaign points.
 
-See [the current design, research, pricing and QA plan](docs/FREE-CAMPAIGN-STORE-V3.md). It supersedes older campaign-paywall and token-wardrobe proposals. [Weekly map architecture](docs/WEEKLY-MAP-AUTOMATION.md) explains backend manifests and engine compatibility.
+See [the current design, research, pricing and QA plan](docs/FREE-CAMPAIGN-STORE-V3.md). It supersedes older campaign-paywall and token-wardrobe proposals.
 
 ## Try it
 
-- [Browser preview](http://127.0.0.1:8787/?build=free-campaign-store): local demo credits, purchases and weekly results. No real token transfers.
+- [Browser preview](http://127.0.0.1:8787/?build=free-campaign-store): local demo credits, purchases and the level map. No real token transfers.
 - [Design and QA review](http://127.0.0.1:8787/design/free-store/index.html): generated reference and actual implemented screens.
 - [Mainnet APK](releases/steal-a-seeker-mainnet.apk): signed arm64 Android build. Phantom approval is required for real purchases; campaign play is free.
 
@@ -53,11 +53,11 @@ The latest browser tutorial check reached the win screen with 60 credits and con
 
 2 October: the frame loop, guard cones, overlay panels, audio hooks and assets were reworked for smoothness and size; see [the performance report](docs/PERFORMANCE-PLAN-2026-10-02.html) for the findings, the evidence register and the remaining items. Code 36 is 90.7 MB against 150.4 MB for code 35, with 396 client and 90 server tests passing and the API redeployed with the current rule bundles. Browser evidence is in `verification/perf-2026-10-02/`.
 
-The updated APK builds. This revision still needs physical Android frame-pacing, sound/haptics, touch and real Phantom purchase verification. Weekly funded prize settlement and campaign-only health upgrades are not included. Do not advertise token winnings before settlement is implemented and funded.
+The updated APK builds. This revision still needs physical Android frame-pacing, sound/haptics, touch and real Phantom purchase verification. Do not advertise token winnings; no prize settlement exists.
 
 ## Source layout
 
-`src/game`: deterministic maps/rules. `src/components`: Skia rendering and screens. `src/commerce`: accounts, credit store and checkout. `src/wallet`: MWA. `src/league` and `src/ranked`: weekly manifests and ranks. `src/progress`: local/cloud bests. `server`: authentication, finalized payments, credit ledger and replay workers. `shared/store.ts`: pack quantities and defaults. Backend price overrides are documented in [PRICING.md](docs/PRICING.md).
+`src/game`: deterministic maps/rules. `src/components`: Skia rendering and screens. `src/commerce`: accounts, credit store and checkout. `src/wallet`: MWA. `src/campaign`: level map, published levels, leaderboard and share card. `src/progress`: local/cloud bests. `server`: authentication, finalized payments, credit ledger and replay workers. `shared/store.ts`: pack quantities and defaults. Backend price overrides are documented in [PRICING.md](docs/PRICING.md).
 
 Current [tutorial audit](docs/TUTORIAL-AUDIT-2026-09-17.md), [repository/deployment audit](docs/REPO-CLEANUP-AUDIT.md), and [reviewer guide](submission/JUDGE-GUIDE.md).
 

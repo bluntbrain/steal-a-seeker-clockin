@@ -6,7 +6,7 @@ import {shareCard} from '../league/shareCard';
 import {CARD_WIDTH,cardHeight,type CourierCardData} from '../league/card';
 export const campaignShareText='I cleared all 12 heists in Steal a Seeker. Every phone secured. Your turn.';
 export const campaignShareUrl='https://x.com/intent/post?text='+encodeURIComponent(campaignShareText)+'&url='+encodeURIComponent('https://stealaseeker.bluntbrain.com/');
-export const levelShareText=(d:CourierCardData)=>{const c=d.campaign;if(!c?.level)return campaignShareText;return c.cleared>=(c.total??12)?`I cleared all ${c.total??12} levels of Steal a Seeker with ${c.stars} stars. Your turn.`:`I am on level ${c.level} of Steal a Seeker. ${c.stars} stars so far. Catch me.`;};
+export const levelShareText=(d:CourierCardData)=>{const c=d.campaign;if(!c.level)return campaignShareText;return c.cleared>=(c.total??12)?`I cleared all ${c.total??12} levels of Steal a Seeker with ${c.stars} stars. Your turn.`:`I am on level ${c.level} of Steal a Seeker. ${c.stars} stars so far. Catch me.`;};
 export const levelShareUrl=(d:CourierCardData)=>'https://x.com/intent/post?text='+encodeURIComponent(levelShareText(d))+'&url='+encodeURIComponent('https://stealaseeker.bluntbrain.com/');
 export default function CompletionCard({data,reduced,registerShare,onSaved}:{data:CourierCardData;reduced:boolean;registerShare:(fn:(()=>Promise<void>)|null)=>void;onSaved?:()=>void}){
  const {height,width:screenWidth}=useWindowDimensions(),insets=useSafeAreaInsets(),card=useRef<View>(null),[ready,setReady]=useState(false),[notice,setNotice]=useState(''),[saved,setSaved]=useState(false);

@@ -1,7 +1,7 @@
 import {createOutbox} from './outbox';
 import {NETWORK_NAME} from '../wallet/config';
 import {api} from '../commerce/client';
-import type {CampaignSummary,CampaignRank} from '../../shared/economy';
+import type {CampaignSummary,CampaignBoard} from '../../shared/economy';
 import type {Replay} from '../../shared/replay';
 import type {MissionId} from '../game/level';
 import {readSave,writeSave} from '../progress/storage';
@@ -18,7 +18,7 @@ const outbox=createOutbox<Pending,CampaignSummary>({
  send:(token,item)=>api<CampaignSummary>('/campaign/runs',{token,body:item}),
 });
 const pending=(target:CampaignTarget,replay:Replay):Pending=>({...target,rulesHash:rules.rulesHash,replay});
-export const campaignApi={summary:(token:string)=>api<CampaignSummary>('/campaign',{token}),board:()=>api<CampaignRank[]>('/campaign/leaderboard'),claim:(token:string)=>api<CampaignSummary>('/campaign/claim',{token,body:{}})};
+export const campaignApi={summary:(token:string)=>api<CampaignSummary>('/campaign',{token}),board:(token?:string)=>api<CampaignBoard>('/campaign/leaderboard',token?{token}:{}),claim:(token:string)=>api<CampaignSummary>('/campaign/claim',{token,body:{}})};
 export async function enqueue(wallet:string,target:CampaignTarget,replay:Replay){await outbox.enqueue(wallet,pending(target,replay));}
 export async function submitCampaignRun(wallet:string,token:string,target:CampaignTarget,replay:Replay){return outbox.submit(wallet,token,pending(target,replay));}
 export async function syncCampaign(wallet:string,token:string,onAward?:(mission:string,credits:number|null)=>void){await outbox.flush(wallet,token,(item,receipt)=>onAward?.(pendingKey(item),receipt.creditAward?.credits??null));return campaignApi.summary(token);}

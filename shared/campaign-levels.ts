@@ -3,7 +3,6 @@
 import type {Box,GuardSpec,LevelDefinition,MissionId,Point} from '../src/game/level';
 import {walkableSegment,findPath} from '../src/game/navigation';
 import {WEEKLY_LAYOUTS} from './weekly-layouts';
-import {weeklyRandom} from './weekly-variety';
 import {BOSS_TRAITS} from '../src/game/heist-guards-v17';
 export const CAMPAIGN_GENERATOR_VERSION=1;
 export const FIRST_PUBLISHED_LEVEL=13;
@@ -24,13 +23,15 @@ export const isBossLevel=(n:number)=>n>=FIRST_PUBLISHED_LEVEL&&n%BOSS_EVERY===0;
 export const bossFor=(n:number):BossId|undefined=>isBossLevel(n)?BOSSES[(n/BOSS_EVERY-Math.ceil(FIRST_PUBLISHED_LEVEL/BOSS_EVERY))%BOSSES.length]:undefined;
 const ZONE_MISSION:Record<CampaignZone,MissionId>={warehouse:'practice',rooftops:'sweep-window',powerworks:'power-trade'};
 const ZONE_FLOOR:Record<CampaignZone,string>={warehouse:'#253A37',rooftops:'#253649',powerworks:'#343D40'};
+/** small deterministic prng keyed by a string; the same key always yields the same level */
+export function seededRandom(key:string){let seed=2166136261;for(let i=0;i<key.length;i++)seed=Math.imul(seed^key.charCodeAt(i),16777619);return()=>{seed+=0x6D2B79F5;let t=seed;t=Math.imul(t^(t>>>15),t|1);t^=t+Math.imul(t^(t>>>7),t|61);return((t^(t>>>14))>>>0)/4294967296;};}
 function shuffled<T>(items:readonly T[],next:()=>number){const a=[...items];for(let i=a.length-1;i>0;i--){const j=Math.floor(next()*(i+1));[a[i],a[j]]=[a[j]!,a[i]!];}return a;}
 /** recipes for a range, built in order so room choice avoids the previous four levels */
 export function makeCampaignRecipes(from:number,to:number,seedSalt=0):CampaignRecipe[]{
  if(from<FIRST_PUBLISHED_LEVEL)throw new Error(`published levels start at ${FIRST_PUBLISHED_LEVEL}`);
  const out:CampaignRecipe[]=[];const history:string[]=[];
  for(let n=FIRST_PUBLISHED_LEVEL;n<=to;n++){
-  const next=weeklyRandom(`campaign-v${CAMPAIGN_GENERATOR_VERSION}:${n}:${seedSalt}`);
+  const next=seededRandom(`campaign-v${CAMPAIGN_GENERATOR_VERSION}:${n}:${seedSalt}`);
   const recent=new Set(history.slice(-4)),rooms=WEEKLY_LAYOUTS.map(t=>t.id).filter(id=>!recent.has(id));
   const template=shuffled(rooms,next)[0]!;history.push(template);
   const zone=campaignZone(n),boss=bossFor(n),steps=n-FIRST_PUBLISHED_LEVEL;
@@ -48,7 +49,7 @@ export const makeCampaignRecipe=(n:number,seedSalt=0)=>makeCampaignRecipes(n,n,s
 /** builds the frozen level for a recipe. throws when the room cannot host the roster, so the publisher can bump the seed salt */
 export function buildCampaignLevel(recipe:CampaignRecipe):LevelDefinition{
  const template=WEEKLY_LAYOUTS.find(t=>t.id===recipe.template);if(!template)throw new Error(`unknown room ${recipe.template}`);
- const next=weeklyRandom(recipe.seed+':build'),{mirror,flip,modifier}=recipe;
+ const next=seededRandom(recipe.seed+':build'),{mirror,flip,modifier}=recipe;
  const point=(p:Point):Point=>({x:mirror?12-p.x:p.x,y:flip?20-p.y:p.y});
  const box=(b:Box):Box=>({...b,x:mirror?12-b.x-b.w:b.x,y:flip?20-b.y-b.h:b.y});
  const phone=point({x:[2,6,10][Math.floor(next()*3)]!,y:2}),spawn=point({x:2,y:18}),exitP=point({x:modifier==='double-haul'?2:10,y:18});

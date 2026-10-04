@@ -5,6 +5,7 @@ import type {SolanaCluster} from '../shared/network';
 import {CoinbasePriceFeed,priceProduct,productPricing,type PriceFeed} from './pricing';
 import type {PaymentCurrency} from '../shared/pricing';
 import {campaignTerms} from '../shared/economy';
+import {PASS_BUNDLE} from '../shared/commerce';
 import type {ReturnService} from './returns';
 import {randomBytes,randomUUID,createHash} from 'node:crypto';
 import type {Pool} from 'pg';
@@ -44,7 +45,7 @@ export class CommerceService {
    const pending=await db.query("SELECT 1 FROM orders WHERE wallet=$1 AND sku=ANY($2) AND (status IN ('verifying','needs_review') OR (status='quoted' AND (expires_at>now() OR payment_authorization IS NOT NULL OR signature IS NOT NULL)))",[wallet,skus]);
    if(pending.rowCount)throw new ServiceError(409,'Finish or cancel the existing checkout before claiming this offer.');
    await reservePromotion(db,p,wallet,null);
-   for(const item of skus)await db.query('INSERT INTO entitlements(wallet,sku) VALUES($1,$2) ON CONFLICT DO NOTHING',[wallet,item]);
+   for(const item of skus){const granted=await db.query('INSERT INTO entitlements(wallet,sku) VALUES($1,$2) ON CONFLICT DO NOTHING RETURNING sku',[wallet,item]);if(item==='campaign'&&granted.rowCount)await grantPassBundle(db,wallet,`promotion:${p.id}`);}
   });return this.me(wallet);
  }
  async challenge(wallet:string):Promise<SignInChallenge>{
@@ -150,7 +151,7 @@ export class CommerceService {
    await db.query('INSERT INTO payment_receipts(signature,order_id,instruction_index,slot) VALUES($1,$2,$3,$4)',[signature,order.id,result.instructionIndex,result.slot]);
    const pack=CREDIT_PACKS.find(p=>p.id===order.sku);
    if(pack){const balance=await db.query('UPDATE wallets SET credits=credits+$2 WHERE address=$1 RETURNING credits',[order.wallet,pack.credits]);await db.query('INSERT INTO credit_ledger(id,wallet,source,delta,balance_after) VALUES($1,$2,$3,$4,$5)',[randomUUID(),order.wallet,`order:${order.id}`,pack.credits,balance.rows[0].credits]);}
-   else await db.query('INSERT INTO entitlements(wallet,sku,order_id) VALUES($1,$2,$3)',[order.wallet,order.sku,order.id]);
+   else {await db.query('INSERT INTO entitlements(wallet,sku,order_id) VALUES($1,$2,$3)',[order.wallet,order.sku,order.id]);if(order.sku==='campaign')await grantPassBundle(db,order.wallet,`order:${order.id}`);}
    if(order.promotion){for(const bonus of order.promotion.bonusSkus)await db.query('INSERT INTO entitlements(wallet,sku) VALUES($1,$2) ON CONFLICT DO NOTHING',[order.wallet,bonus]);await db.query("UPDATE promotion_redemptions SET state='granted',granted_skus=$2,updated_at=now() WHERE order_id=$1",[order.id,JSON.stringify([order.sku,...order.promotion.bonusSkus])]);}
    await db.query("UPDATE orders SET status='fulfilled',signature=$2,detail=NULL,checked_at=now() WHERE id=$1",[order.id,signature]);
    await db.query("UPDATE order_attempts SET state='verified' WHERE order_id=$1 AND signature=$2",[order.id,signature]);
@@ -207,6 +208,20 @@ export class CommerceService {
    if(pending.rowCount)throw new ServiceError(409,'A wallet checkout for this skin is open. Restore or cancel that checkout before spending credits.');
    if((expectedPrice??item.price)!==price)throw new ServiceError(409,'Price changed. Refresh the store and review it before buying.');if(r.rows[0].credits<price)throw new ServiceError(409,'Not enough credits.');const balance=r.rows[0].credits-price;await db.query('UPDATE wallets SET credits=$2,equipment=equipment || $3::jsonb WHERE address=$1',[wallet,balance,JSON.stringify({[item.kind]:sku})]);await db.query('INSERT INTO entitlements(wallet,sku) VALUES($1,$2)',[wallet,sku]);await db.query('INSERT INTO credit_ledger(id,wallet,source,delta,balance_after) VALUES($1,$2,$3,$4,$5)',[randomUUID(),wallet,`redeem:${sku}`,-price,balance]);});return this.me(wallet);
  }
- async equip(wallet:string,sku:ProductId){const product=PRODUCTS.find(p=>p.id===sku);if(!product||product.kind==='access'||product.kind==='credits')throw new ServiceError(400,'This item cannot be equipped.');const owned=await this.pool.query('SELECT 1 FROM entitlements WHERE wallet=$1 AND sku=$2',[wallet,sku]);if(!owned.rowCount)throw new ServiceError(403,'You do not own this item.');await this.pool.query('UPDATE wallets SET equipment=equipment || $2::jsonb WHERE address=$1',[wallet,JSON.stringify({[product.kind]:sku})]);return this.me(wallet);}
+ async equip(wallet:string,sku:ProductId|typeof PASS_BUNDLE.outfit){const product=sku===PASS_BUNDLE.outfit?{kind:'outfit' as const}:PRODUCTS.find(p=>p.id===sku);if(!product||product.kind==='access'||product.kind==='credits')throw new ServiceError(400,'This item cannot be equipped.');const owned=await this.pool.query('SELECT 1 FROM entitlements WHERE wallet=$1 AND sku=$2',[wallet,sku]);if(!owned.rowCount)throw new ServiceError(403,'You do not own this item.');await this.pool.query('UPDATE wallets SET equipment=equipment || $2::jsonb WHERE address=$1',[wallet,JSON.stringify({[product.kind]:sku})]);return this.me(wallet);}
  async unequip(wallet:string,slot:'outfit'|'trail'|'frame'|'rack'){await this.pool.query('UPDATE wallets SET equipment=equipment-$2::text WHERE address=$1',[wallet,slot]);return this.me(wallet);}
+}
+
+/** the game pass bundle: credits and the pass outfit, written once per wallet with a ledger line naming the source */
+export async function grantPassBundle(db:{query:(text:string,values?:unknown[])=>Promise<{rows:any[];rowCount:number|null}>},wallet:string,source:string){
+ await db.query('INSERT INTO entitlements(wallet,sku) VALUES($1,$2) ON CONFLICT DO NOTHING',[wallet,PASS_BUNDLE.outfit]);
+ const already=await db.query("SELECT 1 FROM credit_ledger WHERE wallet=$1 AND source LIKE 'pass:%'",[wallet]);if(already.rowCount)return;
+ const balance=await db.query('UPDATE wallets SET credits=credits+$2 WHERE address=$1 RETURNING credits',[wallet,PASS_BUNDLE.credits]);
+ await db.query('INSERT INTO credit_ledger(id,wallet,source,delta,balance_after) VALUES($1,$2,$3,$4,$5)',[randomUUID(),wallet,`pass:${source}`,PASS_BUNDLE.credits,balance.rows[0].credits]);
+}
+/** wallets that bought the pass when it sold weekly access receive the bundle once at boot */
+export async function backfillPassBundle(pool:Pool){
+ const owners=await pool.query("SELECT e.wallet FROM entitlements e WHERE e.sku='campaign' AND NOT EXISTS (SELECT 1 FROM credit_ledger l WHERE l.wallet=e.wallet AND l.source LIKE 'pass:%')");
+ for(const row of owners.rows)await transaction(pool,async db=>{await db.query('SELECT address FROM wallets WHERE address=$1 FOR UPDATE',[row.wallet]);await grantPassBundle(db,row.wallet,'backfill');});
+ return owners.rowCount??0;
 }

@@ -7,24 +7,6 @@ const layers={mint:require('../../assets/leaderboard-v3/card-mint.webp'),row:req
 export function LeagueSurface({kind='mint'}:{kind?:keyof typeof layers}){
  return <View pointerEvents="none" style={StyleSheet.absoluteFill}><Image accessible={false} source={layers[kind]} resizeMode="stretch" style={{width:'100%',height:'100%'}}/></View>;
 }
-export function WeeklyLeagueHeader({local=false,resetLabel,help,onHelp,onRefresh}:{local?:boolean;resetLabel:string;help:boolean;onHelp:()=>void;onRefresh:()=>void}){
- const {width}=useWindowDimensions(),narrow=width<390,tiny=width<350;
- return <View style={s.header} testID="weekly-league-heading">
-  <View pointerEvents="none" style={[s.hero,narrow&&{width:tiny?112:130,right:-5}]}><Image accessible={false} source={require('../../assets/leaderboard-v3/courier-wave-header.webp')} resizeMode="contain" style={s.heroImage}/></View>
-  <View style={s.headingCopy}>
-   <Text accessibilityRole="header" style={[s.title,narrow&&{fontSize:tiny?23:25,lineHeight:30}]}>Weekly League</Text>
-   <Pressable accessibilityRole="button" accessibilityLabel="Refresh league" onPress={onRefresh} style={s.resetButton}><Text style={s.reset}>{resetLabel} <Text style={s.refresh}>↻</Text></Text></Pressable>
-   <Text style={s.resetNote}>Resets Monday · 00:00 UTC</Text>
-  </View>
-  <View style={s.headerBottom}>
-   <Text style={s.mode}>{local?'BROWSER TEST · LOCAL SCORES':'THREE MISSIONS · ONE WEEK'}</Text>
-   <Pressable accessibilityRole="button" accessibilityLabel={help?'Close How to play':'How to play weekly league'} onPress={onHelp} style={s.help}><Text style={s.helpIcon}>{help?'‹':'?'}</Text><Text style={s.helpText}>{help?'Back to league':'How to play'}</Text></Pressable>
-  </View>
- </View>;
-}
-export function WeeklyPlayButton({disabled,onPress}:{disabled?:boolean;onPress:()=>void}){
- return <View style={s.playDock}><Pressable accessibilityRole="button" accessibilityLabel="Play weekly missions" testID="weekly-play-missions" hapticCue="start" disabled={disabled} onPress={onPress} style={({pressed})=>[s.play,(pressed||disabled)&&{opacity:.5}]}><LeagueSurface kind="button"/><Text style={s.playText}>Play weekly missions</Text></Pressable></View>;
-}
 export function RankMedal({rank}:{rank:number}){
  if(rank<1||rank>3)return null;
  return <View pointerEvents="none" style={s.medal}><Image accessible={false} source={rank===1?require('../../assets/leaderboard-v3/crown.webp'):rank===2?require('../../assets/leaderboard-v3/silver.webp'):require('../../assets/leaderboard-v3/bronze.webp')} style={{width:rank===1?23:22,height:rank===1?23:27}}/>{rank>1&&<Text style={[s.medalNumber,{color:rank===2?'#3F524B':'#694128'}]}>{rank}</Text>}</View>;

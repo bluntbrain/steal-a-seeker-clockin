@@ -113,3 +113,11 @@ Risks: four days; the credit economy decision; the likeness question; difficulty
 1. Credits per level from 13 onward: implemented as 20 plus 5 per extra star, bosses 40 plus 5, pending the user's confirmation before the API deploy.
 2. Boss cadence: implemented as every third level from 13 (15, 18, 21, ...), rotating Toly, Mert, Chase, Lily, Vibhu, Akshay, Beeman. Mission 12 keeps its finale.
 3. Whether owners of retired skins get a notice in the store.
+
+## 8. Weekly missions removed, leaderboard by total points (4 October, evening)
+
+The user asked to remove weekly missions completely and rank players by the points they hold in total, so a player at level 12 outranks one at level 2, and a full-health clear outranks a damaged one. Decisions: keep the Game Pass and repurpose it as a one-time bundle (3,500 credits and the Ghost Signal outfit; the 25 percent completion rebate stays when the live offer carries one); rank by total points (sum of each wallet's best verified score per level, speed and remaining health are already in the score); list only wallet players with server-verified runs, browser guests see the board and their own device total.
+
+Removed: the league, daily and paid routes, services and workers; the weekly board, daily and paid panels and submissions; the weekly contract generator and compatibility list; the related tests and scripts. Kept: the return service for the campaign rebate, the 18 generated rooms (`shared/weekly-layouts.ts`) that feed the level generator, the frozen weekly fixtures as archived-engine regression data (`tests/engine-compatibility.test.ts`).
+
+Added: `GET /campaign/leaderboard` returns the top fifty by total points plus the caller's own row; the pass grants its bundle once on payment and on a free promotion, and existing pass owners receive it at boot; the Ghost Signal outfit is owned through the pass and equippable like any outfit; a campaign board on the Leaderboard tab with a share button to the level card.
