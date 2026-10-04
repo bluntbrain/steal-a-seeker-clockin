@@ -2,7 +2,7 @@
 
 Plan, revised 4 October 2026 after the first review. Branch `hunter-stealth`, draft PR #1. Decisions taken by the user on 4 October: the Solana characters leave the store and become recurring bosses; a boss appears every third level; the campaign grows from 12 fixed missions to a backend-published list that keeps growing (first target 100, capacity 200 or more); missions are shown on a vertically scrolling saga map players can share; the overall look gets an upgrade; guard engine 17 ships in the hackathon build only if the audit passes; top-down art lands for the default costume first.
 
-Implemented so far on the branch (4 October): the top-down courier renderer with sheets for the default and five classic costumes, guard "?" and "!" markers, the red detection ring, the in-play kill counter, the store retirement of the seven Solana skins, the published campaign backend (migration 015, `GET /campaign/levels`, level claims on `POST /campaign/runs`, `campaign:N` progress keys, boot seeding of the bundled batch, the publish script), the shared recipe generator with the first 88 levels bundled in the app, the vertical level map with zone banners and boss nodes, and the level share card. Still design: section 2 (guard engine 17 and the boss role), boss sprites, corpses, zone art.
+Implemented so far on the branch (4 October): the top-down courier renderer with sheets for the default and five classic costumes, guard "?" and "!" markers, the red detection ring, the in-play kill counter, the store retirement of the seven Solana skins, the published campaign backend (migration 015, `GET /campaign/levels`, level claims on `POST /campaign/runs`, `campaign:N` progress keys, boot seeding of the bundled batch, the publish script with the pinned verifier), the shared recipe generator with the first 88 levels bundled in the app, the vertical level map with zone banners and boss nodes, the level share card, combat revision 17 (section 2, in `src/game/heist-guards-v17.ts`, rules hash `62d6f2cf`, engine `9de073de`, revision 16 preserved as `2dff16c1`), the boss role with per-boss traits, boss sprites for Toly, Mert, Chase and Lily, bodies that stay on the floor with a blood pool, and boss name tags. Still open: the remaining three boss sprites, the API deploy, the APK, the device check, and the decisions in section 7.
 
 ## 1. What we studied
 
@@ -102,14 +102,14 @@ The hackathon closes on 8 October 2026. Each step leaves `main` shippable.
 | Day | Scope | Hash |
 | --- | --- | --- |
 | 1, done | Plan, top-down default courier, markers, ring, counter | Unchanged |
-| 2 | Store retirement; campaign level model, API, migration, progress keys, publish script; generator extracted; saga map with levels 1 to 12 plus the first published batch; share card | Unchanged |
-| 3 | Guard engine 17 and the boss role, tests, solver audit, rules bundle, API deploy; boss sprites; remaining top-down sheets; corpses | New |
+| 2, done | Store retirement; campaign level model, API, migration, progress keys, publish script; generator; saga map with levels 1 to 12 plus the first published batch; share card | Unchanged |
+| 3, mostly done | Guard engine 17 and the boss role, tests, solver audit, rules bundle `62d6f2cf`; boss sprites (four of seven); top-down sheets for five classic costumes; corpses. API deploy pending | New |
 | 4 | Balance pass, publish the first 100, APK, device check if a phone is available, PR ready | None |
 
 Risks: four days; the credit economy decision; the likeness question; difficulty regressions from longer cones (mitigated by the slower spot time and the solver gate); production variables that still name Solana skus.
 
 ## 7. Decisions still open
 
-1. Credits per level from 13 onward (proposal in section 3).
-2. Boss cadence detail: every third level from 13, or also replace mission 12's finale.
+1. Credits per level from 13 onward: implemented as 20 plus 5 per extra star, bosses 40 plus 5, pending the user's confirmation before the API deploy.
+2. Boss cadence: implemented as every third level from 13 (15, 18, 21, ...), rotating Toly, Mert, Chase, Lily, Vibhu, Akshay, Beeman. Mission 12 keeps its finale.
 3. Whether owners of retired skins get a notice in the store.
