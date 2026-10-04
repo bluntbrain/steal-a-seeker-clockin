@@ -1,0 +1,30 @@
+{
+  "application": {
+    "package": "com.bluntbrain.stealaseeker",
+    "version": "0.3.36",
+    "versionCode": 39
+  },
+  "apk": "releases/steal-a-seeker-mainnet-v0.3.36-code39.apk",
+  "bytes": 89859794,
+  "sha256": "00ed4252c22dd03fb4e6562229fa87153ec29af8f05d47c901de4f4956d4c125",
+  "builtFrom": "b2c6d05121b1324681945484d200e67b5cbe4f65",
+  "sourceFilesVerified": 263,
+  "sourceMismatches": [],
+  "signatureVerified": true,
+  "certificateSha256": "4fa3e9942238f110824fb67dc99438fc1d70ef48a273e4a79331d5f8a1e1e913",
+  "matchesCode38Certificate": true,
+  "zipIntegrity": true,
+  "zipAlignment16KB": true,
+  "architectures": [
+    "arm64-v8a"
+  ],
+  "stableFileMatches": true,
+  "deviceConnected": false,
+  "installedOrPhysicalPerformanceTested": false,
+  "storeUploaded": false,
+  "notes": [
+    "Unused untracked artwork and marketing experiments remain outside the committed release source.",
+    "Performance and AI livestream document is a proposal only.",
+    "No gameplay/rules changes in this release; mainnet API name lookup deployed separately."
+  ]
+}
