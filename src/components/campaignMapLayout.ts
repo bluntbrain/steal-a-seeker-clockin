@@ -7,7 +7,7 @@ export type MapScene={key:string;zone:CampaignZone;previousZone:CampaignZone|nul
 const roads:Record<CampaignZone,readonly (readonly [number,number])[]>={
  warehouse:[[0,.55],[.08,.68],[.2,.55],[.3,.45],[.4,.52],[.5,.67],[.6,.67],[.7,.6],[.8,.68],[.9,.52],[1,.43]],
  rooftops:[[0,.54],[.1,.6],[.2,.58],[.3,.63],[.4,.53],[.5,.55],[.6,.50],[.68,.49],[.76,.55],[.85,.50],[.95,.52],[1,.45]],
- powerworks:[[0,.56],[.1,.59],[.2,.62],[.3,.52],[.4,.63],[.48,.50],[.55,.53],[.62,.67],[.7,.56],[.78,.42],[.87,.42],[.95,.63],[1,.65]],
+ powerworks:[[0,.56],[.1,.59],[.2,.62],[.3,.52],[.4,.63],[.48,.50],[.55,.53],[.62,.67],[.7,.56],[.755,.53],[.80,.40],[.84,.35],[.88,.42],[.95,.63],[1,.65]],
 };
 function roadX(zone:CampaignZone,fraction:number,width:number){
  const points=roads[zone],upper=points.findIndex(p=>p[0]>=fraction);

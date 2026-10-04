@@ -48,7 +48,7 @@ export default function CampaignMap({entries,progress,current,onSelect}:{entries
  },[images,width,progress,entries,current.key,haptic,onSelect]);
  const extra=useMemo(()=>({progress,width,current:current.key,images}),[progress,width,current.key,images]);
  return <View testID="mission-districts" style={s.list} onLayout={e=>{const {width:w,height:h}=e.nativeEvent.layout;setSize(old=>old.width===w&&old.height===h?old:{width:w,height:h});}}>
-  {width>0&&<FlatList key={`${width}:${entries.length}`} ref={list} data={scenes} extraData={extra} renderItem={render} keyExtractor={r=>r.key} getItemLayout={getItemLayout} initialScrollIndex={currentScene} initialNumToRender={2} windowSize={3} maxToRenderPerBatch={2} showsVerticalScrollIndicator={false} onContentSizeChange={position} onScrollToIndexFailed={position}/>}
+  {width>0&&<FlatList key={`${width}:${entries.length}`} ref={list} data={scenes} extraData={extra} renderItem={render} keyExtractor={r=>r.key} getItemLayout={getItemLayout} initialScrollIndex={currentScene} initialNumToRender={2} windowSize={5} maxToRenderPerBatch={3} showsVerticalScrollIndicator={false} onContentSizeChange={position} onScrollToIndexFailed={position}/>}
  </View>;
 }
 const s=StyleSheet.create({
