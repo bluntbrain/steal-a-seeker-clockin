@@ -1,0 +1,20 @@
+[
+ {
+  "name": "mert",
+  "file": "mert.webp",
+  "model": "gpt-image-2",
+  "source": "output/imagegen/bosses-v1/mert-source.png",
+  "size": 512,
+  "facing": "+x",
+  "sha256": "0e8cab3cf03ac5a9595fb0e561c6d358208bcee09cd6dafda0e960fe051c06d2"
+ },
+ {
+  "name": "toly",
+  "file": "toly.webp",
+  "model": "gpt-image-2",
+  "source": "output/imagegen/bosses-v1/toly-source.png",
+  "size": 512,
+  "facing": "+x",
+  "sha256": "f972f0745dbfea2cea2e6675be0fbcbc0ea37b785f671df5231df656f0b4dded"
+ }
+]

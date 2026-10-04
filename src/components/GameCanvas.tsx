@@ -20,7 +20,7 @@ import {costumeAtlas,topdownAtlas} from './costumeAssets';
 import topdownFrames from '../../assets/courier-topdown-v1/frames.json';
 import {costumeFrame} from '../../shared/costumes';
 import GuardLayer from './GuardLayer';
-import {GUARD_SPRITES} from './enemy-presentation';
+import {GUARD_SPRITES,BOSS_SPRITES} from './enemy-presentation';
 import CameraSignals from './CameraSignals';
 import type {Camera} from '../camera/geometry';
 import CombatLayer from './CombatLayer';
@@ -53,6 +53,7 @@ export default memo(function GameCanvas({camera,size,height=size*20/12,input,gam
  const phones=useImage(require('../../assets/world-v3/phones.webp'),onLoadError);
  const droneSprite=useImage(require('../../assets/drones-v2/scout.webp'),onLoadError);
  const guardSprite=useImage(GUARD_SPRITES.guard,onLoadError),heavySprite=useImage(GUARD_SPRITES.heavy,onLoadError);
+ const bossId=level.patrols.find(p=>p.boss)?.boss,bossSprite=useImage(bossId?BOSS_SPRITES[bossId]??null:null,onLoadError);
  const phoneIndex=editionIndex(level.mission),phoneFrame=phoneAtlas.frames[phoneIndex]!;
  const phoneScale=1.18/phoneFrame.height;
  const phoneSprites=useMemo(()=>[phoneFrame],[phoneIndex]);
@@ -118,7 +119,7 @@ export default memo(function GameCanvas({camera,size,height=size*20/12,input,gam
     <Group transform={useDerivedValue(()=>[{translateY:phoneBob.value}])}><Atlas image={phones} sprites={phoneSprites} transforms={phoneTransforms}/></Group>
     <RoundedRect x={0-.55} y={0+.65} width={pickupWidth} height={.07} r={.025} color="#d9fff0"/>
    </Group>
-   {level.patrols.map((_,index)=><GuardLayer key={index} game={game} alpha={alpha} index={index} clock={clock} reduced={reduced} droneSprite={droneSprite} guardSprite={guardSprite} heavySprite={heavySprite} wallOcclusion={wallOcclusion}/>)}
+   {level.patrols.map((_,index)=><GuardLayer key={index} game={game} alpha={alpha} index={index} clock={clock} reduced={reduced} droneSprite={droneSprite} guardSprite={guardSprite} heavySprite={heavySprite} bossSprite={bossSprite} wallOcclusion={wallOcclusion}/>)}
    {level.switches?.map((_,index)=><SwitchAsset key={index} game={game} level={level} index={index} clock={clock} reduced={reduced}/>)}
    {!level.combat&&<DecoyLayer game={game} input={input} reduced={reduced}/>}
    <Group transform={escapeTransform} opacity={escapeOpacity}>
