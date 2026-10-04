@@ -1,5 +1,23 @@
 [
  {
+  "name": "akshay",
+  "file": "akshay.webp",
+  "model": "gpt-image-2",
+  "source": "output/imagegen/bosses-v1/akshay-source.png",
+  "size": 512,
+  "facing": "+x",
+  "sha256": "d53b33781fd52e42ff7858ed8cf9dc1307914ae5af52ff5fdd483d8b73073195"
+ },
+ {
+  "name": "beeman",
+  "file": "beeman.webp",
+  "model": "gpt-image-2",
+  "source": "output/imagegen/bosses-v1/beeman-source.png",
+  "size": 512,
+  "facing": "+x",
+  "sha256": "bab1158e023945b7bba4d299aa4720111c79b19a32b5f98ce87394609b423d6b"
+ },
+ {
   "name": "chase",
   "file": "chase.webp",
   "model": "gpt-image-2",

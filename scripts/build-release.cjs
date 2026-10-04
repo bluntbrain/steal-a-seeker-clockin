@@ -11,6 +11,10 @@ env.EXPO_PUBLIC_PHONE_RENDERER=env.EXPO_PUBLIC_PHONE_RENDERER||'filament';
 if(!['filament','turntable'].includes(env.EXPO_PUBLIC_PHONE_RENDERER))throw Error('Invalid phone renderer');
 delete env.EXPO_PUBLIC_NATIVE_WEEKLY;delete env.EXPO_PUBLIC_NATIVE_RECOVERY;delete env.EXPO_PUBLIC_NATIVE_PARITY;
 function run(cmd,args,cwd){const r=cp.spawnSync(cmd,args,{cwd,env,stdio:'inherit'});if(r.status!==0)process.exit(r.status||1);}
+// the android manifest takes its version from build.gradle; sync it from app.json so the installed app matches the upload name
+{const appJson=require('../app.json').expo,gradlePath='android/app/build.gradle',gradle=fs.readFileSync(gradlePath,'utf8');
+ const synced=gradle.replace(/^(\s*)versionCode \d+$/m,`$1versionCode ${appJson.android.versionCode}`).replace(/^(\s*)versionName "[^"]*"$/m,`$1versionName "${appJson.version}"`);
+ if(synced!==gradle){fs.writeFileSync(gradlePath,synced);console.log(`Synced android version to ${appJson.version} (${appJson.android.versionCode})`);}}
 run('npm',['run','rules:check'],process.cwd());
 run('./gradlew',[':app:cleanCreateBundleReleaseJsAndAssets',':app:assembleRelease','--no-daemon','-PreactNativeArchitectures=arm64-v8a','-PseekerDiagnostic=false',`-PseekerJudge=${mode==='judge'}`],path.join(process.cwd(),'android'));
 fs.mkdirSync('releases',{recursive:true});const out=`releases/steal-a-seeker-${mode}.apk`;fs.copyFileSync('android/app/build/outputs/apk/release/app-release.apk',out);

@@ -1551,7 +1551,8 @@ import { z } from "zod";
 // src/game/guards.ts
 function makeGuards(mission, override) {
   "worklet";
-  return (override ?? getLevel(mission)).patrols.map(({ route, range, halfAngle, spotSeconds, kind, sweep, activePower, combatRole = "scout", reserveAfter, hp }) => ({ reactionTicks: 0, alerted: false, hp: hp ?? { drone: 25, scout: 50, sentry: 75, heavy: 150, warden: 200 }[combatRole], maxHp: hp ?? { drone: 25, scout: 50, sentry: 75, heavy: 150, warden: 200 }[combatRole], combatRole, gunPhase: "ready", gunTicks: 0, burstLeft: 0, shotAngle: 0, spawned: reserveAfter === void 0, flash: 0, x: route[0].x, y: route[0].y, px: route[0].x, py: route[0].y, angle: sweep ? sweep.angle : Math.atan2(route[1].y - route[0].y, route[1].x - route[0].x), target: 1, wait: 0, exposure: 0, seesPlayer: false, range, halfAngle, spotSeconds, clock: 0, active: reserveAfter === void 0 && (activePower === void 0 || activePower === 0), kind: kind ?? "patrol", lureId: 0, lureAttemptId: 0, lureRetryAt: 0, nextReport: 0, nextChase: 0, mode: "patrol", path: [], pathIndex: 0, searchLeft: 0, searchAngle: 0, lastSeen: { ...route[0] } }));
+  const level = override ?? getLevel(mission), bossHealth = (level.combat?.revision ?? 0) >= 17;
+  return level.patrols.map(({ route, range, halfAngle, spotSeconds, kind, sweep, activePower, combatRole = "scout", reserveAfter, hp }) => ({ reactionTicks: 0, alerted: false, hp: (bossHealth ? hp : void 0) ?? { drone: 25, scout: 50, sentry: 75, heavy: 150, warden: 200 }[combatRole], maxHp: (bossHealth ? hp : void 0) ?? { drone: 25, scout: 50, sentry: 75, heavy: 150, warden: 200 }[combatRole], combatRole, gunPhase: "ready", gunTicks: 0, burstLeft: 0, shotAngle: 0, spawned: reserveAfter === void 0, flash: 0, x: route[0].x, y: route[0].y, px: route[0].x, py: route[0].y, angle: sweep ? sweep.angle : Math.atan2(route[1].y - route[0].y, route[1].x - route[0].x), target: 1, wait: 0, exposure: 0, seesPlayer: false, range, halfAngle, spotSeconds, clock: 0, active: reserveAfter === void 0 && (activePower === void 0 || activePower === 0), kind: kind ?? "patrol", lureId: 0, lureAttemptId: 0, lureRetryAt: 0, nextReport: 0, nextChase: 0, mode: "patrol", path: [], pathIndex: 0, searchLeft: 0, searchAngle: 0, lastSeen: { ...route[0] } }));
 }
 function sightDistance(x, y, dx, dy, limit, level = LEVEL) {
   "worklet";
@@ -2589,13 +2590,14 @@ function notice(g, p, tick, pause = NOTICE_TICKS) {
   "worklet";
   const h = memory(g);
   if (h.hunting) return;
+  const entering = !h.suspicious || g.mode !== "investigate";
   g.lastSeen = { x: p.x, y: p.y };
   h.role = "pursuer";
   h.suspicious = true;
   destination3(g, p, "investigate");
   g.brain.searchUntil = 0;
   g.brain.alertUntil = tick + INVESTIGATE_TICKS2;
-  h.noticeUntil = tick + pause;
+  if (entering) h.noticeUntil = tick + pause;
 }
 function contact2(g, p, l) {
   "worklet";
@@ -2794,6 +2796,10 @@ function noticeBodies(s, index, l, dt, rawSeen) {
     const dead = s.guards[j];
     if (dead.hp > 0 || !dead.spawned || (h.bodySeen ?? 0) >> j & 1) continue;
     if (Math.hypot(dead.x - g.x, dead.y - g.y) > BODY_RADIUS || !sees(g, dead.x, dead.y, l)) continue;
+    if (h.bodyTarget !== j) {
+      h.bodyTarget = j;
+      h.bodyFor = 0;
+    }
     watching = true;
     h.bodyFor = (h.bodyFor ?? 0) + dt;
     if (h.bodyFor >= BODY_SECONDS) {
@@ -2805,7 +2811,10 @@ function noticeBodies(s, index, l, dt, rawSeen) {
     }
     break;
   }
-  if (!watching) h.bodyFor = 0;
+  if (!watching) {
+    h.bodyFor = 0;
+    h.bodyTarget = -1;
+  }
 }
 function updateHeistGuardsV17(s, dt, l, shoot) {
   "worklet";

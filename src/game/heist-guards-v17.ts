@@ -11,7 +11,7 @@ import type {LevelDefinition,Point} from './level';
 import {guardPressure,pressureCombat,droneReportTicks} from './guard-pressure';
 import type {HeistMemory} from './heist-guards';
 
-export type HeistMemoryV17=HeistMemory&{suspicious?:boolean;noticeUntil?:number;waitTotal?:number;hear?:number;bodySeen?:number;bodyFor?:number;dir?:number;pos?:number};
+export type HeistMemoryV17=HeistMemory&{suspicious?:boolean;noticeUntil?:number;waitTotal?:number;hear?:number;bodySeen?:number;bodyFor?:number;bodyTarget?:number;dir?:number;pos?:number};
 type Shot=(s:GameState,from:Point,angle:number,owner:number,damage:number)=>void;
 export const ENTRY_WARNING_TICKS=24;
 export const RADIO_RADIUS=6;
@@ -56,7 +56,10 @@ function investigate(g:Guard,p:Point,tick:number,role:HeistMemory['role']='pursu
  * so a quiet courier can still take it from behind */
 function notice(g:Guard,p:Point,tick:number,pause=NOTICE_TICKS){
  'worklet';const h=memory(g);if(h.hunting)return;
- g.lastSeen={x:p.x,y:p.y};h.role='pursuer';h.suspicious=true;destination(g,p,'investigate');g.brain!.searchUntil=0;g.brain!.alertUntil=tick+INVESTIGATE_TICKS;h.noticeUntil=tick+pause;
+ // the pause starts only on entering suspicion; a repeated report moves the destination without freezing the guard again
+ const entering=!h.suspicious||g.mode!=='investigate';
+ g.lastSeen={x:p.x,y:p.y};h.role='pursuer';h.suspicious=true;destination(g,p,'investigate');g.brain!.searchUntil=0;g.brain!.alertUntil=tick+INVESTIGATE_TICKS;
+ if(entering)h.noticeUntil=tick+pause;
 }
 function contact(g:Guard,p:Point,l:LevelDefinition){'worklet';return sees(g,p.x,p.y,l);}
 function closeOnContact(g:Guard,p:Point,l:LevelDefinition,speed:number,dt:number){
@@ -154,6 +157,8 @@ function noticeBodies(s:GameState,index:number,l:LevelDefinition,dt:number,rawSe
  for(let j=0;j<s.guards.length&&j<31;j++){
   if(j===index)continue;const dead=s.guards[j]!;if(dead.hp>0||!dead.spawned||((h.bodySeen??0)>>j)&1)continue;
   if(Math.hypot(dead.x-g.x,dead.y-g.y)>BODY_RADIUS||!sees(g,dead.x,dead.y,l))continue;
+  // the half second belongs to one body; switching to another body starts over
+  if(h.bodyTarget!==j){h.bodyTarget=j;h.bodyFor=0;}
   watching=true;h.bodyFor=(h.bodyFor??0)+dt;
   if(h.bodyFor>=BODY_SECONDS){
    h.bodyFor=0;h.bodySeen=(h.bodySeen??0)|(1<<j);s.combat!.bodiesFound=(s.combat!.bodiesFound??0)+1;
@@ -162,7 +167,7 @@ function noticeBodies(s:GameState,index:number,l:LevelDefinition,dt:number,rawSe
   }
   break;
  }
- if(!watching)h.bodyFor=0;
+ if(!watching){h.bodyFor=0;h.bodyTarget=-1;}
 }
 
 export function updateHeistGuardsV17(s:GameState,dt:number,l:LevelDefinition,shoot:Shot){

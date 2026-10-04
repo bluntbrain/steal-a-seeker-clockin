@@ -82,3 +82,28 @@ test('revision 17 campaign levels stay deterministic across serialization and ev
  for(let t=0;t<300;t++){const command=t===0?combatTap(a,l.phone.x,l.phone.y,1):undefined;step(a,{...idleInput(),command});step(b,{...idleInput(),command});}
  assert.deepEqual(JSON.parse(JSON.stringify(a)),JSON.parse(JSON.stringify(b)));
 });
+
+test('a receiver behind cover keeps walking under sustained radio reports; the notice pause runs once',()=>{
+ const l=arena();l.patrols=[l.patrols[0]!,{...l.patrols[1]!,route:[{x:9,y:9},{x:9,y:9.01}]}];
+ // a wall hides the courier from the second guard but not from the first
+ l.blockers.push({x:7.5,y:7.5,w:.3,h:3,kind:'wall'});
+ const s=initialState(l.mission,l);s.x=6;s.y=8.5;s.px=s.x;s.py=s.y;const receiver=s.guards[1]!;
+ advanceAI(s,l,24);assert(mem(s,0).hunting,'observer hunts');assert(mem(s,1).suspicious&&!mem(s,1).hunting,'receiver is suspicious');
+ const pauseEnd=mem(s,1).noticeUntil!,at={x:receiver.x,y:receiver.y};
+ // the receiver walks around the wall while reports keep arriving; once it sees the courier itself it hunts
+ let t=0;for(;t<300&&!mem(s,1).hunting;t++){advanceAI(s,l,1);if(!mem(s,1).hunting)assert.equal(mem(s,1).noticeUntil,pauseEnd,'repeated reports never restart the pause');}
+ assert(Math.hypot(receiver.x-at.x,receiver.y-at.y)>1,'the receiver moved toward the report');assert(t>30,'it walked for a while before any direct sighting');
+});
+test('watching two different bodies does not add their time together',()=>{
+ const l=arena(),s=initialState(l.mission,l);far(s);const g=s.guards[0]!;g.angle=Math.PI/2;
+ const a=s.guards[1]!,b=s.guards[2]!;a.hp=0;b.hp=0;a.x=6;a.y=8;b.x=20;b.y=20;
+ advanceAI(s,l,8);assert.equal(s.combat!.bodiesFound??0,0);
+ // swap: body a leaves the cone, body b takes its place
+ a.x=20;a.y=20;b.x=6;b.y=8;advanceAI(s,l,8);assert.equal(s.combat!.bodiesFound??0,0,'eight ticks on each body is not half a second on one');
+ advanceAI(s,l,8);assert.equal(s.combat!.bodiesFound,1);
+});
+test('a revision 16 definition that names a health value keeps the role table',async()=>{
+ const {makeGuards}=await import('../src/game/guards');
+ const l=arena(),old={...l,combat:{version:2 as const,revision:16 as const},patrols:[{...l.patrols[0]!,hp:999}]};
+ assert.equal(makeGuards(old.mission,old)[0]!.hp,50);assert.equal(makeGuards(l.mission,{...l,patrols:[{...l.patrols[0]!,hp:999}]})[0]!.hp,999);
+});

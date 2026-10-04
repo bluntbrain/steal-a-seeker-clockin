@@ -1,7 +1,7 @@
 {
- "publishedAt": "2026-10-04T06:44:03.538Z",
- "rulesHash": "62d6f2cfa6b7b5243a56986834d2a512c98a09ba2ca09db9e6d60c1e41e5c032",
- "engineHash": "9de073de2fc3f53dafee430054c481833c26c627a92c85edf6c5506d9408614e",
+ "publishedAt": "2026-10-04T06:58:10.949Z",
+ "rulesHash": "c841a691979358970a0862a4fb5176c6bedcd5aedc37299e4bda1bc37837cd33",
+ "engineHash": "23df7328b1caa233d26b0f693ccdd21621a47ea6709ac024b3c740ffda750a72",
  "from": 13,
  "to": 100,
  "dry": true,
@@ -91,7 +91,7 @@
    "template": "long-divide",
    "band": 5,
    "modifier": "none",
-   "solvedSeconds": 18.17,
+   "solvedSeconds": 18.23,
    "targetSeconds": 102,
    "salt": 0
   },
@@ -157,7 +157,7 @@
    "template": "loading-hooks",
    "band": 6,
    "modifier": "none",
-   "solvedSeconds": 13.8,
+   "solvedSeconds": 14.53,
    "targetSeconds": 106,
    "salt": 0
   },
@@ -168,7 +168,7 @@
    "template": "long-divide",
    "band": 6,
    "modifier": "none",
-   "solvedSeconds": 14.57,
+   "solvedSeconds": 23.5,
    "targetSeconds": 106,
    "salt": 0
   },
@@ -179,7 +179,7 @@
    "template": "twin-courts",
    "band": 6,
    "modifier": "none",
-   "solvedSeconds": 17.63,
+   "solvedSeconds": 17.27,
    "targetSeconds": 106,
    "salt": 0
   },
@@ -190,7 +190,7 @@
    "template": "switchback",
    "band": 6,
    "modifier": "none",
-   "solvedSeconds": 15.43,
+   "solvedSeconds": 18.3,
    "targetSeconds": 108,
    "salt": 0
   },
@@ -201,7 +201,7 @@
    "template": "four-posts",
    "band": 6,
    "modifier": "none",
-   "solvedSeconds": 14.43,
+   "solvedSeconds": 13.93,
    "targetSeconds": 108,
    "salt": 0
   },
@@ -212,7 +212,7 @@
    "template": "cargo-court",
    "band": 6,
    "modifier": "none",
-   "solvedSeconds": 14.83,
+   "solvedSeconds": 13.87,
    "targetSeconds": 108,
    "salt": 0
   },
@@ -234,7 +234,7 @@
    "template": "twin-courts",
    "band": 6,
    "modifier": "none",
-   "solvedSeconds": 14.73,
+   "solvedSeconds": 14.97,
    "targetSeconds": 110,
    "salt": 0
   },
@@ -245,7 +245,7 @@
    "template": "diagonal-vault",
    "band": 6,
    "modifier": "none",
-   "solvedSeconds": 13.3,
+   "solvedSeconds": 15.47,
    "targetSeconds": 110,
    "salt": 0
   },
@@ -256,7 +256,7 @@
    "template": "freight-fork",
    "band": 6,
    "modifier": "none",
-   "solvedSeconds": 19.03,
+   "solvedSeconds": 13.9,
    "targetSeconds": 110,
    "salt": 0
   },
@@ -267,7 +267,7 @@
    "template": "split-spines",
    "band": 6,
    "modifier": "none",
-   "solvedSeconds": 40.07,
+   "solvedSeconds": 13.33,
    "targetSeconds": 110,
    "salt": 0
   },
@@ -278,7 +278,7 @@
    "template": "double-bend",
    "band": 7,
    "modifier": "exit-window",
-   "solvedSeconds": 18.83,
+   "solvedSeconds": 18.63,
    "targetSeconds": 112,
    "salt": 0
   },
@@ -289,7 +289,7 @@
    "template": "vault-teeth",
    "band": 7,
    "modifier": "none",
-   "solvedSeconds": 22.57,
+   "solvedSeconds": 12.77,
    "targetSeconds": 112,
    "salt": 0
   },
@@ -311,7 +311,7 @@
    "template": "three-cargo",
    "band": 7,
    "modifier": "none",
-   "solvedSeconds": 25.9,
+   "solvedSeconds": 17.8,
    "targetSeconds": 112,
    "salt": 0
   },
@@ -322,7 +322,7 @@
    "template": "freight-fork",
    "band": 7,
    "modifier": "none",
-   "solvedSeconds": 17.43,
+   "solvedSeconds": 12.6,
    "targetSeconds": 114,
    "salt": 0
   },
@@ -333,7 +333,7 @@
    "template": "relay-court",
    "band": 7,
    "modifier": "none",
-   "solvedSeconds": 21.77,
+   "solvedSeconds": 14.27,
    "targetSeconds": 114,
    "salt": 0
   },
@@ -344,7 +344,7 @@
    "template": "long-divide",
    "band": 7,
    "modifier": "none",
-   "solvedSeconds": 21.97,
+   "solvedSeconds": 18.03,
    "targetSeconds": 114,
    "salt": 0
   },
@@ -366,7 +366,7 @@
    "template": "cargo-court",
    "band": 7,
    "modifier": "none",
-   "solvedSeconds": 13.33,
+   "solvedSeconds": 18.17,
    "targetSeconds": 116,
    "salt": 0
   },
@@ -377,7 +377,7 @@
    "template": "double-bend",
    "band": 7,
    "modifier": "none",
-   "solvedSeconds": 17.2,
+   "solvedSeconds": 12.57,
    "targetSeconds": 116,
    "salt": 0
   },
@@ -388,7 +388,7 @@
    "template": "switchback",
    "band": 7,
    "modifier": "blackout",
-   "solvedSeconds": 19.63,
+   "solvedSeconds": 23.37,
    "targetSeconds": 116,
    "salt": 0
   },
@@ -399,7 +399,7 @@
    "template": "staircase",
    "band": 7,
    "modifier": "none",
-   "solvedSeconds": 13.5,
+   "solvedSeconds": 15.53,
    "targetSeconds": 116,
    "salt": 0
   },
@@ -410,7 +410,7 @@
    "template": "four-posts",
    "band": 8,
    "modifier": "none",
-   "solvedSeconds": 18.47,
+   "solvedSeconds": 17.77,
    "targetSeconds": 118,
    "salt": 0
   },
@@ -421,7 +421,7 @@
    "template": "narrow-islands",
    "band": 8,
    "modifier": "none",
-   "solvedSeconds": 21.63,
+   "solvedSeconds": 20.37,
    "targetSeconds": 118,
    "salt": 0
   },
@@ -432,7 +432,7 @@
    "template": "vault-wings",
    "band": 8,
    "modifier": "none",
-   "solvedSeconds": 22.33,
+   "solvedSeconds": 16.27,
    "targetSeconds": 118,
    "salt": 0
   },
@@ -443,7 +443,7 @@
    "template": "long-divide",
    "band": 8,
    "modifier": "exit-window",
-   "solvedSeconds": 17.17,
+   "solvedSeconds": 17.9,
    "targetSeconds": 118,
    "salt": 0
   },
@@ -454,7 +454,7 @@
    "template": "twin-courts",
    "band": 8,
    "modifier": "none",
-   "solvedSeconds": 16.43,
+   "solvedSeconds": 13.37,
    "targetSeconds": 120,
    "salt": 0
   },
@@ -465,7 +465,7 @@
    "template": "loading-hooks",
    "band": 8,
    "modifier": "none",
-   "solvedSeconds": 15.3,
+   "solvedSeconds": 14.43,
    "targetSeconds": 120,
    "salt": 0
   },
@@ -476,7 +476,7 @@
    "template": "three-cargo",
    "band": 8,
    "modifier": "none",
-   "solvedSeconds": 13.5,
+   "solvedSeconds": 12.87,
    "targetSeconds": 120,
    "salt": 0
   },
@@ -487,7 +487,7 @@
    "template": "staircase",
    "band": 8,
    "modifier": "none",
-   "solvedSeconds": 19.77,
+   "solvedSeconds": 19.37,
    "targetSeconds": 120,
    "salt": 0
   },
@@ -498,7 +498,7 @@
    "template": "narrow-islands",
    "band": 8,
    "modifier": "none",
-   "solvedSeconds": 15.37,
+   "solvedSeconds": 14.57,
    "targetSeconds": 122,
    "salt": 0
   },
@@ -509,7 +509,7 @@
    "template": "diagonal-vault",
    "band": 8,
    "modifier": "none",
-   "solvedSeconds": 17.87,
+   "solvedSeconds": 16.3,
    "targetSeconds": 122,
    "salt": 0
   },
@@ -520,7 +520,7 @@
    "template": "broken-cross",
    "band": 8,
    "modifier": "none",
-   "solvedSeconds": 14.03,
+   "solvedSeconds": 16.37,
    "targetSeconds": 122,
    "salt": 0
   },
@@ -531,7 +531,7 @@
    "template": "relay-court",
    "band": 8,
    "modifier": "none",
-   "solvedSeconds": 14.93,
+   "solvedSeconds": 17.33,
    "targetSeconds": 122,
    "salt": 0
   },
@@ -542,7 +542,7 @@
    "template": "staircase",
    "band": 9,
    "modifier": "none",
-   "solvedSeconds": 14.03,
+   "solvedSeconds": 15.33,
    "targetSeconds": 124,
    "salt": 0
   },
@@ -553,7 +553,7 @@
    "template": "twin-courts",
    "band": 9,
    "modifier": "blackout",
-   "solvedSeconds": 13.23,
+   "solvedSeconds": 16.73,
    "targetSeconds": 124,
    "salt": 0
   },
@@ -564,7 +564,7 @@
    "template": "three-cargo",
    "band": 9,
    "modifier": "none",
-   "solvedSeconds": 17.3,
+   "solvedSeconds": 15.1,
    "targetSeconds": 124,
    "salt": 0
   },
@@ -575,7 +575,7 @@
    "template": "double-bend",
    "band": 9,
    "modifier": "none",
-   "solvedSeconds": 14.97,
+   "solvedSeconds": 15.03,
    "targetSeconds": 124,
    "salt": 0
   },
@@ -597,7 +597,7 @@
    "template": "narrow-islands",
    "band": 9,
    "modifier": "none",
-   "solvedSeconds": 13.23,
+   "solvedSeconds": 18.37,
    "targetSeconds": 126,
    "salt": 0
   },
@@ -608,7 +608,7 @@
    "template": "loading-hooks",
    "band": 9,
    "modifier": "exit-window",
-   "solvedSeconds": 17.33,
+   "solvedSeconds": 19.23,
    "targetSeconds": 126,
    "salt": 0
   },
@@ -619,7 +619,7 @@
    "template": "long-divide",
    "band": 9,
    "modifier": "none",
-   "solvedSeconds": 15.47,
+   "solvedSeconds": 13.97,
    "targetSeconds": 126,
    "salt": 0
   },
@@ -630,7 +630,7 @@
    "template": "vault-wings",
    "band": 9,
    "modifier": "none",
-   "solvedSeconds": 15,
+   "solvedSeconds": 14.7,
    "targetSeconds": 128,
    "salt": 0
   },
@@ -641,7 +641,7 @@
    "template": "three-cargo",
    "band": 9,
    "modifier": "none",
-   "solvedSeconds": 13.57,
+   "solvedSeconds": 13.27,
    "targetSeconds": 128,
    "salt": 0
   },
@@ -652,7 +652,7 @@
    "template": "freight-fork",
    "band": 9,
    "modifier": "none",
-   "solvedSeconds": 18.5,
+   "solvedSeconds": 17.4,
    "targetSeconds": 128,
    "salt": 0
   },
@@ -663,7 +663,7 @@
    "template": "cargo-court",
    "band": 9,
    "modifier": "none",
-   "solvedSeconds": 14.93,
+   "solvedSeconds": 14.7,
    "targetSeconds": 128,
    "salt": 0
   },
@@ -674,7 +674,7 @@
    "template": "broken-cross",
    "band": 10,
    "modifier": "none",
-   "solvedSeconds": 12.57,
+   "solvedSeconds": 12.47,
    "targetSeconds": 130,
    "salt": 0
   },
@@ -685,7 +685,7 @@
    "template": "offset-gates",
    "band": 10,
    "modifier": "none",
-   "solvedSeconds": 19.33,
+   "solvedSeconds": 20.73,
    "targetSeconds": 130,
    "salt": 0
   },
@@ -707,7 +707,7 @@
    "template": "split-spines",
    "band": 10,
    "modifier": "none",
-   "solvedSeconds": 13.6,
+   "solvedSeconds": 27.73,
    "targetSeconds": 130,
    "salt": 0
   },
@@ -718,7 +718,7 @@
    "template": "long-divide",
    "band": 10,
    "modifier": "blackout",
-   "solvedSeconds": 13.2,
+   "solvedSeconds": 13.67,
    "targetSeconds": 130,
    "salt": 0
   },
@@ -729,7 +729,7 @@
    "template": "loading-hooks",
    "band": 10,
    "modifier": "none",
-   "solvedSeconds": 13.6,
+   "solvedSeconds": 13.57,
    "targetSeconds": 130,
    "salt": 0
   },
@@ -751,7 +751,7 @@
    "template": "switchback",
    "band": 10,
    "modifier": "none",
-   "solvedSeconds": 13.4,
+   "solvedSeconds": 15.43,
    "targetSeconds": 130,
    "salt": 0
   },
@@ -784,7 +784,7 @@
    "template": "vault-wings",
    "band": 10,
    "modifier": "none",
-   "solvedSeconds": 19.57,
+   "solvedSeconds": 15.53,
    "targetSeconds": 130,
    "salt": 0
   },
@@ -795,7 +795,7 @@
    "template": "vault-teeth",
    "band": 10,
    "modifier": "none",
-   "solvedSeconds": 12.1,
+   "solvedSeconds": 12.47,
    "targetSeconds": 130,
    "salt": 0
   },
@@ -806,7 +806,7 @@
    "template": "three-cargo",
    "band": 11,
    "modifier": "none",
-   "solvedSeconds": 16.5,
+   "solvedSeconds": 14,
    "targetSeconds": 130,
    "salt": 0
   },
@@ -817,7 +817,7 @@
    "template": "narrow-islands",
    "band": 11,
    "modifier": "none",
-   "solvedSeconds": 12.7,
+   "solvedSeconds": 12.67,
    "targetSeconds": 130,
    "salt": 0
   },
@@ -828,7 +828,7 @@
    "template": "broken-cross",
    "band": 11,
    "modifier": "none",
-   "solvedSeconds": 12.5,
+   "solvedSeconds": 13.83,
    "targetSeconds": 130,
    "salt": 0
   },
@@ -839,7 +839,7 @@
    "template": "switchback",
    "band": 11,
    "modifier": "none",
-   "solvedSeconds": 14.63,
+   "solvedSeconds": 14.87,
    "targetSeconds": 130,
    "salt": 0
   },
@@ -883,7 +883,7 @@
    "template": "staircase",
    "band": 11,
    "modifier": "blackout",
-   "solvedSeconds": 24.1,
+   "solvedSeconds": 13.5,
    "targetSeconds": 130,
    "salt": 0
   },
@@ -894,7 +894,7 @@
    "template": "double-bend",
    "band": 11,
    "modifier": "none",
-   "solvedSeconds": 15.87,
+   "solvedSeconds": 15.1,
    "targetSeconds": 130,
    "salt": 0
   },
@@ -905,7 +905,7 @@
    "template": "long-divide",
    "band": 11,
    "modifier": "none",
-   "solvedSeconds": 12.53,
+   "solvedSeconds": 11.8,
    "targetSeconds": 130,
    "salt": 0
   },
@@ -916,7 +916,7 @@
    "template": "split-spines",
    "band": 11,
    "modifier": "none",
-   "solvedSeconds": 11.6,
+   "solvedSeconds": 12.97,
    "targetSeconds": 130,
    "salt": 0
   },
@@ -927,7 +927,7 @@
    "template": "cargo-court",
    "band": 11,
    "modifier": "none",
-   "solvedSeconds": 13.2,
+   "solvedSeconds": 14.63,
    "targetSeconds": 130,
    "salt": 0
   },
@@ -949,7 +949,7 @@
    "template": "double-bend",
    "band": 12,
    "modifier": "none",
-   "solvedSeconds": 13.93,
+   "solvedSeconds": 15.8,
    "targetSeconds": 130,
    "salt": 0
   },
@@ -960,7 +960,7 @@
    "template": "freight-fork",
    "band": 12,
    "modifier": "none",
-   "solvedSeconds": 15.97,
+   "solvedSeconds": 12.93,
    "targetSeconds": 130,
    "salt": 0
   },
@@ -971,7 +971,7 @@
    "template": "loading-hooks",
    "band": 12,
    "modifier": "none",
-   "solvedSeconds": 21.2,
+   "solvedSeconds": 13.47,
    "targetSeconds": 130,
    "salt": 0
   }
