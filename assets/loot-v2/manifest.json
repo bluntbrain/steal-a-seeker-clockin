@@ -1,0 +1,104 @@
+{
+  "status": "coin-spin integrated into gameplay; impact-absorb retained as an unused concept",
+  "provider": "OpenAI image generation",
+  "atlases": [
+    {
+      "file": "coin-spin.png",
+      "frames": [
+        {
+          "x": 0,
+          "y": 0,
+          "width": 128,
+          "height": 128
+        },
+        {
+          "x": 128,
+          "y": 0,
+          "width": 128,
+          "height": 128
+        },
+        {
+          "x": 256,
+          "y": 0,
+          "width": 128,
+          "height": 128
+        },
+        {
+          "x": 0,
+          "y": 128,
+          "width": 128,
+          "height": 128
+        },
+        {
+          "x": 128,
+          "y": 128,
+          "width": 128,
+          "height": 128
+        },
+        {
+          "x": 256,
+          "y": 128,
+          "width": 128,
+          "height": 128
+        }
+      ],
+      "bytes": 104181,
+      "sha256": "c7c00e01494c06c5ed84c76fce9fa2fb2dce2b7da521db00fc77de17cb131ae4"
+    },
+    {
+      "file": "impact-absorb.png",
+      "frames": [
+        {
+          "x": 0,
+          "y": 0,
+          "width": 192,
+          "height": 192
+        },
+        {
+          "x": 192,
+          "y": 0,
+          "width": 192,
+          "height": 192
+        },
+        {
+          "x": 384,
+          "y": 0,
+          "width": 192,
+          "height": 192
+        },
+        {
+          "x": 576,
+          "y": 0,
+          "width": 192,
+          "height": 192
+        },
+        {
+          "x": 0,
+          "y": 192,
+          "width": 192,
+          "height": 192
+        },
+        {
+          "x": 192,
+          "y": 192,
+          "width": 192,
+          "height": 192
+        },
+        {
+          "x": 384,
+          "y": 192,
+          "width": 192,
+          "height": 192
+        },
+        {
+          "x": 576,
+          "y": 192,
+          "width": 192,
+          "height": 192
+        }
+      ],
+      "bytes": 227988,
+      "sha256": "d0ca95406885774ce9d9a58f0fef1f8be3bbd15bfb7cb3f32eefca201a083569"
+    }
+  ]
+}

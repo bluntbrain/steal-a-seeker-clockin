@@ -1,0 +1,70 @@
+{
+  "provider": "OpenAI image generation",
+  "frameSize": 256,
+  "atlases": [
+    {
+      "file": "robots.webp",
+      "cols": 4,
+      "rows": 3,
+      "source": "source/robots.png",
+      "bytes": 708346,
+      "sha256": "953d783ea6606cb0cc05ae465011f84512b4adea6b5c7a275f7e20a07a476097"
+    },
+    {
+      "file": "toly.webp",
+      "cols": 2,
+      "rows": 2,
+      "source": "source/toly.png",
+      "bytes": 151164,
+      "sha256": "8a37c5e0371ebb3ff28b382af02515e92884b781bc5bee39728b350bd5b4a3d1"
+    },
+    {
+      "file": "mert.webp",
+      "cols": 2,
+      "rows": 2,
+      "source": "source/mert.png",
+      "bytes": 129044,
+      "sha256": "1dcca57bfa3c31cafb6d0310b8378845f5e362930911a53b36ad78e8b8eb234e"
+    },
+    {
+      "file": "chase.webp",
+      "cols": 2,
+      "rows": 2,
+      "source": "source/chase.png",
+      "bytes": 145096,
+      "sha256": "d4cd5f06bff0be1906c91147209835cf606e78aeb5c7525545dc865382a525cc"
+    },
+    {
+      "file": "lily.webp",
+      "cols": 2,
+      "rows": 2,
+      "source": "source/lily.png",
+      "bytes": 132966,
+      "sha256": "334c8f5035bfe4d83c959c537dca0ada07cc20873a718e3e938bf866bb14c619"
+    },
+    {
+      "file": "vibhu.webp",
+      "cols": 2,
+      "rows": 2,
+      "source": "source/vibhu.png",
+      "bytes": 124876,
+      "sha256": "cc5cc0d97e0b631557b41e269c09774824fac2f6d8579fdc23d4816879c55514"
+    },
+    {
+      "file": "akshay.webp",
+      "cols": 2,
+      "rows": 2,
+      "source": "source/akshay.png",
+      "bytes": 151064,
+      "sha256": "546730d92de93940b85232c670ee9fa1b90bcb0f2de6c8b14de59d1612d2feee"
+    },
+    {
+      "file": "beeman.webp",
+      "cols": 2,
+      "rows": 2,
+      "source": "source/beeman.png",
+      "bytes": 128108,
+      "sha256": "5e62f72eb8bf6f5ba7b22773872e4a7b3cd6b1241f03306eebacb0d4d3afd8b8"
+    }
+  ]
+}

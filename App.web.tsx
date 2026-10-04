@@ -3,6 +3,7 @@ import {View,Text} from 'react-native';
 import {WithSkiaWeb} from '@shopify/react-native-skia/lib/module/web';
 export default function App(){return <WithSkiaWeb getComponent={()=>{
  const local=['localhost','127.0.0.1','::1'].includes(window.location.hostname),params=new URLSearchParams(window.location.search);
+ if(local&&params.has('defeatLab'))return import('./src/playtest/DefeatFxLab.web');
  if(local&&params.has('worldLab'))return import('./src/playtest/CampaignWorldLab.web');
  if(local&&params.has('loaderLab'))return import('./src/playtest/ChaseLoaderLab.web');
  if(local&&params.has('wallLab'))return import('./src/playtest/WallDepthLab');

@@ -21,6 +21,7 @@ import type {CourierCardData} from './league/card';
 import {useGameAudio} from './audio/useGameAudio';
 import {useCombatGuide} from './onboarding/useCombatGuide';
 import {GUIDE_STEPS,guideCommand,guideTarget} from './onboarding/combat-guide';
+import {useLootAudio} from './audio/useLootAudio';
 import {useCombatAudio} from './audio/useCombatAudio';
 import {useLevelMusic} from './audio/useLevelMusic';
 import {useFootstepAudio} from './audio/useFootstepAudio';
@@ -130,6 +131,7 @@ export function Game({onSnapshot}:{onSnapshot?:(state:GameState)=>void}){
  const showDamage=useCallback(()=>{damagePulse.value=settingsRef.current.reducedEffects?.45:1;damagePulse.value=withTiming(0,{duration:settingsRef.current.reducedEffects?160:280});},[damagePulse,haptic]);
  const showGameplayHeader=paused||hud.status!=='playing';
  const gameplayVisible=renderGameSurface&&!introMission&&!sceneLoading&&!paused&&!hideoutOpen&&!walletOpen&&!mapOpen&&!settingsOpen&&!rewardsOpen;
+ useLootAudio(game,clock,settings.sound&&gameplayVisible,settings.volume);
  useCombatAudio(hud,settings.sound&&gameplayVisible,settings.volume,showDamage,gameplayVisible);
  useEffect(()=>{if(!gameplayVisible||hud.ticks===0)damagePulse.value=0;},[gameplayVisible,hud.ticks===0,damagePulse]);
  useFootstepAudio(hud,settings.sound&&gameplayVisible&&!(guide.active&&guide.waiting),settings.volume);

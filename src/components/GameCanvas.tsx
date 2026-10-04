@@ -20,7 +20,7 @@ import {costumeAtlas,topdownAtlas} from './costumeAssets';
 import topdownFrames from '../../assets/courier-topdown-v2/frames.json';
 import {costumeFrame} from '../../shared/costumes';
 import GuardLayer from './GuardLayer';
-import {GUARD_SPRITES,BOSS_SPRITES} from './enemy-presentation';
+import {GUARD_SPRITES,BOSS_SPRITES,DEFEAT_SPRITES} from './enemy-presentation';
 import CameraSignals from './CameraSignals';
 import type {Camera} from '../camera/geometry';
 import CombatLayer from './CombatLayer';
@@ -54,6 +54,7 @@ export default memo(function GameCanvas({camera,size,height=size*20/12,input,gam
  const droneSprite=useImage(require('../../assets/drones-v2/scout.webp'),onLoadError);
  const guardSprite=useImage(GUARD_SPRITES.guard,onLoadError),heavySprite=useImage(GUARD_SPRITES.heavy,onLoadError);
  const bossId=level.patrols.find(p=>p.boss)?.boss,bossSprite=useImage(bossId?BOSS_SPRITES[bossId]??null:null,onLoadError);
+ const defeatSprite=useImage(DEFEAT_SPRITES.robots,onLoadError),bossDefeat=useImage(bossId?DEFEAT_SPRITES[bossId as keyof typeof DEFEAT_SPRITES]??null:null,onLoadError);
  const phoneIndex=editionIndex(level.mission),phoneFrame=phoneAtlas.frames[phoneIndex]!;
  const phoneScale=1.18/phoneFrame.height;
  const phoneSprites=useMemo(()=>[phoneFrame],[phoneIndex]);
@@ -61,15 +62,15 @@ export default memo(function GameCanvas({camera,size,height=size*20/12,input,gam
  const carryTransforms=useMemo(()=>[Skia.RSXform((knifeCombat(level)?.36:.48)/phoneFrame.height,0,0,0)],[phoneIndex,level]);
  // knife levels draw the courier strictly top-down and rotate one sprite like the guards; older levels keep the directional sheet
  const knifeMode=knifeCombat(level),actorFrames=knifeMode?MELEE_FRAMES:frames;
- const lootCoin=useImage(require('../../assets/loot-v1/coin.png'),onLoadError);
+ const lootCoin=useImage(require('../../assets/loot-v2/coin-spin.png'),onLoadError);
  const sprite=useImage(knifeMode?topdownAtlas(appearance.outfit):costumeAtlas(appearance.outfit),onLoadError);
  // Each scene is keyed by the parent. Never acknowledge a previous district's
  // retained image while a new source is decoding. Let the new canvas paint first.
  useEffect(()=>{
-  if(!lootCoin||!wallTexture||!floor||!phones||!sprite||!droneSprite||!guardSprite||!heavySprite)return;
+  if(!defeatSprite||(bossId&&(!bossSprite||!bossDefeat))||!lootCoin||!wallTexture||!floor||!phones||!sprite||!droneSprite||!guardSprite||!heavySprite)return;
   let second=0;const first=requestAnimationFrame(()=>{second=requestAnimationFrame(()=>onReady?.());});
   return()=>{cancelAnimationFrame(first);cancelAnimationFrame(second);};
- },[lootCoin,wallTexture,floor,phones,sprite,droneSprite,guardSprite,heavySprite,onReady]);
+ },[defeatSprite,bossDefeat,bossSprite,bossId,lootCoin,wallTexture,floor,phones,sprite,droneSprite,guardSprite,heavySprite,onReady]);
  const reduced=!!appearance.reducedEffects;
  const x=useDerivedValue(()=>game.value.px+(game.value.x-game.value.px)*alpha.value);
  const y=useDerivedValue(()=>game.value.py+(game.value.y-game.value.py)*alpha.value);
@@ -118,7 +119,7 @@ export default memo(function GameCanvas({camera,size,height=size*20/12,input,gam
     <Group transform={useDerivedValue(()=>[{translateY:phoneBob.value}])}><Atlas image={phones} sprites={phoneSprites} transforms={phoneTransforms}/></Group>
     <RoundedRect x={0-.55} y={0+.65} width={pickupWidth} height={.07} r={.025} color="#d9fff0"/>
    </Group>
-   {level.patrols.map((_,index)=><GuardLayer key={index} game={game} alpha={alpha} index={index} clock={clock} reduced={reduced} droneSprite={droneSprite} guardSprite={guardSprite} heavySprite={heavySprite} bossSprite={bossSprite} wallOcclusion={wallOcclusion}/>)}
+   {level.patrols.map((_,index)=><GuardLayer key={index} game={game} alpha={alpha} index={index} clock={clock} reduced={reduced} droneSprite={droneSprite} guardSprite={guardSprite} heavySprite={heavySprite} bossSprite={bossSprite} defeatSprite={defeatSprite} bossDefeat={bossDefeat} wallOcclusion={wallOcclusion}/>)}
    {level.switches?.map((_,index)=><SwitchAsset key={index} game={game} level={level} index={index} clock={clock} reduced={reduced}/>)}
    {!level.combat&&<DecoyLayer game={game} input={input} reduced={reduced}/>}
    <Group transform={escapeTransform} opacity={escapeOpacity}>

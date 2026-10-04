@@ -1,0 +1,26 @@
+[
+  {
+    "file": "scatter.wav",
+    "prompt": "A small handful of gold coins bursts outward with an immediate bright metallic tik-clatter, three tiny impacts, all at the very beginning. Dry close arcade collectible sound, tactile and crisp on phone speakers, no long tail. Isolated sound effect. No voice, music, ambience, distortion, reverb, gunshot or explosion.",
+    "provider": "ElevenLabs",
+    "model": "eleven_text_to_sound_v2",
+    "duration": 0.32,
+    "sha256": "3ea61d5c6d86887f1ef8d185bc42e35bcc84c4461619af905a8143350431d9a5"
+  },
+  {
+    "file": "magnet.wav",
+    "prompt": "One very short soft air zip that accelerates and rises gently in pitch, like small coins being magnetically pulled through the air. Instant onset, smooth velvet swish ending in a tight stop. Light and satisfying, not loud or dramatic. Isolated sound effect. No voice, music, ambience, distortion, reverb, gunshot or explosion.",
+    "provider": "ElevenLabs",
+    "model": "eleven_text_to_sound_v2",
+    "duration": 0.38,
+    "sha256": "1e92818959a5f57c335c891815ec10494bc6fe35f7816673ef787e4d7335f3aa"
+  },
+  {
+    "file": "absorb.wav",
+    "prompt": "One single tiny gold coin collected: an immediate crisp rounded metallic plink with a warm little bright sparkle tail. Clean arcade reward sound, short and tactile. Not a melody, not a casino jackpot, no deep impact. Isolated sound effect. No voice, music, ambience, distortion, reverb, gunshot or explosion.",
+    "provider": "ElevenLabs",
+    "model": "eleven_text_to_sound_v2",
+    "duration": 0.18,
+    "sha256": "4c6d132d34ca390f4f16db188a912c468925273f3052d6e6eaffff7a3d01b643"
+  }
+]

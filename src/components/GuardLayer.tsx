@@ -1,5 +1,5 @@
-import React from 'react';
-import {Circle,Group,Image,Path,DashPathEffect,RoundedRect,usePathValue,type SkImage} from '@shopify/react-native-skia';
+import React,{useMemo} from 'react';
+import {Skia,Atlas,Circle,Group,Image,Path,DashPathEffect,RoundedRect,usePathValue,type SkImage} from '@shopify/react-native-skia';
 import {useAnimatedReaction,useSharedValue,useDerivedValue,type SharedValue} from 'react-native-reanimated';
 import {wallActorClip} from '../art/wall-depth';
 import type {WallOcclusion} from '../art/wall-depth-art';
@@ -9,8 +9,8 @@ import {ENEMY_ART_SCALE} from './enemy-presentation';
 import {stateLevel} from '../game/simulation';
 import {sightDistance} from '../game/guards';
 import type {GameState} from '../game/simulation';
-type Props={wallOcclusion?:WallOcclusion;game:SharedValue<GameState>;alpha:SharedValue<number>;index:number;clock:SharedValue<number>;reduced?:boolean;droneSprite:SkImage|null;guardSprite:SkImage|null;heavySprite:SkImage|null;bossSprite?:SkImage|null};
-export default function GuardLayer({game,alpha,index,clock,reduced=false,droneSprite,guardSprite,heavySprite,bossSprite=null,wallOcclusion}:Props){
+type Props={wallOcclusion?:WallOcclusion;game:SharedValue<GameState>;alpha:SharedValue<number>;index:number;clock:SharedValue<number>;reduced?:boolean;droneSprite:SkImage|null;guardSprite:SkImage|null;heavySprite:SkImage|null;bossSprite?:SkImage|null;defeatSprite:SkImage|null;bossDefeat?:SkImage|null};
+export default function GuardLayer({game,alpha,index,clock,reduced=false,droneSprite,guardSprite,heavySprite,bossSprite=null,defeatSprite,bossDefeat=null,wallOcclusion}:Props){
  const kind=stateLevel(game.value).patrols[index]?.kind,boss=!!stateLevel(game.value).patrols[index]?.boss&&!!bossSprite;
  const role=game.value.guards[index]?.combatRole,armor=role==='heavy'||role==='warden',drone=role==='drone'||!game.value.combat&&kind==='scanner';
  const artScale=drone?ENEMY_ART_SCALE.drone:boss?ENEMY_ART_SCALE.heavy*1.12:armor||kind==='warden'?ENEMY_ART_SCALE.heavy:ENEMY_ART_SCALE.guard;
@@ -27,7 +27,11 @@ export default function GuardLayer({game,alpha,index,clock,reduced=false,droneSp
  const fx=useDerivedValue(()=>defeatPose(clock.value-death.value.started,armor,drone,reduced));
  const live=useDerivedValue(()=>{const g=game.value.guards[index];return g&&(!game.value.combat||g.hp>0&&g.active)?1:0;});
  // in combat the body stays on the floor after the fall so other guards can find it
- const visible=useDerivedValue(()=>live.value?1:Math.max(fx.value.opacity,game.value.combat?.82:0));
+ const visible=useDerivedValue(()=>live.value?1:Math.max(fx.value.opacity,game.value.combat?.68:0));
+ const fallen=useDerivedValue(()=>live.value?0:1);
+ const deathFrames=useDerivedValue(()=>{const f=fx.value.frame;return [{x:(boss&&bossDefeat?f%2:f)*256,y:(boss&&bossDefeat?Math.floor(f/2):drone?2:armor||kind==='warden'?1:0)*256,width:256,height:256}];});
+ const deathSize=drone?1.85:boss?1.72:armor||kind==='warden'?1.42:1.28;
+ const deathTransforms=useMemo(()=>[Skia.RSXform(deathSize/256,0,-deathSize/2,-deathSize/2)],[deathSize]);
  const pose=useDerivedValue(()=>{
   const g=game.value.guards[index];if(!g)return [];
   if(!live.value){const d=death.value,f=fx.value;return [{translateX:d.x+d.dx*f.recoil},{translateY:d.y+d.dy*f.recoil},{rotate:d.angle+f.rotation*(index%2?1:-1)},{scaleX:f.scaleX},{scaleY:f.scaleY}];}
@@ -68,7 +72,8 @@ export default function GuardLayer({game,alpha,index,clock,reduced=false,droneSp
   <Path path={lurePath} color="#CFE6E4" style="stroke" strokeWidth={.035} opacity={.65}><DashPathEffect intervals={[.12,.12]}/></Path><Path path={cone} color={color} opacity={opacity}/>
   <Path path={cone} color={color} opacity={opacity} style="stroke" strokeWidth={.025}/>
   <Path path={aim} color="#FF886F" style="stroke" strokeWidth={.045}><DashPathEffect intervals={[.13,.08]}/></Path><Group clip={wallClip}><Group transform={pose}><Group transform={[{scale:artScale}]}>
-   {drone?<QuadDrone game={game} index={index} clock={clock} reduced={reduced} sprite={droneSprite}/>:<Image image={boss?bossSprite:armor||kind==='warden'?heavySprite:guardSprite} x={boss||armor||kind==='warden'?-.59:-.52} y={boss||armor||kind==='warden'?-.59:-.52} width={boss||armor||kind==='warden'?1.18:1.04} height={boss||armor||kind==='warden'?1.18:1.04} fit="contain"/>}
+   <Group opacity={live}>{drone?<QuadDrone game={game} index={index} clock={clock} reduced={reduced} sprite={droneSprite}/>:<Image image={boss?bossSprite:armor||kind==='warden'?heavySprite:guardSprite} x={boss||armor||kind==='warden'?-.59:-.52} y={boss||armor||kind==='warden'?-.59:-.52} width={boss||armor||kind==='warden'?1.18:1.04} height={boss||armor||kind==='warden'?1.18:1.04} fit="contain"/>}</Group>
+   <Group opacity={fallen}><Atlas image={boss&&bossDefeat?bossDefeat:defeatSprite} sprites={deathFrames} transforms={deathTransforms}/></Group>
    <Circle cx={0} cy={0} r={.43} color="#F2FFDA" opacity={hitFlash}/>
    {armor&&(game.value.definition?.combat?.revision??0)>=10&&<>
     <Path path="M .34 -.49 Q .78 0 .34 .49" color="#FFE2A4" style="stroke" strokeWidth={.09} opacity={armorFront}/>

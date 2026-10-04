@@ -1,0 +1,14 @@
+[
+  {
+    "name": "coin-spin",
+    "prompt": "Production game VFX asset: a polished GOLD CREDIT COIN spin sprite sheet on TRUE TRANSPARENT ALPHA. Use the attached gold diamond-emblem coin as identity reference. Exactly SIX sprites, arranged in a precise 3 columns by 2 rows equal-cell grid. Each cell has one complete coin centered at the same point and identical diameter. Successive rotation views around vertical axis: face-on, three-quarter, nearly edge-on, reverse face-on, reverse three-quarter, nearly edge-on. Deep beveled gold rim, simple embossed diamond credit emblem on both faces, readable at 16 pixels, warm gold highlights with very subtle pale-mint reflection. Consistent overhead studio light. Premium friendly arcade game collectible, tangible metal, clean silhouette. Entire sprites and tiny gleams safely inside their own cells with at least 15 percent transparent padding. NO letters, numbers, labels, ground, background, checkerboard, cast shadow, glow cloud, motion trail, spark field, or extra objects. Do not bake a trail: it will be drawn procedurally."
+  },
+  {
+    "name": "coin-spin-alpha",
+    "prompt": "Edit this coin sprite sheet. Keep the six gold coins exactly as they are: same six poses, same centers, same 3 columns x 2 rows grid, same size, same gold metal and diamond emblem. REMOVE ALL of the gold/brown/black background, hazy lighting, glow clouds and shadows. Deliver true transparent alpha everywhere outside the hard silhouettes of the six coins. The empty area between coins must have alpha zero, not a colored background, not checkerboard. Isolated production sprites with clean antialiased edges. No outer glows. Do not change the coin art."
+  },
+  {
+    "name": "impact-absorb",
+    "prompt": "A production mobile game VFX SPRITE ATLAS on a TRUE TRANSPARENT ALPHA background. EXACTLY 8 separate effects in a precise 4 columns by 2 rows equal-cell grid, each effect centered with at least 15% transparent padding. No characters or coins. Top row is a four-frame nonviolent knockout impact animation: frame 1 small sharp ivory-gold impact star, frame 2 short punchy ivory dust puff with a few pale-gold sparks, frame 3 expanded soft gray-ivory wisps with mint highlights, frame 4 thin dissipating particles. Bottom row is a four-frame rewarding coin absorption effect: frame 1 tiny white-gold glint, frame 2 compact mint/gold circular energy ripple with CLEAR EMPTY TRANSPARENT CENTER, frame 3 wider thin mint ripple with 4 tiny gold star flecks and clear center, frame 4 faint disappearing flecks. Polished hand-painted 3D arcade VFX, readable at 32 pixels, colors ivory warm gold pale mint, tasteful restrained light. Effects are lightweight and clean, not explosive. NO blood, gore, red, orange fire, weapons, text, labels, numbers, logos, floor, scene, checkerboard or solid backdrop. Transparent empty space between every frame; actual alpha required."
+  }
+]
