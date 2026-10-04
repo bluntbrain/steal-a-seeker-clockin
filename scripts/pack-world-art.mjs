@@ -27,6 +27,8 @@ for(const group of ['courier-topdown-v2','campaign-world-v2']){
    const base=sharp(source).resize({width:768,withoutEnlargement:true}),{width:w,height:h}=await base.clone().png().toBuffer({resolveWithObject:true}).then(r=>r.info);
    const fade=Math.round(h*.075),mask=Buffer.from(`<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}"><defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset="${(fade/h).toFixed(4)}" stop-color="#fff" stop-opacity="1"/><stop offset="1" stop-color="#fff" stop-opacity="1"/></linearGradient></defs><rect width="${w}" height="${h}" fill="url(#g)"/></svg>`);
    output=await base.ensureAlpha().composite([{input:mask,blend:'dest-in'}]).webp({quality:86,alphaQuality:100,effort:6}).toBuffer();
+   // the topmost scene has no zone above it and keeps an opaque copy
+   const full=await sharp(source).resize({width:768,withoutEnlargement:true}).webp({quality:86,effort:6}).toBuffer();await fs.writeFile(path.join(dir,`${id}-full.webp`),full);
   }
   await fs.writeFile(path.join(dir,`${id}.webp`),output);
   const packed=await sharp(output).metadata();

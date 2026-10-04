@@ -12,6 +12,8 @@ import {campaignMapLayout,type MapScene} from './campaignMapLayout';
 
 const NODE=40,BOSS_NODE=52;
 const art={warehouse:require('../../assets/campaign-world-v2/warehouse.webp'),rooftops:require('../../assets/campaign-world-v2/rooftops.webp'),powerworks:require('../../assets/campaign-world-v2/powerworks.webp')};
+// the topmost scene has no zone above it, so it draws the opaque copy instead of fading into the background
+const artFull={warehouse:require('../../assets/campaign-world-v2/warehouse-full.webp'),rooftops:require('../../assets/campaign-world-v2/rooftops-full.webp'),powerworks:require('../../assets/campaign-world-v2/powerworks-full.webp')};
 export default function CampaignMap({entries,progress,current,onSelect}:{entries:readonly CampaignEntry[];progress:Progress;current:CampaignEntry;onSelect:(entry:CampaignEntry)=>void}){
  const haptic=useHaptics();
  const [{width,height},setSize]=React.useState({width:0,height:0});
@@ -29,7 +31,7 @@ export default function CampaignMap({entries,progress,current,onSelect}:{entries
   // the row above shows its bottom strip under this image's faded top, which keeps the road continuous
   return <View style={{height:item.height,overflow:'hidden'}}>
    {item.previousZone&&<Image accessible={false} source={art[item.previousZone]} resizeMode="contain" style={{position:'absolute',left:0,top:-(item.imageHeight-item.fade),width,height:item.imageHeight}}/>}
-   <Image accessible={false} source={art[item.zone]} resizeMode="contain" style={{position:'absolute',left:0,top:0,width,height:item.imageHeight}}/>
+   <Image accessible={false} source={item.previousZone?art[item.zone]:artFull[item.zone]} resizeMode="contain" style={{position:'absolute',left:0,top:0,width,height:item.imageHeight}}/>
    {item.nodes.map(({entry,index,x,y})=>{
     const open=entryUnlocked(progress,entries,index)&&entry.playable,best=progress.missions[entry.key],isCurrent=entry.key===current.key,boss=entry.boss,size=boss?BOSS_NODE:NODE;
     return <Pressable key={entry.key} testID={`mission-node-${entry.number}`} accessibilityRole="button" accessibilityLabel={`Level ${entry.number}: ${boss?`${BOSS_NAMES[boss]} boss fight`:entry.title}${open?'':'. Locked'}`} accessibilityState={{selected:isCurrent}} onPress={()=>{haptic('select');onSelect(entry);}} style={({pressed})=>[s.target,{left:x-30,top:y-size/2-4,opacity:pressed?.7:1}]}>

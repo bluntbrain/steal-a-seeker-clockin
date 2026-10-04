@@ -68,6 +68,7 @@ const time=(n:number)=>`${Math.floor(n/60).toString().padStart(2,'0')}:${Math.fl
 // memoised so hud publishes do not re-render the hidden overlay panels
 // a shared empty route for hud snapshots: the renderer reads routes from the ui-thread state, not from the hud
 const NO_PATH:Point[]=[];
+function relaySum(timers:readonly number[]){'worklet';let total=0;for(let i=0;i<timers.length;i++)total+=timers[i]!;return total;}
 const RewardsPanelMemo=React.memo(RewardsPanel),WalletPanelMemo=React.memo(WalletPanel),HideoutMemo=React.memo(Hideout),SettingsPanelMemo=React.memo(SettingsPanel);
 export default function GameScreen(){return <GestureHandlerRootView style={{flex:1}}><SafeAreaProvider><LaunchSplash><WalletProvider><AccountProvider><SettingsProvider><EconomyProvider><CampaignGate><WalletGame/></CampaignGate></EconomyProvider></SettingsProvider></AccountProvider></WalletProvider></LaunchSplash></SafeAreaProvider></GestureHandlerRootView>;}
 function WalletGame(){
@@ -103,9 +104,10 @@ export function Game({onSnapshot}:{onSnapshot?:(state:GameState)=>void}){
  useRunTelemetry(hud,paused,trial.active?'trial':'campaign',stats);
  const coach=useCoach(hud,!combatMode);
  const guide=useCombatGuide(hud,entry.key==='practice'),beginGuide=guide.begin;
- const guideWaiting=useSharedValue(true),guideStage=useSharedValue(-1);
+ const guideWaiting=useSharedValue(true),guideStage=useSharedValue(-1),fullSnapshots=useSharedValue(false);
  useEffect(()=>{if(guide.active&&guide.resume){const saved=JSON.parse(JSON.stringify(guide.resume.state));game.value=saved;setHud(saved);recording.value=[];input.value=idleInput();guide.consumeResume();}},[guide.active,guide.resume]);
- useEffect(()=>{guideWaiting.value=!guide.ready||(guide.active&&guide.waiting);guideStage.value=guide.active?guide.stage:-1;},[guide.ready,guide.active,guide.waiting,guide.stage]);
+ // the tutorial stores hud snapshots as checkpoints and restores them into the simulation, so it needs complete ones
+ useEffect(()=>{guideWaiting.value=!guide.ready||(guide.active&&guide.waiting);guideStage.value=guide.active?guide.stage:-1;fullSnapshots.value=guide.active;},[guide.ready,guide.active,guide.waiting,guide.stage,fullSnapshots]);
  useEffect(()=>{if(guide.active&&(hud.status==='caught'||hud.status==='timeout')&&guide.checkpoint.current){const saved=JSON.parse(JSON.stringify(guide.checkpoint.current));game.value=saved;setHud(saved);recording.value=[];input.value=idleInput();accumulator.value=0;setCompletedReplay(undefined);guide.retry();}},[hud.status,guide.active]);
 
  // Keep the teaching targets visible; reduced motion uses the original static map.
@@ -205,25 +207,26 @@ export function Game({onSnapshot}:{onSnapshot?:(state:GameState)=>void}){
    hudClock.value+=dt;
    // frames without a simulation step change nothing, so they only advance interpolation
    if(accumulator.value+1e-9<TUNING.step){alpha.value=accumulator.value/TUNING.step;return;}
-   const previousDamage=game.value.combat?.damageTaken??0,previousDecoys=game.value.decoysLeft,previousAlert=game.value.alert,previousPower=game.value.power,previousRelay0=game.value.relayTimers[0]??0,previousRelay1=game.value.relayTimers[1]??0,previousCarry=game.value.carrying,previousDashes=game.value.dashes,previousTool=game.value.toolSeen,previousStatus=game.value.status;
+   const previousDamage=game.value.combat?.damageTaken??0,previousDecoys=game.value.decoysLeft,previousAlert=game.value.alert,previousPower=game.value.power,previousRelaySum=relaySum(game.value.relayTimers),previousCarry=game.value.carrying,previousDashes=game.value.dashes,previousTool=game.value.toolSeen,previousStatus=game.value.status;
    game.modify(s=>{recording.modify(chunks=>{while(accumulator.value+1e-9>=TUNING.step){recordStep(s,input.value,chunks);accumulator.value-=TUNING.step;}return chunks;});return s;},true);
    alpha.value=accumulator.value/TUNING.step;
    if(game.value.decoysLeft<previousDecoys)runOnJS(callEvent)('decoy');
    if(!combatMode&&previousAlert<=0&&game.value.alert>0)runOnJS(callEvent)('spot');
-   if(game.value.power!==previousPower||(game.value.relayTimers[0]??0)>previousRelay0||(game.value.relayTimers[1]??0)>previousRelay1)runOnJS(callEvent)('switch');
+   // a relay opening adds its whole duration while decay removes a fraction of a tick, so the sum rises only on activation
+   if(game.value.power!==previousPower||relaySum(game.value.relayTimers)>previousRelaySum+1e-6)runOnJS(callEvent)('switch');
    if(game.value.carrying&&!previousCarry)runOnJS(callEvent)('pickup');
    if(game.value.dashes>previousDashes)runOnJS(callEvent)('dash');
    if(game.value.status==='won'&&previousStatus!=='won')runOnJS(callEvent)('success');
    if(game.value.status==='caught'&&previousStatus!=='caught')runOnJS(callEvent)('caught');
-   if(hudClock.value>=.12||previousDamage!==(game.value.combat?.damageTaken??0)||previousTool!==game.value.toolSeen||previousCarry!==game.value.carrying||previousStatus!==game.value.status||previousDashes!==game.value.dashes){runOnJS(callPublish)({...game.value,definition:undefined,guards:game.value.guards.map(g=>({...g,path:NO_PATH,brain:undefined}))},simulationEpoch.value);hudClock.value=0;}
- },[suspended,sceneReady,pendingTap,tapElapsed,game,input,guideStage,guideWaiting,clock,frameTotal,slowTotal,samples,sampleIndex,sampleCount,reportClock,accumulator,recording,alpha,hudClock,simulationEpoch,combatMode,callPublish,callStats,callEvent,callBeginGuide]));
+   if(hudClock.value>=.12||previousDamage!==(game.value.combat?.damageTaken??0)||previousTool!==game.value.toolSeen||previousCarry!==game.value.carrying||previousStatus!==game.value.status||previousDashes!==game.value.dashes){runOnJS(callPublish)(fullSnapshots.value?{...game.value}:{...game.value,definition:undefined,guards:game.value.guards.map(g=>({...g,path:NO_PATH,brain:undefined}))},simulationEpoch.value);hudClock.value=0;}
+ },[suspended,sceneReady,pendingTap,tapElapsed,game,input,guideStage,guideWaiting,fullSnapshots,clock,frameTotal,slowTotal,samples,sampleIndex,sampleCount,reportClock,accumulator,recording,alpha,hudClock,simulationEpoch,combatMode,callPublish,callStats,callEvent,callBeginGuide]));
  useEffect(()=>{frameDriver.setActive(renderGameSurface&&!paused);return()=>frameDriver.setActive(false);},[renderGameSurface,paused,frameDriver]);
  const pause=useCallback((value:boolean)=>{
   suspended.value=value;pendingTap.value=null;previousTap.value=null;
   input.value=idleInput();game.modify(s=>{'worklet';s.vx=0;s.vy=0;s.px=s.x;s.py=s.y;s.dashSeen=0;s.toolSeen=0;return s;});
   setPaused(value);
  },[suspended,input,game,pendingTap,previousTap]);
- const restart=useCallback((next:CampaignEntry=entryRef.current)=>{if(trial.active){trial.finish();return;}sceneReady.value=false;suspended.value=true;pendingTap.value=null;previousTap.value=null;tapElapsed.value=TAP_INTERVAL_MS;simulationEpoch.value=++sceneEpoch.current;setSceneVersion(sceneEpoch.current);setSceneLoading(true);setSceneError('');recording.value=[];setCompletedReplay(undefined);rewardEpoch.current++;setEarnedNotice('');setCreditReward({amount:null});setRewardClaimed(false);setAutoClaim(false);setRewardRetry(0);connectClaimPending.current=false;recorded.current=false;setMission(next.mission);setEntry(next);const fresh=(next.key==='practice'?guide.start('practice'):null)??initialState(next.mission,combatMode?next.definition:undefined);game.value=fresh;input.value=idleInput();accumulator.value=0;alpha.value=0;clock.value=0;sampleIndex.value=0;sampleCount.value=0;frameTotal.value=0;slowTotal.value=0;reportClock.value=0;hudClock.value=0;setHud(fresh);latest.current=fresh;suspended.value=false;setPaused(false);setStats(zeroStats);},[game,input,accumulator,alpha,clock,samples,frameTotal,slowTotal,reportClock,hudClock,suspended,recording,trial,guide.start,combatMode,sceneReady,pendingTap,previousTap,tapElapsed,simulationEpoch]);
+ const restart=useCallback((next:CampaignEntry=entryRef.current)=>{if(trial.active){trial.finish();return;}sceneReady.value=false;suspended.value=true;pendingTap.value=null;previousTap.value=null;tapElapsed.value=TAP_INTERVAL_MS;simulationEpoch.value=++sceneEpoch.current;setSceneVersion(sceneEpoch.current);setSceneLoading(true);setSceneError('');recording.value=[];setCompletedReplay(undefined);rewardEpoch.current++;setEarnedNotice('');setCreditReward({amount:null});setRewardClaimed(false);setAutoClaim(false);setRewardRetry(0);connectClaimPending.current=false;recorded.current=false;setMission(next.mission);setEntry(next);levelRef.current=next.definition;const fresh=(next.key==='practice'?guide.start('practice'):null)??initialState(next.mission,combatMode?next.definition:undefined);game.value=fresh;input.value=idleInput();accumulator.value=0;alpha.value=0;clock.value=0;sampleIndex.value=0;sampleCount.value=0;frameTotal.value=0;slowTotal.value=0;reportClock.value=0;hudClock.value=0;setHud(fresh);latest.current=fresh;suspended.value=false;setPaused(false);setStats(zeroStats);},[game,input,accumulator,alpha,clock,samples,frameTotal,slowTotal,reportClock,hudClock,suspended,recording,trial,guide.start,combatMode,sceneReady,pendingTap,previousTap,tapElapsed,simulationEpoch]);
  // Explicit exits must open the map even when Hideout remembers a briefing or store tab.
  const backToMissions=()=>{pause(true);economy.setTab('map');setMissionMapRequest(n=>n+1);setHideoutOpen(true);};
  const introduceMission=(next:CampaignEntry)=>{if(!next.playable)return;if(testMission){restart(next);return;}pause(true);setHideoutOpen(false);setIntroMission(next);};
