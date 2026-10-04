@@ -153,7 +153,7 @@ export function Game({rankTicket,paidPlay,dailyReturn,paidReturn,onRankStart,onR
  const campaignFinished=!timedRun&&!trial.active&&!testMission&&completedCampaign(progress.progress,hud);
  const finaleVisible=!sceneLoading&&campaignFinished&&!claimVisible&&!paused&&!hideoutOpen&&!walletOpen&&!settingsOpen;
  const published=useSyncExternalStore(publishedLevels.subscribe,publishedLevels.get),entries=useMemo(()=>campaignEntries(published),[published]);
- const nextMission=nextEntry(entries,entry.key);
+ const nextMission=(n=>n?.playable?n:undefined)(nextEntry(entries,entry.key));
  const shareAction=useRef<(()=>Promise<void>)|null>(null),[shareReady,setShareReady]=useState(false);
  const registerShare=useCallback((fn:(()=>Promise<void>)|null)=>{shareAction.current=fn;setShareReady(!!fn);},[]);
  const completionData=useMemo<CourierCardData>(()=>({week:'',rank:null,points:0,cleared:0,ticks:0,domain:null,wallet:account.wallet??'browser-playtest',final:true,local:Platform.OS==='web',earned:false,outfit:economy.equipment.outfit,frame:economy.equipment.frame,campaign:campaignSummary(progress.progress,hud)}),[progress.progress,hud.status,hud.mission,hud.score,hud.ticks,account.wallet,economy.equipment.outfit,economy.equipment.frame]);
@@ -255,7 +255,7 @@ export function Game({rankTicket,paidPlay,dailyReturn,paidReturn,onRankStart,onR
  const restart=useCallback((next:CampaignEntry=entryRef.current)=>{if(trial.active){trial.finish();return;}if(paidEntry){void leavePaid();return;}if(rankTicket){void leaveRank();return;}sceneReady.value=false;suspended.value=true;pendingTap.value=null;previousTap.value=null;tapElapsed.value=TAP_INTERVAL_MS;simulationEpoch.value=++sceneEpoch.current;setSceneVersion(sceneEpoch.current);setSceneLoading(true);setSceneError('');recording.value=[];setCompletedReplay(undefined);rewardEpoch.current++;setEarnedNotice('');setCreditReward({amount:null});setRewardClaimed(false);setAutoClaim(false);setRewardRetry(0);connectClaimPending.current=false;recorded.current=false;setMission(next.mission);setEntry(next);const fresh=(next.key==='practice'?guide.start('practice'):null)??initialState(next.mission,combatMode?next.definition:undefined);game.value=fresh;input.value=idleInput();accumulator.value=0;alpha.value=0;clock.value=0;samples.value=[];frameTotal.value=0;slowTotal.value=0;reportClock.value=0;hudClock.value=0;setHud(fresh);latest.current=fresh;suspended.value=false;setPaused(false);setStats(zeroStats);},[game,input,accumulator,alpha,clock,samples,frameTotal,slowTotal,reportClock,hudClock,suspended,rankTicket,leaveRank,recording,paidEntry,leavePaid,trial,guide.start]);
  // Explicit exits must open the map even when Hideout remembers a briefing or store tab.
  const backToMissions=()=>{pause(true);economy.setTab('map');setMissionMapRequest(n=>n+1);setHideoutOpen(true);};
- const introduceMission=(next:CampaignEntry)=>{if(testMission||timedRun){restart(next);return;}pause(true);setHideoutOpen(false);setIntroMission(next);};
+ const introduceMission=(next:CampaignEntry)=>{if(!next.playable)return;if(testMission||timedRun){restart(next);return;}pause(true);setHideoutOpen(false);setIntroMission(next);};
  useEffect(()=>{const subscription=AppState.addEventListener('change',state=>{if(state!=='active'){finaleAudio.pause();objectiveAudio.pause();if(game.value.status==='playing')pause(true);}});return()=>subscription.remove();},[pause,game,finaleAudio,objectiveAudio]);
  useEffect(()=>{
    if(Platform.OS!=='web')return;

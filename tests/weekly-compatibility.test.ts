@@ -7,6 +7,7 @@ import campaign9 from './fixtures/campaign-revision9.json';
 import campaign10 from './fixtures/campaign-revision10.json';
 import campaign11 from './fixtures/campaign-revision11.json';
 import campaign12 from './fixtures/campaign-revision12.json';
+import campaign16 from './fixtures/campaign-revision16.json';
 import type {LevelDefinition} from '../src/game/level';
 import engine from '../shared/weekly-engine.json';
 import rules from '../shared/rules-manifest.json';
@@ -203,4 +204,22 @@ test('revision 15 guard replays remain identical to the archived verifier after 
  week.contracts[0].level={...combatLevel('sweep-window'),combat:{version:2,revision:15}};
  assert(isWeeklyCompatible(week));delete week.engineHash;assert(isWeeklyCompatible(week));
  week.contracts[0].level.combat.revision=16;assert(!isWeeklyCompatible(week),'Fair pursuit must not alter a pinned revision-15 week');
+});
+
+test('revision 16 guards stay unchanged when the revision 17 engine ships',async()=>{
+ const {PRESERVED_REVISION_16_ENGINE}=await import('../shared/weekly-compatibility');
+ assert.equal(campaign16.engineHash,PRESERVED_REVISION_16_ENGINE);assert.notEqual(engine.engineHash,PRESERVED_REVISION_16_ENGINE);
+ const archived=await import((await checkRuleBundle(campaign16.rulesHash)).href);
+ for(const level of campaign16.levels as LevelDefinition[]){
+  assert.equal(level.combat?.revision,16);const win=solveCombat(level);assert(win,level.title);
+  for(const delay of [0,45,120]){
+   const state=initialState(level.mission,level),replay:Replay={version:2,chunks:[]};
+   for(const chunk of [...(delay?[{ticks:delay,command:undefined}]:[]),...win.replay.chunks])for(let i=0;i<chunk.ticks&&state.status==='playing';i++)recordStep(state,{...idleInput(),command:chunk.command},replay.chunks);
+   assert.deepEqual(verifyReplay(level.mission,replay,level),archived.verifyReplay(level.mission,replay,level),`${level.title}: delay ${delay}`);
+  }
+ }
+ const week=JSON.parse(JSON.stringify(manifest));week.rulesHash=campaign16.rulesHash;week.engineHash=campaign16.engineHash;
+ week.contracts[0].level=campaign16.levels[1];assert(isWeeklyCompatible(week));
+ delete week.engineHash;assert(isWeeklyCompatible(week));
+ week.contracts[0].level={...week.contracts[0].level,combat:{version:2,revision:17}};assert(!isWeeklyCompatible(week),'a revision 17 room cannot run on the preserved revision 16 engine');
 });

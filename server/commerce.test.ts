@@ -805,29 +805,30 @@ test('price feed warming refreshes ahead of expiry and dedupes concurrent fetche
 test('published campaign levels verify against the frozen row, pay the published rate once and list publicly',async()=>{
  const {CampaignService}=await import('./campaign-service'),{buildPublishable}=await import('../scripts/publish-campaign-levels'),{PUBLISHED_CLEAR_CREDITS,BOSS_CLEAR_CREDITS,CAMPAIGN_STAR_BONUS}=await import('../shared/store');
  const u=await login(),campaign=new CampaignService(pool,new ReturnService(pool,undefined,{mint:service.config.mint,treasury:service.config.recipient,source:service.config.destination,decimals:6}));
- const plain=buildPublishable(13,1),boss=buildPublishable(15,1);assert.equal(plain.boss,null);assert.equal(boss.boss,'toly');
+ const plain=await buildPublishable(13,1),middle=await buildPublishable(14,1),boss=await buildPublishable(15,1);assert.equal(plain.boss,null);assert.equal(boss.boss,'toly');
  const strip=({ticks:_t,strategy:_s,salt:_a,...row}:typeof plain)=>row;
- assert.deepEqual(await campaign.levels.publish([strip(plain),strip(boss)]),[13,15]);
+ await assert.rejects(campaign.levels.publish([strip(plain),strip(boss)]),/contiguous/);await assert.rejects(campaign.levels.publish([strip(middle)]),/continue from 13/);
+ assert.deepEqual(await campaign.levels.publish([strip(boss),strip(plain),strip(middle)]),[13,14,15]);
  assert.deepEqual(await campaign.levels.publish([{...strip(plain),title:'tampered'}]),[],'a published row never changes');
  assert.equal((await campaign.levels.get(13))!.title,plain.title);
  const {solveCombat}=await import('../scripts/qa-combat'),win=solveCombat(plain.definition)!,bossWin=solveCombat(boss.definition)!;
- await assert.rejects(campaign.submit(u.wallet,{level:14},'0'.repeat(64),win.replay),/Unknown campaign level/);
+ await assert.rejects(campaign.submit(u.wallet,{level:16},'0'.repeat(64),win.replay),/Unknown campaign level/);
  const first=await campaign.submit(u.wallet,{level:13},'ignored-client-hash',win.replay);
  const stars=1+Number(first.runs[0]!.battery>=60)+Number(win.ticks<=plain.definition.targetSeconds*30);
  assert.equal(first.creditAward.mission,'campaign:13');assert.equal(first.creditAward.credits,PUBLISHED_CLEAR_CREDITS+(stars-1)*CAMPAIGN_STAR_BONUS);
  assert.equal((await campaign.submit(u.wallet,{level:13},'ignored-client-hash',win.replay)).creditAward.credits,0,'a repeat clear pays nothing more');
  const bossReceipt=await campaign.submit(u.wallet,{level:15},'x',bossWin.replay);assert(bossReceipt.creditAward.credits>=BOSS_CLEAR_CREDITS);
- await assert.rejects(campaign.submit(u.wallet,{level:15},'x',win.replay),/extraction|Replay|match/,'a replay for another room cannot claim a boss level');
+ await assert.rejects(campaign.submit(u.wallet,{level:15},'x',win.replay),/extraction|Replay|match|rules/,'a replay for another room cannot claim a boss level');
  assert.equal((await service.me(u.wallet)).credits,first.creditAward.credits+bossReceipt.creditAward.credits);
  // progress sync keeps published keys beside the authored twelve
  await service.syncProgress(u.wallet,{version:1,missions:{'campaign:13':{stars,seconds:win.ticks/30,score:win.score,battery:80,completions:1}}});
  assert.equal(((await service.me(u.wallet)).progress as {missions:Record<string,{stars:number}>}).missions['campaign:13']?.stars,stars);
  const listed=await app.inject({method:'GET',url:'/campaign/levels?from=13&to=40'});assert.equal(listed.statusCode,200);
- const body=listed.json();assert.equal(body.latest,15);assert.deepEqual(body.levels.map((l:{number:number})=>l.number),[13,15]);assert.equal(body.levels[1].boss,'toly');assert.equal(body.levels[0].definition.id,'campaign:13');
+ const body=listed.json();assert.equal(body.latest,15);assert.deepEqual(body.levels.map((l:{number:number})=>l.number),[13,14,15]);assert.equal(body.levels[2].boss,'toly');assert.equal(body.levels[0].definition.id,'campaign:13');
  const bad=await app.inject({method:'POST',url:'/campaign/runs',headers:u.headers,payload:{mission:'practice',level:13,rulesHash:'0'.repeat(64),replay:{}}});assert.equal(bad.statusCode,400);
  const viaApi=await app.inject({method:'POST',url:'/campaign/runs',headers:u.headers,payload:{level:13,rulesHash:'0'.repeat(64),replay:win.replay}});assert.equal(viaApi.statusCode,200,viaApi.body);assert.equal(viaApi.json().creditAward.credits,0);
  // boot seeding publishes the bundled batch once and never rewrites rows that already exist
  const {seedCampaignLevels}=await import('./campaign-levels'),bundle=(await import('../src/campaign/published-levels.json')).default;
- assert.equal(await seedCampaignLevels(pool,()=>{throw new Error('bundle must match its recipes');}),bundle.levels.length-2);assert.equal(await seedCampaignLevels(pool),0);assert.equal(await campaign.levels.latest(),bundle.levels[bundle.levels.length-1]!.number);
+ assert.equal(await seedCampaignLevels(pool,()=>{throw new Error('bundle must match its recipes');}),bundle.levels.length-3);assert.equal(await seedCampaignLevels(pool),0);assert.equal(await campaign.levels.latest(),bundle.levels[bundle.levels.length-1]!.number);
  assert.equal((await campaign.levels.get(13))!.title,plain.title);
 });

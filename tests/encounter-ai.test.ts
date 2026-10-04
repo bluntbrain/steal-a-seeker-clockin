@@ -58,7 +58,7 @@ test('walls prevent the initial report and short glimpses do not instantly alert
  const l=arena();l.blockers.push({x:3,y:7,w:2,h:.5,kind:'wall'});const s=initialState(l.mission,l);
  for(let t=0;t<90;t++)step(s,idleInput());assert(!s.guards.some(g=>g.alerted));
 });
-test('authored home zones are reachable and seeded roaming is repeatable without fixed ping-pong routes',()=>{
+test('authored home zones are reachable and the seeded patrol loop is repeatable and visits several anchors',()=>{
  for(const id of CAMPAIGN_IDS.slice(1)){
   const l=combatLevel(id);for(const spec of l.patrols)for(const p of spec.roam??spec.route)assert(findPath(spec.route[0]!,p,l).length,`${id}: disconnected home zone`);
   for(const sw of l.switches??[])assert(findPath(l.spawn,sw,l).length,`${id}: inaccessible switch`);
@@ -67,7 +67,7 @@ test('authored home zones are reachable and seeded roaming is repeatable without
   const patrolOnly={...l,patrols:l.patrols.map(g=>({...g,range:.01}))};
   const a=initialState(id,patrolOnly),b=initialState(id,patrolOnly),visited=new Set<number>();
   // Allow a full minute for the slower patrol pace and seeded anchor choices.
-  for(let t=0;t<1800;t++){step(a,idleInput());step(b,idleInput());for(const g of a.guards)assert(walkableSegment(g,g,l),`${id}: guard inside a wall`);visited.add(a.guards[0]!.brain?.lastAnchor??0);}
+  for(let t=0;t<1800;t++){step(a,idleInput());step(b,idleInput());for(const g of a.guards)assert(walkableSegment(g,g,l),`${id}: guard inside a wall`);visited.add((a.guards[0]!.heist as {pos?:number}|undefined)?.pos??a.guards[0]!.brain?.lastAnchor??0);}
   assert.deepEqual(a,b);assert(visited.size>=3,`${id}: no patrol variation`);
  }
 });

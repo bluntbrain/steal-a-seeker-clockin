@@ -30,15 +30,16 @@ const bundledTop=BUNDLED_LEVELS[BUNDLED_LEVELS.length-1]?.number??12;
 const merge=(extra:unknown[])=>{const byNumber=new Map(published.map(l=>[l.number,l] as const));for(const l of extra)if(isPublishedLevel(l)&&!byNumber.has(l.number))byNumber.set(l.number,l);return [...byNumber.values()].sort((a,b)=>a.number-b.number);};
 const setPublished=(next:PublishedLevel[])=>{if(next.length===published.length)return;published=next;for(const l of listeners)l();};
 export const publishedLevels={subscribe:(l:()=>void)=>{listeners.add(l);return()=>{listeners.delete(l);};},get:()=>published};
+const contiguousTop=(list:readonly PublishedLevel[])=>{let top=12;for(const l of list){if(l.number===top+1)top=l.number;else if(l.number>top+1)break;}return top;};
 let cacheRead=false;
 export async function loadPublishedLevels(){
  if(!cacheRead){cacheRead=true;try{const raw=await readSave(LEVELS_KEY);if(raw)setPublished(merge(JSON.parse(raw)));}catch{/* the bundle stays */}}
  try{
-  let latest=Infinity,top=published[published.length-1]?.number??12;
+  let latest=Infinity,top=contiguousTop(published);
   while(top<latest){
    const page=await api<{latest:number;levels:unknown[]}>(`/campaign/levels?from=${top+1}`);
    latest=Number(page.latest);if(!Array.isArray(page.levels)||!page.levels.length)break;
-   setPublished(merge(page.levels));const next=published[published.length-1]?.number??12;if(next===top)break;top=next;
+   setPublished(merge(page.levels));const next=contiguousTop(published);if(next===top)break;top=next;
   }
   if(top>bundledTop)await writeSave(LEVELS_KEY,JSON.stringify(published.filter(l=>l.number>bundledTop)));
  }catch{/* offline: bundled and cached levels remain */}

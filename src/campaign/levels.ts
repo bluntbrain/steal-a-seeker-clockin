@@ -22,6 +22,8 @@ export function campaignEntries(published:readonly PublishedLevel[]):CampaignEnt
 }
 export const authoredEntry=(mission:MissionId):CampaignEntry=>authored[CAMPAIGN_IDS.indexOf(mission)]??authored[0]!;
 export const entryUnlocked=(progress:Progress,entries:readonly CampaignEntry[],index:number)=>index<=0||!!progress.missions[entries[index-1]!.key];
+/** unlocked by progress and runnable by this build; only open entries may start a run */
+export const entryOpen=(progress:Progress,entries:readonly CampaignEntry[],index:number)=>entryUnlocked(progress,entries,index)&&entries[index]!.playable;
 export const nextEntry=(entries:readonly CampaignEntry[],key:string)=>{const i=entries.findIndex(e=>e.key===key);return i<0?undefined:entries[i+1];};
 export const firstOpenEntry=(progress:Progress,entries:readonly CampaignEntry[])=>entries.find(e=>!progress.missions[e.key])??entries[entries.length-1]!;
 export const padLevel=(n:number)=>String(n).padStart(2,'0');

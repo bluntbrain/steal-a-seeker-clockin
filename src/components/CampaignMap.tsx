@@ -1,7 +1,7 @@
 // vertical saga map: one node per level from the bottom up, a zone banner every ten levels, larger boss nodes.
 // a FlatList with fixed row heights keeps hundreds of levels cheap and lets the list open on the current level.
 import {useHaptics} from '../feedback/useHaptics';
-import React,{useCallback,useMemo,useRef} from 'react';
+import React,{useCallback,useMemo} from 'react';
 import {FlatList,Image,Pressable,StyleSheet,Text,View} from 'react-native';
 import {entryUnlocked,padLevel,type CampaignEntry} from '../campaign/levels';
 import type {Progress} from '../progress/model';
@@ -20,7 +20,7 @@ type Row={kind:'level';entry:CampaignEntry;index:number;gapBelow:number}|{kind:'
 const nodeX=(number:number,width:number)=>width*(.5+.33*Math.sin(number*1.05));
 export default function CampaignMap({entries,progress,current,onSelect}:{entries:readonly CampaignEntry[];progress:Progress;current:CampaignEntry;onSelect:(entry:CampaignEntry)=>void}){
  const haptic=useHaptics();
- const widthRef=useRef(0),[width,setWidth]=React.useState(0);
+ const [width,setWidth]=React.useState(0);
  // rows run from the top level down so the list scrolls normally; a banner sits below the first level of each zone
  const rows=useMemo<Row[]>(()=>{
   const out:Row[]=[];
@@ -36,7 +36,7 @@ export default function CampaignMap({entries,progress,current,onSelect}:{entries
  const currentIndex=Math.max(0,rows.findIndex(r=>r.kind==='level'&&r.entry.key===current.key));
  const getItemLayout=useCallback((_:unknown,index:number)=>({length:rows[index]?.kind==='banner'?BANNER:ROW,offset:offsets[index]??0,index}),[rows,offsets]);
  const render=useCallback(({item}:{item:Row})=>{
-  const w=widthRef.current;
+  const w=width;
   if(item.kind==='banner'){const h=Math.min(BANNER-16,w/zones[item.zone].ratio);return <View style={{height:BANNER,justifyContent:'center',alignItems:'center'}}><Image accessible={false} source={zones[item.zone].art} resizeMode="contain" style={{position:'absolute',width:h*zones[item.zone].ratio,height:h,opacity:.55}}/><View style={s.banner}><Text style={s.bannerName}>{zones[item.zone].name}</Text><Text style={s.bannerRange}>LEVELS {item.from} – {item.to}</Text></View></View>;}
   const {entry,index,gapBelow}=item,open=entryUnlocked(progress,entries,index)&&entry.playable,best=progress.missions[entry.key],isCurrent=entry.key===current.key,boss=entry.boss;
   const size=boss?BOSS_NODE:NODE,x=nodeX(entry.number,w),below=index>0?entries[index-1]!:null;
@@ -52,9 +52,10 @@ export default function CampaignMap({entries,progress,current,onSelect}:{entries
     {best?<Text maxFontSizeMultiplier={1} style={s.stars}>{'★'.repeat(best.stars)}<Text style={{color:'#65736C'}}>{'★'.repeat(3-best.stars)}</Text></Text>:isCurrent?<Text maxFontSizeMultiplier={1} style={s.play}>PLAY</Text>:!open?<View style={s.lock}><View style={s.shackle}/><View style={s.lockBody}/></View>:null}
    </Pressable>
   </View>;
- },[entries,progress,current.key,haptic,onSelect]);
- return <View testID="mission-districts" style={s.list} onLayout={e=>{const w=e.nativeEvent.layout.width;if(w!==widthRef.current){widthRef.current=w;setWidth(w);}}}>
-  {width>0&&<FlatList data={rows} extraData={progress} renderItem={render} keyExtractor={r=>r.kind==='banner'?`zone-${r.from}`:r.entry.key} getItemLayout={getItemLayout} initialScrollIndex={currentIndex} initialNumToRender={12} windowSize={7} showsVerticalScrollIndicator={false} onScrollToIndexFailed={()=>{}} contentContainerStyle={{paddingVertical:8}}/>}
+ },[entries,progress,current.key,haptic,onSelect,width]);
+ const extra=useMemo(()=>({progress,width}),[progress,width]);
+ return <View testID="mission-districts" style={s.list} onLayout={e=>{const w=e.nativeEvent.layout.width;setWidth(old=>old===w?old:w);}}>
+  {width>0&&<FlatList data={rows} extraData={extra} renderItem={render} keyExtractor={r=>r.kind==='banner'?`zone-${r.from}`:r.entry.key} getItemLayout={getItemLayout} initialScrollIndex={currentIndex} initialNumToRender={12} windowSize={7} showsVerticalScrollIndicator={false} onScrollToIndexFailed={()=>{}} contentContainerStyle={{paddingVertical:8}}/>}
  </View>;
 }
 const s=StyleSheet.create({
