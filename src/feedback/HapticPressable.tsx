@@ -1,4 +1,4 @@
-import React,{forwardRef,useEffect,useRef,useState,type ReactNode} from 'react';
+import React,{forwardRef,useEffect,useLayoutEffect,useRef,useState,type ReactNode} from 'react';
 import {ActivityIndicator,Pressable,StyleSheet,View,type GestureResponderEvent,type PressableProps,type PressableStateCallbackType} from 'react-native';
 import {useHaptics} from './useHaptics';
 import type {HapticCue} from './haptic-policy';
@@ -17,7 +17,8 @@ export const HapticPressable=forwardRef<View,HapticPressableProps>(function Hapt
 ){
  const haptic=useHaptics();
  const [busy,setBusy]=useState(false),dispatch=useRef<Timer|null>(null),reset=useRef<Timer|null>(null);
- const latest=useRef({onPress,disabled});latest.current={onPress,disabled};
+ // the committed disabled flag only cancels a pending press; the press keeps the handler it was tapped with
+ const latestDisabled=useRef(disabled);useLayoutEffect(()=>{latestDisabled.current=disabled;});
  const clear=()=>{if(dispatch.current)clearTimeout(dispatch.current);if(reset.current)clearTimeout(reset.current);dispatch.current=reset.current=null;};
  useEffect(()=>clear,[]);
  useEffect(()=>{if(disabled){clear();setBusy(false);}},[disabled]);
@@ -26,7 +27,7 @@ export const HapticPressable=forwardRef<View,HapticPressableProps>(function Hapt
   if(hapticCue)haptic(hapticCue);
   if(!spinner){onPress?.(event);return;}
   event.persist?.();clear();setBusy(true);
-  dispatch.current=setTimeout(()=>{dispatch.current=null;if(!latest.current.disabled)latest.current.onPress?.(event);},40);
+  dispatch.current=setTimeout(()=>{dispatch.current=null;if(!latestDisabled.current)onPress?.(event);},40);
   reset.current=setTimeout(()=>{reset.current=null;setBusy(false);},SPINNER_RESET_MS);
  };
  const overlay=spinner&&busy?<View style={s.spinner}><ActivityIndicator color="#173337" size="small"/></View>:null;
