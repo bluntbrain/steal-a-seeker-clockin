@@ -2,6 +2,7 @@ import LaunchSplash from './components/LaunchSplash';
 import {exitWindowSeconds} from './controls/exit-window';
 import TutorialHand from './components/TutorialHand';
 import MissionIntro from './components/MissionIntro';
+import MissionChaseLoader,{warmMissionChaseSprites} from './components/MissionChaseLoader';
 import {campaignLesson,publishedLesson} from './onboarding/mission-lessons';
 import {authoredEntry,campaignEntries,nextEntry,type CampaignEntry} from './campaign/levels';
 import {publishedLevels} from './campaign/client';
@@ -29,7 +30,7 @@ import {useTrial} from './commerce/TrialContext';
 import RewardsPanel from './campaign/RewardsPanel';
 import CampaignSubmission from './campaign/CampaignSubmission';
 import React,{useCallback,useEffect,useMemo,useRef,useState,useSyncExternalStore} from 'react';
-import {ActivityIndicator,AppState,Platform,StyleSheet,Text,View,useWindowDimensions} from 'react-native';
+import {AppState,Platform,StyleSheet,Text,View,useWindowDimensions} from 'react-native';
 import {StatusBar} from 'expo-status-bar';
 import {SafeAreaProvider,SafeAreaView,useSafeAreaInsets} from 'react-native-safe-area-context';
 import {Gesture,GestureDetector,GestureHandlerRootView} from 'react-native-gesture-handler';
@@ -73,7 +74,7 @@ function relaySum(timers:readonly number[]){'worklet';let total=0;for(let i=0;i<
 function anyHunting(s:GameState){'worklet';for(let i=0;i<s.guards.length;i++){const g=s.guards[i]!;if(g.active&&g.hp>0&&g.heist?.hunting)return true;}return false;}
 function countSuspicious(s:GameState){'worklet';let n=0;for(let i=0;i<s.guards.length;i++){const g=s.guards[i]!;if(g.active&&g.hp>0&&(g.heist as {suspicious?:boolean}|undefined)?.suspicious)n++;}return n;}
 const RewardsPanelMemo=React.memo(RewardsPanel),WalletPanelMemo=React.memo(WalletPanel),HideoutMemo=React.memo(Hideout),SettingsPanelMemo=React.memo(SettingsPanel);
-export default function GameScreen(){return <GestureHandlerRootView style={{flex:1}}><SafeAreaProvider><LaunchSplash><WalletProvider><AccountProvider><SettingsProvider><EconomyProvider><CampaignGate><WalletGame/></CampaignGate></EconomyProvider></SettingsProvider></AccountProvider></WalletProvider></LaunchSplash></SafeAreaProvider></GestureHandlerRootView>;}
+export default function GameScreen(){useEffect(()=>{void warmMissionChaseSprites();},[]);return <GestureHandlerRootView style={{flex:1}}><SafeAreaProvider><LaunchSplash><WalletProvider><AccountProvider><SettingsProvider><EconomyProvider><CampaignGate><WalletGame/></CampaignGate></EconomyProvider></SettingsProvider></AccountProvider></WalletProvider></LaunchSplash></SafeAreaProvider></GestureHandlerRootView>;}
 function WalletGame(){
  const account=useAccount();
  // connecting a guest must preserve the win; switching away from a wallet still resets its game
@@ -268,12 +269,27 @@ export function Game({onSnapshot}:{onSnapshot?:(state:GameState)=>void}){
   if(isDuplicateTap(previousTap.value,tap))return;
   previousTap.value=tap;pendingTap.value=tap;
  }),[size,camera,suspended,sceneReady,game,pendingTap,previousTap]);
+ // Finish the existing intro under the chase artwork; do not add a separate loading timer.
+ const loadedScene=useRef(-1);
+ const finishSceneLoading=useCallback((expected:number)=>{
+  if(sceneEpoch.current!==expected)return;
+  setSceneError('');setSceneLoading(false);
+ },[]);
+ // Release simulation only after React has removed the loading overlay.
+ useEffect(()=>{if(!sceneLoading)sceneReady.value=true;},[sceneLoading,sceneReady]);
  const sceneLoaded=useCallback(()=>{
-  const expected=sceneVersion;if(sceneEpoch.current!==expected)return;
-  setSceneLoading(false);setSceneError('');
+  const expected=sceneVersion;if(sceneEpoch.current!==expected||loadedScene.current===expected)return;
+  loadedScene.current=expected;setSceneError('');
   const reduced=!!settingsRef.current.reducedEffects;
-  runOnUI(()=>{'worklet';if(simulationEpoch.value!==expected||sceneReady.value)return;accumulator.value=0;focusProgress.value=reduced?1:0;if(reduced){sceneReady.value=true;return;}focusProgress.value=withTiming(1,{duration:650},finished=>{if(finished&&simulationEpoch.value===expected){accumulator.value=0;sceneReady.value=true;}});})();
- },[sceneVersion,sceneReady,simulationEpoch,accumulator,focusProgress]);
+  runOnUI(()=>{'worklet';
+   if(simulationEpoch.value!==expected||sceneReady.value)return;
+   accumulator.value=0;focusProgress.value=reduced?1:0;
+   if(reduced){runOnJS(finishSceneLoading)(expected);return;}
+   focusProgress.value=withTiming(1,{duration:650},finished=>{
+    if(finished&&simulationEpoch.value===expected){accumulator.value=0;runOnJS(finishSceneLoading)(expected);}
+   });
+  })();
+ },[sceneVersion,sceneReady,simulationEpoch,accumulator,focusProgress,finishSceneLoading]);
  const sceneFailed=useCallback(()=>{if(sceneEpoch.current===sceneVersion)setSceneError('Could not load the map. Try again.');},[sceneVersion]);
  useEffect(()=>{if(!sceneLoading||!renderGameSurface)return;const timer=setTimeout(()=>setSceneError('The map is taking longer to load. Retry to reload its artwork.'),12000);return()=>clearTimeout(timer);},[sceneLoading,sceneVersion,renderGameSurface]);
  const appearance=useMemo(()=>({...economy.equipment,reducedEffects:settings.reducedEffects}),[economy.equipment.outfit,economy.equipment.trail,economy.equipment.frame,economy.equipment.rack,settings.reducedEffects]);
@@ -371,13 +387,9 @@ export function Game({onSnapshot}:{onSnapshot?:(state:GameState)=>void}){
  {!testMission&&!trial.active&&!guide.active&&guide.retries===0&&hud.status==='won'&&completedReplay&&!paused&&<View style={{position:'absolute',bottom:insets.bottom+3,zIndex:46}}><CampaignSubmission state={hud} replay={completedReplay} target={entry.number>12?{level:entry.number}:{mission:entry.mission}} quiet retrySignal={rewardRetry} onReward={account.preview?undefined:rewardResolved}/></View>}
  {claimVisible&&<CreditClaim requiresWallet={!account.preview&&!account.wallet&&guide.retries===0} connecting={connectingClaim} onConnect={connectToClaim} autoClaim={autoClaim} reward={creditReward} balance={economy.balance} onRetry={creditReward.amount===null?(account.preview?saveLocalReward:()=>{rewardResolved(null);setRewardRetry(n=>n+1);}):undefined} stars={starsFor(hud)} mission={level.title} onDone={()=>setRewardClaimed(true)}/>}
  {introMission&&<MissionIntro lesson={introMission.number>12?publishedLesson(introMission):campaignLesson(introMission.mission)} onBack={()=>{setIntroMission(null);setHideoutOpen(true);}} onPlay={()=>{const next=introMission;setIntroMission(null);restart(next);}}/>}
- {sceneLoading&&!hideoutOpen&&!walletOpen&&!settingsOpen&&!rewardsOpen&&<View testID="mission-loading" accessibilityViewIsModal style={[StyleSheet.absoluteFill,{zIndex:80,backgroundColor:'#0C1412',justifyContent:'center',alignItems:'center',padding:28,gap:16}]}>
-  <Text style={{color:'#9FBBAD',fontSize:11,fontWeight:'800',letterSpacing:2}}>{entry.boss?'BOSS LEVEL':'LEVEL'} {String(entry.number).padStart(2,'0')}</Text>
-  <Text style={{color:'#E2F2E9',fontSize:27,fontWeight:'900',textAlign:'center'}}>{level.title}</Text>
-  {!sceneError&&<ActivityIndicator size="large" color="#CFE6E4"/>}
-  <Text accessibilityLiveRegion="polite" style={{color:'#AAC5B7',fontSize:13,textAlign:'center'}}>{sceneError||'Preparing your escape…'}</Text>
-  {!!sceneError&&<Pressable accessibilityRole="button" accessibilityLabel="Retry loading mission" onPress={()=>{sceneReady.value=false;simulationEpoch.value=++sceneEpoch.current;setSceneVersion(sceneEpoch.current);setSceneError('');}} style={{padding:16,borderRadius:14,backgroundColor:'#CFE6E4'}}><Text style={{fontWeight:'800',color:'#15352A'}}>Retry loading</Text></Pressable>}
- </View>}
+ {sceneLoading&&renderGameSurface&&<MissionChaseLoader number={entry.number} title={level.title} boss={!!entry.boss} reduced={!!settings.reducedEffects} error={sceneError}
+  onRetry={()=>{sceneReady.value=false;simulationEpoch.value=++sceneEpoch.current;setSceneVersion(sceneEpoch.current);setSceneError('');}}
+  onExit={backToMissions}/>}
  {finaleVisible&&<CampaignConfetti reduced={!!settings.reducedEffects}/>}
  <Animated.View pointerEvents="none" testID="alarm-wash" style={[StyleSheet.absoluteFill,{backgroundColor:'#FF253E'},alarmWash]}/><Animated.View pointerEvents="none" testID="alarm-border" style={[StyleSheet.absoluteFill,{borderWidth:7,borderColor:'#FF4255'},alarmBorder]}/><View pointerEvents="none" style={StyleSheet.absoluteFill}><Animated.Image testID="damage-glow" source={require('../assets/ui/damage-vignette.png')} resizeMode="stretch" style={[StyleSheet.absoluteFill,{width:'100%',height:'100%'},damageStyle]}/></View></SafeAreaView>;
 }
