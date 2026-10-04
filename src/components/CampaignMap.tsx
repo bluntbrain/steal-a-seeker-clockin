@@ -34,7 +34,7 @@ export default function CampaignMap({entries,progress,current,onSelect}:{entries
    <Image accessible={false} source={item.previousZone?art[item.zone]:artFull[item.zone]} resizeMode="contain" style={{position:'absolute',left:0,top:0,width,height:item.imageHeight}}/>
    {item.nodes.map(({entry,index,x,y})=>{
     const open=entryUnlocked(progress,entries,index)&&entry.playable,best=progress.missions[entry.key],isCurrent=entry.key===current.key,boss=entry.boss,size=boss?BOSS_NODE:NODE;
-    return <Pressable key={entry.key} testID={`mission-node-${entry.number}`} accessibilityRole="button" accessibilityLabel={`Level ${entry.number}: ${boss?`${BOSS_NAMES[boss]} boss fight`:entry.title}${open?'':'. Locked'}`} accessibilityState={{selected:isCurrent}} onPress={()=>{haptic('select');onSelect(entry);}} style={({pressed})=>[s.target,{left:x-30,top:y-size/2-4,opacity:pressed?.7:1}]}>
+    return <Pressable key={entry.key} testID={`mission-node-${entry.number}`} accessibilityRole="button" accessibilityLabel={`Level ${entry.number}: ${boss?`${BOSS_NAMES[boss]} boss fight`:entry.title}${open?'':'. Locked'}`} accessibilityState={{selected:isCurrent}} onPress={()=>{haptic(open?'select':'error');onSelect(entry);}} style={({pressed})=>[s.target,{left:x-30,top:y-size/2-4,opacity:pressed?.7:1}]}>
      <View style={[s.node,{width:size,height:size,borderRadius:size/2},open&&s.open,isCurrent&&s.current,boss&&s.bossNode]}>
       {boss?<Image accessible={false} source={bossPortrait(boss)} resizeMode="cover" style={{width:size-6,height:size-6,borderRadius:size/2,transform:[{translateY:3}]}}/>:<Text maxFontSizeMultiplier={1.15} style={[s.number,isCurrent&&{color:'#142F28'},!open&&{color:'#BED3C9'}]}>{padLevel(entry.number)}</Text>}
      </View>

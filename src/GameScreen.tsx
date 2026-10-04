@@ -36,6 +36,7 @@ import {Gesture,GestureDetector,GestureHandlerRootView} from 'react-native-gestu
 import Animated,{runOnJS,runOnUI,useAnimatedStyle,useFrameCallback,useSharedValue,withTiming} from 'react-native-reanimated';
 import {useGameAudio as useAudioPlayer} from './audio/useGameAudio';
 import {useHaptics} from './feedback/useHaptics';
+import type {HapticCue} from './feedback/haptic-policy';
 import CreditClaim,{type CreditReward} from './components/CreditClaim';
 import GameCanvas from './components/GameCanvas';
 import MissionFocus from './components/MissionFocus';
@@ -69,6 +70,8 @@ const time=(n:number)=>`${Math.floor(n/60).toString().padStart(2,'0')}:${Math.fl
 // a shared empty route for hud snapshots: the renderer reads routes from the ui-thread state, not from the hud
 const NO_PATH:Point[]=[];
 function relaySum(timers:readonly number[]){'worklet';let total=0;for(let i=0;i<timers.length;i++)total+=timers[i]!;return total;}
+function anyHunting(s:GameState){'worklet';for(let i=0;i<s.guards.length;i++){const g=s.guards[i]!;if(g.active&&g.hp>0&&g.heist?.hunting)return true;}return false;}
+function countSuspicious(s:GameState){'worklet';let n=0;for(let i=0;i<s.guards.length;i++){const g=s.guards[i]!;if(g.active&&g.hp>0&&(g.heist as {suspicious?:boolean}|undefined)?.suspicious)n++;}return n;}
 const RewardsPanelMemo=React.memo(RewardsPanel),WalletPanelMemo=React.memo(WalletPanel),HideoutMemo=React.memo(Hideout),SettingsPanelMemo=React.memo(SettingsPanel);
 export default function GameScreen(){return <GestureHandlerRootView style={{flex:1}}><SafeAreaProvider><LaunchSplash><WalletProvider><AccountProvider><SettingsProvider><EconomyProvider><CampaignGate><WalletGame/></CampaignGate></EconomyProvider></SettingsProvider></AccountProvider></WalletProvider></LaunchSplash></SafeAreaProvider></GestureHandlerRootView>;}
 function WalletGame(){
@@ -121,10 +124,10 @@ export function Game({onSnapshot}:{onSnapshot?:(state:GameState)=>void}){
  const camera=useFollowCamera(game,alpha,!fullViewport,boardHeight*12/size,renderGameSurface&&!paused);
  const worldOverlayStyle=useAnimatedStyle(()=>{const c=camera.value,scale=size/12*c.zoom;return {transform:[{translateX:(c.zoom-1)*size/2-c.x*scale},{translateY:(c.zoom-1)*boardHeight/2-c.y*scale},{scale:c.zoom}]};});
  const damagePulse=useSharedValue(0);
- const showDamage=useCallback(()=>{haptic('damage');damagePulse.value=settingsRef.current.reducedEffects?.45:1;damagePulse.value=withTiming(0,{duration:settingsRef.current.reducedEffects?160:280});},[damagePulse,haptic]);
+ const showDamage=useCallback(()=>{damagePulse.value=settingsRef.current.reducedEffects?.45:1;damagePulse.value=withTiming(0,{duration:settingsRef.current.reducedEffects?160:280});},[damagePulse,haptic]);
  const showGameplayHeader=paused||hud.status!=='playing';
  const gameplayVisible=renderGameSurface&&!introMission&&!sceneLoading&&!paused&&!hideoutOpen&&!walletOpen&&!mapOpen&&!settingsOpen&&!rewardsOpen;
- useCombatAudio(hud,settings.sound&&gameplayVisible,settings.volume,showDamage,gameplayVisible,haptic);
+ useCombatAudio(hud,settings.sound&&gameplayVisible,settings.volume,showDamage,gameplayVisible);
  useEffect(()=>{if(!gameplayVisible||hud.ticks===0)damagePulse.value=0;},[gameplayVisible,hud.ticks===0,damagePulse]);
  useFootstepAudio(hud,settings.sound&&gameplayVisible&&!(guide.active&&guide.waiting),settings.volume);
  const level=useMemo(()=>combatMode?entry.definition:getLevel(mission),[combatMode,mission,entry]);
@@ -169,9 +172,11 @@ export function Game({onSnapshot}:{onSnapshot?:(state:GameState)=>void}){
  useEffect(()=>{alarmAudio.loop=true;alarmAudio.volume=settings.sound?settings.volume*.12:0;if(settings.sound&&(hud.securityAlarm||laserAlarm)&&hud.status==='playing'&&!paused)alarmAudio.play();else alarmAudio.pause();return()=>alarmAudio.pause();},[alarmAudio,settings.sound,settings.volume,hud.securityAlarm,laserAlarm,hud.status,paused]);
  const lastSpotAt=useRef(-Infinity);
  const soundAllowed=useRef(false);soundAllowed.current=settings.sound&&!paused&&!walletOpen&&!hideoutOpen&&!rewardsOpen;
- const event=useCallback((kind:'pickup'|'dash'|'success'|'caught'|'decoy'|'spot'|'switch')=>{
-   if(kind==='spot'){const now=Date.now();if(now-lastSpotAt.current<1300)return;lastSpotAt.current=now;}
-   if(soundAllowed.current&&!(kind==='success'&&completedCampaign(progress.progress,latest.current))){const player={pickup:pickupAudio,dash:dashAudio,success:successAudio,caught:caughtAudio,decoy:decoyAudio,spot:spotAudio,switch:switchAudio}[kind];player.seekTo(0).then(()=>{if(soundAllowed.current){player.volume=settingsRef.current.volume*({pickup:1,dash:.7,success:.9,caught:.8,decoy:.7,spot:.65,switch:.7}[kind]);player.play();}}).catch(()=>{});}
+ // one entry point for game feel: a sound where one exists and the matching haptic, both at simulation-step timing
+ const event=useCallback((kind:HapticCue)=>{
+   if(kind==='spotted'){const now=Date.now();if(now-lastSpotAt.current<1300)return;lastSpotAt.current=now;}
+   const players:Partial<Record<HapticCue,typeof pickupAudio>>={pickup:pickupAudio,dash:dashAudio,success:successAudio,caught:caughtAudio,decoy:decoyAudio,spotted:spotAudio,switch:switchAudio},player=players[kind];
+   if(player&&soundAllowed.current&&!(kind==='success'&&completedCampaign(progress.progress,latest.current))){player.seekTo(0).then(()=>{if(soundAllowed.current){player.volume=settingsRef.current.volume*({pickup:1,dash:.7,success:.9,caught:.8,decoy:.7,spotted:.65,switch:.7}[kind as 'pickup'|'dash'|'success'|'caught'|'decoy'|'spotted'|'switch']??.7);player.play();}}).catch(()=>{});}
    haptic(kind);
  },[pickupAudio,dashAudio,successAudio,decoyAudio,caughtAudio,spotAudio,switchAudio,progress.progress,haptic]);
  useEffect(()=>{if(paused){for(const p of [pickupAudio,dashAudio,successAudio,decoyAudio,caughtAudio,spotAudio,switchAudio])p.pause();}},[paused]);
@@ -193,6 +198,8 @@ export function Game({onSnapshot}:{onSnapshot?:(state:GameState)=>void}){
     const tapped=assistedCombatTap(game.value,point.x,point.y,seq);
     const command=guideStage.value>=0?guideCommand(guideStage.value,tapped):tapped;
     if(command){input.modify(v=>{v.command=command;return v;});if(guideWaiting.value){guideWaiting.value=false;runOnJS(callBeginGuide)();}}
+    // the thumb learns what the tap did: a tick for a move, a firmer pulse for a target, a double tick for nothing
+    runOnJS(callEvent)(command?(command.kind==='move'||command.kind==='stop'?'tapMove':'tapTarget'):'blocked');
    }
    if(guideWaiting.value){accumulator.value=0;return;}
    const dt=Math.min(raw/1000,.1);clock.value+=dt;
@@ -207,11 +214,21 @@ export function Game({onSnapshot}:{onSnapshot?:(state:GameState)=>void}){
    hudClock.value+=dt;
    // frames without a simulation step change nothing, so they only advance interpolation
    if(accumulator.value+1e-9<TUNING.step){alpha.value=accumulator.value/TUNING.step;return;}
-   const previousDamage=game.value.combat?.damageTaken??0,previousDecoys=game.value.decoysLeft,previousAlert=game.value.alert,previousPower=game.value.power,previousRelaySum=relaySum(game.value.relayTimers),previousCarry=game.value.carrying,previousDashes=game.value.dashes,previousTool=game.value.toolSeen,previousStatus=game.value.status;
+   const previousDamage=game.value.combat?.damageTaken??0,previousDecoys=game.value.decoysLeft,previousAlert=game.value.alert,previousPower=game.value.power,previousRelaySum=relaySum(game.value.relayTimers),previousCarry=game.value.carrying,previousDashes=game.value.dashes,previousTool=game.value.toolSeen,previousStatus=game.value.status,previousKills=game.value.combat?.kills??0,previousHits=game.value.combat?.hitEvents??0,previousBlocks=game.value.combat?.melee?.blocks??0,previousHunting=anyHunting(game.value),previousSuspicious=countSuspicious(game.value),previousExtract=Math.floor(game.value.extraction/.3);
    game.modify(s=>{recording.modify(chunks=>{while(accumulator.value+1e-9>=TUNING.step){recordStep(s,input.value,chunks);accumulator.value-=TUNING.step;}return chunks;});return s;},true);
    alpha.value=accumulator.value/TUNING.step;
    if(game.value.decoysLeft<previousDecoys)runOnJS(callEvent)('decoy');
-   if(!combatMode&&previousAlert<=0&&game.value.alert>0)runOnJS(callEvent)('spot');
+   if((!combatMode&&previousAlert<=0&&game.value.alert>0)||(combatMode&&!previousHunting&&anyHunting(game.value)))runOnJS(callEvent)('spotted');
+   if(countSuspicious(game.value)>previousSuspicious)runOnJS(callEvent)('suspicion');
+   const combatNow=game.value.combat;
+   if(combatNow){
+    // a boss falls with three beats, a rear takedown of an unaware guard lands soft then hard, any other kill is a thud and a tick
+    if(combatNow.kills>previousKills){const boss=game.value.guards.some((g,i)=>g.hp<=0&&g.flash>=.149&&!!game.value.definition?.patrols[i]?.boss);runOnJS(callEvent)(boss?'bossKill':combatNow.feedback==='ambush'&&combatNow.feedbackLeft>0?'stealthKill':'kill');}
+    else if(combatNow.hitEvents>previousHits)runOnJS(callEvent)('melee');
+    if((combatNow.melee?.blocks??0)>previousBlocks)runOnJS(callEvent)('armor');
+    if(combatNow.damageTaken>previousDamage)runOnJS(callEvent)('damage');
+   }
+   if(game.value.extraction>0&&Math.floor(game.value.extraction/.3)>previousExtract)runOnJS(callEvent)('exitTick');
    // a relay opening adds its whole duration while decay removes a fraction of a tick, so the sum rises only on activation
    if(game.value.power!==previousPower||relaySum(game.value.relayTimers)>previousRelaySum+1e-6)runOnJS(callEvent)('switch');
    if(game.value.carrying&&!previousCarry)runOnJS(callEvent)('pickup');

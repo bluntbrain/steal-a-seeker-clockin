@@ -1,6 +1,7 @@
 import PromotionEntry from '../commerce/PromotionEntry';
 import {useEconomy} from '../commerce/EconomyProvider';
 import {useHaptics} from '../feedback/useHaptics';
+import {PREVIEW_CUES} from '../feedback/haptic-patterns';
 import {HapticPressable as Pressable} from '../feedback/HapticPressable';
 import PlaytestControls from '../telemetry/PlaytestControls';
 import React,{useEffect,useRef} from 'react';
@@ -29,7 +30,8 @@ export default function SettingsPanel({visible, onClose, mission, onReplayTips}:
       <View style={{gap: 10}}><Text style={styles.label}>Volume · {Math.round(settings.volume * 100)}%</Text>
         <View accessibilityRole="radiogroup" accessibilityLabel="Game volume" style={{flexDirection: 'row', gap: 8}}>{[.25, .5, .75, 1].map(volume => <Pressable key={volume} accessibilityRole="radio" accessibilityLabel={`Volume ${volume * 100}%`} accessibilityState={{checked: settings.volume === volume}} aria-checked={settings.volume === volume} disabled={!ready} onPress={() => update({volume})} style={[styles.volume, settings.volume === volume && {backgroundColor: '#415D60'}]}><Text style={styles.label}>{volume * 100}%</Text></Pressable>)}</View>
       </View>
-      {toggle('Vibration', Platform.OS === 'web' ? 'Saved for this browser. Vibration feedback is used on Android.' : 'Distinct feedback for knife hits, damage, takedowns and controls.', settings.haptics, haptics => update({haptics}))}
+      {toggle('Vibration', Platform.OS === 'web' ? 'Saved for this browser. Vibration feedback is used on Android.' : 'A tick when you tap, a thump when the knife lands, a rhythm for takedowns, damage and being spotted.', settings.haptics, haptics => update({haptics}))}
+      {settings.haptics && Platform.OS !== 'web' && <View style={{gap: 8}}><Text style={styles.detail}>Try the feedback</Text><View style={{flexDirection: 'row', flexWrap: 'wrap', gap: 8}}>{PREVIEW_CUES.map(p => <Pressable key={p.cue} accessibilityRole="button" accessibilityLabel={`Preview ${p.label} vibration`} onPress={() => haptic(p.cue)} style={styles.button}><Text style={styles.buttonText}>{p.label}</Text></Pressable>)}</View></View>}
       {toggle('Reduced effects', 'Use a steady alarm border; hide the red screen pulse, escape trails and decorative motion. Guard cones and movement stay visible.', settings.reducedEffects, reducedEffects => update({reducedEffects}))}
       {!!error && <View style={{gap: 10}}><Text accessibilityLiveRegion="polite" style={styles.detail}>{error}</Text><Pressable accessibilityRole="button" onPress={retry} style={styles.button}><Text style={styles.buttonText}>Save preferences again</Text></Pressable></View>}
       <View style={{gap: 10}}><Text style={styles.label}>Controls</Text><Text style={styles.detail}>Tap the floor to move. Tap a guard to approach and slash with your knife. Tap elsewhere to escape its aim. Tap the phone to collect it, then tap the exit. Walls stop bullets. Your outfit does not change combat stats.</Text><Text style={styles.detail}>Opening a menu pauses gameplay. Choose Resume when you return. Daily submission deadlines keep counting while paused.</Text></View>
