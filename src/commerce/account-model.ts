@@ -8,10 +8,12 @@ export const progressKey=(wallet?:string)=>wallet?`seeker.campaign.${NETWORK_NAM
 export function readAccount(value:unknown,wallet:string):AccountState|undefined{
  if(!value||typeof value!=='object')return;
  const a=value as AccountState;
- if(a.wallet!==wallet||!Array.isArray(a.entitlements)||!a.entitlements.every(id=>PRODUCTS.some(p=>p.id===id))||!a.equipment||typeof a.equipment!=='object'||!a.progress||typeof a.progress!=='object')return;
+ if(a.wallet!==wallet||!Array.isArray(a.entitlements)||!a.equipment||typeof a.equipment!=='object'||!a.progress||typeof a.progress!=='object')return;
+ // ids this build does not sell (a newer server, the pass outfit row) are dropped, never a reason to reject the account
+ const entitlements=[...new Set(a.entitlements.filter(id=>PRODUCTS.some(p=>p.id===id)))];
  const equipment:Record<string,string>={};
- for(const p of PRODUCTS)if(a.entitlements.includes(p.id)&&a.equipment[p.kind]===p.id)equipment[p.kind]=p.id;
+ for(const p of PRODUCTS)if(entitlements.includes(p.id)&&a.equipment[p.kind]===p.id)equipment[p.kind]=p.id;
  // The authenticated server grants this outfit through league achievements, not the shop.
  if(a.equipment.outfit==='ghost-courier')equipment.outfit='ghost-courier';
- return {wallet,credits:Number.isSafeInteger(a.credits)&&a.credits!>=0?a.credits:0,creditStars:a.creditStars??{},entitlements:[...new Set(a.entitlements)],equipment,progress:a.progress};
+ return {wallet,credits:Number.isSafeInteger(a.credits)&&a.credits!>=0?a.credits:0,creditStars:a.creditStars??{},entitlements,equipment,progress:a.progress};
 }

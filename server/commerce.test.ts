@@ -47,7 +47,7 @@ test('orders bind prices, isolate wallets, reject forged transfers and fulfill d
  await app.inject({method:'POST',url:`/orders/${order.id}/transaction`,headers:user.headers,payload:{signature:forged}});assert.deepEqual((await service.me(user.wallet)).entitlements,[]);
  const sig=b58(randomBytes(64));transactions.set(sig,paidTx(order,sig));const send=()=>app.inject({method:'POST',url:`/orders/${order.id}/transaction`,headers:user.headers,payload:{signature:sig}});
  const results=await Promise.all([send(),send()]);for(const r of results){assert.equal(r.statusCode,200,r.body);assert.equal(r.json().status,'fulfilled');}
- assert.deepEqual((await service.me(user.wallet)).entitlements,['campaign','ghost-courier']);assert.equal(Number((await pool.query('SELECT count(*) FROM payment_receipts WHERE order_id=$1',[order.id])).rows[0].count),1);
+ assert.deepEqual((await service.me(user.wallet)).entitlements,['campaign']);assert.equal(Number((await pool.query("SELECT count(*) FROM entitlements WHERE wallet=$1 AND sku='ghost-courier'",[user.wallet])).rows[0].count),1);assert.equal(Number((await pool.query('SELECT count(*) FROM payment_receipts WHERE order_id=$1',[order.id])).rows[0].count),1);
  assert.equal((await app.inject({method:'POST',url:'/orders',headers:user.headers,payload:{sku:'campaign',idempotencyKey:randomUUID()}})).statusCode,409);
  assert.deepEqual((await service.me(other.wallet)).entitlements,[]);
 });
@@ -96,7 +96,7 @@ test('expired approval rotates only after finalized reference scan; missing call
  const sig=b58(randomBytes(64));transactions.set(sig,paidTx(next,sig));references.set(next.reference,[sig]);
  chainHeight=Number(next.payment!.lastValidBlockHeight)+1;
  const restored=await service.preparePayment(user.wallet,o.id);assert.equal(restored.status,'fulfilled');assert.equal(restored.payment!.id,next.payment!.id,'No new payment is prepared after recovery');
- assert.deepEqual((await service.me(user.wallet)).entitlements,['campaign','ghost-courier']);
+ assert.deepEqual((await service.me(user.wallet)).entitlements,['campaign']);assert.equal(Number((await pool.query("SELECT count(*) FROM entitlements WHERE wallet=$1 AND sku='ghost-courier'",[user.wallet])).rows[0].count),1);
 });
 test('incomplete finalized RPC history blocks reapproval; an expired unpaid quote can be replaced',async()=>{
  const user=await login(),o=await quote(user),first=await service.preparePayment(user.wallet,o.id);chainHeight=Number(first.payment!.lastValidBlockHeight)+1;
@@ -322,7 +322,7 @@ test('wallet-managed send with lost callback stays locked until finalized expiry
  const next=await service.preparePayment(user.wallet,o.id);assert.notEqual(next.payment!.id,prepared.payment!.id);
  const sig=b58(randomBytes(64));transactions.set(sig,paidTx(next,sig));references.set(o.reference,[sig]);
  await service.reconcile(o.id);assert.equal((await service.getOrder(user.wallet,o.id)).status,'fulfilled');
- assert.deepEqual((await service.me(user.wallet)).entitlements,['campaign','ghost-courier']);
+ assert.deepEqual((await service.me(user.wallet)).entitlements,['campaign']);assert.equal(Number((await pool.query("SELECT count(*) FROM entitlements WHERE wallet=$1 AND sku='ghost-courier'",[user.wallet])).rows[0].count),1);
 });
 
 test('credit packs grant once per finalized order, remain repeatable, and never grant pass access',async()=>{
@@ -484,12 +484,12 @@ test('promotion free claim authenticates, bypasses RPC/prices, grants once and r
  assert.equal((await api.inject({method:'POST',url:'/promotions/claim',payload})).statusCode,401);
  const preview=await api.inject({method:'POST',url:'/promotions/preview',payload});assert.equal(preview.statusCode,200);assert.equal(preview.json().percentOff,100);assert(!preview.body.includes(h.code));
  const results=await Promise.all([1,2,3].map(()=>api.inject({method:'POST',url:'/promotions/claim',headers:user.headers,payload})));
- for(const r of results){assert.equal(r.statusCode,200,r.body);assert.deepEqual(r.json().entitlements,['campaign','ghost-courier','solana-mert','solana-toly']);}
+ for(const r of results){assert.equal(r.statusCode,200,r.body);assert.deepEqual(r.json().entitlements,['campaign','solana-mert','solana-toly']);}
  assert.equal(chainCalls,0);assert.equal(priceCalls,0);
  assert.equal(Number((await pool.query('SELECT count(*) FROM orders WHERE wallet=$1',[user.wallet])).rows[0].count),0);
  assert.equal(Number((await pool.query('SELECT count(*) FROM campaign_rebates WHERE wallet=$1',[user.wallet])).rows[0].count),0);
  assert.equal(Number((await pool.query('SELECT count(*) FROM promotion_redemptions WHERE wallet=$1',[user.wallet])).rows[0].count),1);
- const restored=new CommerceService(pool,chain,{...h.config,promotions:[]});assert.deepEqual((await restored.me(user.wallet)).entitlements,['campaign','ghost-courier','solana-mert','solana-toly'],'a free pass carries its bundle outfit');
+ const restored=new CommerceService(pool,chain,{...h.config,promotions:[]});assert.deepEqual((await restored.me(user.wallet)).entitlements,['campaign','solana-mert','solana-toly'],'the pass outfit row is not a product entitlement');
  await restored.equip(user.wallet,'solana-toly');assert.equal((await restored.me(user.wallet)).equipment.outfit,'solana-toly');
  }finally{await api.close();}
 });
@@ -518,7 +518,7 @@ test('promotion discounts SKR and SOL, freezes quotes, suppresses rebates and co
  await assert.rejects(h.commerce.createOrder(u.wallet,'campaign',key,currency),/another product/);
  h.offer.percentOff=25;assert.equal((await h.commerce.createOrder(u.wallet,'campaign',key,currency,h.code)).amount,o.amount);
  const p=await h.commerce.preparePayment(u.wallet,o.id),sig=b58(randomBytes(64));transactions.set(sig,currency==='SOL'?nativeTx(p,sig):paidTx(p,sig));await h.commerce.attach(u.wallet,o.id,sig);assert.equal((await h.commerce.getOrder(u.wallet,o.id)).status,'fulfilled');
- assert.deepEqual((await h.commerce.me(u.wallet)).entitlements,['campaign','ghost-courier','solana-mert','solana-toly']);assert.equal((await pool.query('SELECT state FROM promotion_redemptions WHERE order_id=$1',[o.id])).rows[0].state,'granted');
+ assert.deepEqual((await h.commerce.me(u.wallet)).entitlements,['campaign','solana-mert','solana-toly']);assert.equal((await pool.query('SELECT state FROM promotion_redemptions WHERE order_id=$1',[o.id])).rows[0].state,'granted');
  }
 });
 test('promotion capacity holds pending approvals and releases cancelled or expired untouched quotes',async()=>{
@@ -603,10 +603,10 @@ test('the campaign leaderboard ranks total points from each wallet best verified
 test('the game pass grants its bundle once: credits and the ghost outfit on payment, and for existing owners at boot',async()=>{
  const {PASS_BUNDLE}=await import('../shared/commerce'),{backfillPassBundle}=await import('./service');
  const user=await login(),o=await quote(user),sig=b58(randomBytes(64));transactions.set(sig,paidTx(o,sig));await service.attach(user.wallet,o.id,sig);
- const me=await service.me(user.wallet);assert(me.entitlements.includes('campaign')&&(me.entitlements as string[]).includes(PASS_BUNDLE.outfit));assert.equal(me.credits,PASS_BUNDLE.credits);
+ const me=await service.me(user.wallet);assert.deepEqual(me.entitlements,['campaign'],'the pass outfit is not a product id, listing it broke client account parsing');assert.equal(Number((await pool.query('SELECT count(*) FROM entitlements WHERE wallet=$1 AND sku=$2',[user.wallet,PASS_BUNDLE.outfit])).rows[0].count),1);assert.equal(me.credits,PASS_BUNDLE.credits);
  await service.equip(user.wallet,PASS_BUNDLE.outfit);assert.equal((await service.me(user.wallet)).equipment.outfit,PASS_BUNDLE.outfit);
  await backfillPassBundle(pool);assert.equal(await backfillPassBundle(pool),0,'a second boot grants nothing more');assert.equal((await service.me(user.wallet)).credits,PASS_BUNDLE.credits);
  // a wallet that bought the pass before the bundle existed
  const legacy=await login();await pool.query("INSERT INTO entitlements(wallet,sku,order_id) VALUES($1,'campaign',NULL)",[legacy.wallet]);
- assert.equal(await backfillPassBundle(pool),1);const owner=await service.me(legacy.wallet);assert.equal(owner.credits,PASS_BUNDLE.credits);assert((owner.entitlements as string[]).includes(PASS_BUNDLE.outfit));
+ assert.equal(await backfillPassBundle(pool),1);const owner=await service.me(legacy.wallet);assert.equal(owner.credits,PASS_BUNDLE.credits);assert.equal(Number((await pool.query('SELECT count(*) FROM entitlements WHERE wallet=$1 AND sku=$2',[legacy.wallet,PASS_BUNDLE.outfit])).rows[0].count),1);await service.equip(legacy.wallet,PASS_BUNDLE.outfit);
 });

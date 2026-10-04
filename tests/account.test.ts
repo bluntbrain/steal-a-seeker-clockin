@@ -7,7 +7,7 @@ test('cached access and equipment remain bound to the selected wallet',()=>{
  assert.equal(readAccount(a,'B'),undefined);
  assert.deepEqual(readAccount(a,'A')?.equipment,{});
  assert.deepEqual(readAccount({...a,equipment:{outfit:'night-courier'}},'A')?.equipment,{outfit:'night-courier'});
- assert.equal(readAccount({...a,entitlements:['invented']},'A'),undefined);
+ assert.deepEqual(readAccount({...a,entitlements:['invented']},'A')?.entitlements,[]);
  assert.notEqual(progressKey('A'),progressKey('B'));
  assert.notEqual(progressKey(),progressKey('A'));
 });
@@ -22,4 +22,11 @@ test('cloud restore preserves newer local bests and repeated merges do not add c
 
 test('a server-awarded Ghost Courier outfit survives account caching without a shop purchase',()=>{
  const value=readAccount({wallet:'test-wallet',entitlements:['campaign'],equipment:{outfit:'ghost-courier'},progress:{}},'test-wallet');assert.equal(value?.equipment.outfit,'ghost-courier');
+});
+
+test('an unknown entitlement id is dropped instead of rejecting the account',()=>{
+ const a={wallet:'A',entitlements:['campaign','ghost-courier'],equipment:{outfit:'ghost-courier'},progress:{}};
+ const read=readAccount(a,'A');
+ assert.deepEqual(read?.entitlements,['campaign']);
+ assert.equal(read?.equipment.outfit,'ghost-courier');
 });
