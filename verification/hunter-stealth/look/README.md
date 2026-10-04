@@ -11,3 +11,5 @@ Web preview evidence for the look pass (wall caps regenerated, continuous wall f
 - Start button spinner (commit after 3de2627): browser DOM check on the pause sheet, `{"spinnerShown":true,"sheetGoneAfter400ms":true}` 15 ms after pressing Restart.
 
 Web preview on 127.0.0.1:8787, `?build=free-campaign-store`, viewport 390 x 844. 389 client tests pass.
+
+Emulator (StealSeeker_Code27_QA, arm64, software GPU), code 44 installed from `releases/steal-a-seeker-mainnet-v0.3.41-code44.apk` (versionCode 44 inside): `android-emulator-code44-level1-briefing.png` shows the briefing preview with the continuous wall slabs, `android-emulator-code44-level1.png` the loaded level. The emulator's screen capture lags by about a second, so the spinner and loader instants were not caught there; the browser DOM check above covers the spinner timing.
