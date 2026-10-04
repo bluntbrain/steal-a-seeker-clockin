@@ -1,3 +1,4 @@
+import type {WalletNames} from './wallet-names';
 import {paymentDiagnostic,unavailableMessage} from './payment-errors';
 import {registerSite} from './site';
 import {STORE_ITEMS,RETIRED_ITEMS} from '../shared/store';
@@ -16,7 +17,7 @@ import {CommerceService,ServiceError} from './service';
 import {ReturnService,returnStatus} from './returns';
 const wallet=z.string().refine(v=>{try{address(v);return true;}catch{return false;}}),uuid=z.string().uuid(),sku=z.enum(PRODUCTS.map(p=>p.id) as [ProductId,...ProductId[]]);
 const bytes=z.string().max(8192).regex(/^[A-Za-z0-9+/]*={0,2}$/);
-export async function createApp(service:CommerceService){
+export async function createApp(service:CommerceService,names?:WalletNames){
  const campaign=new CampaignService(service.pool,service.campaignReturns??new ReturnService(service.pool,undefined,{mint:service.config.mint,treasury:service.config.recipient,source:service.config.destination,decimals:service.config.decimals,cluster:service.config.cluster}));
  const app=Fastify({bodyLimit:16*1024,logger:{level:'warn',redact:['req.headers.authorization','req.body.code','req.body.promotionCode']}});await app.register(rateLimit,{max:180,timeWindow:'1 minute'});
  app.setErrorHandler((error,req,reply)=>{if(error instanceof ZodError)return reply.code(400).send({error:'Invalid request.'});if(error instanceof ServiceError){if(error.status>=500)req.log.error({diagnostic:error.diagnostic??error.message,route:req.routeOptions.url},'Payment service unavailable');return reply.code(error.status).send({error:error.message});}const e=error as {statusCode?:number};if(e.statusCode&&e.statusCode<500)return reply.code(e.statusCode).send({error:'Request could not be accepted.'});req.log.error({diagnostic:paymentDiagnostic(error),route:req.routeOptions.url},'Request failed');return reply.header('Retry-After','5').code(503).send({error:unavailableMessage(req.routeOptions.url??req.url)});});
@@ -47,7 +48,8 @@ export async function createApp(service:CommerceService){
  app.post('/me/unequip',async req=>service.unequip((await account(req.headers.authorization)).wallet,z.object({slot:z.enum(['outfit','trail','frame','rack'])}).strict().parse(req.body).slot));
  const day=z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine(v=>{try{return new Date(`${v}T00:00:00Z`).toISOString().slice(0,10)===v;}catch{return false;}}),rulesHash=z.string().regex(/^[a-f0-9]{64}$/);
  app.get('/campaign',async req=>campaign.summary((await account(req.headers.authorization)).wallet));
- app.get('/campaign/leaderboard',async req=>campaign.leaderboard(req.headers.authorization?(await account(req.headers.authorization)).wallet:undefined));
+ app.get('/campaign/leaderboard',async req=>{const board=await campaign.leaderboard(req.headers.authorization?(await account(req.headers.authorization)).wallet:undefined);return names?names.enrich(board):board;});
+ app.addHook('onClose',async()=>names?.close());
  app.post('/campaign/claim',async req=>{z.object({}).strict().parse(req.body);return campaign.claim((await account(req.headers.authorization)).wallet);});
  app.post('/campaign/runs',{bodyLimit:1024*1024,config:{rateLimit:{max:12,timeWindow:'1 minute'}}},async req=>{const a=await account(req.headers.authorization),b=z.object({mission:z.enum(CAMPAIGN_IDS as [MissionId,...MissionId[]]).optional(),level:z.number().int().min(13).max(1000000).optional(),rulesHash,replay:z.unknown()}).strict().refine(v=>(v.mission===undefined)!==(v.level===undefined),'Name one mission or one level.').parse(req.body);return campaign.submit(a.wallet,b.level!==undefined?{level:b.level}:{mission:b.mission!},b.rulesHash,b.replay);});
  // published levels are public and immutable, so clients may cache them by number

@@ -1,3 +1,4 @@
+import {WalletNames,allDomainsLookup} from './wallet-names';
 import {parsePromotions} from './promotions';
 import {reconcileOrders} from './order-worker';
 import {paymentDiagnostic} from './payment-errors';
@@ -30,7 +31,10 @@ async function main(){
   returns.chain=new DevnetReturnChain({...returnConfig,rpcUrl:network.rpcUrl},signer);
  }
  service.campaignReturns=returns;
- const app=await createApp(service);
+ // Identity lives on mainnet even when payments are tested on devnet. Never send identity queries to devnet.
+ const nameRpc=process.env.SKR_RPC_URL||(network.mainnet?network.rpcUrl:process.env.MAINNET_RPC_URL)||'https://api.mainnet.solana.com';
+ const names=process.env.SKR_NAMES_ENABLED==='false'?undefined:new WalletNames(allDomainsLookup(nameRpc));
+ const app=await createApp(service,names);
  let working=false;const timer=setInterval(async()=>{if(working)return;working=true;try{await reconcileOrders(service,(fields,message)=>app.log.warn(fields,message));await service.releaseUnpaidCampaignReservations();}catch(error){app.log.warn({diagnostic:paymentDiagnostic(error)},'Reconciliation worker will retry.');}finally{working=false;}},15000);
  let settling=false;const returnTimer=setInterval(async()=>{if(settling||!returns)return;settling=true;try{await returns.process();}catch{app.log.warn('Return reconciliation will retry.');}finally{settling=false;}},1000);
  const stop=async()=>{clearInterval(timer);clearInterval(returnTimer);await app.close();await pool.end();};process.on('SIGTERM',stop);process.on('SIGINT',stop);

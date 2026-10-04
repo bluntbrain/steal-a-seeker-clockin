@@ -11,5 +11,5 @@ export type CampaignStats=ReturnType<typeof campaignStats>;
 // total points first: the best verified score per level already rewards speed and remaining health
 export function compareCampaign(a:CampaignStats,b:CampaignStats){return b.score-a.score||b.cleared-a.cleared||a.ticks-b.ticks||b.clean-a.clean||b.battery-a.battery;}
 export type CampaignSummary={creditAward?:{mission:string;credits:number;balance?:number};runs:CampaignPerformance[];rebate:number;state:'legacy'|'locked'|'ready'|'queued'|'pending'|'settled'|'review';returnId?:string;signature?:string};
-export type CampaignRank=CampaignStats&{wallet:string;rank:number};
-export type CampaignBoard={board:CampaignRank[];personal:CampaignRank|null;participants:number};
+export type CampaignRank=CampaignStats&{wallet:string;displayName?:string;rank:number};
+export type CampaignBoard={board:CampaignRank[];personal:CampaignRank|null;participants:number;namesPending?:boolean};

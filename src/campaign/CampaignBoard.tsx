@@ -8,7 +8,7 @@ import {campaignApi} from './client';
 import {ApiError} from '../commerce/client';
 import type {CampaignBoard as Board,CampaignRank} from '../../shared/economy';
 import {LeagueSurface,RankMedal} from '../league/LeagueVisuals';
-import {shortWallet} from '../league/card';
+import {leaderboardName} from '../../shared/wallet-name';
 import type {Progress} from '../progress/model';
 import type {CampaignEntry} from './levels';
 const portrait=require('../../assets/leaderboard-v2/courier-avatar.png');
@@ -16,18 +16,21 @@ type Props={entries:readonly CampaignEntry[];progress:Progress;onShare:()=>void;
 export default function CampaignBoard({entries,progress,onShare,onRewards}:Props){
  const account=useAccount(),accountRef=useRef(account);accountRef.current=account;
  const [data,setData]=useState<Board>(),[loading,setLoading]=useState(false),[error,setError]=useState('');
- const load=useCallback(async()=>{
+ const namePolls=useRef(0);
+ const load=useCallback(async(automatic=false)=>{
+  if(!automatic)namePolls.current=0;
   setLoading(true);setError('');
   try{let token:string|undefined;const a=accountRef.current;if(a.wallet&&!a.preview){try{token=(await a.session(false)).token;}catch{/* an anonymous board still loads */}}setData(await campaignApi.board(token));}
   catch(e){setError(e instanceof ApiError&&e.status<500?e.message:'The live leaderboard is not reachable from here.');}
   finally{setLoading(false);}
  },[]);
  useEffect(()=>{void load();},[load,account.wallet]);
+ useEffect(()=>{if(!data?.namesPending||loading||namePolls.current>=10)return;const timer=setTimeout(()=>{namePolls.current++;void load(true);},3000);return()=>clearTimeout(timer);},[data,loading,load]);
  const localPoints=Object.values(progress.missions).reduce((n,b)=>n+(b?.score??0),0),localCleared=entries.filter(e=>!!progress.missions[e.key]).length;
  const personal=data?.personal??null,rows=data?.board??[],guest=!account.wallet||account.preview;
  const points=personal?personal.score:localPoints,cleared=personal?personal.cleared:localCleared;
  const hint=loading&&!data?'Fetching verified scores…':guest?'Connect a wallet and clear a level to be listed.':error?error:personal?`${data?.participants??0} couriers ranked · best verified run per level`:'Clear a level with your wallet connected to join the board.';
- const name=(p:CampaignRank)=>p.wallet===account.wallet?'You':shortWallet(p.wallet);
+ const name=(p:CampaignRank)=>leaderboardName(p,account.wallet);
  return <View style={s.root} testID="campaign-leaderboard">
   <View style={s.heading}><View style={{flex:1,gap:3}}><Text accessibilityRole="header" style={s.title}>Leaderboard</Text><Text style={s.subtitle}>TOTAL POINTS · SPEED AND HEALTH COUNT ON EVERY LEVEL</Text></View><Pressable accessibilityRole="button" accessibilityLabel="Refresh leaderboard" onPress={()=>void load()} style={s.refresh}><Text style={s.refreshText}>{loading?'…':'↻'}</Text></Pressable></View>
   <ScrollView style={{flex:1}} contentContainerStyle={{gap:8,paddingBottom:12}} showsVerticalScrollIndicator={false}>
@@ -35,7 +38,7 @@ export default function CampaignBoard({entries,progress,onShare,onRewards}:Props
     <LeagueSurface/>
     <View style={s.positionTop}>
      <Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={.6} style={s.positionRank}>{personal?`#${personal.rank}`:'—'}</Text>
-     <View style={s.positionIdentity}><Text style={s.positionLabel}>{guest?'This device':'Your position'}</Text><Text style={s.progress}>{cleared} / {entries.length} levels</Text></View>
+     <View style={s.positionIdentity}><Text style={s.positionLabel}>{guest?'This device':'Your position'}</Text>{personal?.displayName&&<Text style={s.progress} numberOfLines={1}>{name(personal)}</Text>}<Text style={s.progress}>{cleared} / {entries.length} levels</Text></View>
      <View style={s.scoreCell}><Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={.6} style={s.positionPoints}>{points.toLocaleString()}</Text><Text style={s.pointsLabel}>POINTS</Text></View>
     </View>
     <View style={s.hintRow}><Text style={s.positionHint} numberOfLines={2}>{hint}</Text><Pressable accessibilityRole="button" accessibilityLabel="Share your level card" onPress={onShare} style={s.share}><Text style={s.shareText}>Share ↗</Text></Pressable></View>
@@ -45,7 +48,7 @@ export default function CampaignBoard({entries,progress,onShare,onRewards}:Props
     <LeagueSurface kind={yours?'mint':p.rank===1?'gold':'row'}/>
     <View style={s.rankCell}>{medal&&<RankMedal rank={p.rank}/>}<Text numberOfLines={1} adjustsFontSizeToFit style={[s.rowRank,!medal&&{textAlign:'center'},p.rank===1&&{color:'#EEC875'},yours&&{color:'#C1F4E0'}]}>#{p.rank}</Text></View>
     <Image accessible={false} source={portrait} style={s.avatar}/>
-    <View style={s.nameCell}><Text style={[s.name,yours&&{color:'#BAEDDC'}]} numberOfLines={1}>{name(p)}</Text><Text style={s.rowDetail}>{p.cleared} {p.cleared===1?'level':'levels'} · {p.clean} clean</Text></View>
+    <View style={s.nameCell}><Text style={[s.name,yours&&{color:'#BAEDDC'}]} numberOfLines={1}>{name(p)}</Text><Text style={s.rowDetail}>{yours&&p.displayName?'You · ':''}{p.cleared} {p.cleared===1?'level':'levels'} · {p.clean} clean</Text></View>
     <View style={s.rowScore}><Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={.65} style={s.points}>{p.score.toLocaleString()}</Text><Text style={s.rowPointsLabel}>POINTS</Text></View>
    </View>;})}</View>
    {!rows.length&&<View style={s.empty} testID="campaign-board-empty"><LeagueSurface kind="row"/><Image accessible={false} source={portrait} style={s.emptyAvatar}/><Text style={s.emptyTitle}>{loading?'Loading the board…':error?'Leaderboard unavailable':'The board is open.'}</Text><Text style={s.emptyText}>{error?error:'The first verified clear takes the top spot.'}</Text></View>}
