@@ -65,6 +65,7 @@ import {alarmSpeedPercent,decoyMessage} from './game/feedback';
 import {initialState,idleInput,step,nearPhone,nearSwitch,exitOpen,stateLevel,type GameState} from './game/simulation';
 import {LEVEL,getLevel,TUNING,MISSIONS,type MissionId,type Point} from './game/level';
 type Stats={fps:number;p95:number;frames:number;slow:number};
+const LOADER_MIN_MS=2000;
 const zeroStats={fps:0,p95:0,frames:0,slow:0};
 const time=(n:number)=>`${Math.floor(n/60).toString().padStart(2,'0')}:${Math.floor(n%60).toString().padStart(2,'0')}`;
 // memoised so hud publishes do not re-render the hidden overlay panels
@@ -269,10 +270,13 @@ export function Game({onSnapshot}:{onSnapshot?:(state:GameState)=>void}){
   if(isDuplicateTap(previousTap.value,tap))return;
   previousTap.value=tap;pendingTap.value=tap;
  }),[size,camera,suspended,sceneReady,game,pendingTap,previousTap]);
- // Finish the existing intro under the courier artwork; do not add a separate loading timer.
- const loadedScene=useRef(-1);
+ // the loader stays up at least LOADER_MIN_MS so a fast scene load does not flash it
+ const loadedScene=useRef(-1),loaderShownAt=useRef(Date.now());
+ useEffect(()=>{if(sceneLoading)loaderShownAt.current=Date.now();},[sceneLoading,sceneVersion]);
  const finishSceneLoading=useCallback((expected:number)=>{
   if(sceneEpoch.current!==expected)return;
+  const wait=LOADER_MIN_MS-(Date.now()-loaderShownAt.current);
+  if(wait>0){setTimeout(()=>finishSceneLoading(expected),wait);return;}
   setSceneError('');setSceneLoading(false);
  },[]);
  // Release simulation only after React has removed the loading overlay.

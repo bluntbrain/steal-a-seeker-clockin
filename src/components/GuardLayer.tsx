@@ -1,5 +1,5 @@
 import React from 'react';
-import {Circle,Group,Image,Oval,Path,DashPathEffect,RoundedRect,usePathValue,type SkImage} from '@shopify/react-native-skia';
+import {Circle,Group,Image,Path,DashPathEffect,RoundedRect,usePathValue,type SkImage} from '@shopify/react-native-skia';
 import {useAnimatedReaction,useSharedValue,useDerivedValue,type SharedValue} from 'react-native-reanimated';
 import {wallActorClip} from '../art/wall-depth';
 import type {WallOcclusion} from '../art/wall-depth-art';
@@ -26,10 +26,8 @@ export default function GuardLayer({game,alpha,index,clock,reduced=false,droneSp
  });
  const fx=useDerivedValue(()=>defeatPose(clock.value-death.value.started,armor,drone,reduced));
  const live=useDerivedValue(()=>{const g=game.value.guards[index];return g&&(!game.value.combat||g.hp>0&&g.active)?1:0;});
- // in combat the body stays on the floor after the fall so other guards can find it; the blood pool spreads under it
+ // in combat the body stays on the floor after the fall so other guards can find it
  const visible=useDerivedValue(()=>live.value?1:Math.max(fx.value.opacity,game.value.combat?.82:0));
- const blood=useDerivedValue(()=>{if(live.value||!game.value.combat||reduced)return 0;const t=clock.value-death.value.started;return Math.min(.72,Math.max(0,t)*1.4);});
- const bloodPose=useDerivedValue(()=>[{translateX:death.value.x},{translateY:death.value.y+.08},{rotate:death.value.angle}]);
  const pose=useDerivedValue(()=>{
   const g=game.value.guards[index];if(!g)return [];
   if(!live.value){const d=death.value,f=fx.value;return [{translateX:d.x+d.dx*f.recoil},{translateY:d.y+d.dy*f.recoil},{rotate:d.angle+f.rotation*(index%2?1:-1)},{scaleX:f.scaleX},{scaleY:f.scaleY}];}
@@ -69,7 +67,7 @@ export default function GuardLayer({game,alpha,index,clock,reduced=false,droneSp
   <Group opacity={visible}>
   <Path path={lurePath} color="#CFE6E4" style="stroke" strokeWidth={.035} opacity={.65}><DashPathEffect intervals={[.12,.12]}/></Path><Path path={cone} color={color} opacity={opacity}/>
   <Path path={cone} color={color} opacity={opacity} style="stroke" strokeWidth={.025}/>
-  <Path path={aim} color="#FF886F" style="stroke" strokeWidth={.045}><DashPathEffect intervals={[.13,.08]}/></Path><Group transform={bloodPose} opacity={blood}><Oval x={-.52} y={-.34} width={1.04} height={.68} color="#5A0F12"/><Oval x={-.3} y={-.2} width={.46} height={.3} color="#7A1418"/></Group><Group clip={wallClip}><Group transform={pose}><Group transform={[{scale:artScale}]}>
+  <Path path={aim} color="#FF886F" style="stroke" strokeWidth={.045}><DashPathEffect intervals={[.13,.08]}/></Path><Group clip={wallClip}><Group transform={pose}><Group transform={[{scale:artScale}]}>
    {drone?<QuadDrone game={game} index={index} clock={clock} reduced={reduced} sprite={droneSprite}/>:<Image image={boss?bossSprite:armor||kind==='warden'?heavySprite:guardSprite} x={boss||armor||kind==='warden'?-.59:-.52} y={boss||armor||kind==='warden'?-.59:-.52} width={boss||armor||kind==='warden'?1.18:1.04} height={boss||armor||kind==='warden'?1.18:1.04} fit="contain"/>}
    <Circle cx={0} cy={0} r={.43} color="#F2FFDA" opacity={hitFlash}/>
    {armor&&(game.value.definition?.combat?.revision??0)>=10&&<>

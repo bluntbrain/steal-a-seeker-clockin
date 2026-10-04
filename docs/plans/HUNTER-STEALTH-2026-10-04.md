@@ -131,3 +131,11 @@ Changes: the level map scenes are plain images with the zone crossfade baked int
 Codex review of the pass found two regressions, both fixed: the tutorial stores HUD snapshots as checkpoints and restores them into the simulation, so snapshots stay complete while the tutorial is active and a saved checkpoint with stripped guards is rejected; the topmost map scene draws an opaque copy of its world image instead of fading into the background. The API now runs Codex's `.skr` name resolver (deployment 14e73003); five of the six ranked wallets resolved. Code 41 carries the fixes. Emulator frame statistics for the map scroll are software-rendered and not meaningful; a device run is still needed.
 
 Still open: a physical device run with Perfetto or gfxinfo, Codex's P1 items (first-tap acknowledgement on the next frame, cached walkable grids in navigation, which needs a rules revision), and the AI livestream proposal, which is not implemented.
+
+## 10. Look pass: walls, route start, blood, loader (4 October, night)
+
+On the user's request after Codex's loader and marker commits (ccbe191, d78b377, 78aba39): the mission loader now stays up at least 2 seconds (`LOADER_MIN_MS` in `src/GameScreen.tsx`; measured 2,081 ms in the browser from the Play tap), the route line starts under the courier again (Codex's inverted courier clip in `CombatLayer.tsx` is removed, the destination dot still fades before arrival), and the blood pool under a fallen guard is gone (the body stays so patrols can still find it).
+
+Walls: the three district caps were regenerated with gpt-image-2 through the Codex CLI (`output/imagegen/walls-v6/`, prompts beside the PNGs) as a bolted frame around a uniform tileable interior with no centrepiece, and `src/art/walls.ts` now nine-slices once per wall (fixed corners, tiled edges and interior at the corner scale) instead of once per two-unit module. Long walls read as one slab instead of a row of framed boxes. Runtime JPEGs stay at `assets/walls-v5/` (manifest and README updated), 135 KB for the three. Evidence: `verification/hunter-stealth/look/`.
+
+Not done: floors are unchanged; a physical device look at the new caps at Seeker density.

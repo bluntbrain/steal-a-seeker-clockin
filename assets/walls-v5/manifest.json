@@ -1,30 +1,35 @@
 {
   "model": "gpt-image-2",
-  "mode": "OpenAI image API via bundled imagegen CLI",
+  "mode": "Codex CLI image tool (codex exec, gpt-6-astra)",
+  "generated": "2026-10-04",
   "size": "1024x1024",
   "quality": "high",
   "runtimeSize": "512x512",
+  "frame": "outer 10 percent, sliced once per wall by src/art/walls.ts",
   "assets": [
     {
       "district": "warehouse",
-      "original": "output/imagegen/walls-v5/warehouse-cap.png",
+      "original": "output/imagegen/walls-v6/warehouse-cap.png",
       "runtime": "assets/walls-v5/warehouse-cap.jpg",
-      "originalSha256": "e1ccf85a0cf3cb37feb7ece60df0fc255ddd4ae94fcd9d6e834c364f3c22a072",
-      "runtimeBytes": 100592
+      "originalSha256": "2699692616aebc97a35e3ad7190d02b79ebe713f9776a60ff8a5622225c4251f",
+      "runtimeBytes": 46653,
+      "prompt": "output/imagegen/walls-v6/warehouse-cap-prompt.txt"
     },
     {
       "district": "rooftop",
-      "original": "output/imagegen/walls-v5/rooftop-cap.png",
+      "original": "output/imagegen/walls-v6/rooftop-cap.png",
       "runtime": "assets/walls-v5/rooftop-cap.jpg",
-      "originalSha256": "1616825c0cb8ec2bdc7bac06a5da72bd52e2798b137abb14d199bf254118fd0a",
-      "runtimeBytes": 104679
+      "originalSha256": "b5d4ecb4b7def24e518018aa315681384b2c85d5c0b43b6d4803ed5934948474",
+      "runtimeBytes": 41643,
+      "prompt": "output/imagegen/walls-v6/rooftop-cap-prompt.txt"
     },
     {
       "district": "vault",
-      "original": "output/imagegen/walls-v5/vault-cap.png",
+      "original": "output/imagegen/walls-v6/vault-cap.png",
       "runtime": "assets/walls-v5/vault-cap.jpg",
-      "originalSha256": "2b6300194ab189e615ccecd27b92c378e96542ce1001f05d3cc8ff09cea00d3b",
-      "runtimeBytes": 102489
+      "originalSha256": "db3dafee27a11c14f37535d68600ae6cdb645ef632ca2f58b534a6823ace360f",
+      "runtimeBytes": 46803,
+      "prompt": "output/imagegen/walls-v6/vault-cap-prompt.txt"
     }
   ]
 }
