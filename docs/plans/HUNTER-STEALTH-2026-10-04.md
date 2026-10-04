@@ -138,4 +138,8 @@ On the user's request after Codex's loader and marker commits (ccbe191, d78b377,
 
 Walls: the three district caps were regenerated with gpt-image-2 through the Codex CLI (`output/imagegen/walls-v6/`, prompts beside the PNGs) as a bolted frame around a uniform tileable interior with no centrepiece, and `src/art/walls.ts` now nine-slices once per wall (fixed corners, tiled edges and interior at the corner scale) instead of once per two-unit module. Long walls read as one slab instead of a row of framed boxes. Runtime JPEGs stay at `assets/walls-v5/` (manifest and README updated), 135 KB for the three. Evidence: `verification/hunter-stealth/look/`.
 
-Not done: floors are unchanged; a physical device look at the new caps at Seeker density.
+Start buttons: the user reported that Play, Next mission and Retry gave no feedback while the level built, so the app looked stuck. `HapticPressable` now takes a `spinner` flag: the press shows a native `ActivityIndicator` over the label at once and runs the handler a frame later; the spinner clears on unmount, when the control is disabled, or after six seconds. Used by the briefing Play, the intro Play and Skip, and the result sheet actions that build a level or mount the intro (not Resume). Verified in the browser DOM: the Restart button carries a progressbar 15 ms after the press and the sheet is gone 400 ms later.
+
+Git hygiene: `.DS_Store` left the index and is ignored with `marketing/` (99 MB of captures). Codex's loot v2 proposal (`assets/loot-v2`, `assets/audio-loot-v2`, `design/loot-v2`, `docs/plans/REWARDING-KNOCKOUTS-2026-10-04.md`, two scripts) stays untracked for Codex to commit.
+
+Not done: floors are unchanged; a physical device look at the new caps at Seeker density and at the spinner during a real level build.
