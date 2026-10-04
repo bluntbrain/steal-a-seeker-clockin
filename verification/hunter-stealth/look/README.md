@@ -13,3 +13,5 @@ Web preview evidence for the look pass (wall caps regenerated, continuous wall f
 Web preview on 127.0.0.1:8787, `?build=free-campaign-store`, viewport 390 x 844. 389 client tests pass.
 
 Emulator (StealSeeker_Code27_QA, arm64, software GPU), code 44 installed from `releases/steal-a-seeker-mainnet-v0.3.41-code44.apk` (versionCode 44 inside): `android-emulator-code44-level1-briefing.png` shows the briefing preview with the continuous wall slabs, `android-emulator-code44-level1.png` the loaded level. The emulator's screen capture lags by about a second, so the spinner and loader instants were not caught there; the browser DOM check above covers the spinner timing.
+
+Paywall and tutorial camera (later the same night): `web-paywall-redesign.png` shows the trailer under a dark wash with the wordmark centred and the pass contents as a checklist; `web-tutorial-follow-camera.png` shows level 1 with the guide active at camera zoom 1.3 from tick 0 (`window.__SEEKER_MVP__.camera` read `{"x":0,"y":3.507,"zoom":1.3}` with the guide instruction on screen), the target ring and hand tracking the zoomed world.

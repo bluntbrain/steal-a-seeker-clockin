@@ -118,7 +118,8 @@ export function Game({onSnapshot}:{onSnapshot?:(state:GameState)=>void}){
  // Keep the teaching targets visible; reduced motion uses the original static map.
  // The live camera fills the available screen without stretching the map.
  // Guided/accessible overview keeps the entire map visible.
- const fullViewport=combatMode&&CAMERA_CONFIG.enabled&&!guide.active&&!settings.reducedEffects;
+ // the tutorial keeps the follow camera too; its target ring and hand live in the camera overlay so they track the zoomed world
+ const fullViewport=combatMode&&CAMERA_CONFIG.enabled&&!settings.reducedEffects;
  const availableHeight=Math.max(240,height-insets.top-insets.bottom-(combatMode?0:48));
  const size=fullViewport?width-2:Math.max(144,Math.min(width-16,(height-insets.top-insets.bottom-(combatMode?16:174))*.6,480));
  const boardHeight=fullViewport?availableHeight-2:size*20/12;
@@ -350,6 +351,7 @@ export function Game({onSnapshot}:{onSnapshot?:(state:GameState)=>void}){
     <Animated.View pointerEvents="none" testID="camera-world-overlays" style={[{position:'absolute',left:0,top:0,width:size,height:boardHeight},worldOverlayStyle]}>
     {combatMode&&<SecurityEntrances level={level} state={hud} size={size} reduced={!!settings.reducedEffects}/>}
     <MechanismLabels level={level} state={hud} size={size}/>
+    {guide.active&&hud.status==='playing'&&<><View testID="tutorial-target" style={{position:'absolute',left:(teachingTarget?.x??0)*size/12-23,top:(teachingTarget?.y??0)*size/12-23,width:46,height:46,borderRadius:23,borderWidth:3,borderColor:'#DEFFD9',backgroundColor:'#BCECCB30'}}/>{guide.waiting&&teachingTarget&&gameplayVisible&&<TutorialHand x={teachingTarget.x*size/12} y={teachingTarget.y*size/12} width={size} height={boardHeight} reduced={!!settings.reducedEffects}/>}</>}
     <View pointerEvents="none" style={StyleSheet.absoluteFill}><Text style={[s.mapLabel,{top:size/12*(level.exit.y+.23),left:size/12*level.exit.x,width:size/12*level.exit.w,color:'#d6f4e4'}]}>EXIT</Text></View>
     </Animated.View>
     {!guide.active&&hud.status==='playing'&&<PhoneObjectivePill state={hud} total={level.targets?.length??1} level={level}/>}
@@ -358,7 +360,7 @@ export function Game({onSnapshot}:{onSnapshot?:(state:GameState)=>void}){
 
     {!!(contextHint||coach.text)&&!paused&&hud.status==='playing'&&<View pointerEvents="none" testID="security-banner" accessibilityLiveRegion="polite" style={[s.contextToast,alarmOn&&{backgroundColor:'#3A171FEF'}]}><Text style={s.contextText} numberOfLines={2}>{contextHint||coach.text}</Text></View>}
     {!!coach.text&&!paused&&<Pressable accessibilityRole="button" accessibilityLabel="Skip movement tips" onPress={coach.dismiss} style={{position:"absolute",bottom:5,right:5,padding:10,borderRadius:12,backgroundColor:"#142923EC"}}><Text style={s.contextText}>Skip tips ×</Text></Pressable>}
-    {guide.active&&hud.status==='playing'&&<View pointerEvents="none" style={StyleSheet.absoluteFill}><View testID="tutorial-target" style={{position:'absolute',left:(teachingTarget?.x??0)*size/12-23,top:(teachingTarget?.y??0)*size/12-23,width:46,height:46,borderRadius:23,borderWidth:3,borderColor:'#DEFFD9',backgroundColor:'#BCECCB30'}}/>{guide.waiting&&teachingTarget&&gameplayVisible&&<TutorialHand x={teachingTarget.x*size/12} y={teachingTarget.y*size/12} width={size} height={boardHeight} reduced={!!settings.reducedEffects}/>}<View style={{position:'absolute',bottom:8,left:8,right:8,padding:9,borderRadius:12,backgroundColor:'#142923F5'}}><Text testID="tutorial-instruction" style={[s.contextText,{fontSize:12,fontWeight:'700'}]}>{GUIDE_STEPS[guide.stage]!.text}</Text></View></View>}
+    {guide.active&&hud.status==='playing'&&<View pointerEvents="none" style={StyleSheet.absoluteFill}><View style={{position:'absolute',bottom:8,left:8,right:8,padding:9,borderRadius:12,backgroundColor:'#142923F5'}}><Text testID="tutorial-instruction" style={[s.contextText,{fontSize:12,fontWeight:'700'}]}>{GUIDE_STEPS[guide.stage]!.text}</Text></View></View>}
     {guide.active&&<Pressable accessibilityRole="button" accessibilityLabel="Skip combat tutorial" onPress={guide.dismiss} style={{position:'absolute',top:58,right:8,padding:10,backgroundColor:'#142923EC',borderRadius:10}}><Text style={s.contextText}>Skip guide</Text></Pressable>}
    </View></GestureDetector>
    </View>

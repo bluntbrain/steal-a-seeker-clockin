@@ -143,3 +143,9 @@ Start buttons: the user reported that Play, Next mission and Retry gave no feedb
 Git hygiene: `.DS_Store` left the index and is ignored with `marketing/` (99 MB of captures). Codex's loot v2 proposal (`assets/loot-v2`, `assets/audio-loot-v2`, `design/loot-v2`, `docs/plans/REWARDING-KNOCKOUTS-2026-10-04.md`, two scripts) stays untracked for Codex to commit.
 
 Not done: floors are unchanged; a physical device look at the new caps at Seeker density and at the spinner during a real level build.
+
+## 11. Paywall redesign and tutorial camera (4 October, late night)
+
+Paywall: the headline "Your next heist. Your name on top." said nothing about the offer. The trailer now sits under a dark wash with the wordmark centred over it (Skip stays top right), the headline is "Gear up before the first heist." and the pass contents are a checklist: 3,500 credits for hideout outfits, the Ghost Signal outfit that only comes with the pass, the 25 percent rebate when the live offer carries one, and "yours for good" (one purchase, no subscription). The price card, promo entry and footer are unchanged.
+
+Tutorial camera: level 1 opened in the overview and snapped to the follow camera when the guide ended (first kill), which the user read as a sudden zoom. The follow camera now runs during the guide as well, and the guide's target ring and tap hand moved into the camera overlay so they track the zoomed world. Reduced effects still disables the follow camera. Version 0.3.42, code 45.
