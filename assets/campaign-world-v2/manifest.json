@@ -73,8 +73,8 @@
     "generator": "OpenAI builtin imagegen",
     "width": 724,
     "height": 2172,
-    "bytes": 372426,
-    "sha256": "6bf670a7c3e03866786cdd94637cdb672585ded71f2359464d28236f361311a0"
+    "bytes": 372936,
+    "sha256": "107de9841efe53974428a9fa896a304cc970c793841b7612ae413d8f3cfcd4e7"
   },
   {
     "group": "campaign-world-v2",
@@ -84,8 +84,8 @@
     "generator": "OpenAI builtin imagegen",
     "width": 724,
     "height": 2172,
-    "bytes": 486698,
-    "sha256": "67113e6966f6e7f8342baeb33861f894d923adafc94920bca0448adf512646c7"
+    "bytes": 487330,
+    "sha256": "95c79e3e672180128d746893cf11dca30a916b9cc0ad932b1c81329473b82529"
   },
   {
     "group": "campaign-world-v2",
@@ -95,7 +95,7 @@
     "generator": "OpenAI builtin imagegen",
     "width": 724,
     "height": 2172,
-    "bytes": 481588,
-    "sha256": "f8fe9d47112368834121674d97981433dadf9b6870703f3258c1614c25087488"
+    "bytes": 482126,
+    "sha256": "83d4ffc4e7447da6148a95c46d6677a9d4ec26fcaba599e99a61e427a8d3c9f1"
   }
 ]

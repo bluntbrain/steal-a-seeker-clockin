@@ -22,7 +22,12 @@ for(const group of ['courier-topdown-v2','campaign-world-v2']){
     tiles.push({input:await sharp(source).extract({left,top,width,height}).resize(256,256,{fit:'contain',background:'#00000000'}).png().toBuffer(),left:col*256,top:row*256});
    }
    output=await sharp({create:{width:1024,height:512,channels:4,background:'#00000000'}}).composite(tiles).webp({quality:92,alphaQuality:100,effort:6}).toBuffer();
-  }else output=await sharp(source).resize({width:768,withoutEnlargement:true}).webp({quality:86,effort:6}).toBuffer();
+  }else{
+   // the top 7.5 percent fades to transparent so the zone above shows through; the map layout reserves the same band
+   const base=sharp(source).resize({width:768,withoutEnlargement:true}),{width:w,height:h}=await base.clone().png().toBuffer({resolveWithObject:true}).then(r=>r.info);
+   const fade=Math.round(h*.075),mask=Buffer.from(`<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}"><defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset="${(fade/h).toFixed(4)}" stop-color="#fff" stop-opacity="1"/><stop offset="1" stop-color="#fff" stop-opacity="1"/></linearGradient></defs><rect width="${w}" height="${h}" fill="url(#g)"/></svg>`);
+   output=await base.ensureAlpha().composite([{input:mask,blend:'dest-in'}]).webp({quality:86,alphaQuality:100,effort:6}).toBuffer();
+  }
   await fs.writeFile(path.join(dir,`${id}.webp`),output);
   const packed=await sharp(output).metadata();
   manifest.push({group,id,source:`assets/${group}/source/${id}.png`,file:`assets/${group}/${id}.webp`,generator:'OpenAI builtin imagegen',width:packed.width,height:packed.height,bytes:output.length,sha256:crypto.createHash('sha256').update(output).digest('hex')});

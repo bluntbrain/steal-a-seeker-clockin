@@ -1,4 +1,6 @@
 // Illustrated journey; virtualized rows share continuous district artwork and a legible route.
+// the art is plain images: a skia canvas per row would put several gpu surfaces inside the scroll view and stutter on
+// android. the crossfade into the zone above is baked into the top of each image at pack time (scripts/pack-world-art.mjs).
 import {useHaptics} from '../feedback/useHaptics';
 import React,{useCallback,useMemo} from 'react';
 import {FlatList,Image,Pressable,StyleSheet,Text,View} from 'react-native';
@@ -7,7 +9,6 @@ import type {Progress} from '../progress/model';
 import {BOSS_NAMES} from '../../shared/campaign-levels';
 import {bossPortrait} from './costumeAssets';
 import {campaignMapLayout,type MapScene} from './campaignMapLayout';
-import {Canvas,Image as SkiaImage,Mask,Rect,LinearGradient,useImage,vec} from '@shopify/react-native-skia';
 
 const NODE=40,BOSS_NODE=52;
 const art={warehouse:require('../../assets/campaign-world-v2/warehouse.webp'),rooftops:require('../../assets/campaign-world-v2/rooftops.webp'),powerworks:require('../../assets/campaign-world-v2/powerworks.webp')};
@@ -15,8 +16,6 @@ export default function CampaignMap({entries,progress,current,onSelect}:{entries
  const haptic=useHaptics();
  const [{width,height},setSize]=React.useState({width:0,height:0});
  const list=React.useRef<FlatList<MapScene>>(null),positioned=React.useRef('');
- const warehouse=useImage(art.warehouse),rooftops=useImage(art.rooftops),powerworks=useImage(art.powerworks);
- const images=useMemo(()=>({warehouse,rooftops,powerworks}),[warehouse,rooftops,powerworks]);
  const {scenes}=useMemo(()=>campaignMapLayout(entries,width),[entries,width]);
  const currentScene=Math.max(0,scenes.findIndex(s=>s.nodes.some(n=>n.entry.key===current.key)));
  const position=useCallback(()=>{
@@ -27,13 +26,10 @@ export default function CampaignMap({entries,progress,current,onSelect}:{entries
  },[width,height,entries.length,scenes,currentScene,current.key]);
  const getItemLayout=useCallback((_:unknown,index:number)=>({length:scenes[index]?.height??0,offset:scenes[index]?.offset??0,index}),[scenes]);
  const render=useCallback(({item}:{item:MapScene})=>{
-  const image=images[item.zone],previous=item.previousZone?images[item.previousZone]:null;
-  const picture=image?<SkiaImage image={image} x={0} y={0} width={width} height={item.imageHeight} fit="contain"/>:null;
-  return <View style={{height:item.height}}>
-   <Canvas pointerEvents="none" accessible={false} style={StyleSheet.absoluteFill}>
-    {previous&&<SkiaImage image={previous} x={0} y={-(item.imageHeight-item.fade)} width={width} height={item.imageHeight} fit="contain"/>}
-    {previous?<Mask mask={<Rect x={0} y={0} width={width} height={item.imageHeight}><LinearGradient start={vec(0,0)} end={vec(0,item.fade)} colors={['transparent','white']}/></Rect>}>{picture}</Mask>:picture}
-   </Canvas>
+  // the row above shows its bottom strip under this image's faded top, which keeps the road continuous
+  return <View style={{height:item.height,overflow:'hidden'}}>
+   {item.previousZone&&<Image accessible={false} source={art[item.previousZone]} resizeMode="contain" style={{position:'absolute',left:0,top:-(item.imageHeight-item.fade),width,height:item.imageHeight}}/>}
+   <Image accessible={false} source={art[item.zone]} resizeMode="contain" style={{position:'absolute',left:0,top:0,width,height:item.imageHeight}}/>
    {item.nodes.map(({entry,index,x,y})=>{
     const open=entryUnlocked(progress,entries,index)&&entry.playable,best=progress.missions[entry.key],isCurrent=entry.key===current.key,boss=entry.boss,size=boss?BOSS_NODE:NODE;
     return <Pressable key={entry.key} testID={`mission-node-${entry.number}`} accessibilityRole="button" accessibilityLabel={`Level ${entry.number}: ${boss?`${BOSS_NAMES[boss]} boss fight`:entry.title}${open?'':'. Locked'}`} accessibilityState={{selected:isCurrent}} onPress={()=>{haptic('select');onSelect(entry);}} style={({pressed})=>[s.target,{left:x-30,top:y-size/2-4,opacity:pressed?.7:1}]}>
@@ -45,8 +41,8 @@ export default function CampaignMap({entries,progress,current,onSelect}:{entries
     </Pressable>;
    })}
   </View>;
- },[images,width,progress,entries,current.key,haptic,onSelect]);
- const extra=useMemo(()=>({progress,width,current:current.key,images}),[progress,width,current.key,images]);
+ },[width,progress,entries,current.key,haptic,onSelect]);
+ const extra=useMemo(()=>({progress,width,current:current.key}),[progress,width,current.key]);
  return <View testID="mission-districts" style={s.list} onLayout={e=>{const {width:w,height:h}=e.nativeEvent.layout;setSize(old=>old.width===w&&old.height===h?old:{width:w,height:h});}}>
   {width>0&&<FlatList key={`${width}:${entries.length}`} ref={list} data={scenes} extraData={extra} renderItem={render} keyExtractor={r=>r.key} getItemLayout={getItemLayout} initialScrollIndex={currentScene} initialNumToRender={2} windowSize={5} maxToRenderPerBatch={3} showsVerticalScrollIndicator={false} onContentSizeChange={position} onScrollToIndexFailed={position}/>}
  </View>;

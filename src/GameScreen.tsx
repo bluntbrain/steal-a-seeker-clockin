@@ -61,11 +61,13 @@ import type {Replay,ReplayChunk} from '../shared/replay';
 import rulesManifest from '../shared/rules-manifest.json';
 import {alarmSpeedPercent,decoyMessage} from './game/feedback';
 import {initialState,idleInput,step,nearPhone,nearSwitch,exitOpen,stateLevel,type GameState} from './game/simulation';
-import {LEVEL,getLevel,TUNING,MISSIONS,type MissionId} from './game/level';
+import {LEVEL,getLevel,TUNING,MISSIONS,type MissionId,type Point} from './game/level';
 type Stats={fps:number;p95:number;frames:number;slow:number};
 const zeroStats={fps:0,p95:0,frames:0,slow:0};
 const time=(n:number)=>`${Math.floor(n/60).toString().padStart(2,'0')}:${Math.floor(n%60).toString().padStart(2,'0')}`;
 // memoised so hud publishes do not re-render the hidden overlay panels
+// a shared empty route for hud snapshots: the renderer reads routes from the ui-thread state, not from the hud
+const NO_PATH:Point[]=[];
 const RewardsPanelMemo=React.memo(RewardsPanel),WalletPanelMemo=React.memo(WalletPanel),HideoutMemo=React.memo(Hideout),SettingsPanelMemo=React.memo(SettingsPanel);
 export default function GameScreen(){return <GestureHandlerRootView style={{flex:1}}><SafeAreaProvider><LaunchSplash><WalletProvider><AccountProvider><SettingsProvider><EconomyProvider><CampaignGate><WalletGame/></CampaignGate></EconomyProvider></SettingsProvider></AccountProvider></WalletProvider></LaunchSplash></SafeAreaProvider></GestureHandlerRootView>;}
 function WalletGame(){
@@ -95,7 +97,7 @@ export function Game({onSnapshot}:{onSnapshot?:(state:GameState)=>void}){
  const pendingTap=useSharedValue<PendingTap|null>(null),previousTap=useSharedValue<PendingTap|null>(null),tapElapsed=useSharedValue(TAP_INTERVAL_MS);
  const recording=useSharedValue<ReplayChunk[]>([]),[completedReplay,setCompletedReplay]=useState<Replay>();
  const game=useSharedValue(initial),input=useSharedValue(idleInput()),alpha=useSharedValue(0),clock=useSharedValue(0),accumulator=useSharedValue(0),suspended=useSharedValue(homeFirst);
- const samples=useSharedValue<number[]>([]),reportClock=useSharedValue(0),hudClock=useSharedValue(0),frameTotal=useSharedValue(0),slowTotal=useSharedValue(0);
+ const samples=useSharedValue<number[]>(Array.from({length:120},()=>0)),sampleIndex=useSharedValue(0),sampleCount=useSharedValue(0),reportClock=useSharedValue(0),hudClock=useSharedValue(0),frameTotal=useSharedValue(0),slowTotal=useSharedValue(0);
  const [hud,setHud]=useState<GameState>(()=>JSON.parse(JSON.stringify(initial))),[stats,setStats]=useState<Stats>(zeroStats),[paused,setPaused]=useState(homeFirst),[details,setDetails]=useState(false),[mission,setMission]=useState<MissionId>(startMission),[entry,setEntry]=useState<CampaignEntry>(()=>authoredEntry(startMission));
  const entryRef=useRef(entry);entryRef.current=entry;
  useRunTelemetry(hud,paused,trial.active?'trial':'campaign',stats);
@@ -157,7 +159,9 @@ export function Game({onSnapshot}:{onSnapshot?:(state:GameState)=>void}){
  const alarmAudio=useAudioPlayer(require('../assets/audio-combat-v3/alarm.wav'));
  const pickupAudio=useAudioPlayer(require('../assets/audio-combat-v3/pickup.wav')),dashAudio=useAudioPlayer(require('../assets/audio-v3/dash.wav')),successAudio=useAudioPlayer(require('../assets/audio-combat-v3/escape.wav'));
  const decoyAudio=useAudioPlayer(require('../assets/audio-v3/decoy.wav')),caughtAudio=useAudioPlayer(require('../assets/audio-combat-v3/caught.wav')),spotAudio=useAudioPlayer(require('../assets/audio-v3/spot.wav')),switchAudio=useAudioPlayer(require('../assets/audio-v3/switch.wav'));
- const publish=useCallback((snapshot:GameState,epoch?:number)=>{if(epoch!==undefined&&epoch!==sceneEpoch.current)return;latest.current=snapshot;setHud(snapshot);onSnapshot?.(snapshot);},[onSnapshot]);
+ // the ui thread sends a slim snapshot (no level definition, no guard routes or brains); the level is reattached here
+ const levelRef=useRef(level);levelRef.current=level;
+ const publish=useCallback((snapshot:GameState,epoch?:number)=>{if(epoch!==undefined&&epoch!==sceneEpoch.current)return;snapshot.definition=levelRef.current;latest.current=snapshot;setHud(snapshot);onSnapshot?.(snapshot);},[onSnapshot]);
  const publishStats=useCallback((value:Stats)=>{latestStats.current=value;setStats(value);},[]);
  useEffect(()=>{for(const player of [pickupAudio,dashAudio,successAudio,decoyAudio,caughtAudio,spotAudio,switchAudio]){player.volume=settings.sound?settings.volume:0;if(!settings.sound)player.pause();}},[settings.sound,settings.volume,pickupAudio,dashAudio,successAudio,decoyAudio,caughtAudio,spotAudio,switchAudio]);
  useEffect(()=>{alarmAudio.loop=true;alarmAudio.volume=settings.sound?settings.volume*.12:0;if(settings.sound&&(hud.securityAlarm||laserAlarm)&&hud.status==='playing'&&!paused)alarmAudio.play();else alarmAudio.pause();return()=>alarmAudio.pause();},[alarmAudio,settings.sound,settings.volume,hud.securityAlarm,laserAlarm,hud.status,paused]);
@@ -191,34 +195,35 @@ export function Game({onSnapshot}:{onSnapshot?:(state:GameState)=>void}){
    if(guideWaiting.value){accumulator.value=0;return;}
    const dt=Math.min(raw/1000,.1);clock.value+=dt;
    frameTotal.value++;if(raw>25)slowTotal.value++;
-   samples.modify(v=>{v.push(raw);if(v.length>120)v.shift();return v;});reportClock.value+=raw;
+   // fixed ring of the last 120 intervals: no array growth or shift on the ui thread
+   samples.modify(v=>{v[sampleIndex.value]=raw;return v;});sampleIndex.value=(sampleIndex.value+1)%120;sampleCount.value=Math.min(120,sampleCount.value+1);reportClock.value+=raw;
    if(reportClock.value>=1000){
-     const sorted=[...samples.value].sort((a,b)=>a-b);const mean=samples.value.reduce((a,b)=>a+b,0)/Math.max(1,samples.value.length);
+     const filled=samples.value.slice(0,sampleCount.value),sorted=[...filled].sort((a,b)=>a-b);const mean=filled.reduce((a,b)=>a+b,0)/Math.max(1,filled.length);
      runOnJS(callStats)({fps:1000/mean,p95:sorted[Math.max(0,Math.ceil(sorted.length*.95)-1)]??0,frames:frameTotal.value,slow:slowTotal.value});reportClock.value=0;
    }
    accumulator.value=Math.min(accumulator.value+dt,TUNING.step*3);
    hudClock.value+=dt;
    // frames without a simulation step change nothing, so they only advance interpolation
    if(accumulator.value+1e-9<TUNING.step){alpha.value=accumulator.value/TUNING.step;return;}
-   const previousDamage=game.value.combat?.damageTaken??0,previousDecoys=game.value.decoysLeft,previousAlert=game.value.alert,previousPower=game.value.power,previousRelays=[...game.value.relayTimers],previousCarry=game.value.carrying,previousDashes=game.value.dashes,previousTool=game.value.toolSeen,previousStatus=game.value.status;
+   const previousDamage=game.value.combat?.damageTaken??0,previousDecoys=game.value.decoysLeft,previousAlert=game.value.alert,previousPower=game.value.power,previousRelay0=game.value.relayTimers[0]??0,previousRelay1=game.value.relayTimers[1]??0,previousCarry=game.value.carrying,previousDashes=game.value.dashes,previousTool=game.value.toolSeen,previousStatus=game.value.status;
    game.modify(s=>{recording.modify(chunks=>{while(accumulator.value+1e-9>=TUNING.step){recordStep(s,input.value,chunks);accumulator.value-=TUNING.step;}return chunks;});return s;},true);
    alpha.value=accumulator.value/TUNING.step;
    if(game.value.decoysLeft<previousDecoys)runOnJS(callEvent)('decoy');
    if(!combatMode&&previousAlert<=0&&game.value.alert>0)runOnJS(callEvent)('spot');
-   if(game.value.power!==previousPower||game.value.relayTimers.some((v,i)=>v>(previousRelays[i]??0)))runOnJS(callEvent)('switch');
+   if(game.value.power!==previousPower||(game.value.relayTimers[0]??0)>previousRelay0||(game.value.relayTimers[1]??0)>previousRelay1)runOnJS(callEvent)('switch');
    if(game.value.carrying&&!previousCarry)runOnJS(callEvent)('pickup');
    if(game.value.dashes>previousDashes)runOnJS(callEvent)('dash');
    if(game.value.status==='won'&&previousStatus!=='won')runOnJS(callEvent)('success');
    if(game.value.status==='caught'&&previousStatus!=='caught')runOnJS(callEvent)('caught');
-   if(hudClock.value>=.12||previousDamage!==(game.value.combat?.damageTaken??0)||previousTool!==game.value.toolSeen||previousCarry!==game.value.carrying||previousStatus!==game.value.status||previousDashes!==game.value.dashes){runOnJS(callPublish)({...game.value},simulationEpoch.value);hudClock.value=0;}
- },[suspended,sceneReady,pendingTap,tapElapsed,game,input,guideStage,guideWaiting,clock,frameTotal,slowTotal,samples,reportClock,accumulator,recording,alpha,hudClock,simulationEpoch,combatMode,callPublish,callStats,callEvent,callBeginGuide]));
+   if(hudClock.value>=.12||previousDamage!==(game.value.combat?.damageTaken??0)||previousTool!==game.value.toolSeen||previousCarry!==game.value.carrying||previousStatus!==game.value.status||previousDashes!==game.value.dashes){runOnJS(callPublish)({...game.value,definition:undefined,guards:game.value.guards.map(g=>({...g,path:NO_PATH,brain:undefined}))},simulationEpoch.value);hudClock.value=0;}
+ },[suspended,sceneReady,pendingTap,tapElapsed,game,input,guideStage,guideWaiting,clock,frameTotal,slowTotal,samples,sampleIndex,sampleCount,reportClock,accumulator,recording,alpha,hudClock,simulationEpoch,combatMode,callPublish,callStats,callEvent,callBeginGuide]));
  useEffect(()=>{frameDriver.setActive(renderGameSurface&&!paused);return()=>frameDriver.setActive(false);},[renderGameSurface,paused,frameDriver]);
  const pause=useCallback((value:boolean)=>{
   suspended.value=value;pendingTap.value=null;previousTap.value=null;
   input.value=idleInput();game.modify(s=>{'worklet';s.vx=0;s.vy=0;s.px=s.x;s.py=s.y;s.dashSeen=0;s.toolSeen=0;return s;});
   setPaused(value);
  },[suspended,input,game,pendingTap,previousTap]);
- const restart=useCallback((next:CampaignEntry=entryRef.current)=>{if(trial.active){trial.finish();return;}sceneReady.value=false;suspended.value=true;pendingTap.value=null;previousTap.value=null;tapElapsed.value=TAP_INTERVAL_MS;simulationEpoch.value=++sceneEpoch.current;setSceneVersion(sceneEpoch.current);setSceneLoading(true);setSceneError('');recording.value=[];setCompletedReplay(undefined);rewardEpoch.current++;setEarnedNotice('');setCreditReward({amount:null});setRewardClaimed(false);setAutoClaim(false);setRewardRetry(0);connectClaimPending.current=false;recorded.current=false;setMission(next.mission);setEntry(next);const fresh=(next.key==='practice'?guide.start('practice'):null)??initialState(next.mission,combatMode?next.definition:undefined);game.value=fresh;input.value=idleInput();accumulator.value=0;alpha.value=0;clock.value=0;samples.value=[];frameTotal.value=0;slowTotal.value=0;reportClock.value=0;hudClock.value=0;setHud(fresh);latest.current=fresh;suspended.value=false;setPaused(false);setStats(zeroStats);},[game,input,accumulator,alpha,clock,samples,frameTotal,slowTotal,reportClock,hudClock,suspended,recording,trial,guide.start,combatMode,sceneReady,pendingTap,previousTap,tapElapsed,simulationEpoch]);
+ const restart=useCallback((next:CampaignEntry=entryRef.current)=>{if(trial.active){trial.finish();return;}sceneReady.value=false;suspended.value=true;pendingTap.value=null;previousTap.value=null;tapElapsed.value=TAP_INTERVAL_MS;simulationEpoch.value=++sceneEpoch.current;setSceneVersion(sceneEpoch.current);setSceneLoading(true);setSceneError('');recording.value=[];setCompletedReplay(undefined);rewardEpoch.current++;setEarnedNotice('');setCreditReward({amount:null});setRewardClaimed(false);setAutoClaim(false);setRewardRetry(0);connectClaimPending.current=false;recorded.current=false;setMission(next.mission);setEntry(next);const fresh=(next.key==='practice'?guide.start('practice'):null)??initialState(next.mission,combatMode?next.definition:undefined);game.value=fresh;input.value=idleInput();accumulator.value=0;alpha.value=0;clock.value=0;sampleIndex.value=0;sampleCount.value=0;frameTotal.value=0;slowTotal.value=0;reportClock.value=0;hudClock.value=0;setHud(fresh);latest.current=fresh;suspended.value=false;setPaused(false);setStats(zeroStats);},[game,input,accumulator,alpha,clock,samples,frameTotal,slowTotal,reportClock,hudClock,suspended,recording,trial,guide.start,combatMode,sceneReady,pendingTap,previousTap,tapElapsed,simulationEpoch]);
  // Explicit exits must open the map even when Hideout remembers a briefing or store tab.
  const backToMissions=()=>{pause(true);economy.setTab('map');setMissionMapRequest(n=>n+1);setHideoutOpen(true);};
  const introduceMission=(next:CampaignEntry)=>{if(!next.playable)return;if(testMission){restart(next);return;}pause(true);setHideoutOpen(false);setIntroMission(next);};
@@ -233,7 +238,7 @@ export function Game({onSnapshot}:{onSnapshot?:(state:GameState)=>void}){
    window.addEventListener('keydown',down);window.addEventListener('keyup',up);window.addEventListener('blur',blur);
    const visibility=()=>{if(document.hidden)blur();};document.addEventListener('visibilitychange',visibility);
    // Read-only diagnostics for reproducible local playtests. No teleport, score or win hooks.
-   (window as unknown as {__SEEKER_MVP__:unknown}).__SEEKER_MVP__={renderer:'2d-skia',rulesHash:rulesManifest.rulesHash,snapshot:()=>({...game.value,guards:game.value.guards.map(g=>({...g}))}),metrics:()=>({...latestStats.current}),get camera(){return {...camera.value};},replay:()=>({version:(combatMode?2:1) as 1|2,chunks:recording.value.map(c=>({...c}))}),get level(){return stateLevel(game.value);}};
+   (window as unknown as {__SEEKER_MVP__:unknown}).__SEEKER_MVP__={renderer:'2d-skia',rulesHash:rulesManifest.rulesHash,snapshot:()=>({...game.value,guards:game.value.guards.map(g=>({...g}))}),metrics:()=>({...latestStats.current}),get hud(){return latest.current;},get camera(){return {...camera.value};},replay:()=>({version:(combatMode?2:1) as 1|2,chunks:recording.value.map(c=>({...c}))}),get level(){return stateLevel(game.value);}};
    return()=>{window.removeEventListener('keydown',down);window.removeEventListener('keyup',up);window.removeEventListener('blur',blur);document.removeEventListener('visibilitychange',visibility);};
  },[input,pause,restart,suspended,recording,introMission,walletOpen,hideoutOpen,mapOpen,settingsOpen,rewardsOpen]);
  const teachingTarget=guideTarget(guide.stage,hud);
