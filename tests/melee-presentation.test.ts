@@ -21,3 +21,11 @@ test('every purchasable and earned appearance has twenty bounded alpha frames un
   for(const f of MELEE_FRAMES){assert(f.x+f.width<=meta.width!&&f.y+f.height<=meta.height!);const {data}=await sharp(path).extract({left:f.x,top:f.y,width:f.width,height:f.height}).extractChannel('alpha').raw().toBuffer({resolveWithObject:true});assert(data.some(a=>a===0));assert(data.some(a=>a>250),`${c.id}: empty frame`);}
  }
 });
+
+test('top-down courier atlas has eight 256 pixel frames with visible alpha in each',async()=>{
+ const frames=JSON.parse(fs.readFileSync('assets/courier-topdown-v1/frames.json','utf8'));
+ assert.equal(frames.length,8);
+ const path='assets/courier-topdown-v1/default.webp',meta=await sharp(path).metadata();
+ assert.equal(meta.width,1024);assert.equal(meta.height,512);assert(meta.hasAlpha);
+ for(const f of frames){assert.equal(f.width,256);assert.equal(f.height,256);const {data}=await sharp(path).extract({left:f.x,top:f.y,width:f.width,height:f.height}).extractChannel('alpha').raw().toBuffer({resolveWithObject:true});assert(data.some(a=>a===0),`${f.name}: no transparent pixels`);assert(data.some(a=>a>250),`${f.name}: empty frame`);}
+});

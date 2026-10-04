@@ -1,7 +1,10 @@
 import type {LevelDefinition,MissionId} from './level';
+import {campaignLevelNumber,campaignZone,type CampaignZone} from '../../shared/campaign-levels';
 
 // Presentation only. Collision geometry and replay rules live in level.ts.
-export function districtFor(number:number){return number>=9?'powerworks':number>=5?'rooftops':'warehouse';}
+export function districtFor(number:number):CampaignZone{return number>=9?'powerworks':number>=5?'rooftops':'warehouse';}
+export function zoneFor(level:LevelDefinition):CampaignZone{const n=campaignLevelNumber(level.id);return n===null?districtFor(level.number):campaignZone(n);}
+const ZONE_PLACES:Record<CampaignZone,{place:string;tint:string}>={warehouse:{place:'Warehouse district',tint:'#A68B5212'},rooftops:{place:'Rooftop district',tint:'#658EBB10'},powerworks:{place:'Powerworks district',tint:'#79A28716'}};
 export const ENVIRONMENTS:Record<MissionId,{place:string;hook:string;tint:string}>={
  practice:{place:'Loading bay',hook:'One pickup lane. Learn to steal and escape.',tint:'#A68B5212'},
  'cone-lesson':{place:'Sorting depot',hook:'Break line of sight around the central rack.',tint:'#789C6512'},
@@ -17,4 +20,4 @@ export const ENVIRONMENTS:Record<MissionId,{place:string;hook:string;tint:string
  'last-vault':{place:'Inner vault',hook:'Two phones, circuit doors, a relay and a Warden.',tint:'#AA8D6338'},
  'night-shift':{place:'Training depot',hook:'The original practice room.',tint:'#A68B5212'},
 };
-export function environmentFor(level:LevelDefinition){return ENVIRONMENTS[level.mission];}
+export function environmentFor(level:LevelDefinition){const n=campaignLevelNumber(level.id);return n===null?ENVIRONMENTS[level.mission]:{...ZONE_PLACES[campaignZone(n)],hook:level.briefing};}

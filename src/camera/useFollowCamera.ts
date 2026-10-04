@@ -12,9 +12,13 @@ export function useFollowCamera(game:SharedValue<GameState>,alpha:SharedValue<nu
   'worklet';
   const s=game.value;
   if(fullMap.value){if(camera.value!==OVERVIEW)camera.value=OVERVIEW;return;}
-  const target=frameCourier(s.px+(s.x-s.px)*alpha.value,s.py+(s.y-s.py)*alpha.value,CAMERA_CONFIG.zoom,viewportHeight);
-  const next=s.ticks<2?target:followCamera(camera.value,target,(frame.timeSincePreviousFrame??16)/1000);
-  if(next!==camera.value)camera.value=next;
+  // a still courier costs nothing: compare the clamped target as scalars before building a camera object
+  const zoom=Math.max(CAMERA_CONFIG.zoom,viewportHeight/20),cx=s.px+(s.x-s.px)*alpha.value,cy=s.py+(s.y-s.py)*alpha.value;
+  const tx=Math.max(0,Math.min(12-12/zoom,cx-6/zoom)),ty=Math.max(0,Math.min(20-viewportHeight/zoom,cy-.5-viewportHeight/2/zoom)),c=camera.value;
+  if(s.ticks>=2&&c.zoom===zoom&&Math.abs(tx-c.x)<1e-6&&Math.abs(ty-c.y)<1e-6)return;
+  const target=frameCourier(cx,cy,CAMERA_CONFIG.zoom,viewportHeight);
+  const next=s.ticks<2?target:followCamera(c,target,(frame.timeSincePreviousFrame??16)/1000);
+  if(next!==c)camera.value=next;
  },[game,alpha,fullMap,camera,viewportHeight]),false);
  useEffect(()=>{driver.setActive(active);return()=>driver.setActive(false);},[driver,active]);
  return camera;

@@ -21,7 +21,8 @@ export const STORE_ITEMS=[
  {id:'rack-theme',name:'Vault finish',price:250,kind:'rack',description:'A mint-lit finish for your collection.'},
 ] as const;
 export type StoreItemId=typeof STORE_ITEMS[number]['id'];
-export const RETIRED_ITEMS:readonly string[]=['escape-trail','profile-frame','rack-theme'];
+// the seven community characters are no longer sold as skins; they appear as bosses. owners keep and equip them
+export const RETIRED_ITEMS:readonly string[]=['escape-trail','profile-frame','rack-theme','solana-toly','solana-mert','solana-chase','solana-lily','solana-vibhu','solana-akshay','solana-beeman'];
 export const isStoreItemForSale=(id:string)=>STORE_ITEMS.some(i=>i.id===id)&&!RETIRED_ITEMS.includes(id);
 export type CreditPackId=typeof CREDIT_PACKS[number]['id'];
 // The 300-credit starter outfit takes five perfect clears or six basic clears.
@@ -29,7 +30,11 @@ export type CreditPackId=typeof CREDIT_PACKS[number]['id'];
 export const CAMPAIGN_CLEAR_CREDITS=50;
 export const CAMPAIGN_STAR_BONUS=5;
 export function creditReward(stars:number){return stars>=1&&stars<=3&&Number.isInteger(stars)?CAMPAIGN_CLEAR_CREDITS+(stars-1)*CAMPAIGN_STAR_BONUS:0;}
+// published levels past the authored twelve pay less per clear so a hundred levels do not flood the credit economy; bosses pay double
+export const PUBLISHED_CLEAR_CREDITS=20;
+export const BOSS_CLEAR_CREDITS=40;
+export function publishedCreditReward(stars:number,boss:boolean){return stars>=1&&stars<=3&&Number.isInteger(stars)?(boss?BOSS_CLEAR_CREDITS:PUBLISHED_CLEAR_CREDITS)+(stars-1)*CAMPAIGN_STAR_BONUS:0;}
 export type LocalInventory={version:1;balance:number;stars:Record<string,number>;owned:StoreItemId[];equipment:Record<string,string>};
 export const emptyInventory=():LocalInventory=>({version:1,balance:0,stars:{},owned:[],equipment:{}});
-export function earnCredits(s:LocalInventory,mission:string,stars:number):LocalInventory{const old=s.stars[mission]??0,delta=creditReward(stars)-creditReward(old);return delta>0?{...s,balance:s.balance+delta,stars:{...s.stars,[mission]:stars}}:s;}
+export function earnCredits(s:LocalInventory,mission:string,stars:number,boss=false):LocalInventory{const reward=(n:number)=>mission.startsWith('campaign:')?publishedCreditReward(n,boss):creditReward(n);const old=s.stars[mission]??0,delta=reward(stars)-reward(old);return delta>0?{...s,balance:s.balance+delta,stars:{...s.stars,[mission]:stars}}:s;}
 export function redeemCredits(s:LocalInventory,id:StoreItemId,priceOverride?:number):LocalInventory{const item=STORE_ITEMS.find(i=>i.id===id);if(!item)throw Error('Unknown item.');if(s.owned.includes(id))return s;if(!isStoreItemForSale(id))throw Error('This item is no longer for sale.');const price=priceOverride??item.price;if(!Number.isSafeInteger(price)||price<=0)throw Error('Invalid store price.');if(s.balance<price)throw Error('Not enough credits.');return {...s,balance:s.balance-price,owned:[...s.owned,id],equipment:{...s.equipment,[item.kind]:id}};}

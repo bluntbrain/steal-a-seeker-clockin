@@ -1,0 +1,35 @@
+[
+  {
+    "key": "pump-capsule",
+    "prompt": "Use case: stylized-concept. ONE SINGLE isolated transparent-background game-map diorama, square canvas. Actual transparent alpha, no background color or gradient, no sheet, no grid, no additional copies, no text. Entire subject and every extremity fully visible inside central 75% of canvas with at least 12% empty transparent margin on all four sides. Premium stylized 3D toy illustration exactly like reference. White-hood tiny robot courier with mint face, black mint-trim outfit. Graphite Solana Seeker phone has one separate circular upper camera above a vertical pill containing two lower lenses and a small silver Solana mark. Restrained mint, charcoal, evergreen, cream highlights. Three-quarter camera. Avoid buildings, unrelated scenery, extraneous fragments, or rectangular backdrops. This is a standalone sprite; ALL of its shapes must fit. ONE mint and cream capsule tilted open with the little courier popping out clutching Seeker. Match middle-left concept in reference, but create only this single complete capsule scene. No violet objects or fragments below it. The entire capsule floats gently, no base.",
+    "refs": [
+      "/Users/bluntbrain/Documents/code/clockin/seeker-game/assets/campaign-world-v4/source/meme-props-f.png",
+      "/Users/bluntbrain/Documents/code/clockin/campaign-15-days/videos/classroom-orientation/production/references/seeker-phone.jpeg"
+    ]
+  },
+  {
+    "key": "portal",
+    "prompt": "Use case: stylized-concept. ONE SINGLE isolated transparent-background game-map diorama, square canvas. Actual transparent alpha, no background color or gradient, no sheet, no grid, no additional copies, no text. Entire subject and every extremity fully visible inside central 75% of canvas with at least 12% empty transparent margin on all four sides. Premium stylized 3D toy illustration exactly like reference. White-hood tiny robot courier with mint face, black mint-trim outfit. Graphite Solana Seeker phone has one separate circular upper camera above a vertical pill containing two lower lenses and a small silver Solana mark. Restrained mint, charcoal, evergreen, cream highlights. Three-quarter camera. Avoid buildings, unrelated scenery, extraneous fragments, or rectangular backdrops. This is a standalone sprite; ALL of its shapes must fit. ONE complete oval mint portal ring standing on a small graphite base with three violet tiles; little courier stepping through carrying Seeker. Match bottom-right scene in reference, but render only this complete freestanding ring. The top of the oval must be fully rounded and entirely visible, well away from frame. NO cropped top.",
+    "refs": [
+      "/Users/bluntbrain/Documents/code/clockin/seeker-game/assets/campaign-world-v4/source/heist-props-e.png",
+      "/Users/bluntbrain/Documents/code/clockin/campaign-15-days/videos/classroom-orientation/production/references/seeker-phone.jpeg"
+    ]
+  },
+  {
+    "key": "token-fountain",
+    "prompt": "Use case: stylized-concept. ONE SINGLE isolated transparent-background game-map diorama, square canvas. Actual transparent alpha, no background color or gradient, no sheet, no grid, no additional copies, no text. Entire subject and every extremity fully visible inside central 75% of canvas with at least 12% empty transparent margin on all four sides. Premium stylized 3D toy illustration exactly like reference. White-hood tiny robot courier with mint face, black mint-trim outfit. Graphite Solana Seeker phone has one separate circular upper camera above a vertical pill containing two lower lenses and a small silver Solana mark. Restrained mint, charcoal, evergreen, cream highlights. Three-quarter camera. Avoid buildings, unrelated scenery, extraneous fragments, or rectangular backdrops. This is a standalone sprite; ALL of its shapes must fit. ONE low mint token fountain on LEFT with five mint coin discs arcing into a tiny courier's backpack on RIGHT. FULL courier body visible including entire hood, face, both arms, backpack, legs and feet, plenty of margin to the right. Match middle-left concept in reference but show whole composition in this single image. No other props, no validator. Only five coins, small mint light trail.",
+    "refs": [
+      "/Users/bluntbrain/Documents/code/clockin/seeker-game/assets/campaign-world-v4/source/heist-props-e.png",
+      "/Users/bluntbrain/Documents/code/clockin/campaign-15-days/videos/classroom-orientation/production/references/seeker-phone.jpeg"
+    ]
+  },
+  {
+    "key": "beeman-lookout",
+    "prompt": "Use case: stylized-concept. ONE SINGLE isolated transparent-background game-map diorama, square canvas. Actual transparent alpha, no background color or gradient, no sheet, no grid, no additional copies, no text. Entire subject and every extremity fully visible inside central 75% of canvas with at least 12% empty transparent margin on all four sides. Premium stylized 3D toy illustration exactly like reference. White-hood tiny robot courier with mint face, black mint-trim outfit. Graphite Solana Seeker phone has one separate circular upper camera above a vertical pill containing two lower lenses and a small silver Solana mark. Restrained mint, charcoal, evergreen, cream highlights. Three-quarter camera. Avoid buildings, unrelated scenery, extraneous fragments, or rectangular backdrops. This is a standalone sprite; ALL of its shapes must fit. Beeman is a giant human with bald head, black sunglasses, long grey beard, black mint-trim tracksuit and backpack matching reference. Beeman STANDING upright with both boots on ground, one hand shading his sunglasses as he looks into the distance. Tiny courier only one fifth his height crouches behind Beeman's boot and carries a small normal-sized Seeker. Playful sneaking pose. NO giant phone, no seat, no bench, no phone furniture. Full giant and courier silhouettes entirely visible.",
+    "refs": [
+      "/Users/bluntbrain/Documents/code/clockin/seeker-game/assets/solana-skins/beeman.webp",
+      "/Users/bluntbrain/Documents/code/clockin/seeker-game/assets/campaign-world-v3/source/giants-b.png",
+      "/Users/bluntbrain/Documents/code/clockin/campaign-15-days/videos/classroom-orientation/production/references/seeker-phone.jpeg"
+    ]
+  }
+]

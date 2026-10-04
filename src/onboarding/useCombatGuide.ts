@@ -19,7 +19,7 @@ export function useCombatGuide(state:GameState,eligible:boolean){
    if(done==='done'||!raw)return;
    try{
     const c=JSON.parse(raw) as Checkpoint;
-    if(c.rulesHash===rules.rulesHash&&Number.isInteger(c.stage)&&c.stage>=0&&c.stage<GUIDE_STEPS.length&&c.state?.mission==='practice'&&c.state.combat?.version===2&&c.state.status==='playing'&&Number.isFinite(c.state.x)&&Number.isFinite(c.state.y)&&Array.isArray(c.state.guards)){
+    if(c.rulesHash===rules.rulesHash&&Number.isInteger(c.stage)&&c.stage>=0&&c.stage<GUIDE_STEPS.length&&c.state?.mission==='practice'&&c.state.combat?.version===2&&c.state.status==='playing'&&Number.isFinite(c.state.x)&&Number.isFinite(c.state.y)&&Array.isArray(c.state.guards)&&(c.state.ticks===0||c.state.guards.every(g=>!!g&&g.brain!==undefined))){
      setStage(c.stage);checkpoint.current=copy(c.state);setResume(c);setRetries(c.state.ticks>0?1:0);
     }
    }catch{/* A corrupt local teaching save starts fresh. It never enters ranked play. */}

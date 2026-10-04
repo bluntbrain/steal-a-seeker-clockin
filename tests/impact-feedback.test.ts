@@ -9,7 +9,7 @@ test('confirmed impact starts its audio and edge glow together, after the seek',
 test('impact completed after pause or restart cannot replay a sound or flash',async()=>{
  const calls:string[]=[];await playImpact({volume:1,loop:false,pause(){},play(){calls.push('sound');},async seekTo(){}},()=>false,()=>calls.push('glow'));assert.deepEqual(calls,[]);
 });
-test('campaign and weekly music use only the five approved tracks with safe fallbacks',()=>{
+test('campaign music uses only the five approved tracks with safe fallbacks',()=>{
  const chosen=Array.from({length:12},(_,i)=>selection.tracks[musicIndex(i+1)]);
  assert.deepEqual([...new Set(chosen)].sort((a,b)=>a!-b!),[2,3,4,10,12]);
  assert(chosen.every((track,i)=>i===0||track!==chosen[i-1]),'Adjacent missions should change music');

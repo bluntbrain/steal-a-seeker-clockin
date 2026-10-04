@@ -1,0 +1,57 @@
+{
+  "generator": "Built-in image_gen (character/Seeker dioramas)",
+  "packing": "sharp compositing, native road geometry from src/components/campaignRoad.ts",
+  "scenes": [
+    {
+      "id": "warehouse",
+      "width": 768,
+      "height": 2304,
+      "bytes": 311466,
+      "sha256": "1686912a869e5108e4b66e96e314a7a58427a26c182d376f8a98afc74f2797b3",
+      "characters": [
+        "toly",
+        "mert",
+        "beeman"
+      ],
+      "brands": [
+        "jupiter",
+        "bonk",
+        "solana"
+      ]
+    },
+    {
+      "id": "rooftops",
+      "width": 768,
+      "height": 2304,
+      "bytes": 312428,
+      "sha256": "874847f5b6d201bf423cbbf93bbfcfcb4b0df7176ea73097392dadda4936aef7",
+      "characters": [
+        "chase",
+        "lily",
+        "seeker"
+      ],
+      "brands": [
+        "meteora",
+        "wif",
+        "skr"
+      ]
+    },
+    {
+      "id": "powerworks",
+      "width": 768,
+      "height": 2304,
+      "bytes": 297112,
+      "sha256": "40bf3a96b4ca7ef57a1d0dce784e00c0eef1bd330cd173ea0af959e881f52b82",
+      "characters": [
+        "vibhu",
+        "akshay",
+        "seeker"
+      ],
+      "brands": [
+        "pump",
+        "phantom",
+        "solana"
+      ]
+    }
+  ]
+}

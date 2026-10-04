@@ -1,0 +1,66 @@
+[
+  {
+    "key": "encounters-c",
+    "cells": [
+      "toly-vault",
+      "mert-scan",
+      "chase-surf",
+      "lily-net",
+      "toly-rope",
+      "mert-relay"
+    ],
+    "refs": [
+      "/Users/bluntbrain/Documents/code/clockin/seeker-game/assets/campaign-world-v3/source/giants-a.png",
+      "/Users/bluntbrain/Documents/code/clockin/campaign-15-days/videos/classroom-orientation/production/references/seeker-phone.jpeg"
+    ],
+    "prompt": "Use case: stylized-concept. Create a production game decoration atlas, portrait 2:3 canvas, EXACTLY 2 columns and 3 rows, SIX EQUAL SQUARE CELLS, six separate isolated dioramas, genuine transparent alpha background, generous transparent gutters. Each complete subject must fit within central 80% of its own cell. No grid, no labels, no words, no scenery connecting cells. Match the supplied premium 3D collectible toy style exactly: charcoal black and mint outfits, white-hood tiny courier with mint robot face. When humans appear they are giants, courier only one fifth their height. Warm cream lighting, evergreen and mint palette with restrained violet accents. Small readable silhouettes, no clutter, NO buildings or cities, no roads, no guns, no blood. Only a tiny base directly beneath props if needed; all space outside isolated subjects transparent. Camera slightly elevated three-quarter. Phone is graphite Solana Seeker, single circular camera above a narrow vertical pill containing two lenses, small silver Solana mark, NOT iPhone. Use reference atlas for character face identity and rendering style; change poses substantially. Cell ordering is row-major top-left, top-right, middle-left, middle-right, bottom-left, bottom-right. Reference atlas contains Toly short brown hair, Mert bald black beard, Chase wavy brown hair, Lily long black hair. Six NEW comedic heist encounters: 1 Toly kneeling beside a small open mint vault door, tiny courier peeking behind it holding Seeker. 2 Mert aiming a handheld mint spotlight down beside his boot while courier hides behind his backpack. 3 Chase surfing sideways on a giant graphite Seeker as tiny courier runs alongside waving. 4 Lily wielding a mint butterfly catching net, narrowly missing the ducking courier. 5 Toly holding a small grappling rope, tiny courier swinging from its end clutching phone. 6 Mert bent down inspecting a glowing compact Solana validator box as courier unplugs a short cable. Keep faces matching references, playful and readable, full bodies."
+  },
+  {
+    "key": "encounters-d",
+    "cells": [
+      "vibhu-phone",
+      "akshay-portal",
+      "beeman-bridge",
+      "vibhu-coins",
+      "akshay-drone",
+      "beeman-break"
+    ],
+    "refs": [
+      "/Users/bluntbrain/Documents/code/clockin/seeker-game/assets/campaign-world-v3/source/giants-b.png",
+      "/Users/bluntbrain/Documents/code/clockin/campaign-15-days/videos/classroom-orientation/production/references/seeker-phone.jpeg"
+    ],
+    "prompt": "Use case: stylized-concept. Create a production game decoration atlas, portrait 2:3 canvas, EXACTLY 2 columns and 3 rows, SIX EQUAL SQUARE CELLS, six separate isolated dioramas, genuine transparent alpha background, generous transparent gutters. Each complete subject must fit within central 80% of its own cell. No grid, no labels, no words, no scenery connecting cells. Match the supplied premium 3D collectible toy style exactly: charcoal black and mint outfits, white-hood tiny courier with mint robot face. When humans appear they are giants, courier only one fifth their height. Warm cream lighting, evergreen and mint palette with restrained violet accents. Small readable silhouettes, no clutter, NO buildings or cities, no roads, no guns, no blood. Only a tiny base directly beneath props if needed; all space outside isolated subjects transparent. Camera slightly elevated three-quarter. Phone is graphite Solana Seeker, single circular camera above a narrow vertical pill containing two lenses, small silver Solana mark, NOT iPhone. Use reference atlas for character face identity and rendering style; change poses substantially. Cell ordering is row-major top-left, top-right, middle-left, middle-right, bottom-left, bottom-right. Reference atlas: Vibhu clean shaven short black hair; Akshay smiling black beard short dark hair; Beeman bald long grey beard and black sunglasses. Six new comic encounters: 1 Vibhu holding an enormous Seeker like a shield, courier peeking round its lower corner. 2 Akshay running toward a compact glowing mint oval teleporter while courier emerges behind him. 3 Beeman stepping across a tiny single mint bridge over a small purple puddle, courier slipping underneath. 4 Vibhu kneeling to inspect three mint tokens while courier tiptoes away with Seeker. 5 Akshay holding a controller and looking up at ONE little scout drone which lifts courier by his backpack. 6 Beeman seated on a compact graphite phone-shaped bench, sunglasses slightly lowered, courier sneakily taking a Seeker from beside him. Full giant character bodies, sharply different silhouettes, no large floors or buildings."
+  },
+  {
+    "key": "heist-props-e",
+    "cells": [
+      "seed-vault",
+      "phone-launch",
+      "token-fountain",
+      "validator",
+      "courier-glider",
+      "portal"
+    ],
+    "refs": [
+      "/Users/bluntbrain/Documents/code/clockin/seeker-game/assets/campaign-world-v3/source/giants-b.png",
+      "/Users/bluntbrain/Documents/code/clockin/campaign-15-days/videos/classroom-orientation/production/references/seeker-phone.jpeg"
+    ],
+    "prompt": "Use case: stylized-concept. Create a production game decoration atlas, portrait 2:3 canvas, EXACTLY 2 columns and 3 rows, SIX EQUAL SQUARE CELLS, six separate isolated dioramas, genuine transparent alpha background, generous transparent gutters. Each complete subject must fit within central 80% of its own cell. No grid, no labels, no words, no scenery connecting cells. Match the supplied premium 3D collectible toy style exactly: charcoal black and mint outfits, white-hood tiny courier with mint robot face. When humans appear they are giants, courier only one fifth their height. Warm cream lighting, evergreen and mint palette with restrained violet accents. Small readable silhouettes, no clutter, NO buildings or cities, no roads, no guns, no blood. Only a tiny base directly beneath props if needed; all space outside isolated subjects transparent. Camera slightly elevated three-quarter. Phone is graphite Solana Seeker, single circular camera above a narrow vertical pill containing two lenses, small silver Solana mark, NOT iPhone. Use reference atlas for character face identity and rendering style; change poses substantially. Cell ordering is row-major top-left, top-right, middle-left, middle-right, bottom-left, bottom-right. Only tiny courier and sculptural Solana-related props in these six cells, no humans. 1 Open compact circular Seed Vault with a graphite Seeker upright inside and tiny courier climbing the door. 2 Giant graphite Seeker angled like a launch ramp, courier skateboarding down it. 3 Low mint token fountain with only five large mint coin discs arcing toward courier's backpack, subtle 3-bar embossed symbol on coins. 4 One small squat graphite validator computer with three mint cooling fins, courier seated atop holding phone, no room or building. 5 Courier hanging underneath a small graphite triangular glider with three mint stripe panels, legs swinging and phone secured to chest. 6 Small freestanding oval mint portal ring, courier halfway through carrying Seeker; three violet tiles at base. Clean distinct readable shapes."
+  },
+  {
+    "key": "meme-props-f",
+    "cells": [
+      "bonk-courier",
+      "hat-dog",
+      "pump-capsule",
+      "jupiter-orbit",
+      "meteora-shards",
+      "phantom-friend"
+    ],
+    "refs": [
+      "/Users/bluntbrain/Documents/code/clockin/seeker-game/assets/campaign-world-v3/source/giants-a.png",
+      "/Users/bluntbrain/Documents/code/clockin/campaign-15-days/videos/classroom-orientation/production/references/seeker-phone.jpeg"
+    ],
+    "prompt": "Use case: stylized-concept. Create a production game decoration atlas, portrait 2:3 canvas, EXACTLY 2 columns and 3 rows, SIX EQUAL SQUARE CELLS, six separate isolated dioramas, genuine transparent alpha background, generous transparent gutters. Each complete subject must fit within central 80% of its own cell. No grid, no labels, no words, no scenery connecting cells. Match the supplied premium 3D collectible toy style exactly: charcoal black and mint outfits, white-hood tiny courier with mint robot face. When humans appear they are giants, courier only one fifth their height. Warm cream lighting, evergreen and mint palette with restrained violet accents. Small readable silhouettes, no clutter, NO buildings or cities, no roads, no guns, no blood. Only a tiny base directly beneath props if needed; all space outside isolated subjects transparent. Camera slightly elevated three-quarter. Phone is graphite Solana Seeker, single circular camera above a narrow vertical pill containing two lenses, small silver Solana mark, NOT iPhone. Use reference atlas for character face identity and rendering style; change poses substantially. Cell ordering is row-major top-left, top-right, middle-left, middle-right, bottom-left, bottom-right. Six playful Solana ecosystem-inspired miniature sculptures, NOT logo recreations; official logos will be added separately. No human characters. 1 Friendly round orange Shiba Inu mascot nose-to-nose with tiny courier offering graphite Seeker, BONK-inspired dog. 2 Friendly beige Shiba Inu wearing knitted pale-pink beanie resting while courier hides phone beneath hat brim, dogwifhat-inspired. 3 Giant mint and cream pump capsule tilted open with tiny courier popping out clutching Seeker. 4 Sculptural miniature mint planet with two thin orbital rings, courier riding one ring holding phone, Jupiter exchange-inspired. 5 Three floating rounded violet meteor shards above a tiny mint base, courier hopping across lowest shard carrying Seeker, Meteora-inspired. 6 Friendly simple lilac rounded ghost with two eyes, courier peeking behind it holding Seeker, Phantom-inspired. All objects clean toy material. Sparse, no text, no background, no extra particles."
+  }
+]

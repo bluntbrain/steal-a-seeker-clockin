@@ -1,6 +1,6 @@
 import { createPicture, Skia, type SkCanvas, type SkImage } from '@shopify/react-native-skia';
 import { LEVEL,type LevelDefinition } from './level';
-import {districtFor} from './environment';
+import {zoneFor} from './environment';
 import {drawWallPanels} from '../art/walls';
 import {interiorWalls,type WallStyle} from '../art/wall-depth';
 import {drawRaisedWalls} from '../art/wall-depth-art';
@@ -8,7 +8,7 @@ const palette={ floor:'#20292c', line:'#293337', mint:'#cfe6e4', edge:'#465054' 
 // Code-native environment art is recorded once, not recreated on each animation frame.
 export function makeWarehouse(drawFloor=true,level:LevelDefinition=LEVEL,wallTexture?:SkImage|null,wallStyle:WallStyle='flat'){
   return createPicture((c:SkCanvas)=>{
-    const district=districtFor(level.number),rooftop=district==='rooftops',power=district==='powerworks';
+    const district=zoneFor(level),rooftop=district==='rooftops',power=district==='powerworks';
     const p=Skia.Paint();p.setAntiAlias(true);
     const rect=(x:number,y:number,w:number,h:number,color:string)=>{p.setColor(Skia.Color(color));c.drawRect(Skia.XYWHRect(x,y,w,h),p);};
     const round=(x:number,y:number,w:number,h:number,r:number,color:string)=>{p.setColor(Skia.Color(color));c.drawRRect(Skia.RRectXY(Skia.XYWHRect(x,y,w,h),r,r),p);};

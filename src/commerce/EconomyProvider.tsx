@@ -4,15 +4,15 @@ import {commerceApi,ApiError,type StoreCatalog} from './client';
 import {AppState} from 'react-native';
 import {readSave,writeSave} from '../progress/storage';
 import {NETWORK_NAME} from '../wallet/config';
+import {validProgressKey} from '../progress/model';
 import {CREDIT_PACKS,emptyInventory,earnCredits,redeemCredits,STORE_ITEMS,type LocalInventory,type StoreItemId} from '../../shared/store';
-import {CAMPAIGN_IDS} from '../game/level';
 import CreditStore from './CreditStore';
 import WalletPanel from '../wallet/WalletPanel';
 import type {ProductId} from '../../shared/commerce';
 import {changePlaytest} from '../playtest/store';
 type StoreItem=Omit<typeof STORE_ITEMS[number],'price'>&{price:number};
 type EquipmentSlot='outfit'|'trail'|'frame'|'rack';
-export type Economy={checkoutOpen?:boolean;passCheckoutOpen?:boolean;items:StoreItem[];catalog:StoreCatalog|null;syncGhost:()=>Promise<void>;unequip:(slot:EquipmentSlot)=>Promise<void>;tab:'map'|'leaderboard'|'rack';setTab:(tab:'map'|'leaderboard'|'rack')=>void;balance:number;ready:boolean;local:boolean;owned:readonly string[];equipment:Record<string,string>;notice:string;openCredits:()=>void;openPass:(code?:string)=>void;openProduct:(sku:ProductId)=>void;redeem:(sku:StoreItemId)=>Promise<void>;equip:(sku:StoreItemId)=>Promise<void>;earn:(mission:string,stars:number)=>Promise<number>};
+export type Economy={checkoutOpen?:boolean;passCheckoutOpen?:boolean;items:StoreItem[];catalog:StoreCatalog|null;syncGhost:()=>Promise<void>;unequip:(slot:EquipmentSlot)=>Promise<void>;tab:'map'|'leaderboard'|'rack';setTab:(tab:'map'|'leaderboard'|'rack')=>void;balance:number;ready:boolean;local:boolean;owned:readonly string[];equipment:Record<string,string>;notice:string;openCredits:()=>void;openPass:(code?:string)=>void;openProduct:(sku:ProductId)=>void;redeem:(sku:StoreItemId)=>Promise<void>;equip:(sku:StoreItemId)=>Promise<void>;earn:(mission:string,stars:number,boss?:boolean)=>Promise<number>};
 const Context=createContext<Economy|undefined>(undefined);
 export function useEconomy(){const c=useContext(Context);if(!c)throw Error('EconomyProvider missing');return c;}
 export default function EconomyProvider({children}:{children:ReactNode}){
@@ -32,7 +32,7 @@ export default function EconomyProvider({children}:{children:ReactNode}){
  async function redeem(sku:StoreItemId){if(!ready)throw Error('Restoring credits…');const price=items.find(i=>i.id===sku)!.price;if(local){await mutate(s=>redeemCredits(s,sku,price));}else{const session=await account.session();try{await account.update(await commerceApi.redeem(session.token,sku,price));}catch(error){if(error instanceof ApiError&&error.status===409)await refreshCatalog();throw error;}}}
  async function equip(sku:StoreItemId){const item=STORE_ITEMS.find(i=>i.id===sku)!;if(!owned.includes(sku))throw Error('Unlock this item first.');if(local)await mutate(s=>({...s,equipment:{...s.equipment,[item.kind]:sku}}));else{const session=await account.session();await account.update(await commerceApi.equip(session.token,sku));}}
  async function unequip(slot:EquipmentSlot){if(local)await mutate(s=>({...s,equipment:{...s.equipment,[slot]:''}}));else{const session=await account.session();await account.update(await commerceApi.unequip(session.token,slot));}}
- async function earn(mission:string,stars:number){if(!local||!ready||!CAMPAIGN_IDS.includes(mission as any))return 0;return mutate(s=>earnCredits(s,mission,stars));}
+ async function earn(mission:string,stars:number,boss=false){if(!local||!ready||!validProgressKey(mission))return 0;return mutate(s=>earnCredits(s,mission,stars,boss));}
  // The native wallet can change while checkout is open. The checkout itself
  // reconciles the wallet-bound order; a browser purchase is explicitly a demo.
  const value:Economy={checkoutOpen:creditsOpen||checkout!==null,passCheckoutOpen:checkout==='campaign',items,catalog,syncGhost:async()=>{if(account.preview)await mutate(s=>({...s,equipment:{...s.equipment,outfit:'ghost-courier'}}));},tab,setTab,balance:local?saved.balance:account.account?.credits??0,ready:local?ready:!!account.account,local,owned,equipment,notice,redeem,equip,unequip,earn,openCredits:()=>setCreditsOpen(true),openPass:code=>{setPromotionCode(code);setCheckout('campaign');},openProduct:sku=>setCheckout(sku)};

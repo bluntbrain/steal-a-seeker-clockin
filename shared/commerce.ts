@@ -2,8 +2,10 @@ import type {PromotionSnapshot} from './promotions';
 import {CREDIT_PACKS} from './store';
 import type {PaymentCurrency,PriceSnapshot} from './pricing';
 import {CAMPAIGN_OFFER,type CampaignTerms} from './economy';
+// the game pass grants this bundle once per wallet on fulfilment, on top of the completion rebate
+export const PASS_BUNDLE={credits:3500,outfit:'ghost-courier'} as const;
 export const PRODUCTS = [
- {id:'campaign',name:'Game Pass',price:CAMPAIGN_OFFER.price,kind:'access',description:'Weekly ranked competition. One purchase per wallet. Campaign and practice are free.'},
+ {id:'campaign',name:'Game Pass',price:CAMPAIGN_OFFER.price,kind:'access',description:'One purchase per wallet: 3,500 credits and the Ghost Signal outfit. The campaign is free.'},
  {id:'night-courier',name:'Night Courier',price:20,kind:'outfit',description:'Charcoal and mint courier outfit. Same gameplay stats.'},
  {id:'signal-runner',name:'Frost Runner',price:20,kind:'outfit',description:'Snowflake hood and mint winter trim. Same gameplay stats.'},
  {id:'circuit-scout',name:'Circuit Scout',price:20,kind:'outfit',description:'Mint circuit stripes on charcoal. Same gameplay stats.'},

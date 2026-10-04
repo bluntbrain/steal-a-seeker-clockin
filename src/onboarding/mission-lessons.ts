@@ -1,7 +1,8 @@
 import {CAMPAIGN_IDS,type MissionId} from '../game/level';
 import {phoneEdition} from '../game/collection';
-import type {Contract} from '../../shared/contracts';
 import type {Mechanic} from './mechanic-demo';
+import {BOSS_NAMES} from '../../shared/campaign-levels';
+import type {CampaignEntry} from '../campaign/levels';
 export type MissionLesson={weapon?:'knife'|'ranged';id:string;kicker:string;title:string;body:string;cue:string;edition:number;collection:boolean;footer:string;tip?:string;playLabel?:string;demo?:Mechanic};
 const lessons=[
  ['Your first clean getaway','Tap the floor to move. Tap a guard to approach and attack with your knife. Take the phone, then reach the exit.','MOVE → TAKE → ESCAPE'],
@@ -23,6 +24,7 @@ export function campaignLesson(mission:MissionId):MissionLesson{
  const tip=edition===1?'Drones do not shoot. Take them out first: a full amber ring reports your location. Breaking sight interrupts an unsent report. After a report, hide elsewhere until the nearby search ends.':edition===0?'Tap the floor to move; tap an enemy to approach and slash. Scout drones do not shoot, but report your location. Take them out before the amber ring fills.':body;
  return {id:mission,kicker:`MISSION ${String(edition+1).padStart(2,'0')} / 12`,title,body,cue,edition,collection:edition===1,tip,demo:mechanics[edition],playLabel:`PLAY MISSION ${String(edition+1).padStart(2,'0')}  →`,footer:`Recover ${phoneEdition(mission).name} · Each win adds a phone to Hideout → Phones`};
 }
-export function weeklyLesson(c:Contract):MissionLesson{
- return {weapon:(c.level.combat?.revision??0)>=15?'knife':'ranged',id:c.id,kicker:`WEEKLY MISSION · ${c.modifier.toUpperCase()}`,title:c.name,body:c.objective,cue:'FASTER ESCAPE + MORE HEALTH = MORE POINTS',edition:Math.min(11,c.slot*4),collection:false,footer:'One ranked chance is used only when you start. Best complete run counts.'};
+export function publishedLesson(entry:CampaignEntry):MissionLesson{
+ const n=String(entry.number).padStart(2,'0'),boss=entry.boss;
+ return {weapon:'knife',id:entry.key,kicker:`LEVEL ${n}${boss?' · BOSS':''}`,title:boss?`${BOSS_NAMES[boss]} holds this room`:entry.title,body:entry.definition.briefing,cue:boss?'FLANK THE ARMOR → TAKE → ESCAPE':'BREAK SIGHT → TAKE → ESCAPE',edition:(entry.number-1)%12,collection:false,footer:boss?'Boss levels pay double credits. Take the Seeker and get out.':'Each clear pays credits and opens the next level on the map.',playLabel:`PLAY LEVEL ${n}  →`};
 }

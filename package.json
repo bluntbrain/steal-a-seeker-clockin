@@ -1,6 +1,6 @@
 {
   "name": "steal-a-seeker-mvp",
-  "version": "0.3.32",
+  "version": "1.0.0",
   "private": true,
   "main": "index.ts",
   "scripts": {
@@ -9,7 +9,7 @@
     "web": "expo start --web --port 8082",
     "typecheck": "tsc --noEmit",
     "test": "tsx --test tests/*.test.ts",
-    "export:web": "npm run rules:check && expo export --platform web && node scripts/build-sheet-preview.cjs && node scripts/build-paywall-preview.cjs && node scripts/build-leaderboard-preview.cjs && node scripts/build-courier-card-preview.cjs && node scripts/build-celebration-preview.cjs && node scripts/build-credit-claim-preview.cjs && node scripts/copy-design.cjs",
+    "export:web": "npm run rules:check && expo export --platform web && node scripts/build-sheet-preview.cjs && node scripts/build-paywall-preview.cjs && node scripts/build-celebration-preview.cjs && node scripts/build-credit-claim-preview.cjs && node scripts/copy-design.cjs",
     "build:apk": "node scripts/build-release.cjs mainnet",
     "preview": "node scripts/preview.cjs",
     "server:dev": "tsx server/main.ts",
@@ -71,9 +71,11 @@
     "@gltf-transform/core": "4.5.0",
     "@gltf-transform/extensions": "4.5.0",
     "@gltf-transform/functions": "4.5.0",
+    "@onsol/tldparser": "1.2.1",
     "@types/pg": "^8.23.1",
     "@types/react": "~19.2.0",
     "@types/three": "^0.180.0",
+    "borsh": "2.0.0",
     "esbuild": "0.28.2",
     "patch-package": "8.0.1",
     "sharp": "0.34.5",

@@ -1,0 +1,65 @@
+[
+ {
+  "name": "akshay",
+  "file": "akshay.webp",
+  "model": "gpt-image-2",
+  "source": "output/imagegen/bosses-v1/akshay-source.png",
+  "size": 512,
+  "facing": "+x",
+  "sha256": "d53b33781fd52e42ff7858ed8cf9dc1307914ae5af52ff5fdd483d8b73073195"
+ },
+ {
+  "name": "beeman",
+  "file": "beeman.webp",
+  "model": "gpt-image-2",
+  "source": "output/imagegen/bosses-v1/beeman-source.png",
+  "size": 512,
+  "facing": "+x",
+  "sha256": "bab1158e023945b7bba4d299aa4720111c79b19a32b5f98ce87394609b423d6b"
+ },
+ {
+  "name": "chase",
+  "file": "chase.webp",
+  "model": "gpt-image-2",
+  "source": "output/imagegen/bosses-v1/chase-source.png",
+  "size": 512,
+  "facing": "+x",
+  "sha256": "79f40678e9448f5ce879515d50db12a841dbe97664741db0dddb8f94fadda13f"
+ },
+ {
+  "name": "lily",
+  "file": "lily.webp",
+  "model": "gpt-image-2",
+  "source": "output/imagegen/bosses-v1/lily-source.png",
+  "size": 512,
+  "facing": "+x",
+  "sha256": "17255142a77c54a404c0728de1271465db6e69ae0c41fae8cd81e0eb1f308ef0"
+ },
+ {
+  "name": "mert",
+  "file": "mert.webp",
+  "model": "gpt-image-2",
+  "source": "output/imagegen/bosses-v1/mert-source.png",
+  "size": 512,
+  "facing": "+x",
+  "sha256": "0e8cab3cf03ac5a9595fb0e561c6d358208bcee09cd6dafda0e960fe051c06d2"
+ },
+ {
+  "name": "toly",
+  "file": "toly.webp",
+  "model": "gpt-image-2",
+  "source": "output/imagegen/bosses-v1/toly-source.png",
+  "size": 512,
+  "facing": "+x",
+  "sha256": "f972f0745dbfea2cea2e6675be0fbcbc0ea37b785f671df5231df656f0b4dded"
+ },
+ {
+  "name": "vibhu",
+  "file": "vibhu.webp",
+  "model": "gpt-image-2",
+  "source": "output/imagegen/bosses-v1/vibhu-source.png",
+  "size": 512,
+  "facing": "+x",
+  "sha256": "30ea9eff1ccc34c111b59b8bbbc573031715f34886c07d05afc8ae803310787f"
+ }
+]

@@ -22,8 +22,7 @@ test('all thirteen costumes have distinct portraits, eight poses and stable old 
  for(const c of premium){const path=`assets/solana-skins/${c.file}`,bytes=readFileSync(path),meta=await sharp(path).metadata();assert.equal(createHash('sha256').update(bytes).digest('hex'),c.sha256);assert.equal(meta.width,1024);assert.equal(meta.height,768);assert.equal(c.frames,8);}
  assert.equal(costumeFor('signal-runner').name,'Frost Runner');assert.equal(costumeFor('ghost-courier').name,'Ghost Signal');
  assert.equal(costumeFor('unknown').id,'default');
- const base={week:'2026-09-14',rank:null,points:0,cleared:0,ticks:0,domain:null,wallet:'test',final:false,local:true,earned:false};
- assert.equal(new Set(COSTUMES.map(c=>cardPortrait({...base,outfit:c.id}))).size,13);
+ assert.equal(new Set(COSTUMES.map(c=>cardPortrait({wallet:'browser-playtest',local:true,outfit:c.id,campaign:{cleared:12,stars:36,score:0,seconds:0}}))).size,13);
 });
 test('courier direction indices and walking frame bounds match the atlas layout',()=>{
  assert.deepEqual([0,1,2,3].map(i=>costumeFrame(i,false)),[0,1,2,3]);
@@ -43,11 +42,11 @@ test('campaign spawn shows the backpack and real movement selects the correct vi
  }
 });
 test('only implemented outfits are on sale, and wallet inventory restores new outfits',()=>{
- const items=STORE_ITEMS.filter(i=>isStoreItemForSale(i.id));assert.equal(items.length,11);
+ const items=STORE_ITEMS.filter(i=>isStoreItemForSale(i.id));assert.equal(items.length,4);
  for(const id of ['profile-frame','rack-theme','escape-trail'] as const)assert.throws(()=>redeemCredits({...emptyInventory(),balance:10000},id),/no longer/);
- let inventory={...emptyInventory(),balance:22800};
+ let inventory={...emptyInventory(),balance:1800};
  for(const item of items.filter(i=>i.kind==='outfit'))inventory=redeemCredits(inventory,item.id);
- assert.equal(inventory.balance,0);assert.equal(inventory.equipment.outfit,'solana-beeman');
+ assert.equal(inventory.balance,0);assert.equal(inventory.equipment.outfit,'archive-keeper');
  const account=readAccount({wallet:'test',credits:0,entitlements:inventory.owned,equipment:inventory.equipment,progress:{}},'test');
- assert.equal(account?.equipment.outfit,'solana-beeman');assert(!account?.entitlements.includes('campaign'));
+ assert.equal(account?.equipment.outfit,'archive-keeper');assert(!account?.entitlements.includes('campaign'));
 });

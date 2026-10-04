@@ -12,7 +12,14 @@ export default function CombatLayer({game,alpha,input,reduced=false}:{game:Share
  const shots=(enemy:boolean)=>usePathValue(p=>{'worklet';for(const b of game.value.combat?.projectiles??[]){if((b.owner>=0)!==enemy)continue;const x=b.px+(b.x-b.px)*alpha.value,y=b.py+(b.y-b.py)*alpha.value;p.moveTo(x,y);p.lineTo(x-b.vx*.018,y-b.vy*.018);}});
  const friendly=shots(false),hostile=shots(true);
  const target=useDerivedValue(()=>{const s=game.value,c=s.combat,o=(input.value.command&&(input.value.command.seq>(c?.commandSeen??0))?input.value.command:c?.order);if(!o||s.status!=='playing')return {x:0,y:0,opacity:0,attack:false};const g=o.kind==='attack'?s.guards[o.target]:null;return {x:g?g.px+(g.x-g.px)*alpha.value:o.x,y:g?g.py+(g.y-g.py)*alpha.value:o.y,opacity:g&&(!g.active||g.hp<=0)?0:1,attack:!!g};});
- const tx=useDerivedValue(()=>target.value.x),ty=useDerivedValue(()=>target.value.y),opacity=useDerivedValue(()=>target.value.attack?0:target.value.opacity);
+ // the route starts under the courier; only the destination dot fades before arrival
+ const courierCenter=useDerivedValue(()=>{const s=game.value;return {x:s.px+(s.x-s.px)*alpha.value,y:s.py+(s.y-s.py)*alpha.value-((s.definition?.combat?.revision??0)>=15?0:.7)};});
+ const tx=useDerivedValue(()=>target.value.x),ty=useDerivedValue(()=>target.value.y);
+ const opacity=useDerivedValue(()=>{
+  const t=target.value,c=courierCenter.value;
+  // Fade out before arrival instead of leaving the destination dot over the character.
+  return t.attack?0:t.opacity*Math.max(0,Math.min(1,(Math.hypot(t.x-c.x,t.y-c.y)-1.3)/.3));
+ });
  const reticle=usePathValue(p=>{
   'worklet';const t=target.value;if(!t.attack||!t.opacity)return;
   const pulse=reduced?0:Math.sin(game.value.elapsed*7)*.035;

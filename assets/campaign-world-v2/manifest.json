@@ -1,0 +1,101 @@
+[
+  {
+    "group": "courier-topdown-v2",
+    "id": "default",
+    "source": "assets/courier-topdown-v2/source/default.png",
+    "file": "assets/courier-topdown-v2/default.webp",
+    "generator": "OpenAI builtin imagegen",
+    "width": 1024,
+    "height": 512,
+    "bytes": 74306,
+    "sha256": "880f71b16f0802b34d27af26168d2288f1190491fb13a67f973750a4334dfb0a"
+  },
+  {
+    "group": "courier-topdown-v2",
+    "id": "night-courier",
+    "source": "assets/courier-topdown-v2/source/night-courier.png",
+    "file": "assets/courier-topdown-v2/night-courier.webp",
+    "generator": "OpenAI builtin imagegen",
+    "width": 1024,
+    "height": 512,
+    "bytes": 55302,
+    "sha256": "745ebac3f8ad7a44ecd564b4dc0520e9ecf866a0a4b33a069a8b43683bc54c5f"
+  },
+  {
+    "group": "courier-topdown-v2",
+    "id": "frost-runner",
+    "source": "assets/courier-topdown-v2/source/frost-runner.png",
+    "file": "assets/courier-topdown-v2/frost-runner.webp",
+    "generator": "OpenAI builtin imagegen",
+    "width": 1024,
+    "height": 512,
+    "bytes": 79432,
+    "sha256": "4ca0876aaf1790e0756332fbe78a85734ebe52171e6d7f882f2fbcba57331c50"
+  },
+  {
+    "group": "courier-topdown-v2",
+    "id": "circuit-scout",
+    "source": "assets/courier-topdown-v2/source/circuit-scout.png",
+    "file": "assets/courier-topdown-v2/circuit-scout.webp",
+    "generator": "OpenAI builtin imagegen",
+    "width": 1024,
+    "height": 512,
+    "bytes": 66162,
+    "sha256": "0e32f96c9e37df8b511a49755e08f97584834220b6554fa49f3f272d805576a1"
+  },
+  {
+    "group": "courier-topdown-v2",
+    "id": "archive-keeper",
+    "source": "assets/courier-topdown-v2/source/archive-keeper.png",
+    "file": "assets/courier-topdown-v2/archive-keeper.webp",
+    "generator": "OpenAI builtin imagegen",
+    "width": 1024,
+    "height": 512,
+    "bytes": 77950,
+    "sha256": "fda3fcc7b96bbc4bab3ae2ec3cc5a8f7b91929932a6613a799ea0a1a24cbebda"
+  },
+  {
+    "group": "courier-topdown-v2",
+    "id": "ghost-signal",
+    "source": "assets/courier-topdown-v2/source/ghost-signal.png",
+    "file": "assets/courier-topdown-v2/ghost-signal.webp",
+    "generator": "OpenAI builtin imagegen",
+    "width": 1024,
+    "height": 512,
+    "bytes": 70070,
+    "sha256": "12d498658d20a80abb26ac33627ae9ddbc2231ed3e7f441749ce5e3b2c438d38"
+  },
+  {
+    "group": "campaign-world-v2",
+    "id": "warehouse",
+    "source": "assets/campaign-world-v2/source/warehouse.png",
+    "file": "assets/campaign-world-v2/warehouse.webp",
+    "generator": "OpenAI builtin imagegen",
+    "width": 724,
+    "height": 2172,
+    "bytes": 372936,
+    "sha256": "107de9841efe53974428a9fa896a304cc970c793841b7612ae413d8f3cfcd4e7"
+  },
+  {
+    "group": "campaign-world-v2",
+    "id": "rooftops",
+    "source": "assets/campaign-world-v2/source/rooftops.png",
+    "file": "assets/campaign-world-v2/rooftops.webp",
+    "generator": "OpenAI builtin imagegen",
+    "width": 724,
+    "height": 2172,
+    "bytes": 487330,
+    "sha256": "95c79e3e672180128d746893cf11dca30a916b9cc0ad932b1c81329473b82529"
+  },
+  {
+    "group": "campaign-world-v2",
+    "id": "powerworks",
+    "source": "assets/campaign-world-v2/source/powerworks.png",
+    "file": "assets/campaign-world-v2/powerworks.webp",
+    "generator": "OpenAI builtin imagegen",
+    "width": 724,
+    "height": 2172,
+    "bytes": 482126,
+    "sha256": "83d4ffc4e7447da6148a95c46d6677a9d4ec26fcaba599e99a61e427a8d3c9f1"
+  }
+]

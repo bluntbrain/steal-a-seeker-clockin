@@ -1,11 +1,10 @@
-import type {HapticCue} from '../feedback/haptic-policy';
 import {useEffect,useRef} from 'react';
 import {playImpact} from './impact-feedback';
 import {useGameAudio} from './useGameAudio';
 import {combatSoundEvents,type CombatSoundCounters} from './combat-events';
 import type {GameState} from '../game/simulation';
 const zero:CombatSoundCounters={shots:0,enemyShots:0,hitEvents:0,damageTaken:0,kills:0,aimEvents:0,commandSeen:0};
-export function useCombatAudio(state:GameState,enabled:boolean,volume:number,onDamage?:()=>void,feedbackEnabled=enabled,onHaptic?:(cue:HapticCue)=>void){
+export function useCombatAudio(state:GameState,enabled:boolean,volume:number,onDamage?:()=>void,feedbackEnabled=enabled){
  const swing=useGameAudio(require('../../assets/audio-melee-v1/swing.wav')),swingB=useGameAudio(require('../../assets/audio-melee-v1/swing-b.wav')),slash=useGameAudio(require('../../assets/audio-melee-v1/impact.wav')),clang=useGameAudio(require('../../assets/audio-melee-v1/clang.wav'));
  const shotA=useGameAudio(require('../../assets/audio-shots-v5/shot-a.wav'));
  const shotB=useGameAudio(require('../../assets/audio-shots-v5/shot-b.wav'));
@@ -30,11 +29,9 @@ export function useCombatAudio(state:GameState,enabled:boolean,volume:number,onD
   const c=state.combat??zero,events=combatSoundEvents(previous.current,c);
   const grateId=state.combat?.grateNoise?.id??0;
   if(state.ticks>=lastTick.current&&grateId>lastGrate.current){
-   if(feedbackEnabled)onHaptic?.('switch');
    if(enabled){grate.volume=volume*.42;const run=epoch.current;void grate.seekTo(0).then(()=>{if(allowed.current&&epoch.current===run)grate.play();}).catch(()=>{});}
   }
   lastGrate.current=grateId;
-  if(feedbackEnabled&&state.ticks>=lastTick.current&&!events.includes('damage')){if(events.includes('knockout'))onHaptic?.('kill');else if(events.includes('clang'))onHaptic?.('armor');else if(events.includes('slash'))onHaptic?.('melee');else if(events.includes('shot'))onHaptic?.('shot');}
   if(!enabled&&feedbackEnabled&&state.ticks>=lastTick.current&&events.includes('damage'))damageFeedback.current?.();
   if(enabled&&state.ticks>=lastTick.current){
    for(const cue of events){
@@ -54,5 +51,5 @@ export function useCombatAudio(state:GameState,enabled:boolean,volume:number,onD
   if(state.ticks<lastTick.current)lastAim.current=-100;
   previousHP.current=state.guards.map(g=>g.hp);
   previous.current={melee:c.melee?{...c.melee}:undefined,shots:c.shots,enemyShots:c.enemyShots,hitEvents:c.hitEvents,damageTaken:c.damageTaken,kills:c.kills,aimEvents:c.aimEvents,commandSeen:c.commandSeen};lastTick.current=state.ticks;
- },[state,enabled,volume,feedbackEnabled,onHaptic,swing,swingB,slash,clang,shotA,shotB,enemyA,enemyB,hit,damage,knockout,knockoutB,heavyKO,droneKO,aim,grate,lootA,lootB]);
+ },[state,enabled,volume,feedbackEnabled,swing,swingB,slash,clang,shotA,shotB,enemyA,enemyB,hit,damage,knockout,knockoutB,heavyKO,droneKO,aim,grate,lootA,lootB]);
 }

@@ -1,0 +1,24 @@
+[
+  {
+    "key": "giants-a",
+    "prompt": "Use case: stylized-concept. Production transparent game-map decoration atlas. Square canvas, EXACT 2 columns by 2 rows, FOUR EQUAL SQUARE CELLS, one isolated miniature diorama in each cell, no border, no text, no grid. Actual transparent alpha outside subjects. High quality stylized 3D collectible toy characters, recognizable faces matching reference sheets, black clothing mint trim, warm cream highlights, restrained evergreen palette. Each cell depicts ONE HUGE human character looming above a TINY white hooded mint-faced robot courier (courier is one sixth human height), playful chase energy, with a small graphite Solana Seeker phone prop. Match reference phone: single circular upper camera and narrow vertical lower camera pill, graphite rear with small silver three-stripe mark, no iPhone camera cluster. NO buildings, skyscrapers, city, windows, warehouses, crates, trees, roads, particles, money piles, pedestal text, or unrelated props. Keep silhouettes beautifully readable at 120 pixels; sparse clean shapes; complete subject inside middle 80% of each cell, generous TRANSPARENT gutters, no overlapping cells. Camera gently elevated three-quarter, NOT top-down. Character identities and hairstyles exactly like references. Soft subtle contact shadow confined within each diorama, no background rectangle. Reference1 Toly, Reference2 Mert bald with beard, Reference3 Chase wavy brown hair, Reference4 Lily long black hair, Reference5 phone. Top-left cell Toly crouching and pointing at a tiny courier escaping with Seeker. Top-right cell Mert raising a clenched fist in mock frustration, tiny courier slipping past boot. Bottom-left cell Chase leaning forward trying to grab Seeker, tiny courier sprinting away. Bottom-right cell Lily hands on hips watching the tiny courier escape. No guns.",
+    "refs": [
+      "/Users/bluntbrain/Documents/code/clockin/seeker-game/assets/solana-skins/toly.webp",
+      "/Users/bluntbrain/Documents/code/clockin/seeker-game/assets/solana-skins/mert.webp",
+      "/Users/bluntbrain/Documents/code/clockin/seeker-game/assets/solana-skins/chase.webp",
+      "/Users/bluntbrain/Documents/code/clockin/seeker-game/assets/solana-skins/lily.webp",
+      "/Users/bluntbrain/Documents/code/clockin/campaign-15-days/videos/classroom-orientation/production/references/seeker-phone.jpeg"
+    ]
+  },
+  {
+    "key": "giants-b",
+    "prompt": "Use case: stylized-concept. Production transparent game-map decoration atlas. Square canvas, EXACT 2 columns by 2 rows, FOUR EQUAL SQUARE CELLS, one isolated miniature diorama in each cell, no border, no text, no grid. Actual transparent alpha outside subjects. High quality stylized 3D collectible toy characters, recognizable faces matching reference sheets, black clothing mint trim, warm cream highlights, restrained evergreen palette. Each cell depicts ONE HUGE human character looming above a TINY white hooded mint-faced robot courier (courier is one sixth human height), playful chase energy, with a small graphite Solana Seeker phone prop. Match reference phone: single circular upper camera and narrow vertical lower camera pill, graphite rear with small silver three-stripe mark, no iPhone camera cluster. NO buildings, skyscrapers, city, windows, warehouses, crates, trees, roads, particles, money piles, pedestal text, or unrelated props. Keep silhouettes beautifully readable at 120 pixels; sparse clean shapes; complete subject inside middle 80% of each cell, generous TRANSPARENT gutters, no overlapping cells. Camera gently elevated three-quarter, NOT top-down. Character identities and hairstyles exactly like references. Soft subtle contact shadow confined within each diorama, no background rectangle. Reference1 Vibhu, Reference2 Akshay black beard smiling, Reference3 Beeman bald sunglasses long grey beard, Reference4 Seeker phone, Reference5 tiny courier. Top-left cell Vibhu reaching down to catch tiny courier. Top-right cell Akshay laughing and giving chase with one arm stretched. Bottom-left cell Beeman looming with arms crossed as courier sneaks around his boot. Bottom-right cell ONLY a standing graphite Seeker phone monument and tiny white hood courier leaning on it, no human. Keep each scene separate.",
+    "refs": [
+      "/Users/bluntbrain/Documents/code/clockin/seeker-game/assets/solana-skins/vibhu.webp",
+      "/Users/bluntbrain/Documents/code/clockin/seeker-game/assets/solana-skins/akshay.webp",
+      "/Users/bluntbrain/Documents/code/clockin/seeker-game/assets/solana-skins/beeman.webp",
+      "/Users/bluntbrain/Documents/code/clockin/campaign-15-days/videos/classroom-orientation/production/references/seeker-phone.jpeg",
+      "/Users/bluntbrain/Documents/code/clockin/seeker-game/assets/costumes-v4/default.webp"
+    ]
+  }
+]

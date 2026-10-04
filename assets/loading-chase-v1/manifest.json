@@ -1,0 +1,30 @@
+{
+  "generator": "Built-in image_gen",
+  "columns": 4,
+  "frameSize": 256,
+  "characters": [
+    "courier",
+    "toly",
+    "mert",
+    "lily",
+    "chase",
+    "vibhu",
+    "akshay",
+    "beeman"
+  ],
+  "sources": [
+    "source/courier-crew.png",
+    "source/crew.png"
+  ],
+  "references": [
+    "assets/costumes-v4/default.webp",
+    "assets/solana-skins/toly.webp",
+    "assets/solana-skins/mert.webp",
+    "assets/solana-skins/lily.webp",
+    "assets/solana-skins/chase.webp",
+    "assets/solana-skins/vibhu.webp",
+    "assets/solana-skins/akshay.webp",
+    "assets/solana-skins/beeman.webp"
+  ],
+  "processing": "Uniform row extraction and 256px frame packing, WebP quality 86 with alpha."
+}

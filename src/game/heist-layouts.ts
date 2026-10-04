@@ -272,16 +272,15 @@ const LAYOUTS:Layout[]=[
 ];
 
 function applyPressure(l:LevelDefinition):LevelDefinition{
- 'worklet';l.combat={version:2,revision:16};const p=guardPressure(l);
+ 'worklet';l.combat={version:2,revision:17};const p=guardPressure(l);
  for(const g of l.patrols){
   const heavy=g.combatRole==='heavy'||g.combatRole==='warden',drone=g.combatRole==='drone';
   g.pursuitSpeed=p.pursuit+(drone?.3:heavy?-.45:0);
-  // Authored campaign values drive both the visible cone and actual sight.
-  // Frozen weekly definitions keep their own published range and angle.
-  g.range=p.vision*(drone?1:heavy?.6:.8);
-  g.halfAngle=drone?Math.PI/3:(heavy?75:95)*Math.PI/360;
-  g.spotSeconds=p.spot;g.pauseSeconds=.2;
-  g.speed=heavy?.75:drone?1.15:.9;
+  // revision 17: long narrow cones, a slow spot time and slow patrols. the player reads the rhythm and hides
+  g.range=p.vision*(drone?1.1:heavy?.75:1);
+  g.halfAngle=drone?Math.PI*110/360:(heavy?60:70)*Math.PI/360;
+  g.spotSeconds=.6-(l.number-1)/11*.15;g.pauseSeconds=.8;
+  g.speed=heavy?.6:drone?1:.75;
  }
  return l;
 }

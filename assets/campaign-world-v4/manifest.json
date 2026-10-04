@@ -1,0 +1,205 @@
+{
+  "generator": "Built-in image_gen (24 new transparent dioramas plus 8 original character scenes)",
+  "packing": "sharp compositing, native road geometry from src/components/campaignRoad.ts",
+  "individualSprites": [
+    "pump-capsule",
+    "portal",
+    "token-fountain",
+    "beeman-lookout",
+    "chase-surf",
+    "lily-net",
+    "toly-rope",
+    "vibhu-phone",
+    "akshay-portal",
+    "beeman-bridge",
+    "akshay-drone",
+    "courier-glider",
+    "jupiter-orbit",
+    "meteora-shards"
+  ],
+  "excludedConcepts": [
+    "beeman-break"
+  ],
+  "scenes": [
+    {
+      "id": "first-pickup",
+      "width": 768,
+      "height": 2304,
+      "bytes": 311466,
+      "sha256": "1686912a869e5108e4b66e96e314a7a58427a26c182d376f8a98afc74f2797b3",
+      "title": "First Pickup",
+      "illustrations": [
+        "toly",
+        "mert",
+        "beeman"
+      ],
+      "brands": [
+        "jupiter",
+        "bonk",
+        "solana"
+      ]
+    },
+    {
+      "id": "seeker-square",
+      "width": 768,
+      "height": 2304,
+      "bytes": 313194,
+      "sha256": "b674d32f2f09cbcf03b6e968046b16aa9b1b4c4243bc33ab592d624e35187cd9",
+      "title": "Seeker Square",
+      "illustrations": [
+        "chase",
+        "lily",
+        "seeker"
+      ],
+      "brands": [
+        "meteora",
+        "wif",
+        "skr"
+      ]
+    },
+    {
+      "id": "validator-yard",
+      "width": 768,
+      "height": 2304,
+      "bytes": 331438,
+      "sha256": "6e8eeec6b70ebd6e845608a6fd431e0caa24a32c5d74cb7bdcac69f0bc569e23",
+      "title": "Validator Yard",
+      "illustrations": [
+        "vibhu",
+        "akshay",
+        "validator",
+        "pump-capsule"
+      ],
+      "brands": [
+        "pump",
+        "solana"
+      ]
+    },
+    {
+      "id": "seed-vault",
+      "width": 768,
+      "height": 2304,
+      "bytes": 325880,
+      "sha256": "a8331e3a6cf4c365b843e550fa57c42ec57792e3fd4cd5ccc6197ea7ef5850c8",
+      "title": "Seed Vault",
+      "illustrations": [
+        "toly-vault",
+        "seed-vault",
+        "toly-rope"
+      ],
+      "brands": [
+        "skr",
+        "solana",
+        "phantom"
+      ]
+    },
+    {
+      "id": "relay-raid",
+      "width": 768,
+      "height": 2304,
+      "bytes": 306376,
+      "sha256": "1c06c0b020b2fc06bed2576744fa5674c16449bfe3ef2360095fcd00c38e2d0c",
+      "title": "Relay Raid",
+      "illustrations": [
+        "mert-scan",
+        "mert-relay",
+        "token-fountain"
+      ],
+      "brands": [
+        "solana",
+        "jupiter",
+        "skr"
+      ]
+    },
+    {
+      "id": "phone-flight",
+      "width": 768,
+      "height": 2304,
+      "bytes": 301172,
+      "sha256": "e1a72d9c39797b089cbe4be0da064b84cf42e3ed660906ca655882c57cfccd87",
+      "title": "Phone Flight",
+      "illustrations": [
+        "chase-surf",
+        "phone-launch",
+        "courier-glider"
+      ],
+      "brands": [
+        "jupiter",
+        "meteora",
+        "solana"
+      ]
+    },
+    {
+      "id": "meme-market",
+      "width": 768,
+      "height": 2304,
+      "bytes": 357658,
+      "sha256": "01eab0d02a843d39d272573da99edca54028527539c8c4ca887d2c80c5c2fe9f",
+      "title": "Meme Market",
+      "illustrations": [
+        "lily-net",
+        "bonk-courier",
+        "hat-dog"
+      ],
+      "brands": [
+        "bonk",
+        "wif",
+        "pump"
+      ]
+    },
+    {
+      "id": "orbital-escape",
+      "width": 768,
+      "height": 2304,
+      "bytes": 313162,
+      "sha256": "f6dfbe51bada4f703c6239ce69e2db70ef2e0cb5c1365aaf726a349bb03b5d20",
+      "title": "Orbital Escape",
+      "illustrations": [
+        "vibhu-phone",
+        "vibhu-coins",
+        "jupiter-orbit"
+      ],
+      "brands": [
+        "jupiter",
+        "skr",
+        "solana"
+      ]
+    },
+    {
+      "id": "portal-pursuit",
+      "width": 768,
+      "height": 2304,
+      "bytes": 336666,
+      "sha256": "c872f68769688e9155b4cfa364ebf792d1d3498b1f64f9e2ef0279fe6ec52714",
+      "title": "Portal Pursuit",
+      "illustrations": [
+        "akshay-portal",
+        "akshay-drone",
+        "meteora-shards",
+        "portal"
+      ],
+      "brands": [
+        "meteora",
+        "phantom"
+      ]
+    },
+    {
+      "id": "last-hideout",
+      "width": 768,
+      "height": 2304,
+      "bytes": 287446,
+      "sha256": "caa792fbf5a483fcc2427801f84419e99285eecf10cef528471aff4be8d3ce32",
+      "title": "Last Hideout",
+      "illustrations": [
+        "beeman-bridge",
+        "beeman-lookout",
+        "phantom-friend"
+      ],
+      "brands": [
+        "phantom",
+        "skr",
+        "solana"
+      ]
+    }
+  ]
+}

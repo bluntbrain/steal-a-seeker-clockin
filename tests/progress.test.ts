@@ -12,3 +12,15 @@ test('mastery needs clean time; malformed and future saves do not silently reset
  assert.throws(()=>parseProgress('{'));assert.throws(()=>parseProgress('{"version":2,"missions":{}}'));
  assert.throws(()=>parseProgress('{"version":1,"missions":{"practice":{"stars":99}}}'));
 });
+
+test('published levels save under their own key, merge beside the twelve and reject keys below the published range',()=>{
+ const {progressKeyOf,mergeBests,validProgressKey}=require('../src/progress/model') as typeof import('../src/progress/model');
+ const {makeCampaignRecipe,buildCampaignLevel}=require('../shared/campaign-levels') as typeof import('../shared/campaign-levels');
+ const level=buildCampaignLevel(makeCampaignRecipe(13)),run=initialState(level.mission,level);
+ assert.equal(progressKeyOf(run),'campaign:13');assert.equal(progressKeyOf(initialState('practice')),'practice');
+ run.status='won';run.elapsed=40;run.score=500;run.battery=80;if(run.combat)run.combat.hp=80;
+ const saved=recordWin(freshProgress(),run);assert.deepEqual(Object.keys(saved.missions),['campaign:13']);assert.equal(saved.missions.practice,undefined);
+ const merged=mergeBests(saved,parseProgress(JSON.stringify({version:1,missions:{practice:{stars:1,seconds:9,score:1,battery:50,completions:1},'campaign:13':{stars:3,seconds:50,score:1,battery:50,completions:2},'campaign:5':{stars:3,seconds:1,score:1,battery:50,completions:1},bogus:{stars:1,seconds:1,score:1,battery:1,completions:1}}})));
+ assert.deepEqual(Object.keys(merged.missions).sort(),['campaign:13','practice']);assert.equal(merged.missions['campaign:13']!.stars,3);assert.equal(merged.missions['campaign:13']!.seconds,40);
+ assert(validProgressKey('campaign:200')&&!validProgressKey('campaign:12')&&!validProgressKey('campaign:x'));
+});

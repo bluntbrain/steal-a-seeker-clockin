@@ -5,7 +5,9 @@ import type {PromotionOffer} from '../shared/promotions';
 import {RETIRED_ITEMS} from '../shared/store';
 import {ServiceError} from './service';
 const sku=z.enum(PRODUCTS.filter(p=>p.kind!=='credits'&&!RETIRED_ITEMS.includes(p.id)).map(p=>p.id) as [ProductId,...ProductId[]]);
-const schema=z.array(z.object({id:z.string().regex(/^[a-z0-9-]{1,50}$/),code:z.string().trim().min(4).max(64).regex(/^[A-Za-z0-9_-]+$/).transform(v=>v.toUpperCase()),label:z.string().min(1).max(80),percentOff:z.number().int().min(1).max(100),sku,bonusSkus:z.array(sku).max(20).default([]),startsAt:z.iso.datetime(),expiresAt:z.iso.datetime(),maxRedemptions:z.number().int().positive().max(100000),enabled:z.boolean().default(true)}).strict()).max(30);
+// bonus grants may still name retired cosmetics: a live offer keeps granting them to redeemers even once they leave the store
+const bonusSku=z.enum(PRODUCTS.filter(p=>p.kind!=='credits').map(p=>p.id) as [ProductId,...ProductId[]]);
+const schema=z.array(z.object({id:z.string().regex(/^[a-z0-9-]{1,50}$/),code:z.string().trim().min(4).max(64).regex(/^[A-Za-z0-9_-]+$/).transform(v=>v.toUpperCase()),label:z.string().min(1).max(80),percentOff:z.number().int().min(1).max(100),sku,bonusSkus:z.array(bonusSku).max(20).default([]),startsAt:z.iso.datetime(),expiresAt:z.iso.datetime(),maxRedemptions:z.number().int().positive().max(100000),enabled:z.boolean().default(true)}).strict()).max(30);
 export type PromotionConfig=z.infer<typeof schema>[number];
 export function parsePromotions(raw:string|undefined):PromotionConfig[]{
  try{const entries=schema.parse(JSON.parse(raw||'[]'));if(new Set(entries.map(p=>p.id)).size!==entries.length||new Set(entries.map(p=>p.code)).size!==entries.length||entries.some(p=>Date.parse(p.expiresAt)<=Date.parse(p.startsAt)||p.bonusSkus.some(id=>!id.startsWith('solana-'))))throw Error();return entries;}

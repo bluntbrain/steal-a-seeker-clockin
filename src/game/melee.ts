@@ -20,7 +20,8 @@ export function stepMelee(s:GameState,l:LevelDefinition){
    const dx=s.x-g.x,dy=s.y-g.y,d=Math.hypot(dx,dy)||1,side=(dx*Math.cos(g.angle)+dy*Math.sin(g.angle))/d;
    const rear=side<=-.35,front=side>=.5,armor=g.combatRole==='heavy'||g.combatRole==='warden';
    const unaware=!g.alerted&&!g.heist?.hunting&&!g.seesPlayer&&!sees(g,s.x,s.y,l)&&g.hp===g.maxHp;
-   const damage=armor?(front?0:rear?75:20):g.combatRole==='drone'?25:rear&&unaware?g.hp:35;
+   const rearArmor=(l.combat?.revision??0)>=17&&l.patrols[o!.target]?.boss==='vibhu'?50:75;
+   const damage=armor?(front?0:rear?rearArmor:20):g.combatRole==='drone'?25:rear&&unaware?g.hp:35;
    m.noiseId++;m.noiseRadius=damage?1.5:2.5;c.noise={x:g.x,y:g.y};c.noiseLeft=.4;
    if(armor&&g.heist)g.heist.armorHit=front?'front':rear?'rear':'side';
    if(!damage){g.flash=.15;m.blocks++;c.feedback='cover';c.feedbackLeft=.65;c.order=null;c.path=[];c.pathIndex=0;delete c.attackPlan;return;}

@@ -67,3 +67,22 @@ test('cadence follows distance across HUD refresh rates without catch-up bursts'
  assert.notEqual(late.cue,null);tracker=late.tracker;
  assert.equal(advanceFootsteps(tracker,snapshot(12,1.64),true).cue,null,'A repeated late frame cannot replay a burst');
 });
+
+test('short taps produce a contact and ordinary stopping does not cut its tail',()=>{
+ let tracker=advanceFootsteps(freshFootsteps(),snapshot(0,0),true).tracker;
+ const short=advanceFootsteps(tracker,snapshot(2,.06),true);
+ assert.equal(short.cue,0,'A small real move should be audible');
+ const stop=advanceFootsteps(short.tracker,snapshot(4,.06),true);
+ assert.equal(stop.moving,false);assert.equal(stop.reset,false,'Let the earned 240ms contact finish');
+ assert.equal(advanceFootsteps(short.tracker,snapshot(4,.06),false).reset,true,'Mute must cancel playback');
+ assert.equal(advanceFootsteps(short.tracker,snapshot(0,0),true).reset,true,'Restart must cancel a pending seek');
+});
+
+test('small real movements accumulate instead of disappearing between HUD snapshots',()=>{
+ let tracker=advanceFootsteps(freshFootsteps(),snapshot(0,0),true).tracker,steps=0;
+ for(let t=1;t<=10;t++){
+  const update=advanceFootsteps(tracker,snapshot(t,t*.006),true);tracker=update.tracker;
+  if(update.cue!==null)steps++;
+ }
+ assert.equal(steps,1);
+});

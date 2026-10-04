@@ -5,12 +5,12 @@ import fixtures from '../verification/native-replay-fixtures.json';
 import {parityRun} from './game/parity';
 import type {MissionId} from './game/level';
 import type {Replay} from '../shared/replay';
-import {restorePaidState} from './paid/recovery';
+import {replayState} from './game/recording';
 import {recordStep} from './game/recording';
 function recoveredRun(mission:MissionId,replay:Replay){
  'worklet';
  const split=Math.max(1,Math.floor(replay.chunks.length/2)),prefix:Replay={version:1,chunks:replay.chunks.slice(0,split).map(c=>({...c}))};
- const state=restorePaidState(mission,prefix),recorded=prefix.chunks;let dash=state.dashSeen,tool=state.toolSeen;
+ const state=replayState(mission,prefix),recorded=prefix.chunks;let dash=state.dashSeen,tool=state.toolSeen;
  for(const c of replay.chunks.slice(split))for(let n=0;n<c.ticks;n++){if(c.buttons&2)dash++;if(c.buttons&4)tool++;recordStep(state,{x:c.x/127,y:c.y/127,interact:!!(c.buttons&1),dash,tool},recorded);}
  const round=(n:number)=>Math.round(n*1e6)/1e6;
  return {status:state.status,ticks:state.ticks,score:state.score,battery:state.battery,delivered:state.delivered,spotted:state.spotted,dashes:state.dashes,decoysLeft:state.decoysLeft,x:round(state.x),y:round(state.y),power:state.power,activations:state.activations,guards:state.guards.map(g=>({x:round(g.x),y:round(g.y),mode:g.mode,exposure:round(g.exposure)})),recordedTicks:recorded.reduce((n,c)=>n+c.ticks,0)};

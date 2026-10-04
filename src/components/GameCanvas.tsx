@@ -1,25 +1,26 @@
+import {courierTopFrame,courierNeedsPhone,courierPhoneHand} from './courier-locomotion';
 import DefeatLootLayer from './DefeatLootLayer';
-import {meleeAtlas} from './meleeAssets';
 import {MELEE_FRAMES,meleeFrame} from './melee-presentation';
 import {knifeCombat} from '../game/melee';
 import ActorHealthBars from './ActorHealthBars';
 import React,{memo,useMemo,useEffect} from 'react';
-import {Canvas,Group,Picture,Image,Atlas,Circle,RoundedRect,Oval,Line,Path,Skia,DashPathEffect,useImage,useRSXformBuffer} from '@shopify/react-native-skia';
-import {useDerivedValue,type SharedValue} from 'react-native-reanimated';
+import {Canvas,Group,Picture,Image,Atlas,Circle,RoundedRect,Line,Path,Skia,DashPathEffect,useImage,useRSXformBuffer} from '@shopify/react-native-skia';
+import {useAnimatedReaction,useDerivedValue,useSharedValue,type SharedValue} from 'react-native-reanimated';
 import {makeWarehouse} from '../game/art';
 import {currentWallStyle} from '../art/wall-style';
 import {interiorWalls,wallActorClip,type WallStyle} from '../art/wall-depth';
 import {makeWallOcclusion} from '../art/wall-depth-art';
-import {districtFor,environmentFor} from '../game/environment';
+import {zoneFor,environmentFor} from '../game/environment';
 import {TUNING,SECURITY,type LevelDefinition} from '../game/level';
 import {targetPhone,decoyLanding,type GameState,type Input} from '../game/simulation';
 import {editionIndex} from '../game/collection';
 import phoneAtlas from '../../assets/world-v3/phones.frames.json';
 import frames from '../../assets/costumes-v4/frames.json';
-import {costumeAtlas} from './costumeAssets';
+import {costumeAtlas,topdownAtlas} from './costumeAssets';
+import topdownFrames from '../../assets/courier-topdown-v2/frames.json';
 import {costumeFrame} from '../../shared/costumes';
 import GuardLayer from './GuardLayer';
-import {GUARD_SPRITES} from './enemy-presentation';
+import {GUARD_SPRITES,BOSS_SPRITES} from './enemy-presentation';
 import CameraSignals from './CameraSignals';
 import type {Camera} from '../camera/geometry';
 import CombatLayer from './CombatLayer';
@@ -40,9 +41,10 @@ function DecoyLayer({game,input,reduced}:{game:SharedValue<GameState>;input:Shar
  <Group opacity={opacity}><Circle cx={x} cy={y} r={radius} style="stroke" strokeWidth={.045} color="#CFE6E4" opacity={.65}/><Circle cx={x} cy={y} r={.26} color="#152D37"/><Circle cx={x} cy={y} r={.18} color="#CFE6E4"/><Circle cx={x} cy={y} r={.07} color="#304E56"/></Group>
  </>;
 }
+const TOP_FRAMES=topdownFrames as {name:string;x:number;y:number;width:number;height:number}[];
 export default memo(function GameCanvas({camera,size,height=size*20/12,input,game,alpha,clock,level,appearance={},onReady,onLoadError,wallStyle=currentWallStyle()}:Props){
  const cameraTransform=useDerivedValue(()=>{const c=camera?.value??{x:0,y:0,zoom:1},scale=size/12*c.zoom;return [{translateX:-c.x*scale},{translateY:-c.y*scale},{scale}];});
- const district=districtFor(level.number),environment=environmentFor(level);
+ const district=zoneFor(level),environment=environmentFor(level);
  const wallTexture=useImage(district==='rooftops'?require('../../assets/walls-v5/rooftop-cap.jpg'):district==='powerworks'?require('../../assets/walls-v5/vault-cap.jpg'):require('../../assets/walls-v5/warehouse-cap.jpg'),onLoadError);
  const world=useMemo(()=>wallTexture?makeWarehouse(false,level,wallTexture,wallStyle):null,[level,wallTexture,wallStyle]);
  const wallOcclusion=useMemo(()=>makeWallOcclusion(interiorWalls(level.blockers,level.width,level.height),wallStyle),[level,wallStyle]);
@@ -51,14 +53,16 @@ export default memo(function GameCanvas({camera,size,height=size*20/12,input,gam
  const phones=useImage(require('../../assets/world-v3/phones.webp'),onLoadError);
  const droneSprite=useImage(require('../../assets/drones-v2/scout.webp'),onLoadError);
  const guardSprite=useImage(GUARD_SPRITES.guard,onLoadError),heavySprite=useImage(GUARD_SPRITES.heavy,onLoadError);
+ const bossId=level.patrols.find(p=>p.boss)?.boss,bossSprite=useImage(bossId?BOSS_SPRITES[bossId]??null:null,onLoadError);
  const phoneIndex=editionIndex(level.mission),phoneFrame=phoneAtlas.frames[phoneIndex]!;
  const phoneScale=1.18/phoneFrame.height;
  const phoneSprites=useMemo(()=>[phoneFrame],[phoneIndex]);
  const phoneTransforms=useMemo(()=>[Skia.RSXform(phoneScale,0,-phoneFrame.width/2*phoneScale,0)],[phoneIndex]);
- const carryTransforms=useMemo(()=>[Skia.RSXform(.48/phoneFrame.height,0,0,0)],[]);
+ const carryTransforms=useMemo(()=>[Skia.RSXform((knifeCombat(level)?.36:.48)/phoneFrame.height,0,0,0)],[phoneIndex,level]);
+ // knife levels draw the courier strictly top-down and rotate one sprite like the guards; older levels keep the directional sheet
  const knifeMode=knifeCombat(level),actorFrames=knifeMode?MELEE_FRAMES:frames;
  const lootCoin=useImage(require('../../assets/loot-v1/coin.png'),onLoadError);
- const sprite=useImage(knifeMode?meleeAtlas(appearance.outfit):costumeAtlas(appearance.outfit),onLoadError);
+ const sprite=useImage(knifeMode?topdownAtlas(appearance.outfit):costumeAtlas(appearance.outfit),onLoadError);
  // Each scene is keyed by the parent. Never acknowledge a previous district's
  // retained image while a new source is decoding. Let the new canvas paint first.
  useEffect(()=>{
@@ -71,17 +75,23 @@ export default memo(function GameCanvas({camera,size,height=size*20/12,input,gam
  const y=useDerivedValue(()=>game.value.py+(game.value.y-game.value.py)*alpha.value);
  const attack=useDerivedValue(()=>{const s=game.value,m=s.combat?.melee;return knifeMode&&m&&s.status==='playing'?meleeFrame(s.ticks-m.started,m.angle):-1;});
  const frame=useDerivedValue(()=>{const s=game.value;if(attack.value>=0)return attack.value;return costumeFrame(s.facing,Math.hypot(s.vx,s.vy)>.1 && Math.floor(s.walked*3.5)%2===1);});
- const sprites=useDerivedValue(()=>[actorFrames[frame.value]!]);
+ // heading is presentation only: the attack angle while slashing, otherwise the movement direction; it holds while idle
+ const heading=useSharedValue(-Math.PI/2);
+ useAnimatedReaction(()=>{const s=game.value,m=s.combat?.melee;if(knifeMode&&m&&s.status==='playing'&&s.ticks-m.started<11)return m.angle;return Math.hypot(s.vx,s.vy)>.1?Math.atan2(s.vy,s.vx):NaN;},(angle)=>{if(!Number.isNaN(angle))heading.value=angle;},[knifeMode]);
+ const topFrame=useDerivedValue(()=>courierTopFrame(game.value));
+ const sprites=useDerivedValue(()=>[knifeMode?TOP_FRAMES[topFrame.value]!:actorFrames[frame.value]!]);
  const transforms=useRSXformBuffer(1,(transform)=>{
-  'worklet';const f=actorFrames[frame.value]!;const scale=1.62/f.height;const bob=reduced||attack.value>=0?0:Math.hypot(game.value.vx,game.value.vy)>.1?Math.abs(Math.sin(game.value.walked*11))*.045:Math.sin(clock.value*2)*.012;transform.set(scale,0,x.value-f.width*scale/2,y.value-f.height*scale+.12-bob);});
- const shadow=useDerivedValue(()=>({x:x.value-.36,y:y.value-.02,width:.72,height:.22}));
- const carry=useDerivedValue(()=>game.value.carrying?1:0);
+  'worklet';
+  if(knifeMode){const f=TOP_FRAMES[topFrame.value]!,scale=1.5/f.width,rot=heading.value+Math.PI/2,a=Math.cos(rot)*scale,b=Math.sin(rot)*scale,ax=f.width/2,ay=f.height/2;transform.set(a,b,x.value-ax*a+ay*b,y.value-ay*a-ax*b);return;}
+  const f=actorFrames[frame.value]!;const scale=1.62/f.height;const bob=reduced||attack.value>=0?0:Math.hypot(game.value.vx,game.value.vy)>.1?Math.abs(Math.sin(game.value.walked*11))*.045:Math.sin(clock.value*2)*.012;transform.set(scale,0,x.value-f.width*scale/2,y.value-f.height*scale+.12-bob);});
+ // Only the idle carry frame has a baked-in phone; running keeps its full leg cycle.
+ const carry=useDerivedValue(()=>(knifeMode?courierNeedsPhone(game.value.carrying,topFrame.value):game.value.carrying)?1:0);
  const target=useDerivedValue(()=>game.value.carrying||game.value.delivered>=(level.targets?.length??1)?0:1);
  const phonePosition=useDerivedValue(()=>[{translateX:targetPhone(game.value).x},{translateY:targetPhone(game.value).y}]);
  const phoneGlow=useDerivedValue(()=>reduced?.34:.22+.22*(.5+.5*Math.sin(clock.value*2.2)));
  const phoneHalo=useDerivedValue(()=>reduced?.85:.80+.12*(.5+.5*Math.sin(clock.value*2.2)));
  const phoneBob=useDerivedValue(()=>-.91+(reduced?0:Math.sin(clock.value*2.6)*.07));
- const carriedTransform=useDerivedValue(()=>[{translateX:x.value+.29},{translateY:y.value-.61},{rotate:.12}]);
+ const carriedTransform=useDerivedValue(()=>{if(!knifeMode)return [{translateX:x.value+.29},{translateY:y.value-.61},{rotate:.12}];const hand=courierPhoneHand(topFrame.value);return [{translateX:x.value},{translateY:y.value},{rotate:heading.value+Math.PI/2},{translateX:hand.x},{translateY:hand.y}];});
  // The burst survives the 0.2s movement impulse, without changing replay physics.
  const burst=useDerivedValue(()=>reduced?0:Math.max(0,1-(TUNING.dashCooldown-game.value.cooldown)/.48));
  const burstTransform=useDerivedValue(()=>[{translateX:x.value},{translateY:y.value-.05},{rotate:Math.atan2(game.value.dashY,game.value.dashX)}]);
@@ -89,6 +99,8 @@ export default memo(function GameCanvas({camera,size,height=size*20/12,input,gam
  const escapeOpacity=useDerivedValue(()=>!reduced&&appearance.trail==='escape-trail'&&game.value.carrying&&Math.hypot(game.value.vx,game.value.vy)>.1?.48:0);
  const escapeTransform=useDerivedValue(()=>[{translateX:x.value},{translateY:y.value},{rotate:Math.atan2(game.value.vy,game.value.vx)}]);
  const glow=useDerivedValue(()=>reduced?.12:.12+Math.sin(clock.value*2)*.035);
+ // red ring while any live guard has the courier in sight; pulses unless effects are reduced
+ const spotted=useDerivedValue(()=>{const s=game.value;if(s.status!=='playing'||!s.combat)return 0;for(let i=0;i<s.guards.length;i++){const g=s.guards[i]!;if(g.active&&g.hp>0&&g.seesPlayer)return reduced?.7:.5+.35*(.5+.5*Math.sin(clock.value*9));}return 0;});
  const extract=useDerivedValue(()=>game.value.extraction/TUNING.extractHold*level.exit.w);
  const pickupWidth=useDerivedValue(()=>game.value.pickup/TUNING.pickupHold*1.1);
  return <Canvas style={{width:size,height}} accessible={false} opaque>
@@ -106,7 +118,7 @@ export default memo(function GameCanvas({camera,size,height=size*20/12,input,gam
     <Group transform={useDerivedValue(()=>[{translateY:phoneBob.value}])}><Atlas image={phones} sprites={phoneSprites} transforms={phoneTransforms}/></Group>
     <RoundedRect x={0-.55} y={0+.65} width={pickupWidth} height={.07} r={.025} color="#d9fff0"/>
    </Group>
-   {level.patrols.map((_,index)=><GuardLayer key={index} game={game} alpha={alpha} index={index} clock={clock} reduced={reduced} droneSprite={droneSprite} guardSprite={guardSprite} heavySprite={heavySprite} wallOcclusion={wallOcclusion}/>)}
+   {level.patrols.map((_,index)=><GuardLayer key={index} game={game} alpha={alpha} index={index} clock={clock} reduced={reduced} droneSprite={droneSprite} guardSprite={guardSprite} heavySprite={heavySprite} bossSprite={bossSprite} wallOcclusion={wallOcclusion}/>)}
    {level.switches?.map((_,index)=><SwitchAsset key={index} game={game} level={level} index={index} clock={clock} reduced={reduced}/>)}
    {!level.combat&&<DecoyLayer game={game} input={input} reduced={reduced}/>}
    <Group transform={escapeTransform} opacity={escapeOpacity}>
@@ -119,9 +131,10 @@ export default memo(function GameCanvas({camera,size,height=size*20/12,input,gam
     <RoundedRect x={-1.5} y={.24} width={1.1} height={.07} r={.035} color="#90CBCB"/>
    </Group>
    <Circle cx={x} cy={y} r={footRadius} color="#CFE6E4" style="stroke" strokeWidth={.055} opacity={burst}/>
+   <Circle cx={x} cy={y} r={.82} color="#FF4A3D" style="stroke" strokeWidth={.07} opacity={spotted}/>
+   <Circle cx={x} cy={y} r={.96} color="#FF4A3D" style="stroke" strokeWidth={.025} opacity={spotted}/>
 
    <Group clip={courierClip}>
-   <Oval rect={shadow} color="#070c0d" opacity={.7}/>
    {sprite && <Atlas image={sprite} sprites={sprites} transforms={transforms}/>}
    <Group transform={carriedTransform} opacity={carry}>
     <Atlas image={phones} sprites={phoneSprites} transforms={carryTransforms}/>

@@ -73,3 +73,7 @@ design/visual-v2/credit-claim/preview.js
 verification/qa/*/videos/
 verification/qa/*/screenshots/
 .gstack/
+
+# Finder metadata and local marketing captures (video, not shipped)
+.DS_Store
+marketing/

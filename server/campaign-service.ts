@@ -1,34 +1,45 @@
-import {creditReward} from '../shared/store';
+import {creditReward,publishedCreditReward} from '../shared/store';
+import {CampaignLevelStore} from './campaign-levels';
+import {campaignLevelKey} from '../shared/campaign-levels';
 import {combatLevel} from '../src/game/combat-levels';
 import {campaignCreditTarget} from './campaign-credit-versions';
 import {createHash,randomUUID} from 'node:crypto';
 import type {Pool} from 'pg';
 import {CAMPAIGN_IDS,type MissionId} from '../src/game/level';
-import {compareRun,type CampaignPerformance,type CampaignSummary,type CampaignRank} from '../shared/economy';
+import {compareRun,type CampaignPerformance,type CampaignSummary,type CampaignRank,type CampaignBoard} from '../shared/economy';
 import {ServiceError} from './service';
 import {ReturnService} from './returns';
 import {transaction} from './db';
 import {replayInput} from './replay';
 import {verifyReplayInWorker} from './replay-runner';
-import rules from '../shared/rules-manifest.json';
 export class CampaignService{
- constructor(public pool:Pool,public returns:ReturnService){}
+ constructor(public pool:Pool,public returns:ReturnService,public levels=new CampaignLevelStore(pool)){}
  async owned(wallet:string){if(!(await this.pool.query("SELECT 1 FROM entitlements WHERE wallet=$1 AND sku='campaign'",[wallet])).rowCount)throw new ServiceError(403,'Campaign pass required.');}
- async submit(wallet:string,mission:MissionId,rulesHash:string,input:unknown){
-  if(!CAMPAIGN_IDS.includes(mission))throw new ServiceError(409,'Update the game before recording a campaign reward run.');
+ /** a claim names either one of the twelve authored missions or a published level number */
+ async submit(wallet:string,target:{mission:MissionId}|{level:number},rulesHash:string,input:unknown){
   const replay=replayInput.parse(input),hash=createHash('sha256').update(JSON.stringify(replay)).digest('hex');
-  const prior=await this.pool.query('SELECT result FROM campaign_runs WHERE wallet=$1 AND mission=$2 AND rules_hash=$3 AND replay_hash=$4',[wallet,mission,rulesHash,hash]);
+  let key:string,verify:()=>Promise<Awaited<ReturnType<typeof verifyReplayInWorker>>>,targetFor:()=>number|undefined,reward:(stars:number)=>number,storedHash=rulesHash;
+  if('level' in target){
+   // published levels verify against the frozen definition and the hash they were published under, never client input
+   const row=await this.levels.get(target.level);if(!row)throw new ServiceError(404,'Unknown campaign level. Update the game or wait for the next batch.');
+   key=campaignLevelKey(row.number);storedHash=row.rulesHash;verify=()=>verifyReplayInWorker(row.definition.mission,replay,{rulesHash:row.rulesHash,definition:row.definition});targetFor=()=>row.definition.targetSeconds;reward=stars=>publishedCreditReward(stars,!!row.boss);
+  }else{
+   const mission=target.mission;if(!CAMPAIGN_IDS.includes(mission))throw new ServiceError(409,'Update the game before recording a campaign reward run.');
+   key=mission;verify=()=>verifyReplayInWorker(mission,replay,{rulesHash});targetFor=()=>campaignCreditTarget(rulesHash,mission);reward=creditReward;
+  }
+  const mission=key;
+  const prior=await this.pool.query('SELECT result FROM campaign_runs WHERE wallet=$1 AND mission=$2 AND rules_hash=$3 AND replay_hash=$4',[wallet,mission,storedHash,hash]);
   // Even an older verified replay may not have a credit award yet.
 
-  const result=prior.rows[0]?.result??await verifyReplayInWorker(mission,replay,{rulesHash});
+  const result=prior.rows[0]?.result??await verify();
   if(result.status!=='won')throw new ServiceError(400,'A completed extraction is required. This run does not earn campaign credit.');
   let awardedCredits=0,creditBalance=0;
   await transaction(this.pool,async db=>{
    const locked=await db.query('SELECT credits FROM wallets WHERE address=$1 FOR UPDATE',[wallet]);creditBalance=Number(locked.rows[0].credits);
-   await db.query('INSERT INTO campaign_runs(id,wallet,mission,rules_hash,replay_hash,replay,result) VALUES($1,$2,$3,$4,$5,$6,$7) ON CONFLICT DO NOTHING',[randomUUID(),wallet,mission,rulesHash,hash,replay,result]);
+   await db.query('INSERT INTO campaign_runs(id,wallet,mission,rules_hash,replay_hash,replay,result) VALUES($1,$2,$3,$4,$5,$6,$7) ON CONFLICT DO NOTHING',[randomUUID(),wallet,mission,storedHash,hash,replay,result]);
    // Versioned thresholds preserve the previous release during the app rollout.
-   const targetSeconds=campaignCreditTarget(rulesHash,mission);
-   if(targetSeconds!==undefined){const stars=1+Number(result.battery>=60)+Number(result.ticks<=targetSeconds*30),old=await db.query('SELECT stars FROM campaign_credit_stars WHERE wallet=$1 AND mission=$2',[wallet,mission]),delta=creditReward(stars)-creditReward(old.rows[0]?.stars??0);
+   const targetSeconds=targetFor();
+   if(targetSeconds!==undefined){const stars=1+Number(result.battery>=60)+Number(result.ticks<=targetSeconds*30),old=await db.query('SELECT stars FROM campaign_credit_stars WHERE wallet=$1 AND mission=$2',[wallet,mission]),delta=reward(stars)-reward(old.rows[0]?.stars??0);
     if(delta>0){awardedCredits=delta;creditBalance+=delta;const b=await db.query('UPDATE wallets SET credits=credits+$2 WHERE address=$1 RETURNING credits',[wallet,delta]);await db.query('INSERT INTO campaign_credit_stars(wallet,mission,stars) VALUES($1,$2,$3) ON CONFLICT(wallet,mission) DO UPDATE SET stars=$3',[wallet,mission,stars]);await db.query('INSERT INTO credit_ledger(id,wallet,source,delta,balance_after) VALUES($1,$2,$3,$4,$5)',[randomUUID(),wallet,`mission:${mission}:stars:${stars}`,delta,b.rows[0].credits]);}
    }
   });
@@ -49,14 +60,18 @@ export class CampaignService{
    await this.returns.allocateInTransaction(db,row.rows[0].reservation_id,'success');
   });return this.summary(wallet);
  }
- async leaderboard():Promise<CampaignRank[]>{
-  // Aggregate in SQL before transferring results. Rank uses a single best replay
-  // for each mission; exact performance ties share the same displayed rank.
+ /** total points across every verified run, one best replay per level, any rules hash. the top fifty plus the
+  * caller's own row when it ranks lower; exact ties share a rank */
+ async leaderboard(wallet?:string):Promise<CampaignBoard>{
   const rows=await this.pool.query(`WITH best AS (
-    SELECT DISTINCT ON(wallet,mission) wallet,mission,result FROM campaign_runs WHERE rules_hash=$1
+    SELECT DISTINCT ON(wallet,mission) wallet,mission,result FROM campaign_runs WHERE result->>'status'='won'
     ORDER BY wallet,mission,(result->>'score')::int DESC,(result->>'ticks')::int ASC,(result->>'spotted')::boolean ASC,(result->>'battery')::int DESC,id
-   ), totals AS (SELECT wallet,count(*)::int AS cleared,sum((result->>'score')::int)::int AS score,sum((result->>'ticks')::int)::int AS ticks,sum(CASE WHEN (result->>'spotted')::boolean THEN 0 ELSE 1 END)::int AS clean,sum((result->>'battery')::int)::int AS battery FROM best GROUP BY wallet)
-   SELECT *,rank() OVER(ORDER BY cleared DESC,score DESC,ticks ASC,clean DESC,battery DESC)::int AS rank FROM totals ORDER BY cleared DESC,score DESC,ticks ASC,clean DESC,battery DESC,wallet LIMIT 50`,[rules.rulesHash]);
-  return rows.rows;
+   ), totals AS (SELECT wallet,count(*)::int AS cleared,sum((result->>'score')::int)::int AS score,sum((result->>'ticks')::int)::int AS ticks,sum(CASE WHEN (result->>'spotted')::boolean THEN 0 ELSE 1 END)::int AS clean,sum((result->>'battery')::int)::int AS battery FROM best GROUP BY wallet),
+   ranked AS (SELECT *,rank() OVER(ORDER BY score DESC,cleared DESC,ticks ASC,clean DESC,battery DESC)::int AS rank,count(*) OVER()::int AS participants FROM totals)
+   SELECT * FROM ranked WHERE rank<=50 OR wallet=$1 ORDER BY rank,wallet`,[wallet??'']);
+  const all=rows.rows as (CampaignRank&{participants:number})[],participants=all[0]?.participants??0;
+  const personal=wallet?all.find(r=>r.wallet===wallet)??null:null;
+  const strip=({participants:_p,...r}:CampaignRank&{participants:number}):CampaignRank=>r;
+  return {board:all.filter(r=>r.rank<=50).map(strip),personal:personal?strip(personal):null,participants};
  }
 }

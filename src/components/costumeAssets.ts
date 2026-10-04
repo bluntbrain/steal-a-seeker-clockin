@@ -31,5 +31,16 @@ const atlases={
  'archive-keeper':require('../../assets/costumes-v4/archive-keeper-atlas.webp'),
  'ghost-signal':require('../../assets/costumes-v4/ghost-signal-atlas.webp'),
 };
+// strict top-down sheets for play; costumes without their own sheet fall back to the default until generated
+const topdown:Partial<Record<string,number>>={
+ 'default':require('../../assets/courier-topdown-v2/default.webp'),
+ 'frost-runner':require('../../assets/courier-topdown-v2/frost-runner.webp'),
+ 'night-courier':require('../../assets/courier-topdown-v2/night-courier.webp'),
+ 'circuit-scout':require('../../assets/courier-topdown-v2/circuit-scout.webp'),
+ 'archive-keeper':require('../../assets/courier-topdown-v2/archive-keeper.webp'),
+ 'ghost-signal':require('../../assets/courier-topdown-v2/ghost-signal.webp'),
+};
+export const topdownAtlas=(id?:string)=>topdown[costumeFor(id).asset]??topdown.default!;
 export const costumePortrait=(id?:string)=>portraits[costumeFor(id).asset];
+export const bossPortrait=(boss:string)=>portraits[`solana-${boss}` as keyof typeof portraits];
 export const costumeAtlas=(id?:string)=>atlases[costumeFor(id).asset];

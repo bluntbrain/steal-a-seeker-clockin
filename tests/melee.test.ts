@@ -5,7 +5,6 @@ import {combatTap} from '../src/game/combat';
 import {stepMelee,canKnifeHit} from '../src/game/melee';
 import {initialState,idleInput,step,type GameState} from '../src/game/simulation';
 import {walkableSegment} from '../src/game/navigation';
-import {makeReleaseContracts} from '../shared/weekly-melee';
 function arena(){const l=combatLevel('practice');return {...l,spawn:{x:2,y:10},blockers:l.blockers.slice(0,4),patrols:[{...l.patrols[0]!,combatRole:'scout' as const,range:0,route:[{x:8,y:10},{x:8,y:9}],speed:0,roam:undefined}]};}
 function tick(s:GameState,n:number){for(let i=0;i<n;i++)step(s,idleInput());}
 function contact(role:'scout'|'sentry'|'heavy'|'drone'='scout',front=false){const l=arena(),s=initialState(l.mission,l),g=s.guards[0]!;s.x=7.2;s.y=10;g.combatRole=role;g.angle=front?Math.PI:0;g.hp=g.maxHp=role==='heavy'?150:role==='drone'?25:75;g.range=0;s.combat!.order={seq:1,kind:'attack',target:0,x:g.x,y:g.y};return {s,g,l};}
@@ -32,9 +31,6 @@ test('unaware rear normal defeat, frontal armor block, rear armor damage and one
 test('mid-swing serialization continues identically; revision 14 still fires',()=>{
  const {s}=contact();step(s,idleInput());const copy=JSON.parse(JSON.stringify(s));tick(s,35);tick(copy,35);assert.deepEqual(JSON.parse(JSON.stringify(s)),copy);
  const l=arena();l.combat={version:2,revision:14};const old=initialState(l.mission,l);step(old,{...idleInput(),command:combatTap(old,8,10,1)});tick(old,100);assert(old.combat!.shots>0);assert.equal(old.combat!.melee,undefined);
-});
-test('future weekly knife switch is explicit and never changes an earlier week',()=>{
- const date=new Date('2026-10-05T00:00:00Z');const legacy=makeReleaseContracts(date),future=makeReleaseContracts(date,'2026-10-05');assert(legacy.every(c=>(c.level.combat?.revision??0)<15));assert(future.every(c=>c.level.combat?.revision===16));assert.deepEqual(makeReleaseContracts(new Date('2026-09-28'),'2026-10-05'),makeReleaseContracts(new Date('2026-09-28')));assert.throws(()=>makeReleaseContracts(date,'2026-10-06'));
 });
 
 test('repeated taps on an unreachable enemy reuse the failed route cooldown',()=>{

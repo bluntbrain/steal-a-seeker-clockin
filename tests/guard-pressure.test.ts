@@ -10,7 +10,9 @@ import {campaignCreditTarget} from '../server/campaign-credit-versions';
 
 function arena(revision:10|11|12|13=13):LevelDefinition{
  const level=combatLevel('cone-lesson');
- return {...level,combat:{version:2,revision},spawn:{x:6,y:9},blockers:level.blockers.slice(0,4),patrols:[{...level.patrols[0]!,speed:0,roam:undefined,route:[{x:6,y:6},{x:6,y:7}]}]};
+ // the arena pins the revision 16 sight values this engine was tuned with; authored levels now run revision 17
+ const p=guardPressure({...level,combat:{version:2,revision:16}});
+ return {...level,combat:{version:2,revision},spawn:{x:6,y:9},blockers:level.blockers.slice(0,4),patrols:[{...level.patrols[0]!,speed:0,roam:undefined,route:[{x:6,y:6},{x:6,y:7}],range:p.vision*.8,halfAngle:95*Math.PI/360,spotSeconds:p.spot}]};
 }
 function advance(state:GameState,level:LevelDefinition,count:number,onShot:(damage:number)=>void=()=>{}){
  for(let i=0;i<count;i++){state.ticks++;updateHeistGuards(state,1/30,level,(_s,_p,_a,_owner,damage)=>onShot(damage));}
@@ -63,7 +65,7 @@ test('the faster drone report remains interruptible with the same countdown used
  assert.equal(g.heist!.charge,0);assert(!s.combat!.hunt);
 });
 test('campaign pursuit is grounded while alertness and opening pickup responses remain',()=>{
- for(const id of CAMPAIGN_IDS){const l=combatLevel(id);assert.equal(l.combat?.revision,16);
+ for(const id of CAMPAIGN_IDS){const l=combatLevel(id);assert.equal(l.combat?.revision,17);
   for(const g of l.patrols)assert(g.pursuitSpeed!>=2.4&&g.pursuitSpeed!<=3.65,'Pursuit stays within a believable pace');
   const current=guardPressure(l),previous=guardPressure({...l,combat:{version:2,revision:11}});
   assert(current.pursuit<previous.pursuit*.72);
@@ -76,8 +78,10 @@ test('all campaign enemies, including pickup reinforcements, use their role sigh
  for(const id of CAMPAIGN_IDS){const l=combatLevel(id),base=guardPressure(l).vision;
   for(const g of l.patrols){
    const drone=g.combatRole==='drone',heavy=g.combatRole==='heavy'||g.combatRole==='warden';
-   assert.equal(g.range,base*(drone?1:heavy?.6:.8));
-   assert.equal(g.halfAngle,drone?Math.PI/3:(heavy?75:95)*Math.PI/360);
+   // revision 17: longer, narrower cones with a slow spot time
+   assert.equal(g.range,base*(drone?1.1:heavy?.75:1));
+   assert.equal(g.halfAngle,drone?Math.PI*110/360:(heavy?60:70)*Math.PI/360);
+   assert(g.spotSeconds>=.449&&g.spotSeconds<=.6);
   }
  }
 });
@@ -85,8 +89,8 @@ test('Heavy has a readable front cone and a blind flank before it is alerted',()
  const level=combatLevel('narrow-crossing'),heavy=level.patrols.find(g=>g.combatRole==='heavy')!;
  const l={...level,blockers:[],patrols:[{...heavy,route:[{x:6,y:6},{x:7,y:6}]}]},g=initialState(l.mission,l).guards[0]!;
  assert(sees(g,6+g.range-.01,6,l));assert(!sees(g,6+g.range+.01,6,l));
- assert(sees(g,6+Math.cos(.63)*2,6+Math.sin(.63)*2,l));
- assert(!sees(g,6+Math.cos(.68)*2,6+Math.sin(.68)*2,l));
+ assert(sees(g,6+Math.cos(.50)*2,6+Math.sin(.50)*2,l));
+ assert(!sees(g,6+Math.cos(.55)*2,6+Math.sin(.55)*2,l),'Outside the 60-degree heavy cone is safe');
  assert(!sees(g,5,6,l));
 });
 test('codes 29–32 keep their campaign reward thresholds after role-specific vision',()=>{

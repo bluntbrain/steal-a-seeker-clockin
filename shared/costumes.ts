@@ -5,7 +5,7 @@ export const COSTUMES = [
  {id:'night-courier',asset:'night-courier',name:'Night Courier',description:'Charcoal hood and dark backpack.',unlock:'credits'},
  {id:'circuit-scout',asset:'circuit-scout',name:'Circuit Scout',description:'Mint circuit stripes on charcoal.',unlock:'credits'},
  {id:'archive-keeper',asset:'archive-keeper',name:'Archive Keeper',description:'Cream jacket. Tan satchel straps.',unlock:'credits'},
- {id:'ghost-courier',asset:'ghost-signal',name:'Ghost Signal',description:'Glass-grey hood. Glowing mint pack.',unlock:'weekly'},
+ {id:'ghost-courier',asset:'ghost-signal',name:'Ghost Signal',description:'Glass-grey hood. Glowing mint pack.',unlock:'pass'},
  {id:'solana-toly',asset:'solana-toly',name:'Toly',description:'Short hair, mint pack. Ready for extraction.',unlock:'credits'},
  {id:'solana-mert',asset:'solana-mert',name:'Mert',description:'Black beard. Black suit. Quiet escape.',unlock:'credits'},
  {id:'solana-chase',asset:'solana-chase',name:'Chase',description:'Wavy hair and mint-trimmed field gear.',unlock:'credits'},

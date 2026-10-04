@@ -1,5 +1,5 @@
 import React from 'react';
-import {Circle,Group,Image,Oval,Path,DashPathEffect,RoundedRect,usePathValue,type SkImage} from '@shopify/react-native-skia';
+import {Circle,Group,Image,Path,DashPathEffect,RoundedRect,usePathValue,type SkImage} from '@shopify/react-native-skia';
 import {useAnimatedReaction,useSharedValue,useDerivedValue,type SharedValue} from 'react-native-reanimated';
 import {wallActorClip} from '../art/wall-depth';
 import type {WallOcclusion} from '../art/wall-depth-art';
@@ -9,11 +9,11 @@ import {ENEMY_ART_SCALE} from './enemy-presentation';
 import {stateLevel} from '../game/simulation';
 import {sightDistance} from '../game/guards';
 import type {GameState} from '../game/simulation';
-type Props={wallOcclusion?:WallOcclusion;game:SharedValue<GameState>;alpha:SharedValue<number>;index:number;clock:SharedValue<number>;reduced?:boolean;droneSprite:SkImage|null;guardSprite:SkImage|null;heavySprite:SkImage|null};
-export default function GuardLayer({game,alpha,index,clock,reduced=false,droneSprite,guardSprite,heavySprite,wallOcclusion}:Props){
- const kind=stateLevel(game.value).patrols[index]?.kind;
+type Props={wallOcclusion?:WallOcclusion;game:SharedValue<GameState>;alpha:SharedValue<number>;index:number;clock:SharedValue<number>;reduced?:boolean;droneSprite:SkImage|null;guardSprite:SkImage|null;heavySprite:SkImage|null;bossSprite?:SkImage|null};
+export default function GuardLayer({game,alpha,index,clock,reduced=false,droneSprite,guardSprite,heavySprite,bossSprite=null,wallOcclusion}:Props){
+ const kind=stateLevel(game.value).patrols[index]?.kind,boss=!!stateLevel(game.value).patrols[index]?.boss&&!!bossSprite;
  const role=game.value.guards[index]?.combatRole,armor=role==='heavy'||role==='warden',drone=role==='drone'||!game.value.combat&&kind==='scanner';
- const artScale=drone?ENEMY_ART_SCALE.drone:armor||kind==='warden'?ENEMY_ART_SCALE.heavy:ENEMY_ART_SCALE.guard;
+ const artScale=drone?ENEMY_ART_SCALE.drone:boss?ENEMY_ART_SCALE.heavy*1.12:armor||kind==='warden'?ENEMY_ART_SCALE.heavy:ENEMY_ART_SCALE.guard;
  const wallClip=useDerivedValue(()=>{const g=game.value.guards[index];return wallActorClip(wallOcclusion,g?g.py+(g.y-g.py)*alpha.value:0,drone||!g);});
  const barWidth=.9*artScale,barLift=(drone?.90:armor||kind==='warden'?.75:.56)*artScale+.14;
  const death=useSharedValue({started:-100,x:0,y:0,angle:0,dx:0,dy:0});
@@ -21,10 +21,13 @@ export default function GuardLayer({game,alpha,index,clock,reduced=false,droneSp
   if(!next.dead){if(death.value.started!==-100)death.value={...death.value,started:-100};return;}
   // Do not replay old deaths when restoring a scene or returning to its canvas.
   if(previous&&!previous.dead&&next.tick>=previous.tick){const g=game.value.guards[index]!;const dx=g.x-game.value.x,dy=g.y-game.value.y,d=Math.hypot(dx,dy)||1;death.value={started:clock.value,x:g.x,y:g.y,angle:g.angle,dx:dx/d,dy:dy/d};}
+  // a scene restored with a dead guard shows the body where it fell, without the fall animation
+  else if(death.value.started===-100){const g=game.value.guards[index]!;death.value={started:-1000,x:g.x,y:g.y,angle:g.angle,dx:0,dy:0};}
  });
  const fx=useDerivedValue(()=>defeatPose(clock.value-death.value.started,armor,drone,reduced));
  const live=useDerivedValue(()=>{const g=game.value.guards[index];return g&&(!game.value.combat||g.hp>0&&g.active)?1:0;});
- const visible=useDerivedValue(()=>live.value?1:fx.value.opacity);
+ // in combat the body stays on the floor after the fall so other guards can find it
+ const visible=useDerivedValue(()=>live.value?1:Math.max(fx.value.opacity,game.value.combat?.82:0));
  const pose=useDerivedValue(()=>{
   const g=game.value.guards[index];if(!g)return [];
   if(!live.value){const d=death.value,f=fx.value;return [{translateX:d.x+d.dx*f.recoil},{translateY:d.y+d.dy*f.recoil},{rotate:d.angle+f.rotation*(index%2?1:-1)},{scaleX:f.scaleX},{scaleY:f.scaleY}];}
@@ -54,8 +57,10 @@ export default function GuardLayer({game,alpha,index,clock,reduced=false,droneSp
   }
   p.close();
  });
- const alertOpacity=useDerivedValue(()=>{const g=game.value.guards[index];return g?.brain&&g.active&&g.hp>0&&(g.seesPlayer&&g.exposure>=1||g.mode==='investigate'||g.mode==='search')?1:0;});
- const alertColor=useDerivedValue(()=>game.value.guards[index]?.seesPlayer?'#FF886F':'#E1C381');
+ // "?" while the guard is turning toward a glimpse or walking to a noise, "!" once the courier is confirmed or the guard hunts
+ const exclaimOpacity=useDerivedValue(()=>{const g=game.value.guards[index];return g?.brain&&g.active&&g.hp>0&&(g.seesPlayer&&g.exposure>=1||!!g.heist?.hunting)?1:0;});
+ const questionOpacity=useDerivedValue(()=>{const g=game.value.guards[index];if(!g?.brain||!g.active||g.hp<=0||g.seesPlayer&&g.exposure>=1||g.heist?.hunting)return 0;return g.seesPlayer&&g.exposure>0||g.mode==='investigate'||g.mode==='search'||!!(g.heist as {suspicious?:boolean}|undefined)?.suspicious?1:0;});
+ const questionMark=usePathValue(p=>{'worklet';const cx=barWidth/2,cy=-.33;p.moveTo(cx-.085,cy-.07);p.quadTo(cx-.085,cy-.17,cx,cy-.17);p.quadTo(cx+.09,cy-.17,cx+.09,cy-.08);p.quadTo(cx+.09,cy-.01,cx+.01,cy);p.lineTo(cx,cy+.035);});
  const lurePath=usePathValue(p=>{'worklet';const g=game.value.guards[index];if(!g||!g.active||g.seesPlayer||game.value.decoy.ttl<=0||g.lureId!==game.value.decoy.id||g.mode!=='investigate')return;p.moveTo(g.x,g.y);for(let i=g.pathIndex;i<g.path.length;i++)p.lineTo(g.path[i]!.x,g.path[i]!.y);});
  const listening=useDerivedValue(()=>{const g=game.value.guards[index];return g&&g.active&&!g.seesPlayer&&game.value.decoy.ttl>0&&g.lureId===game.value.decoy.id&&(g.mode==='investigate'||g.mode==='search')?1:0;});
  return <Group>
@@ -63,15 +68,14 @@ export default function GuardLayer({game,alpha,index,clock,reduced=false,droneSp
   <Path path={lurePath} color="#CFE6E4" style="stroke" strokeWidth={.035} opacity={.65}><DashPathEffect intervals={[.12,.12]}/></Path><Path path={cone} color={color} opacity={opacity}/>
   <Path path={cone} color={color} opacity={opacity} style="stroke" strokeWidth={.025}/>
   <Path path={aim} color="#FF886F" style="stroke" strokeWidth={.045}><DashPathEffect intervals={[.13,.08]}/></Path><Group clip={wallClip}><Group transform={pose}><Group transform={[{scale:artScale}]}>
-   <Oval x={-.42} y={-.39} width={.84} height={.84} color="#06080B" opacity={.65}/>
-   {drone?<QuadDrone game={game} index={index} clock={clock} reduced={reduced} sprite={droneSprite}/>:<Image image={armor||kind==='warden'?heavySprite:guardSprite} x={armor||kind==='warden'?-.59:-.52} y={armor||kind==='warden'?-.59:-.52} width={armor||kind==='warden'?1.18:1.04} height={armor||kind==='warden'?1.18:1.04} fit="contain"/>}
+   {drone?<QuadDrone game={game} index={index} clock={clock} reduced={reduced} sprite={droneSprite}/>:<Image image={boss?bossSprite:armor||kind==='warden'?heavySprite:guardSprite} x={boss||armor||kind==='warden'?-.59:-.52} y={boss||armor||kind==='warden'?-.59:-.52} width={boss||armor||kind==='warden'?1.18:1.04} height={boss||armor||kind==='warden'?1.18:1.04} fit="contain"/>}
    <Circle cx={0} cy={0} r={.43} color="#F2FFDA" opacity={hitFlash}/>
    {armor&&(game.value.definition?.combat?.revision??0)>=10&&<>
     <Path path="M .34 -.49 Q .78 0 .34 .49" color="#FFE2A4" style="stroke" strokeWidth={.09} opacity={armorFront}/>
     <Circle cx={-.39} cy={0} r={.3} color="#C8FFE2" opacity={armorRear}/>
    </>}
   </Group></Group></Group>
-  <Group transform={bar} opacity={live}><Group opacity={alertOpacity}><Circle cx={barWidth/2} cy={-.32} r={.19} color="#14221F"/><RoundedRect x={barWidth/2-.025} y={-.45} width={.05} height={.16} r={.02} color={alertColor}/><Circle cx={barWidth/2} cy={-.22} r={.03} color={alertColor}/></Group><Circle cx={barWidth/2} cy={-.18} r={.13} color="#CFE6E4" opacity={listening}/><Circle cx={barWidth/2} cy={-.18} r={.065} color="#243F48" opacity={listening}/>
+  <Group transform={bar} opacity={live}><Group opacity={exclaimOpacity}><Circle cx={barWidth/2} cy={-.32} r={.19} color="#14221F"/><RoundedRect x={barWidth/2-.03} y={-.45} width={.06} height={.16} r={.025} color="#FF6B5A"/><Circle cx={barWidth/2} cy={-.21} r={.035} color="#FF6B5A"/></Group><Group opacity={questionOpacity}><Circle cx={barWidth/2} cy={-.32} r={.19} color="#14221F"/><Path path={questionMark} color="#F2C96B" style="stroke" strokeWidth={.045} strokeCap="round" strokeJoin="round"/><Circle cx={barWidth/2} cy={-.22} r={.032} color="#F2C96B"/></Group><Circle cx={barWidth/2} cy={-.18} r={.13} color="#CFE6E4" opacity={listening}/><Circle cx={barWidth/2} cy={-.18} r={.065} color="#243F48" opacity={listening}/>
    {!game.value.combat&&<RoundedRect x={0} y={0} width={barWidth} height={.10} r={.04} color="#152023"/>}
    {!game.value.combat&&<RoundedRect x={0} y={0} width={width} height={.10} r={.04} color="#ff8169"/>}
   </Group>

@@ -22,3 +22,7 @@ Standing, blocked movement, pause, tutorial instructions, menus, mute, backgroun
 - Browser: started First Pickup, moved across the bottom lane and paused. No warning/error logs during the check.
 - WAV decoding: both cues are non-silent and peak at -6 dB without clipping.
 - Web export includes both WAV assets. Android package built separately; on-device listening still needs a phone test.
+
+## 2026-10-04 short-tap and carrying fix
+
+Short real moves now trigger their first contact after 0.04 world units; small travel increments accumulate rather than being discarded. The normal 0.72-unit stride and 120ms rate limit remain. The top-down visual gait uses this same stride distance both before and after phone pickup. Ordinary stopping allows an earned 240ms sample to finish; pause, mute, run reset and unmount still cancel playback and pending seeks. Quiet/alert/alarm gains are now 0.65/0.52/0.58 times user volume so steps remain audible under music. Existing generated samples are reused.
