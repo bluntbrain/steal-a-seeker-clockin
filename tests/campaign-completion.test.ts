@@ -43,7 +43,7 @@ test('the level map lists the twelve authored missions then every bundled level 
  // a missing batch stops the map instead of showing unreachable nodes
  assert.equal(campaignEntries(BUNDLED_LEVELS.filter(l=>l.number!==20)).length,12+7);
  // the bundle regenerates bit for bit from its recipes, so the server rows and the app agree
- for(const n of [13,15,47,100]){const row=BUNDLED_LEVELS.find(l=>l.number===n)!;assert.deepEqual(buildCampaignLevel(makeCampaignRecipe(n)),row.definition);}
+ for(const n of [13,15,47,100]){const row=BUNDLED_LEVELS.find(l=>l.number===n)!;assert.deepEqual(buildCampaignLevel((row as typeof row&{recipe:Parameters<typeof buildCampaignLevel>[0]}).recipe),row.definition);}
  let p=freshProgress();assert(entryUnlocked(p,entries,0));assert(!entryUnlocked(p,entries,12));assert.equal(nextEntry(entries,'last-vault')!.key,'campaign:13');assert.equal(nextEntry(entries,entries[entries.length-1]!.key),undefined);
  for(const id of CAMPAIGN_IDS){const s=initialState(id);s.status='won';p=recordWin(p,s);}
  assert(entryUnlocked(p,entries,12));assert.equal(firstOpenEntry(p,entries).key,'campaign:13');assert.equal(authoredEntry('practice').number,1);

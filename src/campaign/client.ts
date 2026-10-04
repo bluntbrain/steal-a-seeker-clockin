@@ -8,7 +8,7 @@ import {readSave,writeSave} from '../progress/storage';
 import rules from '../../shared/rules-manifest.json';
 import {campaignLevelKey} from '../../shared/campaign-levels';
 import {BUNDLED_LEVELS,isPublishedLevel,type PublishedLevel} from './levels';
-export type CampaignTarget={mission:MissionId}|{level:number};
+export type CampaignTarget={mission:MissionId}|{level:number;rulesHash?:string};
 type Pending={mission?:MissionId;level?:number;rulesHash:string;replay:Replay};
 export const pendingKey=(item:Pending)=>item.level!==undefined?campaignLevelKey(item.level):item.mission!;
 const key=(wallet:string)=>`seeker.campaign.outbox.${NETWORK_NAME}.${wallet}`;
@@ -17,7 +17,7 @@ const outbox=createOutbox<Pending,CampaignSummary>({
  write:(wallet,items)=>writeSave(key(wallet),JSON.stringify(items)),
  send:(token,item)=>api<CampaignSummary>('/campaign/runs',{token,body:item}),
 });
-const pending=(target:CampaignTarget,replay:Replay):Pending=>({...target,rulesHash:rules.rulesHash,replay});
+const pending=(target:CampaignTarget,replay:Replay):Pending=>({...target,rulesHash:'level' in target?(target.rulesHash??rules.rulesHash):rules.rulesHash,replay});
 export const campaignApi={summary:(token:string)=>api<CampaignSummary>('/campaign',{token}),board:(token?:string)=>api<CampaignBoard>('/campaign/leaderboard',token?{token}:{}),claim:(token:string)=>api<CampaignSummary>('/campaign/claim',{token,body:{}})};
 export async function enqueue(wallet:string,target:CampaignTarget,replay:Replay){await outbox.enqueue(wallet,pending(target,replay));}
 export async function submitCampaignRun(wallet:string,token:string,target:CampaignTarget,replay:Replay){return outbox.submit(wallet,token,pending(target,replay));}

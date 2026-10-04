@@ -155,6 +155,12 @@ export function stepCombat(s:GameState,input:Input,dt=TUNING.step){
  if(order?.kind==='attack'){
   const g=s.guards[order.target];if(!g||!g.active||g.hp<=0)clearOrder(c);
   else if(knifeCombat(level)){
+   // Revision 18: keep closing the gap during wind-up. A patrol must not walk out
+   // of every swing simply because the courier freezes for four ticks.
+   if((level.combat?.revision??0)>=18&&c.melee&&!c.melee.resolved){
+    const dx=g.x-s.x,dy=g.y-s.y,d=Math.hypot(dx,dy),stand=knifeReach(g)*.78;
+    if(d>stand&&walkableSegment(s,g,level))walkActor(s,{x:g.x-dx/d*stand,y:g.y-dy/d*stand},(s.carrying?3.15:4.1)*courierSpeedMultiplier(level),dt,level);
+   }
    stepMelee(s,level);
    if(c.order&&(!c.melee||c.melee.resolved&&s.ticks>=c.melee.until)&&!canKnifeHit(s,g,level)){
     const plan=c.attackPlan;if(!plan||s.ticks>=plan.nextTick&&(c.pathIndex>=c.path.length||Math.hypot(g.x-plan.x,g.y-plan.y)>.35)){

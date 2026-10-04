@@ -10,6 +10,7 @@ const roamingTargets=[100,75,75,75,90,90,90,125,90,100,100,100];
 export function campaignCreditTarget(hash:string,mission:MissionId):number|undefined{
  // Preserve the pre-targeting campaign rewards during rollout.
  if(hash==='a44303bf08233f54f9edc45d156f1d9f7400ab6a00f982dd1355b94cb1a1c26a'||hash==='6def64a8028a9aacdd926441f15e07135318a88609042d9a17a635b94367d354')return [100,65,65,80,80,80,80,115,95,95,95,95][CAMPAIGN_IDS.indexOf(mission)];
+ if(hash==='9da2c067e23429d53a8b085cd3df168f7d2be3cb31902116dae1d7b41da61468')return [100,65,65,80,80,80,80,115,95,95,95,95][CAMPAIGN_IDS.indexOf(mission)];
  if(hash===rules.rulesHash)return combatLevel(mission).targetSeconds;
  // Code 36 (revision 16 guards) keeps its thresholds while the revision 17 campaign rolls out.
  if(hash==='dccdef3f350858895875bb13f786e3e40cbcaa55ce3c91c9acb1f11e8b3da71b')return [100,65,65,80,80,80,80,115,95,95,95,95][CAMPAIGN_IDS.indexOf(mission)];

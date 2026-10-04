@@ -1,0 +1,8 @@
+const sharp=require('sharp'),fs=require('fs'),path=require('path'),crypto=require('crypto');
+const root=path.resolve(__dirname,'../assets/boss-motion-v2');
+(async()=>{const manifest={provider:'OpenAI image generation',cell:256,columns:4,rows:2,frames:{walk:[0,1,2,3],entrance:[4,5,6,7]},facing:'walk +X, entrance viewer',characters:[]};
+for(const name of ['toly','mert','chase','lily','vibhu','akshay','beeman']){const source=path.join(root,'source',name+'.png'),m=await sharp(source).metadata(),parts=[];
+const alpha=await sharp(source).ensureAlpha().extractChannel(3).raw().toBuffer();let split=Math.floor(m.height/2),best=Infinity;for(let y=Math.floor(m.height*.36);y<Math.floor(m.height*.58);y++){let occupied=0;for(let x=0;x<m.width;x++)if(alpha[y*m.width+x]>20)occupied++;const score=occupied*10000+Math.abs(y-m.height/2);if(score<best){best=score;split=y;}}
+for(let i=0;i<8;i++){const left=Math.round(i%4*m.width/4),top=i<4?0:split,width=Math.round((i%4+1)*m.width/4)-left,height=(i<4?split:m.height)-top;parts.push({input:await sharp(source).extract({left,top,width,height}).resize(240,240,{fit:'contain',background:'#00000000'}).extend({top:8,bottom:8,left:8,right:8,background:'#00000000'}).png().toBuffer(),left:i%4*256,top:Math.floor(i/4)*256});}
+const file=name+'.webp',output=path.join(root,file);await sharp({create:{width:1024,height:512,channels:4,background:'#00000000'}}).composite(parts).webp({lossless:true}).toFile(output);manifest.characters.push({name,file,bytes:fs.statSync(output).size,sha256:crypto.createHash('sha256').update(fs.readFileSync(output)).digest('hex')});}
+fs.writeFileSync(path.join(root,'manifest.json'),JSON.stringify(manifest,null,2)+'\n');})();

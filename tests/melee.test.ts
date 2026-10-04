@@ -44,3 +44,11 @@ test('optimized contact navigation preserves legacy collision samples across cam
  const l=arena();l.blockers.push({x:4,y:4,w:1,h:9,kind:'wall'},{x:7,y:13,w:3,h:.3,kind:'crate'});const old={...l,combat:{version:2 as const,revision:14 as const}};
  for(let i=0;i<800;i++){const a={x:(i*17%115)/10+.2,y:(i*31%195)/10+.2},b={x:(i*47%115)/10+.2,y:(i*13%195)/10+.2};assert.equal(walkableSegment(a,b,l),walkableSegment(a,b,old));}
 });
+
+test('revision 18 catches a moving patrol during the wind-up without teleporting or striking through walls',()=>{
+ const l=arena();l.combat={version:2,revision:18};l.patrols[0]!.route=[{x:4,y:10},{x:10,y:10}];l.patrols[0]!.speed=1.6;l.patrols[0]!.pauseSeconds=0;
+ const s=initialState(l.mission,l);s.x=s.px=3.12;s.y=s.py=10;s.guards[0]!.angle=0;
+ step(s,{...idleInput(),command:combatTap(s,4,10,1)});
+ for(let i=0;i<70&&s.guards[0]!.hp>0;i++){const before={x:s.x,y:s.y};step(s,idleInput());assert(Math.hypot(s.x-before.x,s.y-before.y)<=4.1/30+.0001);assert(walkableSegment(before,s,l));}
+ assert(s.combat!.melee!.hits>0);assert.equal(s.guards[0]!.hp,0);assert(s.combat!.melee!.swings<=2);
+});

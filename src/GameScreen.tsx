@@ -1,3 +1,4 @@
+import BossEntrance from './components/BossEntrance';
 import LaunchSplash from './components/LaunchSplash';
 import {exitWindowSeconds} from './controls/exit-window';
 import TutorialHand from './components/TutorialHand';
@@ -9,7 +10,7 @@ import {publishedLevels} from './campaign/client';
 import {HapticPressable as Pressable} from './feedback/HapticPressable';
 import EconomyProvider,{useEconomy} from './commerce/EconomyProvider';
 import CreditBalance from './components/CreditBalance';
-import {localTestMission} from './playtest/mission';
+import {localTestMission,localTestEntry} from './playtest/mission';
 import {isDuplicateTap,tapReady,TAP_INTERVAL_MS,type PendingTap} from './controls/tapQueue';
 import {assistedCombatTap} from './controls/tapDestination';
 import {encounterHint} from './controls/encounterHint';
@@ -89,7 +90,7 @@ export function Game({onSnapshot}:{onSnapshot?:(state:GameState)=>void}){
  const [introMission,setIntroMission]=useState<CampaignEntry|null>(null);
  const [rewardsOpen,setRewardsOpen]=useState(false),[returnHome,setReturnHome]=useState(false);
  const closeOverlay=(close:(open:boolean)=>void)=>{close(false);if(returnHome){setHideoutOpen(true);setReturnHome(false);}};
- const startMission=testMission??'practice';
+ const startMission=testMission??'practice',startEntry=localTestEntry()??authoredEntry(startMission);
  const account=useAccount(),economy=useEconomy(),{settings}=useSettings();
  const haptic=useHaptics();
  const settingsRef=useRef(settings);settingsRef.current=settings;
@@ -98,14 +99,16 @@ export function Game({onSnapshot}:{onSnapshot?:(state:GameState)=>void}){
  const homeFirst=!testMission&&!trial.active;
  const [missionMapRequest,setMissionMapRequest]=useState(0);
  const [walletOpen,setWalletOpen]=useState(false),[mapOpen,setMapOpen]=useState(false),[hideoutOpen,setHideoutOpen]=useState(homeFirst),[settingsOpen,setSettingsOpen]=useState(false);
- const initial=useMemo(()=>initialState(startMission,authoredEntry(startMission).definition),[]);
+ const initial=useMemo(()=>initialState(startMission,startEntry.definition),[]);
  const sceneEpoch=useRef(0),[sceneVersion,setSceneVersion]=useState(0),[sceneLoading,setSceneLoading]=useState(true),[sceneError,setSceneError]=useState('');
+ const [bossEntrance,setBossEntrance]=useState(!!startEntry.boss);
+ const finishBossEntrance=useCallback(()=>setBossEntrance(false),[]);
  const sceneReady=useSharedValue(false),simulationEpoch=useSharedValue(0),focusProgress=useSharedValue(1);
  const pendingTap=useSharedValue<PendingTap|null>(null),previousTap=useSharedValue<PendingTap|null>(null),tapElapsed=useSharedValue(TAP_INTERVAL_MS);
  const recording=useSharedValue<ReplayChunk[]>([]),[completedReplay,setCompletedReplay]=useState<Replay>();
  const game=useSharedValue(initial),input=useSharedValue(idleInput()),alpha=useSharedValue(0),clock=useSharedValue(0),accumulator=useSharedValue(0),suspended=useSharedValue(homeFirst);
  const samples=useSharedValue<number[]>(Array.from({length:120},()=>0)),sampleIndex=useSharedValue(0),sampleCount=useSharedValue(0),reportClock=useSharedValue(0),hudClock=useSharedValue(0),frameTotal=useSharedValue(0),slowTotal=useSharedValue(0);
- const [hud,setHud]=useState<GameState>(()=>JSON.parse(JSON.stringify(initial))),[stats,setStats]=useState<Stats>(zeroStats),[paused,setPaused]=useState(homeFirst),[details,setDetails]=useState(false),[mission,setMission]=useState<MissionId>(startMission),[entry,setEntry]=useState<CampaignEntry>(()=>authoredEntry(startMission));
+ const [hud,setHud]=useState<GameState>(()=>JSON.parse(JSON.stringify(initial))),[stats,setStats]=useState<Stats>(zeroStats),[paused,setPaused]=useState(homeFirst),[details,setDetails]=useState(false),[mission,setMission]=useState<MissionId>(startMission),[entry,setEntry]=useState<CampaignEntry>(()=>startEntry);
  const entryRef=useRef(entry);entryRef.current=entry;
  useRunTelemetry(hud,paused,trial.active?'trial':'campaign',stats);
  const coach=useCoach(hud,!combatMode);
@@ -130,7 +133,7 @@ export function Game({onSnapshot}:{onSnapshot?:(state:GameState)=>void}){
  const damagePulse=useSharedValue(0);
  const showDamage=useCallback(()=>{damagePulse.value=settingsRef.current.reducedEffects?.45:1;damagePulse.value=withTiming(0,{duration:settingsRef.current.reducedEffects?160:280});},[damagePulse,haptic]);
  const showGameplayHeader=paused||hud.status!=='playing';
- const gameplayVisible=renderGameSurface&&!introMission&&!sceneLoading&&!paused&&!hideoutOpen&&!walletOpen&&!mapOpen&&!settingsOpen&&!rewardsOpen;
+ const gameplayVisible=renderGameSurface&&!bossEntrance&&!introMission&&!sceneLoading&&!paused&&!hideoutOpen&&!walletOpen&&!mapOpen&&!settingsOpen&&!rewardsOpen;
  useLootAudio(game,clock,settings.sound&&gameplayVisible,settings.volume);
  useCombatAudio(hud,settings.sound&&gameplayVisible,settings.volume,showDamage,gameplayVisible);
  useEffect(()=>{if(!gameplayVisible||hud.ticks===0)damagePulse.value=0;},[gameplayVisible,hud.ticks===0,damagePulse]);
@@ -248,7 +251,7 @@ export function Game({onSnapshot}:{onSnapshot?:(state:GameState)=>void}){
   input.value=idleInput();game.modify(s=>{'worklet';s.vx=0;s.vy=0;s.px=s.x;s.py=s.y;s.dashSeen=0;s.toolSeen=0;return s;});
   setPaused(value);
  },[suspended,input,game,pendingTap,previousTap]);
- const restart=useCallback((next:CampaignEntry=entryRef.current)=>{if(trial.active){trial.finish();return;}sceneReady.value=false;suspended.value=true;pendingTap.value=null;previousTap.value=null;tapElapsed.value=TAP_INTERVAL_MS;simulationEpoch.value=++sceneEpoch.current;setSceneVersion(sceneEpoch.current);setSceneLoading(true);setSceneError('');recording.value=[];setCompletedReplay(undefined);rewardEpoch.current++;setEarnedNotice('');setCreditReward({amount:null});setRewardClaimed(false);setAutoClaim(false);setRewardRetry(0);connectClaimPending.current=false;recorded.current=false;setMission(next.mission);setEntry(next);levelRef.current=next.definition;const fresh=(next.key==='practice'?guide.start('practice'):null)??initialState(next.mission,combatMode?next.definition:undefined);game.value=fresh;input.value=idleInput();accumulator.value=0;alpha.value=0;clock.value=0;sampleIndex.value=0;sampleCount.value=0;frameTotal.value=0;slowTotal.value=0;reportClock.value=0;hudClock.value=0;setHud(fresh);latest.current=fresh;suspended.value=false;setPaused(false);setStats(zeroStats);},[game,input,accumulator,alpha,clock,samples,frameTotal,slowTotal,reportClock,hudClock,suspended,recording,trial,guide.start,combatMode,sceneReady,pendingTap,previousTap,tapElapsed,simulationEpoch]);
+ const restart=useCallback((next:CampaignEntry=entryRef.current)=>{if(trial.active){trial.finish();return;}sceneReady.value=false;suspended.value=true;pendingTap.value=null;previousTap.value=null;tapElapsed.value=TAP_INTERVAL_MS;simulationEpoch.value=++sceneEpoch.current;setSceneVersion(sceneEpoch.current);setSceneLoading(true);setBossEntrance(!!next.boss);setSceneError('');recording.value=[];setCompletedReplay(undefined);rewardEpoch.current++;setEarnedNotice('');setCreditReward({amount:null});setRewardClaimed(false);setAutoClaim(false);setRewardRetry(0);connectClaimPending.current=false;recorded.current=false;setMission(next.mission);setEntry(next);levelRef.current=next.definition;const fresh=(next.key==='practice'?guide.start('practice'):null)??initialState(next.mission,combatMode?next.definition:undefined);game.value=fresh;input.value=idleInput();accumulator.value=0;alpha.value=0;clock.value=0;sampleIndex.value=0;sampleCount.value=0;frameTotal.value=0;slowTotal.value=0;reportClock.value=0;hudClock.value=0;setHud(fresh);latest.current=fresh;suspended.value=false;setPaused(false);setStats(zeroStats);},[game,input,accumulator,alpha,clock,samples,frameTotal,slowTotal,reportClock,hudClock,suspended,recording,trial,guide.start,combatMode,sceneReady,pendingTap,previousTap,tapElapsed,simulationEpoch]);
  // Explicit exits must open the map even when Hideout remembers a briefing or store tab.
  const backToMissions=()=>{pause(true);economy.setTab('map');setMissionMapRequest(n=>n+1);setHideoutOpen(true);};
  const introduceMission=(next:CampaignEntry)=>{if(!next.playable)return;if(testMission){restart(next);return;}pause(true);setHideoutOpen(false);setIntroMission(next);};
@@ -285,7 +288,7 @@ export function Game({onSnapshot}:{onSnapshot?:(state:GameState)=>void}){
   loaderTimer.current=null;setSceneError('');setSceneLoading(false);
  },[]);
  // Release simulation only after React has removed the loading overlay.
- useEffect(()=>{if(!sceneLoading)sceneReady.value=true;},[sceneLoading,sceneReady]);
+ useEffect(()=>{if(!sceneLoading&&!bossEntrance)sceneReady.value=true;},[sceneLoading,bossEntrance,sceneReady]);
  const sceneLoaded=useCallback(()=>{
   const expected=sceneVersion;if(sceneEpoch.current!==expected||loadedScene.current===expected)return;
   loadedScene.current=expected;setSceneError('');
@@ -394,9 +397,10 @@ export function Game({onSnapshot}:{onSnapshot?:(state:GameState)=>void}){
   secondary={trial.active?undefined:paused?{label:'Restart',accessibilityLabel:'Restart level',spinner:true,onPress:()=>restart()}:{label:hud.status==='won'?'Replay':'Back to missions',accessibilityLabel:hud.status==='won'?'Retry level':'View missions',spinner:true,onPress:()=>hud.status==='won'?restart():backToMissions()}}
   utility={trial.active?paused?{label:'Exit trial',onPress:()=>trial.finish()}:undefined:(paused||hud.status==='won')?{label:'Back to missions',onPress:backToMissions}:undefined}
  >{finaleVisible&&<CompletionCard data={completionData} reduced={!!settings.reducedEffects} registerShare={registerShare}/>} {paused&&<Pressable accessibilityRole="button" accessibilityLabel="Toggle frame statistics" onPress={()=>setDetails(!details)}><Text style={s.stats}>{details?`${Math.round(stats.fps)} FPS · p95 ${stats.p95.toFixed(1)}ms · ${stats.slow} slow frames`:'Performance details'}</Text></Pressable>}</ResultSheet>}
- {!testMission&&!trial.active&&!guide.active&&guide.retries===0&&hud.status==='won'&&completedReplay&&!paused&&<View style={{position:'absolute',bottom:insets.bottom+3,zIndex:46}}><CampaignSubmission state={hud} replay={completedReplay} target={entry.number>12?{level:entry.number}:{mission:entry.mission}} quiet retrySignal={rewardRetry} onReward={account.preview?undefined:rewardResolved}/></View>}
+ {!testMission&&!trial.active&&!guide.active&&guide.retries===0&&hud.status==='won'&&completedReplay&&!paused&&<View style={{position:'absolute',bottom:insets.bottom+3,zIndex:46}}><CampaignSubmission state={hud} replay={completedReplay} target={entry.number>12?{level:entry.number,rulesHash:entry.rulesHash}:{mission:entry.mission}} quiet retrySignal={rewardRetry} onReward={account.preview?undefined:rewardResolved}/></View>}
  {claimVisible&&<CreditClaim requiresWallet={!account.preview&&!account.wallet&&guide.retries===0} connecting={connectingClaim} onConnect={connectToClaim} autoClaim={autoClaim} reward={creditReward} balance={economy.balance} onRetry={creditReward.amount===null?(account.preview?saveLocalReward:()=>{rewardResolved(null);setRewardRetry(n=>n+1);}):undefined} stars={starsFor(hud)} mission={level.title} onDone={()=>setRewardClaimed(true)}/>}
  {introMission&&<MissionIntro lesson={introMission.number>12?publishedLesson(introMission):campaignLesson(introMission.mission)} onBack={()=>{setIntroMission(null);setHideoutOpen(true);}} onPlay={()=>{const next=introMission;setIntroMission(null);restart(next);}}/>}
+ {bossEntrance&&entry.boss&&!sceneLoading&&renderGameSurface&&!paused&&<BossEntrance key={sceneVersion} boss={entry.boss} reduced={!!settings.reducedEffects} onDone={finishBossEntrance}/>}
  {sceneLoading&&renderGameSurface&&<MissionChaseLoader reduced={!!settings.reducedEffects} error={sceneError}
   onRetry={()=>{sceneReady.value=false;simulationEpoch.value=++sceneEpoch.current;setSceneVersion(sceneEpoch.current);setSceneError('');}}
   onExit={backToMissions}/>}

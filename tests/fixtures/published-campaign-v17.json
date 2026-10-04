@@ -1,0 +1,279 @@
+{
+  "rulesHash": "9da2c067e23429d53a8b085cd3df168f7d2be3cb31902116dae1d7b41da61468",
+  "engineHash": "6037b867a86139f9ec884b215ccdb090fbb0fd2a84295640c29085bb107130c6",
+  "level": {
+    "number": 13,
+    "title": "Offset Gates",
+    "zone": "warehouse",
+    "boss": null,
+    "recipe": {
+      "version": 1,
+      "number": 13,
+      "template": "offset-gates",
+      "mirror": true,
+      "flip": false,
+      "seed": "campaign-v1:13:0",
+      "modifier": "none",
+      "band": 5,
+      "mission": "practice",
+      "zone": "warehouse",
+      "roster": {
+        "drones": 1,
+        "scouts": 1,
+        "sentries": 1,
+        "heavies": 0,
+        "warden": 0
+      },
+      "reinforcements": 1,
+      "targetSeconds": 100,
+      "hardLimitSeconds": 210,
+      "title": "Offset Gates"
+    },
+    "definition": {
+      "id": "campaign:13",
+      "mission": "practice",
+      "title": "Offset Gates",
+      "number": 5,
+      "width": 12,
+      "height": 20,
+      "spawn": {
+        "x": 10,
+        "y": 18
+      },
+      "phone": {
+        "x": 6,
+        "y": 2
+      },
+      "exit": {
+        "x": 1.3,
+        "y": 17.35,
+        "w": 1.4,
+        "h": 1.3
+      },
+      "blockers": [
+        {
+          "x": 0,
+          "y": 0,
+          "w": 12,
+          "h": 0.7,
+          "kind": "wall"
+        },
+        {
+          "x": 0,
+          "y": 19.3,
+          "w": 12,
+          "h": 0.7,
+          "kind": "wall"
+        },
+        {
+          "x": 0,
+          "y": 0,
+          "w": 0.7,
+          "h": 20,
+          "kind": "wall"
+        },
+        {
+          "x": 11.3,
+          "y": 0,
+          "w": 0.7,
+          "h": 20,
+          "kind": "wall"
+        },
+        {
+          "x": 5,
+          "y": 5,
+          "w": 5,
+          "h": 1.4,
+          "kind": "crate"
+        },
+        {
+          "x": 2,
+          "y": 10,
+          "w": 5,
+          "h": 1.4,
+          "kind": "rack"
+        },
+        {
+          "x": 6,
+          "y": 14,
+          "w": 4,
+          "h": 1.4,
+          "kind": "rack"
+        },
+        {
+          "x": 1.9999999999999993,
+          "y": 3.6,
+          "w": 1.2,
+          "h": 2.8,
+          "kind": "crate"
+        },
+        {
+          "x": 8.7,
+          "y": 8.5,
+          "w": 1.3,
+          "h": 2,
+          "kind": "rack"
+        }
+      ],
+      "patrols": [
+        {
+          "combatRole": "sentry",
+          "route": [
+            {
+              "x": 9.5,
+              "y": 4
+            },
+            {
+              "x": 8.5,
+              "y": 4
+            }
+          ],
+          "roam": [
+            {
+              "x": 9.5,
+              "y": 4
+            },
+            {
+              "x": 8.5,
+              "y": 4
+            },
+            {
+              "x": 7.5,
+              "y": 4
+            },
+            {
+              "x": 10.5,
+              "y": 4
+            }
+          ],
+          "speed": 0.7654984441935084,
+          "pursuitSpeed": 2.75,
+          "range": 4.8,
+          "halfAngle": 0.6108652381980153,
+          "spotSeconds": 0.5,
+          "pauseSeconds": 0.8213323339819909,
+          "investigates": true
+        },
+        {
+          "combatRole": "drone",
+          "route": [
+            {
+              "x": 8.5,
+              "y": 7
+            },
+            {
+              "x": 7.5,
+              "y": 9
+            }
+          ],
+          "roam": [
+            {
+              "x": 8.5,
+              "y": 7
+            },
+            {
+              "x": 7.5,
+              "y": 9
+            },
+            {
+              "x": 8.5,
+              "y": 8
+            },
+            {
+              "x": 10.5,
+              "y": 8
+            }
+          ],
+          "speed": 1,
+          "pursuitSpeed": 2.75,
+          "range": 6,
+          "halfAngle": 0.9599310885968813,
+          "spotSeconds": 0.5,
+          "pauseSeconds": 1.07880120864138,
+          "investigates": true
+        },
+        {
+          "combatRole": "scout",
+          "route": [
+            {
+              "x": 6.5,
+              "y": 13
+            },
+            {
+              "x": 6.5,
+              "y": 12
+            }
+          ],
+          "roam": [
+            {
+              "x": 6.5,
+              "y": 13
+            },
+            {
+              "x": 6.5,
+              "y": 12
+            },
+            {
+              "x": 4.5,
+              "y": 14
+            },
+            {
+              "x": 5.5,
+              "y": 12
+            }
+          ],
+          "speed": 0.7277044112212024,
+          "pursuitSpeed": 2.75,
+          "range": 4.8,
+          "halfAngle": 0.6108652381980153,
+          "spotSeconds": 0.5,
+          "pauseSeconds": 0.850695291813463,
+          "investigates": true
+        },
+        {
+          "combatRole": "scout",
+          "route": [
+            {
+              "x": 2,
+              "y": 18
+            },
+            {
+              "x": 3,
+              "y": 18
+            }
+          ],
+          "roam": [
+            {
+              "x": 2,
+              "y": 18
+            },
+            {
+              "x": 3,
+              "y": 18
+            }
+          ],
+          "speed": 0.75,
+          "pursuitSpeed": 2.7,
+          "range": 4.4,
+          "halfAngle": 0.6108652381980153,
+          "spotSeconds": 0.5,
+          "pauseSeconds": 0.8,
+          "investigates": true,
+          "reserveAfter": 0,
+          "pickupWave": 1
+        }
+      ],
+      "combat": {
+        "version": 2,
+        "revision": 17
+      },
+      "decoys": 0,
+      "targetSeconds": 100,
+      "hardLimitSeconds": 210,
+      "briefing": "Choose a short exposed crossing or a longer covered turn.",
+      "floorColor": "#253A37"
+    },
+    "rulesHash": "9da2c067e23429d53a8b085cd3df168f7d2be3cb31902116dae1d7b41da61468",
+    "engineHash": "6037b867a86139f9ec884b215ccdb090fbb0fd2a84295640c29085bb107130c6"
+  }
+}

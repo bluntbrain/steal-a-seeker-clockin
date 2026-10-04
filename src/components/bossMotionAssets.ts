@@ -1,0 +1,2 @@
+import type {BossId} from '../../shared/campaign-levels';
+export const BOSS_MOTION:Record<BossId,number>={toly:require('../../assets/boss-motion-v2/toly.webp'),mert:require('../../assets/boss-motion-v2/mert.webp'),chase:require('../../assets/boss-motion-v2/chase.webp'),lily:require('../../assets/boss-motion-v2/lily.webp'),vibhu:require('../../assets/boss-motion-v2/vibhu.webp'),akshay:require('../../assets/boss-motion-v2/akshay.webp'),beeman:require('../../assets/boss-motion-v2/beeman.webp')};

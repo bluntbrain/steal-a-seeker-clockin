@@ -8,7 +8,7 @@ import engine from '../../shared/weekly-engine.json';
 import type {Progress} from '../progress/model';
 import bundled from './published-levels.json';
 export type PublishedLevel={number:number;title:string;zone:CampaignZone;boss:BossId|null;definition:LevelDefinition;rulesHash:string;engineHash:string};
-export type CampaignEntry={number:number;key:string;mission:MissionId;title:string;zone:CampaignZone;boss:BossId|null;definition:LevelDefinition;playable:boolean};
+export type CampaignEntry={rulesHash?:string;number:number;key:string;mission:MissionId;title:string;zone:CampaignZone;boss:BossId|null;definition:LevelDefinition;playable:boolean};
 export const BUNDLED_LEVELS=bundled.levels as PublishedLevel[];
 const authored:CampaignEntry[]=CAMPAIGN_IDS.map((id,i)=>{const definition=combatLevel(id);return {number:i+1,key:id,mission:id,title:definition.title,zone:districtFor(i+1),boss:null,definition,playable:true};});
 /** a level is playable only when this build runs the engine it was published under, like weekly contracts */
@@ -17,7 +17,7 @@ export const isPublishedLevel=(v:unknown):v is PublishedLevel=>{const l=v as Pub
 export function campaignEntries(published:readonly PublishedLevel[]):CampaignEntry[]{
  const sorted=[...published].filter(isPublishedLevel).sort((a,b)=>a.number-b.number),out=[...authored];
  // the map stops at the first gap so a missing batch never shows an unreachable node
- for(const l of sorted){if(l.number!==out.length+1)continue;out.push({number:l.number,key:campaignLevelKey(l.number),mission:l.definition.mission,title:l.title,zone:l.zone,boss:l.boss,definition:l.definition,playable:runnable(l)});}
+ for(const l of sorted){if(l.number!==out.length+1)continue;out.push({rulesHash:l.rulesHash,number:l.number,key:campaignLevelKey(l.number),mission:l.definition.mission,title:l.title,zone:l.zone,boss:l.boss,definition:l.definition,playable:runnable(l)});}
  return out;
 }
 export const authoredEntry=(mission:MissionId):CampaignEntry=>authored[CAMPAIGN_IDS.indexOf(mission)]??authored[0]!;

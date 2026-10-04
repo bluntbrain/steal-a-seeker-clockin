@@ -21,7 +21,7 @@ export class CampaignService{
   let key:string,verify:()=>Promise<Awaited<ReturnType<typeof verifyReplayInWorker>>>,targetFor:()=>number|undefined,reward:(stars:number)=>number,storedHash=rulesHash;
   if('level' in target){
    // published levels verify against the frozen definition and the hash they were published under, never client input
-   const row=await this.levels.get(target.level);if(!row)throw new ServiceError(404,'Unknown campaign level. Update the game or wait for the next batch.');
+   const row=await this.levels.get(target.level,rulesHash);if(!row)throw new ServiceError(404,'Unknown campaign level. Update the game or wait for the next batch.');
    key=campaignLevelKey(row.number);storedHash=row.rulesHash;verify=()=>verifyReplayInWorker(row.definition.mission,replay,{rulesHash:row.rulesHash,definition:row.definition});targetFor=()=>row.definition.targetSeconds;reward=stars=>publishedCreditReward(stars,!!row.boss);
   }else{
    const mission=target.mission;if(!CAMPAIGN_IDS.includes(mission))throw new ServiceError(409,'Update the game before recording a campaign reward run.');

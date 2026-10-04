@@ -23,7 +23,7 @@ const transactions=new Map<string,unknown>(),references=new Map<string,string[]>
 let chainHeight=100,chainUnavailable=false;
 const chain:PaymentChain={ready:async()=>{},verify:async(o,s)=>verifyPayment(o,s,transactions.get(s)??null),find:async r=>{if(chainUnavailable)throw new Error('RPC unavailable');return references.get(r)||[];},lifetime:async()=>({blockhash:pub(),lastValidBlockHeight:String(chainHeight+150),contextSlot:String(chainHeight+1000)}),height:async()=>chainHeight};
 let service:CommerceService,app:Awaited<ReturnType<typeof createApp>>;
-before(async()=>{assert.equal((await pool.query('SELECT current_database() AS name')).rows[0].name,'seeker_clockin_test');await migrate(pool);await pool.query('TRUNCATE league_weeks,daily_manifests,campaign_levels,wallets,auth_challenges,sessions,orders,order_attempts,payment_receipts,entitlements,transfer_receipts CASCADE');const mint=pub(),recipient=pub();const [destination]=await findAssociatedTokenPda({owner:address(recipient),mint:address(mint),tokenProgram:address(TOKEN_PROGRAM)});service=new CommerceService(pool,chain,{mint,recipient,destination,decimals:6,identityUri:'https://github.com/bluntbrain'});app=await createApp(service);});
+before(async()=>{assert.equal((await pool.query('SELECT current_database() AS name')).rows[0].name,'seeker_clockin_test');await migrate(pool);await pool.query('TRUNCATE league_weeks,daily_manifests,campaign_level_versions,campaign_levels,wallets,auth_challenges,sessions,orders,order_attempts,payment_receipts,entitlements,transfer_receipts CASCADE');const mint=pub(),recipient=pub();const [destination]=await findAssociatedTokenPda({owner:address(recipient),mint:address(mint),tokenProgram:address(TOKEN_PROGRAM)});service=new CommerceService(pool,chain,{mint,recipient,destination,decimals:6,identityUri:'https://github.com/bluntbrain'});app=await createApp(service);});
 after(async()=>{await app.close();await pool.end();});
 let testClient=0;
 async function login(){const remoteAddress=`127.0.1.${++testClient}`,keys=generateKeyPairSync('ed25519'),wallet=b58(keys.publicKey.export({type:'spki',format:'der'}).subarray(-32));const response=await app.inject({method:'POST',url:'/auth/challenge',remoteAddress,payload:{wallet}});assert.equal(response.statusCode,200);const c=response.json<SignInChallenge>(),message=createSignInMessage(c.payload),signature=sign(null,message,keys.privateKey);const payload={id:c.id,wallet,signedMessage:Buffer.from(message).toString('base64'),signature:signature.toString('base64')};const auth=await app.inject({method:'POST',url:'/auth/verify',remoteAddress,payload});assert.equal(auth.statusCode,200,auth.body);return {keys,wallet,token:auth.json().token,headers:{authorization:`Bearer ${auth.json().token}`},payload};}
@@ -550,12 +550,12 @@ test('published campaign levels verify against the frozen row, pay the published
  assert.equal((await campaign.levels.get(13))!.title,plain.title);
  const {solveCombat}=await import('../scripts/qa-combat'),win=solveCombat(plain.definition)!,bossWin=solveCombat(boss.definition)!;
  await assert.rejects(campaign.submit(u.wallet,{level:16},'0'.repeat(64),win.replay),/Unknown campaign level/);
- const first=await campaign.submit(u.wallet,{level:13},'ignored-client-hash',win.replay);
+ const first=await campaign.submit(u.wallet,{level:13},plain.rulesHash,win.replay);
  const stars=1+Number(first.runs[0]!.battery>=60)+Number(win.ticks<=plain.definition.targetSeconds*30);
  assert.equal(first.creditAward.mission,'campaign:13');assert.equal(first.creditAward.credits,PUBLISHED_CLEAR_CREDITS+(stars-1)*CAMPAIGN_STAR_BONUS);
- assert.equal((await campaign.submit(u.wallet,{level:13},'ignored-client-hash',win.replay)).creditAward.credits,0,'a repeat clear pays nothing more');
- const bossReceipt=await campaign.submit(u.wallet,{level:15},'x',bossWin.replay);assert(bossReceipt.creditAward.credits>=BOSS_CLEAR_CREDITS);
- await assert.rejects(campaign.submit(u.wallet,{level:15},'x',win.replay),/extraction|Replay|match|rules/,'a replay for another room cannot claim a boss level');
+ assert.equal((await campaign.submit(u.wallet,{level:13},plain.rulesHash,win.replay)).creditAward.credits,0,'a repeat clear pays nothing more');
+ const bossReceipt=await campaign.submit(u.wallet,{level:15},boss.rulesHash,bossWin.replay);assert(bossReceipt.creditAward.credits>=BOSS_CLEAR_CREDITS);
+ await assert.rejects(campaign.submit(u.wallet,{level:15},boss.rulesHash,win.replay),/extraction|Replay|match|rules/,'a replay for another room cannot claim a boss level');
  assert.equal((await service.me(u.wallet)).credits,first.creditAward.credits+bossReceipt.creditAward.credits);
  // progress sync keeps published keys beside the authored twelve
  await service.syncProgress(u.wallet,{version:1,missions:{'campaign:13':{stars,seconds:win.ticks/30,score:win.score,battery:80,completions:1}}});
@@ -563,15 +563,25 @@ test('published campaign levels verify against the frozen row, pay the published
  const listed=await app.inject({method:'GET',url:'/campaign/levels?from=13&to=40'});assert.equal(listed.statusCode,200);
  const body=listed.json();assert.equal(body.latest,15);assert.deepEqual(body.levels.map((l:{number:number})=>l.number),[13,14,15]);assert.equal(body.levels[2].boss,'toly');assert.equal(body.levels[0].definition.id,'campaign:13');
  const bad=await app.inject({method:'POST',url:'/campaign/runs',headers:u.headers,payload:{mission:'practice',level:13,rulesHash:'0'.repeat(64),replay:{}}});assert.equal(bad.statusCode,400);
- const viaApi=await app.inject({method:'POST',url:'/campaign/runs',headers:u.headers,payload:{level:13,rulesHash:'0'.repeat(64),replay:win.replay}});assert.equal(viaApi.statusCode,200,viaApi.body);assert.equal(viaApi.json().creditAward.credits,0);
+ const viaApi=await app.inject({method:'POST',url:'/campaign/runs',headers:u.headers,payload:{level:13,rulesHash:plain.rulesHash,replay:win.replay}});assert.equal(viaApi.statusCode,200,viaApi.body);assert.equal(viaApi.json().creditAward.credits,0);
  // boot seeding publishes the bundled batch once and never rewrites rows that already exist
  const {seedCampaignLevels}=await import('./campaign-levels'),bundle=(await import('../src/campaign/published-levels.json')).default;
  assert.equal(await seedCampaignLevels(pool,()=>{throw new Error('bundle must match its recipes');}),bundle.levels.length-3);assert.equal(await seedCampaignLevels(pool),0);assert.equal(await campaign.levels.latest(),bundle.levels[bundle.levels.length-1]!.number);
  assert.equal((await campaign.levels.get(13))!.title,plain.title);
  // a hotfix before anyone played: a stale unplayed row is replaced, a played one is kept
  await pool.query("UPDATE campaign_levels SET rules_hash='0000' WHERE number IN (14,15)");
- assert.equal(await seedCampaignLevels(pool,()=>{}),1,'level 14 has no run and is replaced; level 15 was claimed and stays');
- assert.equal((await campaign.levels.get(14))!.rulesHash,plain.rulesHash);assert.equal((await campaign.levels.get(15))!.rulesHash,'0000');
+ assert.equal(await seedCampaignLevels(pool,()=>{}),2,'both layouts refresh, and old versions remain available');
+ assert.equal((await campaign.levels.get(14))!.rulesHash,plain.rulesHash);assert.equal((await campaign.levels.get(15))!.rulesHash,plain.rulesHash);
+ assert.equal((await campaign.levels.get(15,'0000'))!.rulesHash,'0000');
+ assert.equal(await campaign.levels.get(15,'unknown'),null);
+ await assert.rejects(campaign.submit(u.wallet,{level:13},'unknown',win.replay),/Unknown campaign level/);
+ assert.equal((await campaign.submit(u.wallet,{level:15},boss.rulesHash,bossWin.replay)).creditAward.credits,0,'refresh never duplicates a reward');
+ const frozen=(await import('../tests/fixtures/published-campaign-v17.json')).default,previous=frozen.level;
+ await pool.query('INSERT INTO campaign_level_versions(number,batch,recipe,definition,rules_hash,engine_hash,boss,title,zone) VALUES($1,1,$2,$3,$4,$5,$6,$7,$8) ON CONFLICT DO NOTHING',[previous.number,previous.recipe,previous.definition,frozen.rulesHash,frozen.engineHash,previous.boss,previous.title,previous.zone]);
+ const oldWin=solveCombat(previous.definition as import('../src/game/level').LevelDefinition);assert(oldWin);
+ const oldReceipt=await campaign.submit(u.wallet,{level:13},frozen.rulesHash,oldWin.replay);
+ assert.equal(oldReceipt.creditAward.credits,0,'the shipped sparse-map replay still verifies after the dense map is published, without a second payout');
+
 });
 
 test('the code 36 build keeps earning campaign credits through the archived revision 16 bundle after revision 17 ships',async()=>{

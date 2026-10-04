@@ -77,7 +77,7 @@ test('boss traits apply: toly spots faster and calls farther, vibhu has more hea
  assert.equal(BOSS_TRAITS.vibhu!.hp,200);assert.equal(BOSS_TRAITS.vibhu!.rearDamage,50);assert.equal(BOSS_TRAITS.mert!.radio,99);
 });
 test('revision 17 campaign levels stay deterministic across serialization and every authored level runs the new engine',()=>{
- for(const id of CAMPAIGN_IDS)assert.equal(combatLevel(id).combat?.revision,17,id);
+ for(const id of CAMPAIGN_IDS)assert.equal(combatLevel(id).combat?.revision,18,id);
  const l=combatLevel('false-footsteps'),a=initialState(l.mission,l);tick(a,17);const b:GameState=JSON.parse(JSON.stringify(a));
  for(let t=0;t<300;t++){const command=t===0?combatTap(a,l.phone.x,l.phone.y,1):undefined;step(a,{...idleInput(),command});step(b,{...idleInput(),command});}
  assert.deepEqual(JSON.parse(JSON.stringify(a)),JSON.parse(JSON.stringify(b)));

@@ -1,5 +1,6 @@
-// frozen published campaign levels. publishing inserts once; nothing updates a row after it is live.
+// Published campaign definitions are versioned. Current layouts may refresh; old replays retain their definition.
 import type {Pool} from 'pg';
+import {transaction} from './db';
 import type {LevelDefinition} from '../src/game/level';
 import {buildCampaignLevel,type CampaignRecipe} from '../shared/campaign-levels';
 import bundled from '../src/campaign/published-levels.json';
@@ -18,29 +19,38 @@ export async function seedCampaignLevels(pool:Pool,warn:(message:string)=>void=c
   if(recipe?.number!==level.number||JSON.stringify(buildCampaignLevel(recipe))!==JSON.stringify(level.definition)){warn(`Bundled level ${level.number} no longer matches its recipe; nothing seeded.`);return 0;}
   rows.push({number:level.number,batch:Math.ceil((level.number-12)/50),recipe,definition:level.definition as LevelDefinition,rulesHash:bundled.rulesHash,engineHash:bundled.engineHash,boss:level.boss,title:level.title,zone:level.zone});
  }
- const store=new CampaignLevelStore(pool),replaced=await store.replaceUnplayed(rows);
- if(replaced.length)warn(`Replaced ${replaced.length} unplayed campaign levels published under another rules hash.`);
+ const store=new CampaignLevelStore(pool),replaced=await store.refreshVersions(rows);
+ if(replaced.length)warn(`Replaced ${replaced.length} campaign layouts while archiving previous definitions.`);
  return replaced.length+(await store.publish(rows)).length;
 }
 const columns='number,batch,recipe,definition,rules_hash AS "rulesHash",engine_hash AS "engineHash",boss,title,zone,published_at AS "publishedAt"';
 export class CampaignLevelStore{
  constructor(private pool:Pool){}
  async latest():Promise<number>{const r=await this.pool.query('SELECT COALESCE(MAX(number),12)::int AS n FROM campaign_levels');return r.rows[0].n;}
- async get(number:number):Promise<PublishedLevel|null>{const r=await this.pool.query(`SELECT ${columns} FROM campaign_levels WHERE number=$1`,[number]);return r.rows[0]??null;}
+ async get(number:number,rulesHash?:string):Promise<PublishedLevel|null>{
+  const r=await this.pool.query(`SELECT ${columns} FROM campaign_levels WHERE number=$1${rulesHash?' AND rules_hash=$2':''}`,rulesHash?[number,rulesHash]:[number]);
+  if(r.rows[0]||!rulesHash)return r.rows[0]??null;
+  const archived=await this.pool.query(`SELECT ${columns} FROM campaign_level_versions WHERE number=$1 AND rules_hash=$2`,[number,rulesHash]);return archived.rows[0]??null;
+ }
  async list(from:number,to:number):Promise<PublicLevel[]>{
   const r=await this.pool.query(`SELECT ${columns} FROM campaign_levels WHERE number BETWEEN $1 AND $2 ORDER BY number LIMIT ${LEVEL_PAGE}`,[from,to]);
   return r.rows.map((row:PublishedLevel)=>({number:row.number,title:row.title,zone:row.zone,boss:row.boss,definition:row.definition,rulesHash:row.rulesHash,engineHash:row.engineHash}));
  }
- /** rows published under another rules hash that nobody has claimed yet are replaced; a played level is never touched */
- async replaceUnplayed(rows:Omit<PublishedLevel,'publishedAt'>[]):Promise<number[]>{
-  const replaced:number[]=[];
-  for(const row of rows){
-   const r=await this.pool.query(`WITH stale AS (SELECT number FROM campaign_levels WHERE number=$1 AND rules_hash<>$2 AND NOT EXISTS (SELECT 1 FROM campaign_runs WHERE mission=$3) AND NOT EXISTS (SELECT 1 FROM campaign_credit_stars WHERE mission=$3))
-    DELETE FROM campaign_levels WHERE number IN (SELECT number FROM stale) RETURNING number`,[row.number,row.rulesHash,`campaign:${row.number}`]);
-   if(!r.rowCount)continue;
-   await this.pool.query('INSERT INTO campaign_levels(number,batch,recipe,definition,rules_hash,engine_hash,boss,title,zone) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9)',[row.number,row.batch,row.recipe,row.definition,row.rulesHash,row.engineHash,row.boss,row.title,row.zone]);replaced.push(row.number);
-  }
-  return replaced;
+ /** Refresh shipped layouts atomically. Played definitions remain available by their rules hash;
+  * stars and credits still deduplicate by mission number, so a refresh grants no duplicate rewards. */
+ async refreshVersions(rows:Omit<PublishedLevel,'publishedAt'>[]):Promise<number[]>{
+  return transaction(this.pool,async db=>{
+   await db.query('SELECT pg_advisory_xact_lock(1936024940)');
+   const replaced:number[]=[];
+   for(const row of rows){
+    const old=await db.query('SELECT rules_hash FROM campaign_levels WHERE number=$1 FOR UPDATE',[row.number]);
+    if(!old.rowCount||old.rows[0].rules_hash===row.rulesHash)continue;
+    await db.query('INSERT INTO campaign_level_versions SELECT number,batch,recipe,definition,rules_hash,engine_hash,boss,title,zone,published_at FROM campaign_levels WHERE number=$1 ON CONFLICT DO NOTHING',[row.number]);
+    await db.query('UPDATE campaign_levels SET batch=$2,recipe=$3,definition=$4,rules_hash=$5,engine_hash=$6,boss=$7,title=$8,zone=$9,published_at=now() WHERE number=$1',[row.number,row.batch,row.recipe,row.definition,row.rulesHash,row.engineHash,row.boss,row.title,row.zone]);
+    replaced.push(row.number);
+   }
+   return replaced;
+  });
  }
  /** inserts new rows only; an existing number is left exactly as published. levels are published in one
   * contiguous run from the latest row so the map never has a hole */

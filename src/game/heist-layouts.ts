@@ -272,7 +272,7 @@ const LAYOUTS:Layout[]=[
 ];
 
 function applyPressure(l:LevelDefinition):LevelDefinition{
- 'worklet';l.combat={version:2,revision:17};const p=guardPressure(l);
+ 'worklet';l.combat={version:2,revision:18};const p=guardPressure(l);
  for(const g of l.patrols){
   const heavy=g.combatRole==='heavy'||g.combatRole==='warden',drone=g.combatRole==='drone';
   g.pursuitSpeed=p.pursuit+(drone?.3:heavy?-.45:0);

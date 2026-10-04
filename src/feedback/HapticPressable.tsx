@@ -30,11 +30,16 @@ export const HapticPressable=forwardRef<View,HapticPressableProps>(function Hapt
   dispatch.current=setTimeout(()=>{dispatch.current=null;if(!latestDisabled.current)onPress?.(event);},40);
   reset.current=setTimeout(()=>{reset.current=null;setBusy(false);},SPINNER_RESET_MS);
  };
- // the label dims under a transparent overlay, so the parent's rounded corners stay intact
- const overlay=spinner&&busy?<View style={s.spinner}><ActivityIndicator color="#173337" size="small"/></View>:null,dim=spinner&&busy?s.dim:undefined;
+ // Resolve the same radius for the native press surface and its absolute overlay.
+ // Keep the original children directly in the Pressable: an extra View breaks row/flex buttons.
  const state=props.accessibilityState??{};
- return <Pressable {...props} ref={ref} disabled={disabled||busy} accessibilityState={{...state,busy:busy||state.busy,disabled:!!disabled||state.disabled}} onPress={onPress?press:undefined}>
-  {typeof children==='function'?(pressed:PressableStateCallbackType):ReactNode=><><View style={dim}>{children(pressed)}</View>{overlay}</>:<><View style={dim}>{children}</View>{overlay}</>}
+ const buttonStyle=(pressed:PressableStateCallbackType)=>[typeof props.style==='function'?props.style(pressed):props.style,spinner&&{overflow:'hidden' as const}];
+ return <Pressable {...props} style={buttonStyle} ref={ref} disabled={disabled||busy} accessibilityState={{...state,busy:busy||state.busy,disabled:!!disabled||busy||state.disabled}} onPress={onPress?press:undefined}>
+  {(pressed:PressableStateCallbackType):ReactNode=>{
+   const flat=StyleSheet.flatten(typeof props.style==='function'?props.style(pressed):props.style)??{};
+   const corners={borderRadius:flat.borderRadius,borderTopLeftRadius:flat.borderTopLeftRadius,borderTopRightRadius:flat.borderTopRightRadius,borderBottomLeftRadius:flat.borderBottomLeftRadius,borderBottomRightRadius:flat.borderBottomRightRadius};
+   return <>{typeof children==='function'?children(pressed):children}{spinner&&busy&&<View pointerEvents="none" style={[s.spinner,corners,{backgroundColor:flat.backgroundColor??'#C1EFDA'}]}><ActivityIndicator color="#173337" size="small"/></View>}</>;
+  }}
  </Pressable>;
 });
-const s=StyleSheet.create({spinner:{...StyleSheet.absoluteFillObject,justifyContent:'center',alignItems:'center'},dim:{opacity:.15}});
+const s=StyleSheet.create({spinner:{...StyleSheet.absoluteFillObject,justifyContent:'center',alignItems:'center'}});
