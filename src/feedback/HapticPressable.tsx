@@ -30,10 +30,11 @@ export const HapticPressable=forwardRef<View,HapticPressableProps>(function Hapt
   dispatch.current=setTimeout(()=>{dispatch.current=null;if(!latestDisabled.current)onPress?.(event);},40);
   reset.current=setTimeout(()=>{reset.current=null;setBusy(false);},SPINNER_RESET_MS);
  };
- const overlay=spinner&&busy?<View style={s.spinner}><ActivityIndicator color="#173337" size="small"/></View>:null;
+ // the label dims under a transparent overlay, so the parent's rounded corners stay intact
+ const overlay=spinner&&busy?<View style={s.spinner}><ActivityIndicator color="#173337" size="small"/></View>:null,dim=spinner&&busy?s.dim:undefined;
  const state=props.accessibilityState??{};
  return <Pressable {...props} ref={ref} disabled={disabled||busy} accessibilityState={{...state,busy:busy||state.busy,disabled:!!disabled||state.disabled}} onPress={onPress?press:undefined}>
-  {typeof children==='function'?(pressed:PressableStateCallbackType):ReactNode=><>{children(pressed)}{overlay}</>:<>{children}{overlay}</>}
+  {typeof children==='function'?(pressed:PressableStateCallbackType):ReactNode=><><View style={dim}>{children(pressed)}</View>{overlay}</>:<><View style={dim}>{children}</View>{overlay}</>}
  </Pressable>;
 });
-const s=StyleSheet.create({spinner:{...StyleSheet.absoluteFillObject,justifyContent:'center',alignItems:'center',backgroundColor:'#C9F5DF'}});
+const s=StyleSheet.create({spinner:{...StyleSheet.absoluteFillObject,justifyContent:'center',alignItems:'center'},dim:{opacity:.15}});
