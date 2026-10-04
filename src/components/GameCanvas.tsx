@@ -1,6 +1,6 @@
+import {courierTopFrame,courierNeedsPhone,courierPhoneHand} from './courier-locomotion';
 import DefeatLootLayer from './DefeatLootLayer';
-import {meleeAtlas} from './meleeAssets';
-import {MELEE_FRAMES,meleeFrame,attackPose} from './melee-presentation';
+import {MELEE_FRAMES,meleeFrame} from './melee-presentation';
 import {knifeCombat} from '../game/melee';
 import ActorHealthBars from './ActorHealthBars';
 import React,{memo,useMemo,useEffect} from 'react';
@@ -58,7 +58,7 @@ export default memo(function GameCanvas({camera,size,height=size*20/12,input,gam
  const phoneScale=1.18/phoneFrame.height;
  const phoneSprites=useMemo(()=>[phoneFrame],[phoneIndex]);
  const phoneTransforms=useMemo(()=>[Skia.RSXform(phoneScale,0,-phoneFrame.width/2*phoneScale,0)],[phoneIndex]);
- const carryTransforms=useMemo(()=>[Skia.RSXform(.48/phoneFrame.height,0,0,0)],[]);
+ const carryTransforms=useMemo(()=>[Skia.RSXform((knifeCombat(level)?.36:.48)/phoneFrame.height,0,0,0)],[phoneIndex,level]);
  // knife levels draw the courier strictly top-down and rotate one sprite like the guards; older levels keep the directional sheet
  const knifeMode=knifeCombat(level),actorFrames=knifeMode?MELEE_FRAMES:frames;
  const lootCoin=useImage(require('../../assets/loot-v1/coin.png'),onLoadError);
@@ -78,21 +78,21 @@ export default memo(function GameCanvas({camera,size,height=size*20/12,input,gam
  // heading is presentation only: the attack angle while slashing, otherwise the movement direction; it holds while idle
  const heading=useSharedValue(-Math.PI/2);
  useAnimatedReaction(()=>{const s=game.value,m=s.combat?.melee;if(knifeMode&&m&&s.status==='playing'&&s.ticks-m.started<11)return m.angle;return Math.hypot(s.vx,s.vy)>.1?Math.atan2(s.vy,s.vx):NaN;},(angle)=>{if(!Number.isNaN(angle))heading.value=angle;},[knifeMode]);
- const topFrame=useDerivedValue(()=>{const s=game.value,m=s.combat?.melee;if(m&&s.status==='playing'){const pose=attackPose(s.ticks-m.started);if(pose>=0)return 4+pose;}if(s.carrying)return 7;if(Math.hypot(s.vx,s.vy)<=.1)return 0;const phase=Math.floor(s.walked*4)%4;return phase===0?1:phase===1?2:phase===2?3:2;});
+ const topFrame=useDerivedValue(()=>courierTopFrame(game.value));
  const sprites=useDerivedValue(()=>[knifeMode?TOP_FRAMES[topFrame.value]!:actorFrames[frame.value]!]);
  const transforms=useRSXformBuffer(1,(transform)=>{
   'worklet';
   if(knifeMode){const f=TOP_FRAMES[topFrame.value]!,scale=1.5/f.width,rot=heading.value+Math.PI/2,a=Math.cos(rot)*scale,b=Math.sin(rot)*scale,ax=f.width/2,ay=f.height/2;transform.set(a,b,x.value-ax*a+ay*b,y.value-ay*a-ax*b);return;}
   const f=actorFrames[frame.value]!;const scale=1.62/f.height;const bob=reduced||attack.value>=0?0:Math.hypot(game.value.vx,game.value.vy)>.1?Math.abs(Math.sin(game.value.walked*11))*.045:Math.sin(clock.value*2)*.012;transform.set(scale,0,x.value-f.width*scale/2,y.value-f.height*scale+.12-bob);});
  const shadow=useDerivedValue(()=>knifeMode?{x:x.value-.4,y:y.value-.34,width:.8,height:.8}:{x:x.value-.36,y:y.value-.02,width:.72,height:.22});
- // the top-down carry frame already shows the phone in hand
- const carry=useDerivedValue(()=>!knifeMode&&game.value.carrying?1:0);
+ // Only the idle carry frame has a baked-in phone; running keeps its full leg cycle.
+ const carry=useDerivedValue(()=>(knifeMode?courierNeedsPhone(game.value.carrying,topFrame.value):game.value.carrying)?1:0);
  const target=useDerivedValue(()=>game.value.carrying||game.value.delivered>=(level.targets?.length??1)?0:1);
  const phonePosition=useDerivedValue(()=>[{translateX:targetPhone(game.value).x},{translateY:targetPhone(game.value).y}]);
  const phoneGlow=useDerivedValue(()=>reduced?.34:.22+.22*(.5+.5*Math.sin(clock.value*2.2)));
  const phoneHalo=useDerivedValue(()=>reduced?.85:.80+.12*(.5+.5*Math.sin(clock.value*2.2)));
  const phoneBob=useDerivedValue(()=>-.91+(reduced?0:Math.sin(clock.value*2.6)*.07));
- const carriedTransform=useDerivedValue(()=>[{translateX:x.value+.29},{translateY:y.value-.61},{rotate:.12}]);
+ const carriedTransform=useDerivedValue(()=>{if(!knifeMode)return [{translateX:x.value+.29},{translateY:y.value-.61},{rotate:.12}];const hand=courierPhoneHand(topFrame.value);return [{translateX:x.value},{translateY:y.value},{rotate:heading.value+Math.PI/2},{translateX:hand.x},{translateY:hand.y}];});
  // The burst survives the 0.2s movement impulse, without changing replay physics.
  const burst=useDerivedValue(()=>reduced?0:Math.max(0,1-(TUNING.dashCooldown-game.value.cooldown)/.48));
  const burstTransform=useDerivedValue(()=>[{translateX:x.value},{translateY:y.value-.05},{rotate:Math.atan2(game.value.dashY,game.value.dashX)}]);

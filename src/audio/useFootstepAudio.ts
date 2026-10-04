@@ -6,7 +6,7 @@ import {useGameAudio} from './useGameAudio';
 export function useFootstepAudio(state: GameState, enabled: boolean, volume: number) {
   const left = useGameAudio(require('../../assets/audio-footsteps/step-a.wav'));
   const right = useGameAudio(require('../../assets/audio-footsteps/step-b.wav'));
-  const tracker = useRef(freshFootsteps()), epoch = useRef(0), allowed = useRef(false), lastGain = useRef(-1), wasMoving = useRef(false);
+  const tracker = useRef(freshFootsteps()), epoch = useRef(0), allowed = useRef(false), lastGain = useRef(-1), hasPlayback = useRef(false);
   allowed.current = enabled && volume > 0 && state.status === 'playing';
 
   useEffect(() => () => {
@@ -18,17 +18,19 @@ export function useFootstepAudio(state: GameState, enabled: boolean, volume: num
   useEffect(() => {
     const result = advanceFootsteps(tracker.current, state, allowed.current);
     tracker.current = result.tracker;
-    // Slightly duck under combat and alarms; keep the targeting cue intelligible.
-    const gain = Math.max(0, Math.min(1, volume)) * (state.alert > 0 ? .28 : state.securityAlarm ? .36 : .46);
+    // Keep actual travel audible under the music, with modest ducking during combat.
+    const gain = Math.max(0, Math.min(1, volume)) * (state.alert > 0 ? .52 : state.securityAlarm ? .58 : .65);
     // native volume writes and pauses only on change; this effect runs on every hud publish
     if (gain !== lastGain.current) { lastGain.current = gain; left.volume = gain; right.volume = gain; }
-    if (!result.moving) {
-      if (wasMoving.current) { epoch.current++; left.pause(); right.pause(); }
-      wasMoving.current = false;
+    if (result.reset) {
+      epoch.current++;
+      if(hasPlayback.current){left.pause(); right.pause();hasPlayback.current=false;}
       return;
     }
-    wasMoving.current = true;
+    // A short move may finish before the 240ms sample does. Let that earned
+    // contact finish; only pause/mute/reset cancels it (including a pending seek).
     if (result.cue === null) return;
+    hasPlayback.current = true;
     const player = result.cue === 0 ? left : right, run = ++epoch.current;
     void player.seekTo(0).then(() => {
       if (allowed.current && epoch.current === run) player.play();
