@@ -38,7 +38,7 @@ export default function HideoutStore({active=true,progress,onInspect,hasPass}:Pr
     <View style={s.stage}><CharacterStage sku={look.id} height={stageHeight} badges={premium} equipped={equipped}/></View>
     <View testID="outfit-grid" onLayout={event=>setGridWidth(event.nativeEvent.layout.width)} style={s.grid}>{outfits.map(c=>{
      const p=e.items.find(i=>i.id===c.id),has=c.unlock==='free'||(c.unlock==='pass'?hasPass||e.owned.includes(c.id):e.owned.includes(c.id)),worn=equippedLook.id===c.id,chosen=selected===c.id;
-     return <Pressable key={c.id} accessibilityRole="button" accessibilityState={{selected:chosen}} accessibilityLabel={`Preview ${c.name} skin${worn?', equipped':has?', owned':c.unlock==='pass'?', earn weekly':`, ${p!.price} credits`}`} onPress={()=>{setSelected(c.id);setMessage('');scroll.current?.scrollTo({y:0,animated:true});}} style={[s.outfit,{width:cardWidth},chosen&&s.selectedOutfit]}>
+     return <Pressable key={c.id} accessibilityRole="button" accessibilityState={{selected:chosen}} accessibilityLabel={`Preview ${c.name} skin${worn?', equipped':has?', owned':c.unlock==='pass'?', with the Game Pass':`, ${p!.price} credits`}`} onPress={()=>{setSelected(c.id);setMessage('');scroll.current?.scrollTo({y:0,animated:true});}} style={[s.outfit,{width:cardWidth},chosen&&s.selectedOutfit]}>
       {chosen&&<View pointerEvents="none" style={StyleSheet.absoluteFill}><SkinGlow/></View>}
       <Image source={costumePortrait(c.id)} resizeMode="contain" style={{height:portraitHeight,width:'100%'}}/>
       <Text numberOfLines={1} style={s.itemName}>{c.name}</Text>
@@ -49,7 +49,7 @@ export default function HideoutStore({active=true,progress,onInspect,hasPass}:Pr
    </>}
   </ScrollView>
   {section!=='collection'&&<View testID="outfit-fixed-footer" style={s.footer}>
-   <View testID="outfit-details" style={{gap:3}}><View style={s.detailHeading}><Text numberOfLines={1} style={s.title}>{look.name}</Text>{!owned&&!lockedWeekly&&<View style={s.detailPrice}><CreditCoin size={15}/><Text style={s.price}>{price.toLocaleString()}</Text></View>}</View><Text numberOfLines={2} style={s.description}>{lockedWeekly?'Clear all three weekly missions to earn this skin.':look.description}</Text></View>
+   <View testID="outfit-details" style={{gap:3}}><View style={s.detailHeading}><Text numberOfLines={1} style={s.title}>{look.name}</Text>{!owned&&!lockedWeekly&&<View style={s.detailPrice}><CreditCoin size={15}/><Text style={s.price}>{price.toLocaleString()}</Text></View>}</View><Text numberOfLines={2} style={s.description}>{lockedWeekly?'Comes with the Game Pass, together with 3,500 credits.':look.description}</Text></View>
    <Pressable testID="outfit-action" accessibilityRole="button" accessibilityLabel={label} disabled={busy||!e.ready||equipped} onPress={()=>void act()} style={[s.cta,(busy||equipped)&&s.ctaDisabled]}><Text style={[s.ctaText,equipped&&{color:'#B9E4D3'}]}>{label}</Text></Pressable>
    {!!(message||e.notice)&&<Text accessibilityLiveRegion="polite" numberOfLines={2} style={s.status}>{message||e.notice}</Text>}
   </View>}

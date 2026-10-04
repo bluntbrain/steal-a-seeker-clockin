@@ -5,6 +5,7 @@ import {Image,ScrollView,StyleSheet,Text,View} from 'react-native';
 import {HapticPressable as Pressable} from '../feedback/HapticPressable';
 import {useAccount} from '../commerce/account-context';
 import {campaignApi} from './client';
+import {ApiError} from '../commerce/client';
 import type {CampaignBoard as Board,CampaignRank} from '../../shared/economy';
 import {LeagueSurface,RankMedal} from '../league/LeagueVisuals';
 import {shortWallet} from '../league/card';
@@ -18,14 +19,14 @@ export default function CampaignBoard({entries,progress,onShare,onRewards}:Props
  const load=useCallback(async()=>{
   setLoading(true);setError('');
   try{let token:string|undefined;const a=accountRef.current;if(a.wallet&&!a.preview){try{token=(await a.session(false)).token;}catch{/* an anonymous board still loads */}}setData(await campaignApi.board(token));}
-  catch(e){setError(e instanceof Error?e.message:'The leaderboard is unavailable right now.');}
+  catch(e){setError(e instanceof ApiError&&e.status<500?e.message:'The live leaderboard is not reachable from here.');}
   finally{setLoading(false);}
  },[]);
  useEffect(()=>{void load();},[load,account.wallet]);
  const localPoints=Object.values(progress.missions).reduce((n,b)=>n+(b?.score??0),0),localCleared=entries.filter(e=>!!progress.missions[e.key]).length;
  const personal=data?.personal??null,rows=data?.board??[],guest=!account.wallet||account.preview;
  const points=personal?personal.score:localPoints,cleared=personal?personal.cleared:localCleared;
- const hint=loading&&!data?'Fetching verified scores…':error?error:guest?'Connect a wallet and clear a level to be listed.':personal?`${data?.participants??0} couriers ranked · best verified run per level`:'Clear a level with your wallet connected to join the board.';
+ const hint=loading&&!data?'Fetching verified scores…':guest?'Connect a wallet and clear a level to be listed.':error?error:personal?`${data?.participants??0} couriers ranked · best verified run per level`:'Clear a level with your wallet connected to join the board.';
  const name=(p:CampaignRank)=>p.wallet===account.wallet?'You':shortWallet(p.wallet);
  return <View style={s.root} testID="campaign-leaderboard">
   <View style={s.heading}><View style={{flex:1,gap:3}}><Text accessibilityRole="header" style={s.title}>Leaderboard</Text><Text style={s.subtitle}>TOTAL POINTS · SPEED AND HEALTH COUNT ON EVERY LEVEL</Text></View><Pressable accessibilityRole="button" accessibilityLabel="Refresh leaderboard" onPress={()=>void load()} style={s.refresh}><Text style={s.refreshText}>{loading?'…':'↻'}</Text></Pressable></View>
@@ -47,7 +48,7 @@ export default function CampaignBoard({entries,progress,onShare,onRewards}:Props
     <View style={s.nameCell}><Text style={[s.name,yours&&{color:'#BAEDDC'}]} numberOfLines={1}>{name(p)}</Text><Text style={s.rowDetail}>{p.cleared} {p.cleared===1?'level':'levels'} · {p.clean} clean</Text></View>
     <View style={s.rowScore}><Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={.65} style={s.points}>{p.score.toLocaleString()}</Text><Text style={s.rowPointsLabel}>POINTS</Text></View>
    </View>;})}</View>
-   {!rows.length&&<View style={s.empty} testID="campaign-board-empty"><LeagueSurface kind="row"/><Image accessible={false} source={portrait} style={s.emptyAvatar}/><Text style={s.emptyTitle}>{loading?'Loading the board…':error?'Leaderboard unavailable':'The board is open.'}</Text><Text style={s.emptyText}>{error?'Check your connection and refresh.':'The first verified clear takes the top spot.'}</Text></View>}
+   {!rows.length&&<View style={s.empty} testID="campaign-board-empty"><LeagueSurface kind="row"/><Image accessible={false} source={portrait} style={s.emptyAvatar}/><Text style={s.emptyTitle}>{loading?'Loading the board…':error?'Leaderboard unavailable':'The board is open.'}</Text><Text style={s.emptyText}>{error?error:'The first verified clear takes the top spot.'}</Text></View>}
   </ScrollView>
  </View>;
 }
