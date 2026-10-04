@@ -11,7 +11,7 @@ export default function CampaignWorldLab(){
  return <View style={{flex:1,backgroundColor:'#10251F'}}>
   <View style={{padding:10,gap:6,alignItems:'center'}}>
    <Text style={{color:'#B6D4C4',fontSize:10}}>MAP PREVIEW · SAMPLE PROGRESS</Text>
-   <View style={{flexDirection:'row',gap:8}}>{[1,11,21,100].map(n=><Pressable key={n} accessibilityRole="button" onPress={()=>setLevel(n)} style={{padding:8,borderRadius:8,backgroundColor:level===n?'#B6EAD5':'#284B3C'}}><Text style={{color:level===n?'#142D24':'#D2E8DC',fontSize:11}}>Level {n}</Text></Pressable>)}</View>
+   <View style={{flexDirection:'row',flexWrap:'wrap',justifyContent:'center',gap:6}}>{[1,11,21,31,41,51,61,71,81,91,100].map(n=><Pressable key={n} accessibilityRole="button" onPress={()=>{setLevel(n);setSelected('Tap a level to check selection');}} style={{padding:8,borderRadius:8,backgroundColor:level===n?'#B6EAD5':'#284B3C'}}><Text style={{color:level===n?'#142D24':'#D2E8DC',fontSize:11}}>Level {n}</Text></Pressable>)}</View>
    <Text accessibilityLiveRegion="polite" style={{color:'#D2E8DC',fontSize:11}}>{selected}</Text>
   </View>
   <CampaignMap key={level} entries={entries} progress={progress} current={entries[level-1]!} onSelect={e=>setSelected(`Level ${e.number}: ${e.title}`)}/>

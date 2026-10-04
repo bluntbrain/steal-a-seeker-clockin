@@ -1,0 +1,82 @@
+[
+  {
+    "key": "chase-surf",
+    "prompt": "Use case: stylized-concept. ONE SINGLE isolated transparent-background game-map diorama, square canvas. Actual transparent alpha, no background color or gradient, no sheet, no grid, no additional copies, no text. Entire subject and every extremity fully visible inside central 75% of canvas with at least 12% empty transparent margin on all four sides. Premium stylized 3D toy illustration exactly like reference. White-hood tiny robot courier with mint face, black mint-trim outfit. Graphite Solana Seeker phone has one separate circular upper camera above a vertical pill containing two lower lenses and a small silver Solana mark. Restrained mint, charcoal, evergreen, cream highlights. Three-quarter camera. Avoid buildings, unrelated scenery, extraneous fragments, or rectangular backdrops. This is a standalone sprite; ALL of its shapes must fit. Chase, wavy brown hair, black mint tracksuit, surfing sideways on a large graphite Seeker phone, tiny courier running alongside holding a smaller phone. Both full characters, whole phone, feet and the couriers outstretched arm fully visible. Match middle-left reference scene. Render ONLY this single scene from the reference; DO NOT copy the six-cell atlas layout or any neighboring scene. Scale the WHOLE composition down enough to have empty transparent margins everywhere.",
+    "refs": [
+      "/Users/bluntbrain/Documents/code/clockin/seeker-game/assets/campaign-world-v4/source/encounters-c.png",
+      "/Users/bluntbrain/Documents/code/clockin/campaign-15-days/videos/classroom-orientation/production/references/seeker-phone.jpeg"
+    ]
+  },
+  {
+    "key": "lily-net",
+    "prompt": "Use case: stylized-concept. ONE SINGLE isolated transparent-background game-map diorama, square canvas. Actual transparent alpha, no background color or gradient, no sheet, no grid, no additional copies, no text. Entire subject and every extremity fully visible inside central 75% of canvas with at least 12% empty transparent margin on all four sides. Premium stylized 3D toy illustration exactly like reference. White-hood tiny robot courier with mint face, black mint-trim outfit. Graphite Solana Seeker phone has one separate circular upper camera above a vertical pill containing two lower lenses and a small silver Solana mark. Restrained mint, charcoal, evergreen, cream highlights. Three-quarter camera. Avoid buildings, unrelated scenery, extraneous fragments, or rectangular backdrops. This is a standalone sprite; ALL of its shapes must fit. Lily with long black hair, black mint tracksuit, lunging playfully with a mint catching net while tiny courier dodges holding Seeker. Whole net, both humans feet and entire courier inside the canvas. Match middle-right reference scene. Render ONLY this single scene from the reference; DO NOT copy the six-cell atlas layout or any neighboring scene. Scale the WHOLE composition down enough to have empty transparent margins everywhere.",
+    "refs": [
+      "/Users/bluntbrain/Documents/code/clockin/seeker-game/assets/campaign-world-v4/source/encounters-c.png",
+      "/Users/bluntbrain/Documents/code/clockin/campaign-15-days/videos/classroom-orientation/production/references/seeker-phone.jpeg"
+    ]
+  },
+  {
+    "key": "toly-rope",
+    "prompt": "Use case: stylized-concept. ONE SINGLE isolated transparent-background game-map diorama, square canvas. Actual transparent alpha, no background color or gradient, no sheet, no grid, no additional copies, no text. Entire subject and every extremity fully visible inside central 75% of canvas with at least 12% empty transparent margin on all four sides. Premium stylized 3D toy illustration exactly like reference. White-hood tiny robot courier with mint face, black mint-trim outfit. Graphite Solana Seeker phone has one separate circular upper camera above a vertical pill containing two lower lenses and a small silver Solana mark. Restrained mint, charcoal, evergreen, cream highlights. Three-quarter camera. Avoid buildings, unrelated scenery, extraneous fragments, or rectangular backdrops. This is a standalone sprite; ALL of its shapes must fit. Toly with short brown hair, black mint tracksuit, holding a small grappling rope with tiny courier swinging from its end carrying Seeker. Whole rope and top grappling hook must fit well within canvas. Match bottom-left scene. Render ONLY this single scene from the reference; DO NOT copy the six-cell atlas layout or any neighboring scene. Scale the WHOLE composition down enough to have empty transparent margins everywhere.",
+    "refs": [
+      "/Users/bluntbrain/Documents/code/clockin/seeker-game/assets/campaign-world-v4/source/encounters-c.png",
+      "/Users/bluntbrain/Documents/code/clockin/campaign-15-days/videos/classroom-orientation/production/references/seeker-phone.jpeg"
+    ]
+  },
+  {
+    "key": "vibhu-phone",
+    "prompt": "Use case: stylized-concept. ONE SINGLE isolated transparent-background game-map diorama, square canvas. Actual transparent alpha, no background color or gradient, no sheet, no grid, no additional copies, no text. Entire subject and every extremity fully visible inside central 75% of canvas with at least 12% empty transparent margin on all four sides. Premium stylized 3D toy illustration exactly like reference. White-hood tiny robot courier with mint face, black mint-trim outfit. Graphite Solana Seeker phone has one separate circular upper camera above a vertical pill containing two lower lenses and a small silver Solana mark. Restrained mint, charcoal, evergreen, cream highlights. Three-quarter camera. Avoid buildings, unrelated scenery, extraneous fragments, or rectangular backdrops. This is a standalone sprite; ALL of its shapes must fit. Vibhu clean-shaven short black hair standing behind an upright large graphite Seeker like a shield with tiny courier peeking behind its lower corner. Whole phone and both pairs of feet, complete oval ground base visible. Match top-left scene. Render ONLY this single scene from the reference; DO NOT copy the six-cell atlas layout or any neighboring scene. Scale the WHOLE composition down enough to have empty transparent margins everywhere.",
+    "refs": [
+      "/Users/bluntbrain/Documents/code/clockin/seeker-game/assets/campaign-world-v4/source/encounters-d.png",
+      "/Users/bluntbrain/Documents/code/clockin/campaign-15-days/videos/classroom-orientation/production/references/seeker-phone.jpeg"
+    ]
+  },
+  {
+    "key": "akshay-portal",
+    "prompt": "Use case: stylized-concept. ONE SINGLE isolated transparent-background game-map diorama, square canvas. Actual transparent alpha, no background color or gradient, no sheet, no grid, no additional copies, no text. Entire subject and every extremity fully visible inside central 75% of canvas with at least 12% empty transparent margin on all four sides. Premium stylized 3D toy illustration exactly like reference. White-hood tiny robot courier with mint face, black mint-trim outfit. Graphite Solana Seeker phone has one separate circular upper camera above a vertical pill containing two lower lenses and a small silver Solana mark. Restrained mint, charcoal, evergreen, cream highlights. Three-quarter camera. Avoid buildings, unrelated scenery, extraneous fragments, or rectangular backdrops. This is a standalone sprite; ALL of its shapes must fit. Akshay smiling black beard short black hair black mint tracksuit taking a running step toward a compact oval mint portal while tiny courier escapes behind him. Entire portal, both full bodies and complete small ground base visible. Match top-right scene. Render ONLY this single scene from the reference; DO NOT copy the six-cell atlas layout or any neighboring scene. Scale the WHOLE composition down enough to have empty transparent margins everywhere.",
+    "refs": [
+      "/Users/bluntbrain/Documents/code/clockin/seeker-game/assets/campaign-world-v4/source/encounters-d.png",
+      "/Users/bluntbrain/Documents/code/clockin/campaign-15-days/videos/classroom-orientation/production/references/seeker-phone.jpeg"
+    ]
+  },
+  {
+    "key": "beeman-bridge",
+    "prompt": "Use case: stylized-concept. ONE SINGLE isolated transparent-background game-map diorama, square canvas. Actual transparent alpha, no background color or gradient, no sheet, no grid, no additional copies, no text. Entire subject and every extremity fully visible inside central 75% of canvas with at least 12% empty transparent margin on all four sides. Premium stylized 3D toy illustration exactly like reference. White-hood tiny robot courier with mint face, black mint-trim outfit. Graphite Solana Seeker phone has one separate circular upper camera above a vertical pill containing two lower lenses and a small silver Solana mark. Restrained mint, charcoal, evergreen, cream highlights. Three-quarter camera. Avoid buildings, unrelated scenery, extraneous fragments, or rectangular backdrops. This is a standalone sprite; ALL of its shapes must fit. Beeman bald black sunglasses grey long beard black mint tracksuit stepping across a tiny mint bridge over a tiny violet puddle. Tiny courier sneaks underneath. Whole bridge and water island fully visible, full boots. Match middle-left scene. Render ONLY this single scene from the reference; DO NOT copy the six-cell atlas layout or any neighboring scene. Scale the WHOLE composition down enough to have empty transparent margins everywhere.",
+    "refs": [
+      "/Users/bluntbrain/Documents/code/clockin/seeker-game/assets/campaign-world-v4/source/encounters-d.png",
+      "/Users/bluntbrain/Documents/code/clockin/campaign-15-days/videos/classroom-orientation/production/references/seeker-phone.jpeg"
+    ]
+  },
+  {
+    "key": "akshay-drone",
+    "prompt": "Use case: stylized-concept. ONE SINGLE isolated transparent-background game-map diorama, square canvas. Actual transparent alpha, no background color or gradient, no sheet, no grid, no additional copies, no text. Entire subject and every extremity fully visible inside central 75% of canvas with at least 12% empty transparent margin on all four sides. Premium stylized 3D toy illustration exactly like reference. White-hood tiny robot courier with mint face, black mint-trim outfit. Graphite Solana Seeker phone has one separate circular upper camera above a vertical pill containing two lower lenses and a small silver Solana mark. Restrained mint, charcoal, evergreen, cream highlights. Three-quarter camera. Avoid buildings, unrelated scenery, extraneous fragments, or rectangular backdrops. This is a standalone sprite; ALL of its shapes must fit. Akshay smiling short black hair black beard in black mint tracksuit holding controller and looking up at a small mint scout drone lifting a tiny courier by backpack. Whole drone and rotors with generous space above. Full human, tiny courier clutching Seeker. Match bottom-left scene. Render ONLY this single scene from the reference; DO NOT copy the six-cell atlas layout or any neighboring scene. Scale the WHOLE composition down enough to have empty transparent margins everywhere.",
+    "refs": [
+      "/Users/bluntbrain/Documents/code/clockin/seeker-game/assets/campaign-world-v4/source/encounters-d.png",
+      "/Users/bluntbrain/Documents/code/clockin/campaign-15-days/videos/classroom-orientation/production/references/seeker-phone.jpeg"
+    ]
+  },
+  {
+    "key": "courier-glider",
+    "prompt": "Use case: stylized-concept. ONE SINGLE isolated transparent-background game-map diorama, square canvas. Actual transparent alpha, no background color or gradient, no sheet, no grid, no additional copies, no text. Entire subject and every extremity fully visible inside central 75% of canvas with at least 12% empty transparent margin on all four sides. Premium stylized 3D toy illustration exactly like reference. White-hood tiny robot courier with mint face, black mint-trim outfit. Graphite Solana Seeker phone has one separate circular upper camera above a vertical pill containing two lower lenses and a small silver Solana mark. Restrained mint, charcoal, evergreen, cream highlights. Three-quarter camera. Avoid buildings, unrelated scenery, extraneous fragments, or rectangular backdrops. This is a standalone sprite; ALL of its shapes must fit. One tiny white hood robot courier holding a normal-size Seeker secured to chest and hanging under a compact triangular charcoal glider with three mint panels. Both wing tips, all extremities and feet entirely visible. Match bottom-left scene. No humans. Render ONLY this single scene from the reference; DO NOT copy the six-cell atlas layout or any neighboring scene. Scale the WHOLE composition down enough to have empty transparent margins everywhere.",
+    "refs": [
+      "/Users/bluntbrain/Documents/code/clockin/seeker-game/assets/campaign-world-v4/source/heist-props-e.png",
+      "/Users/bluntbrain/Documents/code/clockin/campaign-15-days/videos/classroom-orientation/production/references/seeker-phone.jpeg"
+    ]
+  },
+  {
+    "key": "jupiter-orbit",
+    "prompt": "Use case: stylized-concept. ONE SINGLE isolated transparent-background game-map diorama, square canvas. Actual transparent alpha, no background color or gradient, no sheet, no grid, no additional copies, no text. Entire subject and every extremity fully visible inside central 75% of canvas with at least 12% empty transparent margin on all four sides. Premium stylized 3D toy illustration exactly like reference. White-hood tiny robot courier with mint face, black mint-trim outfit. Graphite Solana Seeker phone has one separate circular upper camera above a vertical pill containing two lower lenses and a small silver Solana mark. Restrained mint, charcoal, evergreen, cream highlights. Three-quarter camera. Avoid buildings, unrelated scenery, extraneous fragments, or rectangular backdrops. This is a standalone sprite; ALL of its shapes must fit. One small sculptural mint striped planet with two orbital rings; tiny robot courier sits on one ring carrying Seeker. Both rings entirely visible with no cuts. Match middle-right scene. No humans. Render ONLY this single scene from the reference; DO NOT copy the six-cell atlas layout or any neighboring scene. Scale the WHOLE composition down enough to have empty transparent margins everywhere.",
+    "refs": [
+      "/Users/bluntbrain/Documents/code/clockin/seeker-game/assets/campaign-world-v4/source/meme-props-f.png",
+      "/Users/bluntbrain/Documents/code/clockin/campaign-15-days/videos/classroom-orientation/production/references/seeker-phone.jpeg"
+    ]
+  },
+  {
+    "key": "meteora-shards",
+    "prompt": "Use case: stylized-concept. ONE SINGLE isolated transparent-background game-map diorama, square canvas. Actual transparent alpha, no background color or gradient, no sheet, no grid, no additional copies, no text. Entire subject and every extremity fully visible inside central 75% of canvas with at least 12% empty transparent margin on all four sides. Premium stylized 3D toy illustration exactly like reference. White-hood tiny robot courier with mint face, black mint-trim outfit. Graphite Solana Seeker phone has one separate circular upper camera above a vertical pill containing two lower lenses and a small silver Solana mark. Restrained mint, charcoal, evergreen, cream highlights. Three-quarter camera. Avoid buildings, unrelated scenery, extraneous fragments, or rectangular backdrops. This is a standalone sprite; ALL of its shapes must fit. Three rounded violet meteor stepping stones floating over a tiny mint base, tiny robot courier holding Seeker jumping between stones. Entire highest meteor including its rounded top fully visible well away from edge. Match bottom-left scene. No humans. Render ONLY this single scene from the reference; DO NOT copy the six-cell atlas layout or any neighboring scene. Scale the WHOLE composition down enough to have empty transparent margins everywhere.",
+    "refs": [
+      "/Users/bluntbrain/Documents/code/clockin/seeker-game/assets/campaign-world-v4/source/meme-props-f.png",
+      "/Users/bluntbrain/Documents/code/clockin/campaign-15-days/videos/classroom-orientation/production/references/seeker-phone.jpeg"
+    ]
+  }
+]

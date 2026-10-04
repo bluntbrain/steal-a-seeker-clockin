@@ -3,6 +3,15 @@ import assert from 'node:assert/strict';
 import {campaignMapLayout} from '../src/components/campaignMapLayout';
 import {campaignRoadPoint,campaignSlotFraction,MAP_ASPECT} from '../src/components/campaignRoad';
 import {campaignEntries,BUNDLED_LEVELS} from '../src/campaign/levels';
+import {CAMPAIGN_WORLDS} from '../src/components/campaignWorlds';
+
+test('the full campaign uses distinct artwork for every ten-level chapter',()=>{
+ const {scenes}=campaignMapLayout(campaignEntries(BUNDLED_LEVELS),366);
+ assert.equal(scenes.length,10);
+ assert.equal(new Set(scenes.map(s=>s.world)).size,scenes.length,'no background repeats over the 100 levels');
+ const illustrations=CAMPAIGN_WORLDS.flatMap(w=>[...w.actors,...('extra' in w?[w.extra]:[])]);
+ assert.equal(new Set(illustrations).size,illustrations.length,'character poses and generated props appear only once');
+});
 
 for(const width of [296,366,540])test(`nodes stay on the winding road and targets stay separate at ${width}px`,()=>{
  const entries=campaignEntries(BUNDLED_LEVELS),{scenes}=campaignMapLayout(entries,width);
