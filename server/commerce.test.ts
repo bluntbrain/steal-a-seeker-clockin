@@ -831,4 +831,8 @@ test('published campaign levels verify against the frozen row, pay the published
  const {seedCampaignLevels}=await import('./campaign-levels'),bundle=(await import('../src/campaign/published-levels.json')).default;
  assert.equal(await seedCampaignLevels(pool,()=>{throw new Error('bundle must match its recipes');}),bundle.levels.length-3);assert.equal(await seedCampaignLevels(pool),0);assert.equal(await campaign.levels.latest(),bundle.levels[bundle.levels.length-1]!.number);
  assert.equal((await campaign.levels.get(13))!.title,plain.title);
+ // a hotfix before anyone played: a stale unplayed row is replaced, a played one is kept
+ await pool.query("UPDATE campaign_levels SET rules_hash='0000' WHERE number IN (14,15)");
+ assert.equal(await seedCampaignLevels(pool,()=>{}),1,'level 14 has no run and is replaced; level 15 was claimed and stays');
+ assert.equal((await campaign.levels.get(14))!.rulesHash,plain.rulesHash);assert.equal((await campaign.levels.get(15))!.rulesHash,'0000');
 });

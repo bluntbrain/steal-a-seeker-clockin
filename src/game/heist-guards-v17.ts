@@ -11,7 +11,7 @@ import type {LevelDefinition,Point} from './level';
 import {guardPressure,pressureCombat,droneReportTicks} from './guard-pressure';
 import type {HeistMemory} from './heist-guards';
 
-export type HeistMemoryV17=HeistMemory&{suspicious?:boolean;noticeUntil?:number;waitTotal?:number;hear?:number;bodySeen?:number;bodyFor?:number;bodyTarget?:number;dir?:number;pos?:number};
+export type HeistMemoryV17=HeistMemory&{suspicious?:boolean;noticeUntil?:number;waitTotal?:number;hear?:number;bodySeen?:number;bodyFor?:number;bodyTarget?:number;dir?:number;pos?:number;noticed?:boolean};
 type Shot=(s:GameState,from:Point,angle:number,owner:number,damage:number)=>void;
 export const ENTRY_WARNING_TICKS=24;
 export const RADIO_RADIUS=6;
@@ -56,10 +56,11 @@ function investigate(g:Guard,p:Point,tick:number,role:HeistMemory['role']='pursu
  * so a quiet courier can still take it from behind */
 function notice(g:Guard,p:Point,tick:number,pause=NOTICE_TICKS){
  'worklet';const h=memory(g);if(h.hunting)return;
- // the pause starts only on entering suspicion; a repeated report moves the destination without freezing the guard again
- const entering=!h.suspicious||g.mode!=='investigate';
+ // a guard already searching around that same spot (its path there failed) keeps searching instead of starting over
+ if(g.mode==='search'&&h.suspicious&&Math.hypot(g.lastSeen.x-p.x,g.lastSeen.y-p.y)<.6)return;
  g.lastSeen={x:p.x,y:p.y};h.role='pursuer';h.suspicious=true;destination(g,p,'investigate');g.brain!.searchUntil=0;g.brain!.alertUntil=tick+INVESTIGATE_TICKS;
- if(entering)h.noticeUntil=tick+pause;
+ // one pause per suspicion episode: later reports move the destination without freezing the guard again
+ if(!h.noticed){h.noticed=true;h.noticeUntil=tick+pause;}
 }
 function contact(g:Guard,p:Point,l:LevelDefinition){'worklet';return sees(g,p.x,p.y,l);}
 function closeOnContact(g:Guard,p:Point,l:LevelDefinition,speed:number,dt:number){
@@ -73,7 +74,7 @@ function trackedShot(g:Guard,s:GameState,dt:number,hard:boolean){
  return Math.atan2(s.y-g.y+(s.y-s.py)/dt*lead,s.x-g.x+(s.x-s.px)/dt*lead);
 }
 function pursue(g:Guard,p:Point,tick:number){
- 'worklet';const h=memory(g);investigate(g,p,tick);h.hunting=true;h.suspicious=false;h.noticeUntil=0;g.brain!.trackingUntil=tick+30;
+ 'worklet';const h=memory(g);investigate(g,p,tick);h.hunting=true;h.suspicious=false;h.noticed=false;h.noticeUntil=0;g.brain!.trackingUntil=tick+30;
 }
 /** nearby guards hear the shout and grow suspicious of the spot; only the observer hunts. a boss can call farther */
 function alertNearby(s:GameState,index:number,point:Point,l:LevelDefinition,radius:number){
@@ -244,7 +245,7 @@ export function updateHeistGuardsV17(s:GameState,dt:number,l:LevelDefinition,sho
   if(s.ticks<(h.noticeUntil??0)&&b.goal){face(g,Math.atan2(b.goal.y-g.y,b.goal.x-g.x),dt,trait?.turn);continue;}
   if(g.mode==='search'){
    if(s.ticks>=b.searchUntil){
-    h.hunting=false;h.suspicious=false;h.role='patrol';h.charge=0;h.broadcastUntil=0;
+    h.hunting=false;h.suspicious=false;h.noticed=false;h.role='patrol';h.charge=0;h.broadcastUntil=0;
     g.alerted=false;g.exposure=0;b.seenFor=0;b.trackingUntil=0;
     g.gunPhase='ready';g.gunTicks=0;g.burstLeft=0;
     const anchors=spec.roam??spec.route;h.pos=nearestAnchor(g,i,l);destination(g,anchors[loopOrder(anchors)[h.pos]!]!,'return');

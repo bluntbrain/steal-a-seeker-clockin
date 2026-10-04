@@ -2590,14 +2590,17 @@ function notice(g, p, tick, pause = NOTICE_TICKS) {
   "worklet";
   const h = memory(g);
   if (h.hunting) return;
-  const entering = !h.suspicious || g.mode !== "investigate";
+  if (g.mode === "search" && h.suspicious && Math.hypot(g.lastSeen.x - p.x, g.lastSeen.y - p.y) < 0.6) return;
   g.lastSeen = { x: p.x, y: p.y };
   h.role = "pursuer";
   h.suspicious = true;
   destination3(g, p, "investigate");
   g.brain.searchUntil = 0;
   g.brain.alertUntil = tick + INVESTIGATE_TICKS2;
-  if (entering) h.noticeUntil = tick + pause;
+  if (!h.noticed) {
+    h.noticed = true;
+    h.noticeUntil = tick + pause;
+  }
 }
 function contact2(g, p, l) {
   "worklet";
@@ -2624,6 +2627,7 @@ function pursue2(g, p, tick) {
   investigate3(g, p, tick);
   h.hunting = true;
   h.suspicious = false;
+  h.noticed = false;
   h.noticeUntil = 0;
   g.brain.trackingUntil = tick + 30;
 }
@@ -3000,6 +3004,7 @@ function updateHeistGuardsV17(s, dt, l, shoot) {
       if (s.ticks >= b.searchUntil) {
         h.hunting = false;
         h.suspicious = false;
+        h.noticed = false;
         h.role = "patrol";
         h.charge = 0;
         h.broadcastUntil = 0;

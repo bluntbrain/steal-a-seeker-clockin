@@ -13,6 +13,7 @@ delete env.EXPO_PUBLIC_NATIVE_WEEKLY;delete env.EXPO_PUBLIC_NATIVE_RECOVERY;dele
 function run(cmd,args,cwd){const r=cp.spawnSync(cmd,args,{cwd,env,stdio:'inherit'});if(r.status!==0)process.exit(r.status||1);}
 // the android manifest takes its version from build.gradle; sync it from app.json so the installed app matches the upload name
 {const appJson=require('../app.json').expo,gradlePath='android/app/build.gradle',gradle=fs.readFileSync(gradlePath,'utf8');
+ for(const re of [/^\s*versionCode \d+$/gm,/^\s*versionName "[^"]*"$/gm])if((gradle.match(re)||[]).length!==1)throw Error('build.gradle must declare versionCode and versionName exactly once');
  const synced=gradle.replace(/^(\s*)versionCode \d+$/m,`$1versionCode ${appJson.android.versionCode}`).replace(/^(\s*)versionName "[^"]*"$/m,`$1versionName "${appJson.version}"`);
  if(synced!==gradle){fs.writeFileSync(gradlePath,synced);console.log(`Synced android version to ${appJson.version} (${appJson.android.versionCode})`);}}
 run('npm',['run','rules:check'],process.cwd());

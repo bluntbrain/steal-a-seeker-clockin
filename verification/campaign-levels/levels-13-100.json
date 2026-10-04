@@ -1,7 +1,7 @@
 {
- "publishedAt": "2026-10-04T06:58:10.949Z",
- "rulesHash": "c841a691979358970a0862a4fb5176c6bedcd5aedc37299e4bda1bc37837cd33",
- "engineHash": "23df7328b1caa233d26b0f693ccdd21621a47ea6709ac024b3c740ffda750a72",
+ "publishedAt": "2026-10-04T07:10:37.469Z",
+ "rulesHash": "9da2c067e23429d53a8b085cd3df168f7d2be3cb31902116dae1d7b41da61468",
+ "engineHash": "6037b867a86139f9ec884b215ccdb090fbb0fd2a84295640c29085bb107130c6",
  "from": 13,
  "to": 100,
  "dry": true,
@@ -157,7 +157,7 @@
    "template": "loading-hooks",
    "band": 6,
    "modifier": "none",
-   "solvedSeconds": 14.53,
+   "solvedSeconds": 14.83,
    "targetSeconds": 106,
    "salt": 0
   },
@@ -410,7 +410,7 @@
    "template": "four-posts",
    "band": 8,
    "modifier": "none",
-   "solvedSeconds": 17.77,
+   "solvedSeconds": 16.93,
    "targetSeconds": 118,
    "salt": 0
   },
@@ -443,7 +443,7 @@
    "template": "long-divide",
    "band": 8,
    "modifier": "exit-window",
-   "solvedSeconds": 17.9,
+   "solvedSeconds": 25.8,
    "targetSeconds": 118,
    "salt": 0
   },
@@ -542,7 +542,7 @@
    "template": "staircase",
    "band": 9,
    "modifier": "none",
-   "solvedSeconds": 15.33,
+   "solvedSeconds": 22.37,
    "targetSeconds": 124,
    "salt": 0
   },
@@ -707,7 +707,7 @@
    "template": "split-spines",
    "band": 10,
    "modifier": "none",
-   "solvedSeconds": 27.73,
+   "solvedSeconds": 28.03,
    "targetSeconds": 130,
    "salt": 0
   },
@@ -751,7 +751,7 @@
    "template": "switchback",
    "band": 10,
    "modifier": "none",
-   "solvedSeconds": 15.43,
+   "solvedSeconds": 17.03,
    "targetSeconds": 130,
    "salt": 0
   },
@@ -773,7 +773,7 @@
    "template": "broken-cross",
    "band": 10,
    "modifier": "exit-window",
-   "solvedSeconds": 17.17,
+   "solvedSeconds": 25.17,
    "targetSeconds": 130,
    "salt": 0
   },
@@ -784,7 +784,7 @@
    "template": "vault-wings",
    "band": 10,
    "modifier": "none",
-   "solvedSeconds": 15.53,
+   "solvedSeconds": 13.07,
    "targetSeconds": 130,
    "salt": 0
   },
@@ -828,7 +828,7 @@
    "template": "broken-cross",
    "band": 11,
    "modifier": "none",
-   "solvedSeconds": 13.83,
+   "solvedSeconds": 19.77,
    "targetSeconds": 130,
    "salt": 0
   },
@@ -850,7 +850,7 @@
    "template": "relay-court",
    "band": 11,
    "modifier": "none",
-   "solvedSeconds": 14.07,
+   "solvedSeconds": 13.73,
    "targetSeconds": 130,
    "salt": 0
   },

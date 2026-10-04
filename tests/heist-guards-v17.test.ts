@@ -107,3 +107,17 @@ test('a revision 16 definition that names a health value keeps the role table',a
  const l=arena(),old={...l,combat:{version:2 as const,revision:16 as const},patrols:[{...l.patrols[0]!,hp:999}]};
  assert.equal(makeGuards(old.mission,old)[0]!.hp,50);assert.equal(makeGuards(l.mission,{...l,patrols:[{...l.patrols[0]!,hp:999}]})[0]!.hp,999);
 });
+
+test('a receiver that cannot reach a report keeps one search going under repeated reports and returns to patrol',()=>{
+ const l=arena();l.patrols=[l.patrols[0]!,{...l.patrols[1]!,route:[{x:9,y:9},{x:9,y:9.01}]}];
+ // a full dividing wall: the receiver can never reach the courier's side
+ l.blockers.push({x:7.5,y:.7,w:.3,h:18.6,kind:'wall'});
+ const s=initialState(l.mission,l);s.x=6;s.y=8.5;s.px=s.x;s.py=s.y;const receiver=s.guards[1]!;
+ advanceAI(s,l,24);assert(mem(s,0).hunting&&mem(s,1).suspicious);
+ // the observer keeps reporting every 12 ticks; the receiver gets one pause, fails its path, searches once around the
+ // spot, calms down, and only a later report starts a second episode
+ let pauses=0,lastPause=mem(s,1).noticeUntil!,searches=0,lastSearch=-1,moved=0,at={x:receiver.x,y:receiver.y};
+ for(let t=0;t<420;t++){advanceAI(s,l,1);const pause=mem(s,1).noticeUntil!;if(pause!==lastPause){lastPause=pause;pauses++;}if(receiver.mode==='search'&&receiver.brain!.searchUntil!==lastSearch){lastSearch=receiver.brain!.searchUntil;searches++;}moved+=Math.hypot(receiver.x-at.x,receiver.y-at.y);at={x:receiver.x,y:receiver.y};}
+ // 420 ticks hold about two full episodes (pause, failed path, 150-tick search) against some 35 reports
+ assert(pauses<=2,`the pause restarted ${pauses} times in two episodes`);assert(searches<=3,`search restarted ${searches} times`);assert(moved>1,'the receiver was never frozen in place');
+});
