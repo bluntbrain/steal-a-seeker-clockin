@@ -16,7 +16,8 @@ export type CampaignRecipe={version:1;number:number;template:string;mirror:boole
 export const campaignLevelKey=(n:number)=>`campaign:${n}`;
 export const campaignLevelNumber=(key:string)=>{const m=/^campaign:(\d+)$/.exec(key);return m?Number(m[1]):null;};
 export const ZONES:readonly CampaignZone[]=['warehouse','rooftops','powerworks'];
-export const campaignZone=(n:number):CampaignZone=>ZONES[Math.floor((n-1)/10)%3]!;
+// authored levels keep their districts (1 to 4, 5 to 8, 9 to 12); published zones then run ten levels each from 13
+export const campaignZone=(n:number):CampaignZone=>n<FIRST_PUBLISHED_LEVEL?(n>=9?'powerworks':n>=5?'rooftops':'warehouse'):ZONES[Math.floor((n-FIRST_PUBLISHED_LEVEL)/10)%3]!;
 export const isBossLevel=(n:number)=>n>=FIRST_PUBLISHED_LEVEL&&n%BOSS_EVERY===0;
 // the rotation starts with toly on the first boss level and cycles through the seven
 export const bossFor=(n:number):BossId|undefined=>isBossLevel(n)?BOSSES[(n/BOSS_EVERY-Math.ceil(FIRST_PUBLISHED_LEVEL/BOSS_EVERY))%BOSSES.length]:undefined;

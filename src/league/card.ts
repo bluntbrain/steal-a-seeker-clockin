@@ -10,7 +10,7 @@ export const CARD_PORTRAIT={x:526,y:350,width:478,height:717};
 export const cardPortrait=(d:CourierCardData)=>d.campaign&&costumeFor(d.outfit).id==='default'?celebration.uri:portraits[costumeFor(d.outfit).asset];
 export const cardHeight=(d:CourierCardData)=>d.campaign?1450:CARD_HEIGHT;
 export const cardPortraitRect=(d:CourierCardData)=>d.campaign?{x:40,y:185,width:1000,height:970}:CARD_PORTRAIT;
-export type CourierCardData={week:string;rank:number|null;participants?:number;points:number;cleared:number;ticks:number;domain:string|null;wallet:string;final:boolean;local:boolean;earned:boolean;outfit?:string;frame?:string;campaign?:{cleared:number;stars:number;score:number;seconds:number}};
+export type CourierCardData={week:string;rank:number|null;participants?:number;points:number;cleared:number;ticks:number;domain:string|null;wallet:string;final:boolean;local:boolean;earned:boolean;outfit?:string;frame?:string;campaign?:{cleared:number;stars:number;score:number;seconds:number;level?:number;total?:number}};
 export type CardText={key:string;text:string;x:number;y:number;width:number;size:number;color:string;weight:'400'|'700'|'900';align?:'left'|'center';spacing?:number};
 const esc=(s:string)=>s.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&apos;'}[c]!));
 const natural=(n:number)=>Number.isFinite(n)?Math.max(0,Math.floor(n)):0;
@@ -24,12 +24,24 @@ export function cardWeek(week:string){
  const a=`${start.getUTCDate()} ${month[start.getUTCMonth()]}`,b=`${end.getUTCDate()} ${month[end.getUTCMonth()]} ${end.getUTCFullYear()}`;
  return start.getUTCFullYear()!==end.getUTCFullYear()?`${a} ${start.getUTCFullYear()} – ${b} · UTC`:start.getUTCMonth()!==end.getUTCMonth()?`${a} – ${b} · UTC`:`${start.getUTCDate()}–${b} · UTC`;
 }
-export const cardFileName=(d:CourierCardData)=>d.campaign?'seeker-campaign-complete.png':`seeker-${/^\d{4}-\d{2}-\d{2}$/.test(d.week)?d.week:'weekly'}.png`;
+export const cardFileName=(d:CourierCardData)=>d.campaign?.level?`seeker-level-${d.campaign.level}.png`:d.campaign?'seeker-campaign-complete.png':`seeker-${/^\d{4}-\d{2}-\d{2}$/.test(d.week)?d.week:'weekly'}.png`;
 /** Shared layout keeps native preview, browser preview and exported PNG values identical. */
 export function cardLayout(d:CourierCardData):CardText[]{
  const blocks:CardText[]=[],put=(key:string,text:string,x:number,y:number,width:number,size:number,color='#CFE6E4',weight:CardText['weight']='700',align:CardText['align']='left',spacing=0)=>blocks.push({key,text,x,y,width,size,color,weight,align,spacing});
  if(d.campaign){
-  const c=d.campaign;
+  const c=d.campaign,total=c.total??12,level=c.level;
+  if(level){
+   const done=c.cleared>=total;
+   put('status',done?`ALL ${natural(total)} LEVELS CLEARED`:`LEVEL ${natural(level)} OF ${natural(total)}`,40,35,1000,31,'#ACCBC6','700','center',5);
+   put('name',done?'Every level. Cleared.':'Still climbing.',25,101,1030,77,'#F6F6F5','900','center');
+   put('meaning','Campaign so far',330,1135,420,30,'#94ACA4','700','center');
+   [String(natural(c.cleared)),String(natural(c.stars))+' / '+natural(total*3),count(c.score)].forEach((v,i)=>{
+    put('stat-'+i,v,[20,380,740][i]!,1255,320,Math.min(68,320/(v.length*.57)),'#E1F2EC','900','center');
+    put('label-'+i,['LEVELS CLEARED','STARS','BEST SCORE'][i]!,[20,380,740][i]!,1333,320,27,'#9EBCB2','700','center',1);
+   });
+   put('qualifier',d.local?'Personal campaign record · Played in browser':'Personal campaign record · Played on Android',30,1400,1020,22,'#8FA99E','400','center');
+   return blocks;
+  }
   put('status',`${natural(c.cleared)} / 12 HEISTS`,40,35,1000,31,'#ACCBC6','700','center',5);
   put('name','Every Seeker. Secured.',25,101,1030,77,'#F6F6F5','900','center');
   put('meaning','Personal bests',330,1135,420,30,'#94ACA4','700','center');

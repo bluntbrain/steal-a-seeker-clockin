@@ -4,11 +4,12 @@ import {HapticPressable as Pressable} from '../feedback/HapticPressable';
 import {useAccount} from '../commerce/account-context';
 import {ApiError,commerceApi} from '../commerce/client';
 import {walletFailure} from '../wallet/diagnostics';
-import {enqueue,submitCampaignRun} from './client';
+import {enqueue,submitCampaignRun,type CampaignTarget} from './client';
 import type {GameState} from '../game/simulation';
 import type {Replay} from '../../shared/replay';
-export default function CampaignSubmission({state,replay,quiet=false,onReward,retrySignal=0}:{state:GameState;replay:Replay;quiet?:boolean;onReward?:(amount:number|null,message?:string,saved?:boolean)=>void;retrySignal?:number}){
- const account=useAccount(),latest=useRef({account,onReward});latest.current={account,onReward};
+export default function CampaignSubmission({state,replay,target,quiet=false,onReward,retrySignal=0}:{state:GameState;replay:Replay;target:CampaignTarget;quiet?:boolean;onReward?:(amount:number|null,message?:string,saved?:boolean)=>void;retrySignal?:number}){
+ const account=useAccount(),latest=useRef({account,onReward,target});latest.current={account,onReward,target};
+ const targetId='level' in target?`level:${target.level}`:target.mission;
  const lastRetry=useRef(0);
  const [message,setMessage]=useState('Verifying your mission…'),[retry,setRetry]=useState(0),[failed,setFailed]=useState(false);
  useEffect(()=>{
@@ -20,14 +21,14 @@ export default function CampaignSubmission({state,replay,quiet=false,onReward,re
    if(!valid()||running||confirmed)return;running=true;attempts++;setFailed(false);
    let saved=false;
    try{
-    await enqueue(wallet,state.mission,replay);saved=true;
+    await enqueue(wallet,latest.current.target,replay);saved=true;
     if(!valid())return;
     latest.current.onReward?.(null,wallet==='guest'?'Connect your wallet to save these credits to your account.':undefined,true);
     // Keep guest wins durable until the player connects to claim.
     if(wallet==='guest')return;
     const session=await latest.current.account.session(interactive&&attempts===1);
     if(!valid())return;
-    const receipt=await submitCampaignRun(wallet,session.token,state.mission,replay);
+    const receipt=await submitCampaignRun(wallet,session.token,latest.current.target,replay);
     if(!valid())return;
     const award=receipt.creditAward;
     confirmed=true;
@@ -52,6 +53,6 @@ export default function CampaignSubmission({state,replay,quiet=false,onReward,re
   void run();
   const subscription=AppState.addEventListener('change',s=>{if(s==='active'&&!confirmed){clearTimeout(timer);void run();}});
   return()=>{alive=false;clearTimeout(timer);subscription.remove();};
- },[account.wallet,state.status,state.mission,replay,retry,retrySignal]);
+ },[account.wallet,state.status,targetId,replay,retry,retrySignal]);
  return quiet&&!failed?null:<View style={{gap:4}}><Text style={{color:'#C7EADB',fontSize:10}}>{message}</Text>{failed&&<Pressable accessibilityRole="button" accessibilityLabel="Retry campaign replay save" onPress={()=>setRetry(n=>n+1)}><Text style={{color:'#E7FCD8',fontSize:11}}>Retry replay save</Text></Pressable>}</View>;
 }

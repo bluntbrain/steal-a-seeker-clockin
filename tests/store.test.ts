@@ -49,3 +49,10 @@ test('direct outfit checkout has configurable SKR and converted SOL prices, inde
  assert.equal(priceProduct('night-courier','SKR',rates,6,now,1,undefined,{'night-courier':'125'}).amount,'125000000');
  assert.equal(networkConfig({STORE_CREDIT_PRICES_JSON:'{"circuit-scout":3200}'}).storeCreditPrices['circuit-scout'],3200);
 });
+test('local credits pay the published rate for levels past twelve and double it for bosses',async()=>{
+ const {emptyInventory,earnCredits,PUBLISHED_CLEAR_CREDITS,BOSS_CLEAR_CREDITS,CAMPAIGN_STAR_BONUS}=await import('../shared/store');
+ let s=earnCredits(emptyInventory(),'campaign:13',1);assert.equal(s.balance,PUBLISHED_CLEAR_CREDITS);
+ s=earnCredits(s,'campaign:13',3);assert.equal(s.balance,PUBLISHED_CLEAR_CREDITS+2*CAMPAIGN_STAR_BONUS);
+ s=earnCredits(s,'campaign:13',2);assert.equal(s.balance,PUBLISHED_CLEAR_CREDITS+2*CAMPAIGN_STAR_BONUS,'a worse run never pays again');
+ s=earnCredits(s,'campaign:15',2,true);assert.equal(s.balance,PUBLISHED_CLEAR_CREDITS+2*CAMPAIGN_STAR_BONUS+BOSS_CLEAR_CREDITS+CAMPAIGN_STAR_BONUS);
+});

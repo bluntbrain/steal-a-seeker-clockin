@@ -1,5 +1,23 @@
 [
  {
+  "name": "archive-keeper",
+  "file": "archive-keeper.webp",
+  "model": "gpt-image-2",
+  "source": "output/imagegen/courier-topdown-v1/archive-keeper-sheet.png",
+  "frames": 8,
+  "cell": 256,
+  "sha256": "771b6d5e832735a1a386512dec064fc14e10d0c858ef7075c8e67f9639dbc345"
+ },
+ {
+  "name": "circuit-scout",
+  "file": "circuit-scout.webp",
+  "model": "gpt-image-2",
+  "source": "output/imagegen/courier-topdown-v1/circuit-scout-sheet.png",
+  "frames": 8,
+  "cell": 256,
+  "sha256": "f7dfbffe45d6d8463d051b6017ac97f88b01cea16acac0e4531eedaf05b911d4"
+ },
+ {
   "name": "default",
   "file": "default.webp",
   "model": "gpt-image-2",
@@ -7,5 +25,32 @@
   "frames": 8,
   "cell": 256,
   "sha256": "6a3c67a16dfdb75b3a5f99db8840d67f9828df86d636cc3165d9b3d01b07720b"
+ },
+ {
+  "name": "frost-runner",
+  "file": "frost-runner.webp",
+  "model": "gpt-image-2",
+  "source": "output/imagegen/courier-topdown-v1/frost-runner-sheet.png",
+  "frames": 8,
+  "cell": 256,
+  "sha256": "3f6ada6c105a3ee8cc45756f18c88b33ecb51a52410936e332e1b7be5dfdcef3"
+ },
+ {
+  "name": "ghost-signal",
+  "file": "ghost-signal.webp",
+  "model": "gpt-image-2",
+  "source": "output/imagegen/courier-topdown-v1/ghost-signal-sheet.png",
+  "frames": 8,
+  "cell": 256,
+  "sha256": "e217cc62ee844f3baf4415cea91cda45c0b8507fe3ecfc77e6ff69c098daaa90"
+ },
+ {
+  "name": "night-courier",
+  "file": "night-courier.webp",
+  "model": "gpt-image-2",
+  "source": "output/imagegen/courier-topdown-v1/night-courier-sheet.png",
+  "frames": 8,
+  "cell": 256,
+  "sha256": "7145646c31817d700d257a9d7199af7fa162982cdbf0234509d9d2fd7119076a"
  }
 ]

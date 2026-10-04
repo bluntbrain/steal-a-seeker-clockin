@@ -10,7 +10,7 @@ import {makeWarehouse} from '../game/art';
 import {currentWallStyle} from '../art/wall-style';
 import {interiorWalls,wallActorClip,type WallStyle} from '../art/wall-depth';
 import {makeWallOcclusion} from '../art/wall-depth-art';
-import {districtFor,environmentFor} from '../game/environment';
+import {zoneFor,environmentFor} from '../game/environment';
 import {TUNING,SECURITY,type LevelDefinition} from '../game/level';
 import {targetPhone,decoyLanding,type GameState,type Input} from '../game/simulation';
 import {editionIndex} from '../game/collection';
@@ -44,7 +44,7 @@ function DecoyLayer({game,input,reduced}:{game:SharedValue<GameState>;input:Shar
 const TOP_FRAMES=topdownFrames as {name:string;x:number;y:number;width:number;height:number}[];
 export default memo(function GameCanvas({camera,size,height=size*20/12,input,game,alpha,clock,level,appearance={},onReady,onLoadError,wallStyle=currentWallStyle()}:Props){
  const cameraTransform=useDerivedValue(()=>{const c=camera?.value??{x:0,y:0,zoom:1},scale=size/12*c.zoom;return [{translateX:-c.x*scale},{translateY:-c.y*scale},{scale}];});
- const district=districtFor(level.number),environment=environmentFor(level);
+ const district=zoneFor(level),environment=environmentFor(level);
  const wallTexture=useImage(district==='rooftops'?require('../../assets/walls-v5/rooftop-cap.jpg'):district==='powerworks'?require('../../assets/walls-v5/vault-cap.jpg'):require('../../assets/walls-v5/warehouse-cap.jpg'),onLoadError);
  const world=useMemo(()=>wallTexture?makeWarehouse(false,level,wallTexture,wallStyle):null,[level,wallTexture,wallStyle]);
  const wallOcclusion=useMemo(()=>makeWallOcclusion(interiorWalls(level.blockers,level.width,level.height),wallStyle),[level,wallStyle]);

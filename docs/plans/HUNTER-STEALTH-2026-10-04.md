@@ -2,7 +2,7 @@
 
 Plan, revised 4 October 2026 after the first review. Branch `hunter-stealth`, draft PR #1. Decisions taken by the user on 4 October: the Solana characters leave the store and become recurring bosses; a boss appears every third level; the campaign grows from 12 fixed missions to a backend-published list that keeps growing (first target 100, capacity 200 or more); missions are shown on a vertically scrolling saga map players can share; the overall look gets an upgrade; guard engine 17 ships in the hackathon build only if the audit passes; top-down art lands for the default costume first.
 
-Implemented so far on the branch: the top-down courier renderer with the default sheet, guard "?" and "!" markers, the red detection ring and the in-play kill counter. Everything else below is design.
+Implemented so far on the branch (4 October): the top-down courier renderer with sheets for the default and five classic costumes, guard "?" and "!" markers, the red detection ring, the in-play kill counter, the store retirement of the seven Solana skins, the published campaign backend (migration 015, `GET /campaign/levels`, level claims on `POST /campaign/runs`, `campaign:N` progress keys, boot seeding of the bundled batch, the publish script), the shared recipe generator with the first 88 levels bundled in the app, the vertical level map with zone banners and boss nodes, and the level share card. Still design: section 2 (guard engine 17 and the boss role), boss sprites, corpses, zone art.
 
 ## 1. What we studied
 

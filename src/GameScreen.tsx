@@ -2,20 +2,20 @@ import LaunchSplash from './components/LaunchSplash';
 import {exitWindowSeconds} from './ranked/exit-window';
 import TutorialHand from './components/TutorialHand';
 import MissionIntro from './components/MissionIntro';
-import {campaignLesson} from './onboarding/mission-lessons';
+import {campaignLesson,publishedLesson} from './onboarding/mission-lessons';
+import {authoredEntry,campaignEntries,nextEntry,type CampaignEntry} from './campaign/levels';
+import {publishedLevels} from './campaign/client';
 import {HapticPressable as Pressable} from './feedback/HapticPressable';
-import {CAMPAIGN_IDS} from './game/level';
 import EconomyProvider,{useEconomy} from './commerce/EconomyProvider';
 import CreditBalance from './components/CreditBalance';
 import {localTestMission} from './playtest/mission';
-import {combatLevel} from './game/combat-levels';
 import {isDuplicateTap,tapReady,TAP_INTERVAL_MS,type PendingTap} from './controls/tapQueue';
 import {assistedCombatTap} from './controls/tapDestination';
 import {encounterHint} from './controls/encounterHint';
 import {PhoneObjectivePill,SecurityEntrances,MechanismLabels} from './components/ObjectiveSignals';
 import CampaignConfetti from './components/CampaignConfetti';
 import CompletionCard from './campaign/CompletionCard';
-import {completedCampaign,campaignSummary,nextCampaignMission} from './campaign/completion';
+import {completedCampaign,campaignSummary} from './campaign/completion';
 import type {CourierCardData} from './league/card';
 import {useGameAudio} from './audio/useGameAudio';
 import {useCombatGuide} from './onboarding/useCombatGuide';
@@ -29,7 +29,7 @@ import {useCoach} from './onboarding/useCoach';
 import {useTrial} from './commerce/TrialContext';
 import RewardsPanel from './campaign/RewardsPanel';
 import CampaignSubmission from './campaign/CampaignSubmission';
-import React,{useCallback,useEffect,useMemo,useRef,useState} from 'react';
+import React,{useCallback,useEffect,useMemo,useRef,useState,useSyncExternalStore} from 'react';
 import {ActivityIndicator,AppState,Platform,StyleSheet,Text,View,useWindowDimensions} from 'react-native';
 import {StatusBar} from 'expo-status-bar';
 import {SafeAreaProvider,SafeAreaView,useSafeAreaInsets} from 'react-native-safe-area-context';
@@ -51,7 +51,7 @@ import ResultSheet from './components/ResultSheet';
 import SettingsProvider,{useSettings} from './settings/SettingsProvider';
 import SettingsPanel from './settings/SettingsPanel';
 import {useProgress} from './progress/useProgress';
-import {starsFor} from './progress/model';
+import {starsFor,progressKeyOf} from './progress/model';
 import WalletProvider from './wallet/WalletProvider';
 import WalletPanel from './wallet/WalletPanel';
 import AccountProvider from './commerce/AccountProvider';
@@ -89,7 +89,7 @@ function WalletGame(){
 }
 export function Game({rankTicket,paidPlay,dailyReturn,paidReturn,onRankStart,onRankExit,onPaidStart,onPaidExit,onSnapshot,paidCheckpoint=paidStore.checkpoint}:{rankTicket?:RunTicket;paidPlay?:PaidPlay;dailyReturn:boolean;paidReturn:boolean;onRankStart:(ticket:RunTicket)=>void;onRankExit:()=>void;onPaidStart:(play:PaidPlay)=>void;onPaidExit:()=>void;onSnapshot?:(state:GameState)=>void;paidCheckpoint?:typeof paidStore.checkpoint}){
  const trial=useTrial(),testMission=localTestMission();
- const [introMission,setIntroMission]=useState<MissionId|null>(null);
+ const [introMission,setIntroMission]=useState<CampaignEntry|null>(null);
  const [rewardsOpen,setRewardsOpen]=useState(false),[returnHome,setReturnHome]=useState(false);
  const closeOverlay=(close:(open:boolean)=>void)=>{close(false);if(returnHome){setHideoutOpen(true);setReturnHome(false);}};
  const paidEntry=paidPlay?.entry,timedRun=!!rankTicket||!!paidEntry,startMission=rankTicket?.manifest.mission??paidEntry?.manifest.mission??testMission??'practice';
@@ -101,17 +101,18 @@ export function Game({rankTicket,paidPlay,dailyReturn,paidReturn,onRankStart,onR
  const homeFirst=!testMission&&!trial.active&&!timedRun&&!dailyReturn&&!paidReturn;
  const [missionMapRequest,setMissionMapRequest]=useState(0);
  const [walletOpen,setWalletOpen]=useState(false),[mapOpen,setMapOpen]=useState(false),[hideoutOpen,setHideoutOpen]=useState(homeFirst||dailyReturn),[dailyOpen,setDailyOpen]=useState(false),[settingsOpen,setSettingsOpen]=useState(false),[paidOpen,setPaidOpen]=useState(paidReturn);
- const initial=useMemo(()=>initialState(startMission,rankTicket?.manifest.contract?.level??(combatMode?combatLevel(startMission):undefined)),[]);
+ const initial=useMemo(()=>initialState(startMission,rankTicket?.manifest.contract?.level??(combatMode?authoredEntry(startMission).definition:undefined)),[]);
  const sceneEpoch=useRef(0),[sceneVersion,setSceneVersion]=useState(0),[sceneLoading,setSceneLoading]=useState(true),[sceneError,setSceneError]=useState('');
  const sceneReady=useSharedValue(false),simulationEpoch=useSharedValue(0),focusProgress=useSharedValue(1);
  const pendingTap=useSharedValue<PendingTap|null>(null),previousTap=useSharedValue<PendingTap|null>(null),tapElapsed=useSharedValue(TAP_INTERVAL_MS);
  const recording=useSharedValue<ReplayChunk[]>(paidPlay?.replay.chunks.map(c=>({...c}))??[]),[completedReplay,setCompletedReplay]=useState<Replay>();
  const game=useSharedValue(initial),input=useSharedValue(idleInput()),alpha=useSharedValue(0),clock=useSharedValue(0),accumulator=useSharedValue(0),suspended=useSharedValue(!!paidEntry||dailyReturn||paidReturn||homeFirst),saveClock=useSharedValue(0);
  const samples=useSharedValue<number[]>([]),reportClock=useSharedValue(0),hudClock=useSharedValue(0),frameTotal=useSharedValue(0),slowTotal=useSharedValue(0);
- const [hud,setHud]=useState<GameState>(()=>JSON.parse(JSON.stringify(initial))),[stats,setStats]=useState<Stats>(zeroStats),[paused,setPaused]=useState(!!paidEntry||dailyReturn||paidReturn||homeFirst),[details,setDetails]=useState(false),[mission,setMission]=useState<MissionId>(startMission);
+ const [hud,setHud]=useState<GameState>(()=>JSON.parse(JSON.stringify(initial))),[stats,setStats]=useState<Stats>(zeroStats),[paused,setPaused]=useState(!!paidEntry||dailyReturn||paidReturn||homeFirst),[details,setDetails]=useState(false),[mission,setMission]=useState<MissionId>(startMission),[entry,setEntry]=useState<CampaignEntry>(()=>authoredEntry(startMission));
+ const entryRef=useRef(entry);entryRef.current=entry;
  useRunTelemetry(hud,paused,paidEntry?'paid':rankTicket?'daily':trial.active?'trial':'campaign',stats);
  const coach=useCoach(hud,!timedRun&&!combatMode);
- const guide=useCombatGuide(hud,!timedRun),beginGuide=guide.begin;
+ const guide=useCombatGuide(hud,!timedRun&&entry.key==='practice'),beginGuide=guide.begin;
  const guideWaiting=useSharedValue(true),guideStage=useSharedValue(-1);
  useEffect(()=>{if(guide.active&&guide.resume){const saved=JSON.parse(JSON.stringify(guide.resume.state));game.value=saved;setHud(saved);recording.value=[];input.value=idleInput();guide.consumeResume();}},[guide.active,guide.resume]);
  useEffect(()=>{guideWaiting.value=!guide.ready||(guide.active&&guide.waiting);guideStage.value=guide.active?guide.stage:-1;},[guide.ready,guide.active,guide.waiting,guide.stage]);
@@ -134,7 +135,7 @@ export function Game({rankTicket,paidPlay,dailyReturn,paidReturn,onRankStart,onR
  useCombatAudio(hud,settings.sound&&gameplayVisible,settings.volume,showDamage,gameplayVisible,haptic);
  useEffect(()=>{if(!gameplayVisible||hud.ticks===0)damagePulse.value=0;},[gameplayVisible,hud.ticks===0,damagePulse]);
  useFootstepAudio(hud,settings.sound&&gameplayVisible&&!(guide.active&&guide.waiting),settings.volume);
- const level=useMemo(()=>rankTicket?.manifest.contract?.level??(combatMode?combatLevel(mission):getLevel(mission)),[rankTicket?.manifest.contract?.level,combatMode,mission]);
+ const level=useMemo(()=>rankTicket?.manifest.contract?.level??(combatMode?entry.definition:getLevel(mission)),[rankTicket?.manifest.contract?.level,combatMode,mission,entry]);
  useLevelMusic(level.number,settings.sound&&gameplayVisible&&hud.status==='playing'&&!(guide.active&&guide.waiting),settings.volume,hud.securityAlarm);
  const progress=useProgress(),recorded=useRef(false),rankResolved=useRef(false);
  const [earnedNotice,setEarnedNotice]=useState('');
@@ -148,10 +149,11 @@ export function Game({rankTicket,paidPlay,dailyReturn,paidReturn,onRankStart,onR
  useEffect(()=>{if(account.wallet&&connectClaimPending.current){connectClaimPending.current=false;setCreditReward({amount:null});setRewardRetry(n=>n+1);}},[account.wallet]);
  async function connectToClaim(){if(connectClaimPending.current)return;connectClaimPending.current=true;setConnectingClaim(true);setAutoClaim(true);setCreditReward({amount:null});haptic('confirm');try{await account.connect();}catch{connectClaimPending.current=false;setAutoClaim(false);setCreditReward({amount:null,message:'Wallet connection was not completed. Try again to claim.'});}finally{setConnectingClaim(false);}}
  const rewardResolved=useCallback((amount:number|null,message?:string,saved=false)=>setCreditReward({amount,message,saved}),[]);
- const saveLocalReward=()=>{const epoch=rewardEpoch.current;rewardResolved(null);void economy.earn(hud.mission,starsFor(hud)).then(n=>{if(epoch!==rewardEpoch.current)return;setEarnedNotice(n>0?`+${n} credits`:'');rewardResolved(n);}).catch(()=>{if(epoch===rewardEpoch.current)rewardResolved(null,'Credit save failed. Tap Retry save.');});};
+ const saveLocalReward=()=>{const epoch=rewardEpoch.current;rewardResolved(null);void economy.earn(progressKeyOf(hud),starsFor(hud),!!entry.boss).then(n=>{if(epoch!==rewardEpoch.current)return;setEarnedNotice(n>0?`+${n} credits`:'');rewardResolved(n);}).catch(()=>{if(epoch===rewardEpoch.current)rewardResolved(null,'Credit save failed. Tap Retry save.');});};
  const campaignFinished=!timedRun&&!trial.active&&!testMission&&completedCampaign(progress.progress,hud);
  const finaleVisible=!sceneLoading&&campaignFinished&&!claimVisible&&!paused&&!hideoutOpen&&!walletOpen&&!settingsOpen;
- const nextMission=nextCampaignMission(mission);
+ const published=useSyncExternalStore(publishedLevels.subscribe,publishedLevels.get),entries=useMemo(()=>campaignEntries(published),[published]);
+ const nextMission=nextEntry(entries,entry.key);
  const shareAction=useRef<(()=>Promise<void>)|null>(null),[shareReady,setShareReady]=useState(false);
  const registerShare=useCallback((fn:(()=>Promise<void>)|null)=>{shareAction.current=fn;setShareReady(!!fn);},[]);
  const completionData=useMemo<CourierCardData>(()=>({week:'',rank:null,points:0,cleared:0,ticks:0,domain:null,wallet:account.wallet??'browser-playtest',final:true,local:Platform.OS==='web',earned:false,outfit:economy.equipment.outfit,frame:economy.equipment.frame,campaign:campaignSummary(progress.progress,hud)}),[progress.progress,hud.status,hud.mission,hud.score,hud.ticks,account.wallet,economy.equipment.outfit,economy.equipment.frame]);
@@ -175,7 +177,7 @@ export function Game({rankTicket,paidPlay,dailyReturn,paidReturn,onRankStart,onR
  const soundAllowed=useRef(false);soundAllowed.current=settings.sound&&!paused&&!walletOpen&&!hideoutOpen&&!rewardsOpen;
  const event=useCallback((kind:'pickup'|'dash'|'success'|'caught'|'decoy'|'spot'|'switch')=>{
    if(kind==='spot'){const now=Date.now();if(now-lastSpotAt.current<1300)return;lastSpotAt.current=now;}
-   if(soundAllowed.current&&!(kind==='success'&&!timedRun&&CAMPAIGN_IDS.every(id=>id===latest.current.mission||!!progress.progress.missions[id]))){const player={pickup:pickupAudio,dash:dashAudio,success:successAudio,caught:caughtAudio,decoy:decoyAudio,spot:spotAudio,switch:switchAudio}[kind];player.seekTo(0).then(()=>{if(soundAllowed.current){player.volume=settingsRef.current.volume*({pickup:1,dash:.7,success:.9,caught:.8,decoy:.7,spot:.65,switch:.7}[kind]);player.play();}}).catch(()=>{});}
+   if(soundAllowed.current&&!(kind==='success'&&!timedRun&&completedCampaign(progress.progress,latest.current))){const player={pickup:pickupAudio,dash:dashAudio,success:successAudio,caught:caughtAudio,decoy:decoyAudio,spot:spotAudio,switch:switchAudio}[kind];player.seekTo(0).then(()=>{if(soundAllowed.current){player.volume=settingsRef.current.volume*({pickup:1,dash:.7,success:.9,caught:.8,decoy:.7,spot:.65,switch:.7}[kind]);player.play();}}).catch(()=>{});}
    haptic(kind);
  },[pickupAudio,dashAudio,successAudio,decoyAudio,caughtAudio,spotAudio,switchAudio,timedRun,progress.progress,haptic]);
  useEffect(()=>{if(paused){for(const p of [pickupAudio,dashAudio,successAudio,decoyAudio,caughtAudio,spotAudio,switchAudio])p.pause();}},[paused]);
@@ -250,10 +252,10 @@ export function Game({rankTicket,paidPlay,dailyReturn,paidReturn,onRankStart,onR
  },[suspended,input,game,timedRun,paidEntry,checkpoint,recording,recoveryReady,recoveryError,deadlinePassed]);
  const leavePaid=useCallback(async()=>{if(!paidEntry)return;suspended.value=true;setPaused(true);try{await persistPaid({version:(combatMode?2:1) as 1|2,chunks:recording.value.map(c=>({...c}))});onPaidExit();}catch{/* Keep the screen and input log available for a save retry. */}},[paidEntry,suspended,persistPaid,recording,onPaidExit]);
  const leaveRank=useCallback(async()=>{if(!rankTicket)return;if(rankTicket.practice){onRankExit();return;}if(Platform.OS==='web'&&rankTicket.manifest.contract){const {abandonLocal}=await import('./league/local');abandonLocal();onRankExit();return;}try{if(game.value.status==='playing'){const session=await account.session(false);if(session.wallet===rankTicket.wallet)await rankedApi.abandon(session.token,rankTicket.id);}else if(!rankResolved.current)await savePending(rankTicket,{version:(combatMode?2:1) as 1|2,chunks:recording.value.map(c=>({...c}))});}catch{/* The daily screen can recover the server ticket after an outage. */}finally{onRankExit();}},[rankTicket,game,recording,account.session,onRankExit]);
- const restart=useCallback((next:MissionId=game.value.mission)=>{if(trial.active){trial.finish();return;}if(paidEntry){void leavePaid();return;}if(rankTicket){void leaveRank();return;}sceneReady.value=false;suspended.value=true;pendingTap.value=null;previousTap.value=null;tapElapsed.value=TAP_INTERVAL_MS;simulationEpoch.value=++sceneEpoch.current;setSceneVersion(sceneEpoch.current);setSceneLoading(true);setSceneError('');recording.value=[];setCompletedReplay(undefined);rewardEpoch.current++;setEarnedNotice('');setCreditReward({amount:null});setRewardClaimed(false);setAutoClaim(false);setRewardRetry(0);connectClaimPending.current=false;recorded.current=false;setMission(next);const fresh=guide.start(next)??initialState(next,combatMode?combatLevel(next):undefined);game.value=fresh;input.value=idleInput();accumulator.value=0;alpha.value=0;clock.value=0;samples.value=[];frameTotal.value=0;slowTotal.value=0;reportClock.value=0;hudClock.value=0;setHud(fresh);latest.current=fresh;suspended.value=false;setPaused(false);setStats(zeroStats);},[game,input,accumulator,alpha,clock,samples,frameTotal,slowTotal,reportClock,hudClock,suspended,rankTicket,leaveRank,recording,paidEntry,leavePaid,trial,guide.start]);
+ const restart=useCallback((next:CampaignEntry=entryRef.current)=>{if(trial.active){trial.finish();return;}if(paidEntry){void leavePaid();return;}if(rankTicket){void leaveRank();return;}sceneReady.value=false;suspended.value=true;pendingTap.value=null;previousTap.value=null;tapElapsed.value=TAP_INTERVAL_MS;simulationEpoch.value=++sceneEpoch.current;setSceneVersion(sceneEpoch.current);setSceneLoading(true);setSceneError('');recording.value=[];setCompletedReplay(undefined);rewardEpoch.current++;setEarnedNotice('');setCreditReward({amount:null});setRewardClaimed(false);setAutoClaim(false);setRewardRetry(0);connectClaimPending.current=false;recorded.current=false;setMission(next.mission);setEntry(next);const fresh=(next.key==='practice'?guide.start('practice'):null)??initialState(next.mission,combatMode?next.definition:undefined);game.value=fresh;input.value=idleInput();accumulator.value=0;alpha.value=0;clock.value=0;samples.value=[];frameTotal.value=0;slowTotal.value=0;reportClock.value=0;hudClock.value=0;setHud(fresh);latest.current=fresh;suspended.value=false;setPaused(false);setStats(zeroStats);},[game,input,accumulator,alpha,clock,samples,frameTotal,slowTotal,reportClock,hudClock,suspended,rankTicket,leaveRank,recording,paidEntry,leavePaid,trial,guide.start]);
  // Explicit exits must open the map even when Hideout remembers a briefing or store tab.
  const backToMissions=()=>{pause(true);economy.setTab('map');setMissionMapRequest(n=>n+1);setHideoutOpen(true);};
- const introduceMission=(next:MissionId)=>{if(testMission||timedRun){restart(next);return;}pause(true);setHideoutOpen(false);setIntroMission(next);};
+ const introduceMission=(next:CampaignEntry)=>{if(testMission||timedRun){restart(next);return;}pause(true);setHideoutOpen(false);setIntroMission(next);};
  useEffect(()=>{const subscription=AppState.addEventListener('change',state=>{if(state!=='active'){finaleAudio.pause();objectiveAudio.pause();if(game.value.status==='playing')pause(true);}});return()=>subscription.remove();},[pause,game,finaleAudio,objectiveAudio]);
  useEffect(()=>{
    if(Platform.OS!=='web')return;
@@ -308,14 +310,14 @@ export function Game({rankTicket,paidPlay,dailyReturn,paidReturn,onRankStart,onR
   rewardsClose:()=>live.current.closeOverlay(setRewardsOpen),
   walletClose:()=>live.current.closeOverlay(setWalletOpen),
   hideoutContract:(ticket:RunTicket)=>{setHideoutOpen(false);live.current.onRankStart(ticket);},
-  hideoutStart:(next:MissionId)=>live.current.introduceMission(next),
+  hideoutStart:(next:CampaignEntry)=>live.current.introduceMission(next),
   hideoutClose:()=>setHideoutOpen(false),
   hideoutShop:()=>{setReturnHome(true);setHideoutOpen(false);setWalletOpen(true);},
   hideoutSync:()=>{void live.current.retrySync();},
   hideoutSettings:()=>{setReturnHome(true);setHideoutOpen(false);setSettingsOpen(true);},
   hideoutDaily:()=>{setHideoutOpen(false);setDailyOpen(true);},
   hideoutPaid:()=>{setReturnHome(true);setHideoutOpen(false);setRewardsOpen(true);},
-  settingsReplay:()=>{setReturnHome(false);if(combatMode)live.current.guideReplay();else live.current.coachReplay();setSettingsOpen(false);setHideoutOpen(false);live.current.restart('practice');},
+  settingsReplay:()=>{setReturnHome(false);if(combatMode)live.current.guideReplay();else live.current.coachReplay();setSettingsOpen(false);setHideoutOpen(false);live.current.restart(authoredEntry('practice'));},
   settingsClose:()=>live.current.closeOverlay(setSettingsOpen),
   dailyClose:()=>{setDailyOpen(false);setHideoutOpen(true);},
   dailyStart:(ticket:RunTicket)=>{setDailyOpen(false);live.current.onRankStart(ticket);},
@@ -375,16 +377,16 @@ export function Game({rankTicket,paidPlay,dailyReturn,paidReturn,onRankStart,onR
   art={paused?(recoveryError?'recovery':!recoveryReady?'pending':'pause'):hud.status==='won'?'success':hud.status==='caught'?'caught':'timeout'}
   eyebrow={finaleVisible?'12 / 12 HEISTS':paused?(recoveryError?'SAVE NEEDS ATTENTION':'RUN PAUSED'):hud.status==='won'?'HEIST COMPLETE':hud.status==='caught'?'PATROL '+(hud.caughtBy+1):'TIME LIMIT'}
   title={finaleVisible?'Every Seeker. Secured.':paused?(recoveryError?'Save interrupted.':'Take a breather.'):hud.status==='won'?'Seeker secured.':hud.status==='caught'?combatMode?'Out of health.':'They spotted you.':'Out of time.'}
-  detail={finaleVisible?'Your campaign is complete. Keep the card.':trial.active&&!paused?'Your free attempt is complete. Unlock the campaign for all 12 missions and unlimited retries.':paused?(paidEntry?(deadlinePassed?'Deadline passed. Return to your entry.':!recoveryReady?'Restoring your saved run…':recoveryError?'Retry saving before you resume.': 'Run paused. Your entry deadline still counts down.'):rankTicket?.practice?'Practice paused. No ranked attempt used.':timedRun?'Run paused. Your submission deadline still counts down.':combatMode?((level.combat?.revision??0)>=15?'Tap the floor to move. Tap a guard to approach and slash. Flank armored guards. Tap the phone, then the exit.':'Tap the floor to move. Tap a guard to approach and shoot. Tap the phone, then the exit.'):'Drag to move. Stop and hold TAKE. Use ACT at switches. More help in Settings.'):hud.status==='won'?(timedRun?'Phone recovered.':`${phoneEdition(mission).name} added to your rack.${earnedNotice?' '+earnedNotice:''}`):hud.status==='caught'?(combatMode?'Move when a guard aims. Cover stops their shots.':level.decoys?'Use cover. Tap DISTRACT, then go the other way.':'Break line of sight behind cover. Dash after taking the phone.'):'Take the phone and reach the mint exit.'}
+  detail={finaleVisible?'Your campaign is complete. Keep the card.':trial.active&&!paused?'Your free attempt is complete. Unlock the campaign for all 12 missions and unlimited retries.':paused?(paidEntry?(deadlinePassed?'Deadline passed. Return to your entry.':!recoveryReady?'Restoring your saved run…':recoveryError?'Retry saving before you resume.': 'Run paused. Your entry deadline still counts down.'):rankTicket?.practice?'Practice paused. No ranked attempt used.':timedRun?'Run paused. Your submission deadline still counts down.':combatMode?((level.combat?.revision??0)>=15?'Tap the floor to move. Tap a guard to approach and slash. Flank armored guards. Tap the phone, then the exit.':'Tap the floor to move. Tap a guard to approach and shoot. Tap the phone, then the exit.'):'Drag to move. Stop and hold TAKE. Use ACT at switches. More help in Settings.'):hud.status==='won'?(timedRun?'Phone recovered.':`${entry.number>12?`Level ${entry.number} cleared.`:`${phoneEdition(mission).name} added to your rack.`}${earnedNotice?' '+earnedNotice:''}`):hud.status==='caught'?(combatMode?'Move when a guard aims. Cover stops their shots.':level.decoys?'Use cover. Tap DISTRACT, then go the other way.':'Break line of sight behind cover. Dash after taking the phone.'):'Take the phone and reach the mint exit.'}
   stats={!finaleVisible&&hud.status==='won'&&!paused?`${time(hud.elapsed)} · ${hud.battery}% ${combatMode?'health':'charge'} · ${(rankTicket?.manifest.contract?contractPoints({status:hud.status,score:hud.score,ticks:hud.ticks,battery:hud.battery},level):hud.score).toLocaleString()} pts`:undefined}
   stars={!finaleVisible&&hud.status==='won'&&!paused?'★'.repeat(starsFor(hud))+'☆'.repeat(3-starsFor(hud)):undefined}
   primary={finaleVisible?{label:'Share card ↗',accessibilityLabel:'Share campaign completion card on X',disabled:!shareReady,onPress:()=>void shareAction.current?.()}:{label:trial.active&&!paused?'View campaign pass':paused?'Resume':paidEntry?'Back to entry':rankTicket?(rankTicket.manifest.contract?'Weekly league':'Back to daily'):hud.status==='won'?(nextMission?'Next mission ↗':'Missions'):'Retry ↗',accessibilityLabel:trial.active&&!paused?'Finish free trial':paused?'Resume run':paidEntry?'Back to paid challenge':rankTicket?(rankTicket.manifest.contract?'Back to weekly league':'Back to daily challenge'):hud.status==='won'?(nextMission?'View next mission':'View missions'):'Retry level',disabled:!!paidEntry&&paused&&(!recoveryReady||!!recoveryError||deadlinePassed),onPress:()=>trial.active&&!paused?trial.finish():paused?pause(false):hud.status==='won'&&!timedRun?(nextMission?introduceMission(nextMission):backToMissions()):restart()}}
   secondary={trial.active?undefined:paused?{label:paidEntry?'Save & leave':rankTicket?'Leave run':'Restart',accessibilityLabel:paidEntry?'Save and leave paid attempt':rankTicket?'Leave challenge':'Restart level',onPress:()=>restart()}:!timedRun?{label:hud.status==='won'?'Replay':'Back to missions',accessibilityLabel:hud.status==='won'?'Retry level':'View missions',onPress:()=>hud.status==='won'?restart():backToMissions()}:undefined}
   utility={trial.active?paused?{label:'Exit trial',onPress:()=>trial.finish()}:undefined:!timedRun&&(paused||hud.status==='won')?{label:'Back to missions',onPress:backToMissions}:paused?(recoveryError?{label:'Retry save',accessibilityLabel:'Retry save',onPress:()=>checkpoint({version:(combatMode?2:1) as 1|2,chunks:recording.value.map(c=>({...c}))})}:{label:'Settings',accessibilityLabel:'Open settings',onPress:()=>setSettingsOpen(true)}):undefined}
  >{finaleVisible&&<CompletionCard data={completionData} reduced={!!settings.reducedEffects} registerShare={registerShare}/>} {paused&&<Pressable accessibilityRole="button" accessibilityLabel="Toggle frame statistics" onPress={()=>setDetails(!details)}><Text style={s.stats}>{details?`${Math.round(stats.fps)} FPS · p95 ${stats.p95.toFixed(1)}ms · ${stats.slow} slow frames`:'Performance details'}</Text></Pressable>} {paidEntry&&completedReplay&&!paused&&<PaidSubmission entry={paidEntry} replay={completedReplay}/>}{rankTicket&&completedReplay&&!paused&&<RunSubmission ticket={rankTicket} replay={completedReplay} onResolved={()=>{rankResolved.current=true;}}/>}</ResultSheet>}
- {!testMission&&!trial.active&&!timedRun&&!guide.active&&guide.retries===0&&hud.status==='won'&&completedReplay&&!paused&&<View style={{position:'absolute',bottom:insets.bottom+3,zIndex:46}}><CampaignSubmission state={hud} replay={completedReplay} quiet retrySignal={rewardRetry} onReward={account.preview?undefined:rewardResolved}/></View>}
+ {!testMission&&!trial.active&&!timedRun&&!guide.active&&guide.retries===0&&hud.status==='won'&&completedReplay&&!paused&&<View style={{position:'absolute',bottom:insets.bottom+3,zIndex:46}}><CampaignSubmission state={hud} replay={completedReplay} target={entry.number>12?{level:entry.number}:{mission:entry.mission}} quiet retrySignal={rewardRetry} onReward={account.preview?undefined:rewardResolved}/></View>}
  {claimVisible&&<CreditClaim requiresWallet={!account.preview&&!account.wallet&&guide.retries===0} connecting={connectingClaim} onConnect={connectToClaim} autoClaim={autoClaim} reward={creditReward} balance={economy.balance} onRetry={creditReward.amount===null?(account.preview?saveLocalReward:()=>{rewardResolved(null);setRewardRetry(n=>n+1);}):undefined} stars={starsFor(hud)} mission={level.title} onDone={()=>setRewardClaimed(true)}/>}
- {introMission&&<MissionIntro lesson={campaignLesson(introMission)} onBack={()=>{setIntroMission(null);setHideoutOpen(true);}} onPlay={()=>{const next=introMission;setIntroMission(null);restart(next);}}/>}
+ {introMission&&<MissionIntro lesson={introMission.number>12?publishedLesson(introMission):campaignLesson(introMission.mission)} onBack={()=>{setIntroMission(null);setHideoutOpen(true);}} onPlay={()=>{const next=introMission;setIntroMission(null);restart(next);}}/>}
  {sceneLoading&&!hideoutOpen&&!walletOpen&&!settingsOpen&&!dailyOpen&&!paidOpen&&!rewardsOpen&&<View testID="mission-loading" accessibilityViewIsModal style={[StyleSheet.absoluteFill,{zIndex:80,backgroundColor:'#0C1412',justifyContent:'center',alignItems:'center',padding:28,gap:16}]}>
   <Text style={{color:'#9FBBAD',fontSize:11,fontWeight:'800',letterSpacing:2}}>MISSION {String(level.number).padStart(2,'0')}</Text>
   <Text style={{color:'#E2F2E9',fontSize:27,fontWeight:'900',textAlign:'center'}}>{level.title}</Text>
