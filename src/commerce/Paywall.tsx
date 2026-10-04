@@ -34,12 +34,12 @@ export default function Paywall({local,mediaActive=true,onBuy,onSkip,onCode}:Pro
    <View style={s.perks}>{[
     ['3,500 credits','Spend them on outfits in the hideout.'],
     ['Ghost Signal outfit','Only comes with the pass. Never sold for credits.'],
-    ...(rebate>0?[['25% back after 12 heists*','A quarter of the price returns to your wallet when you clear the first 12.']]:[]),
+    ...(rebate>0?[[`${rebate} SKR back after 12 heists*`,'The rebate returns to your wallet when you clear the first 12 heists.']]:[]),
     ['Yours for good','No subscription. Buy once, keep every perk on this wallet.'],
    ].map(([head,body])=><View key={head} style={s.perk}><View style={s.bullet}><Text style={s.bulletText}>✓</Text></View><View style={{flex:1}}><Text style={s.perkHead}>{head}</Text><Text style={s.perkBody}>{body}</Text></View></View>)}</View>
    <View style={s.pass}><View style={{flex:1}}><Text style={s.passTitle}>Game Pass</Text><Text style={s.passNote}>Buy once · Keep every perk</Text></View><View style={{alignItems:'flex-end'}}>{offer&&<><Text style={[s.passNote,{fontSize:9}]}>Planned regular price</Text><Text accessibilityLabel={`Planned regular price: ${offer.plannedSkr} SKR or ${usdLabel(offer.plannedUsdCents)} in SOL`} style={[s.passNote,{textDecorationLine:'line-through'}]}>{offer.plannedSkr} SKR / {usdLabel(offer.plannedUsdCents)}</Text></>}<Text style={s.price}>{offer?`${offer.skr} SKR`:'SKR / SOL'}</Text><Text style={s.passNote}>{offer?`or ≈ ${usdLabel(offer.usdCents)} in SOL`:'Live price at checkout'}</Text></View></View>
    <PromotionEntry onDiscount={onCode}/>
-   <Text style={s.detail}>{rebate>0?'*Clear the first 12 heists and 25% of the price comes back to your wallet. ':''}Credits and the outfit are granted to the paying wallet right after checkout.</Text>
+   <Text style={s.detail}>{rebate>0?`*Clear the first 12 heists and ${rebate} SKR comes back to your wallet. `:''}Credits and the outfit are granted to the paying wallet once payment is confirmed.</Text>
   </View>
   </ScrollView>
   <View testID="paywall-footer" style={[s.footer,{gap:compact?6:8}]}><Pressable accessibilityRole="button" onPress={onBuy} style={s.primary}><Text style={s.primaryText}>{local?'Preview Game Pass':'Get Game Pass'}  →</Text></Pressable><Text style={s.free}>The whole campaign is free. Skip to play.</Text><Text style={s.fine}>{local?'Browser demo · No real payment':`${price?.test?'Test price · ':''}Pay in SKR or SOL · Network fee extra`}</Text></View>
