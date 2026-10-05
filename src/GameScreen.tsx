@@ -266,9 +266,11 @@ export function Game({onSnapshot}:{onSnapshot?:(state:GameState)=>void}){
    window.addEventListener('keydown',down);window.addEventListener('keyup',up);window.addEventListener('blur',blur);
    const visibility=()=>{if(document.hidden)blur();};document.addEventListener('visibilitychange',visibility);
    // Read-only diagnostics for reproducible local playtests. No teleport, score or win hooks.
-   (window as unknown as {__SEEKER_MVP__:unknown}).__SEEKER_MVP__={renderer:'2d-skia',rulesHash:rulesManifest.rulesHash,snapshot:()=>({...game.value,guards:game.value.guards.map(g=>({...g}))}),metrics:()=>({...latestStats.current}),get hud(){return latest.current;},get camera(){return {...camera.value};},replay:()=>({version:(combatMode?2:1) as 1|2,chunks:recording.value.map(c=>({...c}))}),get level(){return stateLevel(game.value);}};
+   (window as unknown as {__SEEKER_MVP__:unknown}).__SEEKER_MVP__={renderer:'2d-skia',rulesHash:rulesManifest.rulesHash,snapshot:()=>({...game.value,guards:game.value.guards.map(g=>({...g}))}),metrics:()=>({...latestStats.current}),get hud(){return latest.current;},get camera(){return {...camera.value};},replay:()=>({version:(combatMode?2:1) as 1|2,chunks:recording.value.map(c=>({...c}))}),get level(){return stateLevel(game.value);},
+    // a pilot taps here in world units: same queue, same duplicate rule, same rules as a finger. nothing else moves the courier
+    tap:(x:number,y:number)=>{if(suspended.value||!sceneReady.value||!game.value.combat||game.value.status!=='playing')return false;const tap={x:Math.round(x*100)/100,y:Math.round(y*100)/100,at:Date.now()};if(isDuplicateTap(previousTap.value,tap))return false;previousTap.value=tap;pendingTap.value=tap;return true;}};
    return()=>{window.removeEventListener('keydown',down);window.removeEventListener('keyup',up);window.removeEventListener('blur',blur);document.removeEventListener('visibilitychange',visibility);};
- },[input,pause,restart,suspended,recording,introMission,walletOpen,hideoutOpen,mapOpen,settingsOpen,rewardsOpen]);
+ },[input,pause,restart,suspended,recording,introMission,walletOpen,hideoutOpen,mapOpen,settingsOpen,rewardsOpen,sceneReady,pendingTap,previousTap]);
  const teachingTarget=guideTarget(guide.stage,hud);
  const tapBoard=useMemo(()=>Gesture.Tap().maxDuration(650).onBegin(e=>{
   'worklet';if(suspended.value||!sceneReady.value||!game.value.combat||game.value.status!=='playing')return;

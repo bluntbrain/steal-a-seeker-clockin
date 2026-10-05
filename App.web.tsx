@@ -8,5 +8,7 @@ export default function App(){return <WithSkiaWeb getComponent={()=>{
  if(local&&params.has('worldLab'))return import('./src/playtest/CampaignWorldLab.web');
  if(local&&params.has('loaderLab'))return import('./src/playtest/ChaseLoaderLab.web');
  if(local&&params.has('wallLab'))return import('./src/playtest/WallDepthLab');
+ // ?pilot=jev lets the local decision bridge play through the normal tap queue; never on a public host
+ if(local&&params.get('pilot')==='jev')void import('./src/playtest/jev-pilot').then(m=>m.startJevPilot(params.get('bridge')??undefined,Number(params.get('interval'))||undefined));
  return import('./src/GameScreen');
  }} opts={{locateFile:()=>'/canvaskit.wasm'}} fallback={<View style={{flex:1,backgroundColor:'#0c1011',alignItems:'center',justifyContent:'center'}}><Text style={{color:'#cfe6e4'}}>Preparing the warehouse…</Text></View>}/>;}
