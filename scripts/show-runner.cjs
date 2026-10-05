@@ -37,7 +37,9 @@ const sleep=ms=>new Promise(r=>setTimeout(r,ms));
  await gotoGame();await sleep(1500);
  await game().evaluate(()=>{Object.keys(localStorage).filter(k=>/tutorial|guide/i.test(k)).forEach(k=>localStorage.removeItem(k));});
  if(evalMode)await seed(to);
- const cleared=async()=>game().evaluate(k=>{try{const p=JSON.parse(localStorage.getItem('seeker.campaign.progress.v1')||'{}').missions||{};let top=0;for(const key of k){if(p[key])top++;else break;}return top;}catch{return 0;}},Array.from({length:to},(_,i)=>keyOf(i+1))).catch(()=>0);
+ // the preview plays as the browser-playtest wallet, so the game saves under seeker.campaign.<network>.<wallet>.v1;
+ // the guest key is merged in on load. read every campaign save and take the union
+ const cleared=async()=>game().evaluate(k=>{try{const p={};for(let i=0;i<localStorage.length;i++){const key=localStorage.key(i);if(!/^seeker\.campaign\.(progress|[a-z]+\.[^.]+)\.v1$/.test(key||''))continue;try{Object.assign(p,JSON.parse(localStorage.getItem(key)||'{}').missions||{});}catch{}}let top=0;for(const key of k){if(p[key])top++;else break;}return top;}catch{return 0;}},Array.from({length:to},(_,i)=>keyOf(i+1))).catch(()=>0);
  let n=from;
  // a show continues from the first locked level, never replays cleared ones and never skips ahead of an unlock
  if(!evalMode&&wins.size){let top=0;while(wins.has(top+1))top++;const have=await cleared();if(top>have){await seed(top);console.log(`restored jev's own ${top} earned unlocks into the profile`);}}
@@ -65,7 +67,10 @@ const sleep=ms=>new Promise(r=>setTimeout(r,ms));
    last=running?(s||{status:'unknown'}):{status:'not started',decisions:0,mode:'idle',hp:null,kills:0};
    console.log(`level ${n} attempt ${attempt+1}: ${last.status} in ${((Date.now()-started)/1000).toFixed(0)}s, ${last.decisions} decisions (${last.mode}), hp ${last.hp}, kills ${last.kills}`);
    try{await fetch(`${bridge}/outcome`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({level:n,outcome:last.status})});}catch{}
-   if(last.status==='won'&&(evalMode||(await cleared())>=n)){outcome='won';if(!evalMode)recordWin(n);log.push({level:n,outcome,attempts:attempt+1,deaths,seconds:+((Date.now()-started)/1000).toFixed(1),decisions:last.decisions,mode:last.mode,score:last.score,kills:last.kills,hp:last.hp});break;}
+   // the game writes the win to its save a moment after the status flips, so wait for it rather than checking once
+   let saved=evalMode;for(let k=0;k<32&&!saved&&last.status==='won';k++){saved=(await cleared())>=n;if(!saved)await sleep(250);}
+   if(last.status==='won'&&!saved)console.log(`level ${n}: the game showed a win but its save did not confirm it, replaying`);
+   if(last.status==='won'&&saved){outcome='won';if(!evalMode)recordWin(n);log.push({level:n,outcome,attempts:attempt+1,deaths,seconds:+((Date.now()-started)/1000).toFixed(1),decisions:last.decisions,mode:last.mode,score:last.score,kills:last.kills,hp:last.hp});break;}
    deaths++;if(attempt===retries-1){log.push({level:n,outcome:'skipped',attempts:retries,deaths,mode:last.mode});}
   }
   save();

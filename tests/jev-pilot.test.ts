@@ -19,7 +19,9 @@ test('the observation carries public facts only and the options are moves a fing
 test('a point inside a cone is exposed and spotted play removes exposed walks and waiting',()=>{
  const level=combatLevel('practice'),s=initialState(level.mission,level),g=s.guards[0]!;
  const ahead={x:g.x+Math.cos(g.angle)*Math.min(1,g.range-.1),y:g.y+Math.sin(g.angle)*Math.min(1,g.range-.1)};
- assert.equal(exposed(ahead,s),true);assert.equal(exposed({x:g.x-Math.cos(g.angle)*2,y:g.y-Math.sin(g.angle)*2},s),false);
+ assert.equal(exposed(ahead,s,level),true);assert.equal(exposed({x:g.x-Math.cos(g.angle)*2,y:g.y-Math.sin(g.angle)*2},s,level),false);
+ // a wall between the guard and the point blocks sight, exactly as in the game
+ const wall={x:Math.min(g.x,ahead.x)-.05,y:Math.min(g.y,ahead.y)-.05,w:Math.abs(ahead.x-g.x)+.1,h:Math.abs(ahead.y-g.y)+.1,kind:'wall' as const};const mid={...s,blockers:[...s.blockers,{...wall,x:(g.x+ahead.x)/2-.1,y:(g.y+ahead.y)/2-.1,w:.2,h:.2}]};assert.equal(exposed(ahead,mid,level),false,'walls block sight');
  g.seesPlayer=true;const moves=options(s,level);
  assert(!moves.some(m=>m.key==='wait'),'no waiting while spotted');
  for(const m of moves)if(m.key.startsWith('walk'))assert.equal(m.meta.exposed,false,`${m.key} leaves every cone`);
