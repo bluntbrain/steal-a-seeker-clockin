@@ -23,6 +23,16 @@ export function exposed(p:Point,s:GameState,level?:LevelDefinition){
   return true;}
  return false;
 }
+/** points every half tile along a route, up to a distance; used to look ahead for cones on the way */
+function along(from:Point,route:Point[],limit:number){const out:Point[]=[];let prev=from,walked=0;for(const p of route){const d=Math.hypot(p.x-prev.x,p.y-prev.y);for(let t=.5;t<=d&&walked+t<=limit;t+=.5)out.push({x:prev.x+(p.x-prev.x)*t/d,y:prev.y+(p.y-prev.y)*t/d});walked+=d;prev=p;if(walked>=limit)break;}return out;}
+/** public look ahead: which guards could see the next stretch of a route right now, and which stand in sight range of it */
+function threats(points:Point[],s:GameState,level:LevelDefinition){
+ const sight={...level,blockers:s.blockers},seenBy:number[]=[],near:number[]=[];
+ s.guards.forEach((g,i)=>{if(!g.active||!g.spawned||g.hp<=0)return;let inRange=false,inSight=false;
+  for(const p of points){const d=Math.hypot(p.x-g.x,p.y-g.y);if(d>g.range)continue;if(d>1e-6&&sightDistance(g.x,g.y,(p.x-g.x)/d,(p.y-g.y)/d,d,sight)<d-1e-6)continue;inRange=true;if(d<1e-6||wrap(Math.atan2(p.y-g.y,p.x-g.x)-g.angle)<=g.halfAngle){inSight=true;break;}}
+  if(inSight)seenBy.push(i);else if(inRange)near.push(i);});
+ return {seenBy,near};
+}
 const routeLength=(a:Point,b:Point,level:LevelDefinition)=>{const r=findPath(a,b,level);if(!r.length)return Infinity;let len=0,prev=a;for(const p of r){len+=Math.hypot(p.x-prev.x,p.y-prev.y);prev=p;}return len;};
 /** the game's rules as they are in the code (revision 17 knife combat), sent with every decision */
 export const RULES=[
@@ -34,6 +44,8 @@ export const RULES=[
  'Tapping a guard walks to it and slashes. From behind on a guard that has not noticed you: instant kill. Unarmoured from the side or front: 35 damage.',
  'Heavies, wardens and bosses are armoured: a front hit does nothing, a side hit 20, a rear hit 75. Drones have 25 health and do not fight, they report.',
  'Health by role: drone 25, scout 50, sentry 75, heavy 150, warden 200. Killed guards leave bodies that other guards notice.',
+ 'Taking the phone can call extra guards near the exit. Expect company on the way out.',
+ 'A route whose next stretch is in a guard cone gets you spotted. Prefer a detour, wait for the cone to turn, or kill that guard from behind.',
  'Good play: follow the corridor route whenever its leg is not exposed; kill a guard from behind when it blocks the route; wait only to let a nearby cone sweep past; never walk back and forth.',
 ];
 /** public facts only: guards on screen or that currently see the courier; no brains, paths or search targets */
@@ -69,7 +81,21 @@ export function options(s:GameState,level:LevelDefinition,previous?:Point|null):
  // the first two tiles of the real corridor route, so progress is always one of the choices
  if(route.length){let leg=route[route.length-1]!,walked=0,prev=from;for(const p of route){const d=Math.hypot(p.x-prev.x,p.y-prev.y);if(walked+d>=STEP){const t=(STEP-walked)/d;leg={x:prev.x+(p.x-prev.x)*t,y:prev.y+(p.y-prev.y)*t};break;}walked+=d;prev=p;leg=p;}
   const ex=seen(leg),cone=nearestCone(leg),routeLen=route.reduce((a,p,i)=>a+(i?Math.hypot(p.x-route[i-1]!.x,p.y-route[i-1]!.y):Math.hypot(p.x-from.x,p.y-from.y)),0);
-  if(!(spotted&&ex)&&Math.hypot(leg.x-from.x,leg.y-from.y)>=.4)out.push({key:'follow_route',text:`Follow the corridor route to the ${what}: 2 tiles of real progress, ${r1(routeLen)} tiles left. ${ex?'A guard can see the end of this leg right now.':cone>0?`Out of sight; nearest cone edge ${r1(cone)} tiles.`:'Out of sight but at a cone edge.'}`,tap:leg,meta:{dist_to_goal:Math.max(0,routeLen-STEP),exposed:ex}});}
+  const ahead=threats(along(from,route,6),s,level),legSeen=threats(along(from,route,STEP),s,level).seenBy.length>0||ex;
+  const name=(i:number)=>`guard ${i} (${s.guards[i]!.combatRole})`;
+  const warn=ahead.seenBy.length?` The next 6 tiles run through the cone of ${ahead.seenBy.map(name).join(' and ')} right now.`:ahead.near.length?` The next 6 tiles pass within sight range of ${ahead.near.map(name).join(' and ')}, which ${ahead.near.length>1?'face':'faces'} away for now.`:' The next 6 tiles are clear of every guard.';
+  if(!(spotted&&legSeen)&&Math.hypot(leg.x-from.x,leg.y-from.y)>=.4)out.push({key:'follow_route',text:`Follow the shortest corridor route to the ${what}: 2 tiles of real progress, ${r1(routeLen)} tiles left. ${legSeen?'A guard can see this leg right now.':cone>0?`This leg is out of sight; nearest cone edge ${r1(cone)} tiles.`:'This leg is out of sight but touches a cone edge.'}${warn}`,tap:leg,meta:{dist_to_goal:Math.max(0,routeLen-STEP),exposed:legSeen}});
+  // a detour treats each threatening guard's surroundings as a wall and finds another way, if there is one
+  for(const gi of [...ahead.seenBy,...ahead.near].slice(0,2)){
+   const g=s.guards[gi]!,pad=Math.min(2.4,Math.max(1.4,Math.hypot(g.x-from.x,g.y-from.y)-.8));
+   const avoid={...level,blockers:[...level.blockers,{x:g.x-pad,y:g.y-pad,w:pad*2,h:pad*2,kind:'wall' as const}]};
+   const alt=findPath(from,goal,avoid);if(!alt.length)continue;
+   let altLeg=alt[alt.length-1]!,w=0,pv=from;for(const p of alt){const d=Math.hypot(p.x-pv.x,p.y-pv.y);if(w+d>=STEP){const t=(STEP-w)/d;altLeg={x:pv.x+(p.x-pv.x)*t,y:pv.y+(p.y-pv.y)*t};break;}w+=d;pv=p;altLeg=p;}
+   const altLen=alt.reduce((a,p,i)=>a+(i?Math.hypot(p.x-alt[i-1]!.x,p.y-alt[i-1]!.y):Math.hypot(p.x-from.x,p.y-from.y)),0),altSeen=threats(along(from,alt,6),s,level).seenBy;
+   if(Math.hypot(altLeg.x-leg.x,altLeg.y-leg.y)<.6||(spotted&&seen(altLeg)))continue;
+   out.push({key:`detour_around_guard_${gi}`,text:`Take another corridor that keeps ${r1(pad)} tiles away from ${name(gi)}: ${r1(altLen)} tiles to the ${what}, ${r1(altLen-routeLen)} tiles longer.${altSeen.length?` Its next 6 tiles are in the cone of ${altSeen.map(name).join(' and ')} right now.`:' Its next 6 tiles are out of every cone right now.'}`,tap:altLeg,meta:{dist_to_goal:altLen,exposed:altSeen.length>0}});
+  }
+ }
  if(goalDist<=3.5&&walkableSegment(from,goal,level)&&!(spotted&&seen(goal)))out.push({key:s.carrying?'go_to_exit':'go_to_phone',text:`${s.carrying?'Run for the exit and win':'Grab the phone'}: ${r1(goalDist)} tiles in a straight line. ${seen(goal)?'A guard can see it right now.':'No guard can see it.'}`,tap:goal,meta:{dist_to_goal:0,exposed:seen(goal)}});
  s.guards.forEach((g,id)=>{
   if(!g.active||!g.spawned||g.hp<=0||g.combatRole==='drone')return;const d=Math.hypot(g.x-from.x,g.y-from.y);if(d>4||!findPath(from,{x:g.x,y:g.y},level).length)return;
