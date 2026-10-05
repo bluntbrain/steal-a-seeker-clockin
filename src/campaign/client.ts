@@ -35,13 +35,14 @@ let cacheRead=false;
 export async function loadPublishedLevels(){
  if(!cacheRead){cacheRead=true;try{const raw=await readSave(LEVELS_KEY);if(raw)setPublished(merge(JSON.parse(raw)));}catch{/* the bundle stays */}}
  try{
-  let latest=Infinity,top=contiguousTop(published);
+  let latest=Infinity,top=contiguousTop(published);const before=published.length;
   while(top<latest){
    const page=await api<{latest:number;levels:unknown[]}>(`/campaign/levels?from=${top+1}`);
    latest=Number(page.latest);if(!Array.isArray(page.levels)||!page.levels.length)break;
    setPublished(merge(page.levels));const next=contiguousTop(published);if(next===top)break;top=next;
   }
-  if(top>bundledTop)await writeSave(LEVELS_KEY,JSON.stringify(published.filter(l=>l.number>bundledTop)));
+  // the cache can hold hundreds of levels, so it is rewritten only when this call added some
+  if(top>bundledTop&&published.length>before)await writeSave(LEVELS_KEY,JSON.stringify(published.filter(l=>l.number>bundledTop)));
  }catch{/* offline: bundled and cached levels remain */}
 }
 
