@@ -19,6 +19,9 @@ const sleep=ms=>new Promise(r=>setTimeout(r,ms));
  // one persistent profile: progress, unlocked levels and the tutorial flag survive restarts
  const browser=await chromium.launchPersistentContext(path.resolve(evalMode?'.jev-profile-eval':'.jev-profile'),{headless,executablePath:'/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',args:[stage?'--window-size=1920,1080':'--window-size=430,900','--autoplay-policy=no-user-gesture-required'],viewport:stage?{width:1920,height:1080}:{width:390,height:844}});
  const page=browser.pages()[0]||await browser.newPage();
+ process.on('SIGTERM',async()=>{try{await browser.close();}catch{}process.exit(0);});process.on('SIGINT',async()=>{try{await browser.close();}catch{}process.exit(0);});
+ const winsFile=path.join('verification/jev','wins.json');const wins=new Set(fs.existsSync(winsFile)?JSON.parse(fs.readFileSync(winsFile,'utf8')):[]);
+ const recordWin=n=>{wins.add(n);fs.mkdirSync('verification/jev',{recursive:true});fs.writeFileSync(winsFile,JSON.stringify([...wins].sort((a,b)=>a-b)));};
  if(stage)await page.goto(`${bridge}/stage`);
  // in stage mode every game action targets the iframe; the frame is found by its url after each navigation
  const game=()=>stage?page.frames().find(f=>f.url().startsWith(base))??page.mainFrame():page;
@@ -37,6 +40,7 @@ const sleep=ms=>new Promise(r=>setTimeout(r,ms));
  const cleared=async()=>game().evaluate(k=>{try{const p=JSON.parse(localStorage.getItem('seeker.campaign.progress.v1')||'{}').missions||{};let top=0;for(const key of k){if(p[key])top++;else break;}return top;}catch{return 0;}},Array.from({length:to},(_,i)=>keyOf(i+1))).catch(()=>0);
  let n=from;
  // a show continues from the first locked level, never replays cleared ones and never skips ahead of an unlock
+ if(!evalMode&&wins.size){let top=0;while(wins.has(top+1))top++;const have=await cleared();if(top>have){await seed(top);console.log(`restored jev's own ${top} earned unlocks into the profile`);}}
  if(!evalMode){const top=await cleared();console.log(`jev has cleared ${top} level${top===1?'':'s'} in this profile; starting at ${Math.max(from,top+1)}`);n=Math.max(from,Math.min(n,top+1),top+1);}
  for(;n<=to;n++){
   let outcome='skipped',deaths=0;
@@ -57,7 +61,7 @@ const sleep=ms=>new Promise(r=>setTimeout(r,ms));
    last=s||{status:'unknown'};
    console.log(`level ${n} attempt ${attempt+1}: ${last.status} in ${((Date.now()-started)/1000).toFixed(0)}s, ${last.decisions} decisions (${last.mode}), hp ${last.hp}, kills ${last.kills}`);
    try{await fetch(`${bridge}/outcome`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({level:n,outcome:last.status})});}catch{}
-   if(last.status==='won'){outcome='won';log.push({level:n,outcome,attempts:attempt+1,deaths,seconds:+((Date.now()-started)/1000).toFixed(1),decisions:last.decisions,mode:last.mode,score:last.score,kills:last.kills,hp:last.hp});break;}
+   if(last.status==='won'){outcome='won';if(!evalMode)recordWin(n);log.push({level:n,outcome,attempts:attempt+1,deaths,seconds:+((Date.now()-started)/1000).toFixed(1),decisions:last.decisions,mode:last.mode,score:last.score,kills:last.kills,hp:last.hp});break;}
    deaths++;if(attempt===retries-1){log.push({level:n,outcome:'skipped',attempts:retries,deaths,mode:last.mode});}
   }
   save();
