@@ -7,6 +7,8 @@ COPY shared ./shared
 COPY src/game ./src/game
 # the bundled campaign levels are seeded on boot
 COPY src/campaign/published-levels.json ./src/campaign/published-levels.json
+# the solver proves each level winnable before the server publishes it
+COPY scripts/qa-combat.ts scripts/qa-tactical.ts ./scripts/
 ENV NODE_ENV=production HOST=0.0.0.0
 USER node
 CMD ["node", "--import", "tsx", "server/main.ts"]

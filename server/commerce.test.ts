@@ -540,7 +540,7 @@ test('price feed warming refreshes ahead of expiry and dedupes concurrent fetche
 });
 
 test('published campaign levels verify against the frozen row, pay the published rate once and list publicly',async()=>{
- const {CampaignService}=await import('./campaign-service'),{buildPublishable}=await import('../scripts/publish-campaign-levels'),{PUBLISHED_CLEAR_CREDITS,BOSS_CLEAR_CREDITS,CAMPAIGN_STAR_BONUS}=await import('../shared/store');
+ const {CampaignService}=await import('./campaign-service'),{buildPublishable}=await import('./campaign-publisher'),{PUBLISHED_CLEAR_CREDITS,BOSS_CLEAR_CREDITS,CAMPAIGN_STAR_BONUS}=await import('../shared/store');
  const u=await login(),campaign=new CampaignService(pool,new ReturnService(pool,undefined,{mint:service.config.mint,treasury:service.config.recipient,source:service.config.destination,decimals:6}));
  const plain=await buildPublishable(13,1),middle=await buildPublishable(14,1),boss=await buildPublishable(15,1);assert.equal(plain.boss,null);assert.equal(boss.boss,'toly');
  const strip=({ticks:_t,strategy:_s,salt:_a,...row}:typeof plain)=>row;
@@ -619,4 +619,10 @@ test('the game pass grants its bundle once: credits and the ghost outfit on paym
  // a wallet that bought the pass before the bundle existed
  const legacy=await login();await pool.query("INSERT INTO entitlements(wallet,sku,order_id) VALUES($1,'campaign',NULL)",[legacy.wallet]);
  assert.equal(await backfillPassBundle(pool),1);const owner=await service.me(legacy.wallet);assert.equal(owner.credits,PASS_BUNDLE.credits);assert.equal(Number((await pool.query('SELECT count(*) FROM entitlements WHERE wallet=$1 AND sku=$2',[legacy.wallet,PASS_BUNDLE.outfit])).rows[0].count),1);await service.equip(legacy.wallet,PASS_BUNDLE.outfit);
+});
+
+test('the background publisher does nothing when the target is already published',async()=>{
+ const {publishToTarget}=await import('./campaign-publisher'),{CampaignLevelStore}=await import('./campaign-levels');
+ const latest=await new CampaignLevelStore(pool).latest(),logs:string[]=[];
+ assert.deepEqual(await publishToTarget(pool,latest,m=>logs.push(m)),[]);assert.deepEqual(await publishToTarget(pool,NaN,m=>logs.push(m)),[]);assert.equal(logs.length,0);
 });

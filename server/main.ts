@@ -7,6 +7,7 @@ import {address} from '@solana/kit';
 import {findAssociatedTokenPda} from '@solana-program/token';
 import {database,migrate} from './db';
 import {seedCampaignLevels} from './campaign-levels';
+import {publishToTarget} from './campaign-publisher';
 import {DevnetChain,TOKEN_PROGRAM} from './chain';
 import {CommerceService,backfillPassBundle} from './service';
 import {createApp} from './app';
@@ -39,5 +40,7 @@ async function main(){
  let settling=false;const returnTimer=setInterval(async()=>{if(settling||!returns)return;settling=true;try{await returns.process();}catch{app.log.warn('Return reconciliation will retry.');}finally{settling=false;}},1000);
  const stop=async()=>{clearInterval(timer);clearInterval(returnTimer);await app.close();await pool.end();};process.on('SIGTERM',stop);process.on('SIGINT',stop);
  await app.listen({port:Number(process.env.PORT||8790),host:process.env.HOST||'127.0.0.1'});console.log('Steal a Seeker API ready on '+network.cluster);
+ // CAMPAIGN_TARGET_LEVEL publishes more levels in the background: build, solve, verify, insert, one at a time
+ const target=Number(process.env.CAMPAIGN_TARGET_LEVEL);if(target>12)void publishToTarget(pool,target,message=>console.log(message)).catch(e=>console.warn('campaign publisher stopped: '+(e instanceof Error?e.message:String(e))));
 }
 main().catch(e=>{console.error(e instanceof Error?e.message:'Startup failed');process.exitCode=1;});
