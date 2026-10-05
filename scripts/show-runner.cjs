@@ -22,7 +22,9 @@ const sleep=ms=>new Promise(r=>setTimeout(r,ms));
  if(stage)await page.goto(`${bridge}/stage`);
  // in stage mode every game action targets the iframe; the frame is found by its url after each navigation
  const game=()=>stage?page.frames().find(f=>f.url().startsWith(base))??page.mainFrame():page;
- const gotoGame=async()=>{if(stage){await page.evaluate(u=>{document.getElementById('game').src=u;},url);await sleep(2500);}else await page.goto(url);};
+ // the game frame is ready when it carries the scripting hook; localStorage and buttons live in that origin
+ const gameReady=async()=>{for(let i=0;i<40;i++){const ok=await game().evaluate(()=>!!window.__SEEKER_MVP__).catch(()=>false);if(ok&&(!stage||game()!==page.mainFrame()))return true;await sleep(250);}return false;};
+ const gotoGame=async()=>{if(stage){await page.evaluate(u=>{document.getElementById('game').src=u;},url);}else await page.goto(url);await gameReady();};
  const log=[],outDir='verification/jev';fs.mkdirSync(outDir,{recursive:true});
  const outFile=path.join(outDir,`${evalMode?'eval':'show'}-${new Date().toISOString().slice(0,16).replace(/[:T]/g,'-')}.json`);
  const save=()=>fs.writeFileSync(outFile,JSON.stringify({url,from,to,evalMode,levels:log},null,1));
@@ -34,7 +36,8 @@ const sleep=ms=>new Promise(r=>setTimeout(r,ms));
  if(evalMode)await seed(to);
  const cleared=async()=>game().evaluate(k=>{try{const p=JSON.parse(localStorage.getItem('seeker.campaign.progress.v1')||'{}').missions||{};let top=0;for(const key of k){if(p[key])top++;else break;}return top;}catch{return 0;}},Array.from({length:to},(_,i)=>keyOf(i+1))).catch(()=>0);
  let n=from;
- if(!evalMode){const top=await cleared();if(n>top+1){console.log(`level ${n} is locked; jev has cleared ${top}, starting at ${top+1}`);n=top+1;}}
+ // a show continues from the first locked level, never replays cleared ones and never skips ahead of an unlock
+ if(!evalMode){const top=await cleared();console.log(`jev has cleared ${top} level${top===1?'':'s'} in this profile; starting at ${Math.max(from,top+1)}`);n=Math.max(from,Math.min(n,top+1),top+1);}
  for(;n<=to;n++){
   let outcome='skipped',deaths=0;
   for(let attempt=0;attempt<retries;attempt++){
