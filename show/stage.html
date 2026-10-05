@@ -21,11 +21,11 @@
  .jev{display:flex;align-items:center;gap:12px;margin-bottom:6px}
  .jevlogo{width:44px;height:44px;border-radius:10px;background:#fff;object-fit:contain}
  .jevmark{font-size:26px;font-weight:900;letter-spacing:.08em;color:#C4F7DC;border:2px solid #C4F7DC;border-radius:10px;padding:2px 10px}
- .log{flex:1;overflow:hidden;font-family:"JetBrains Mono",Menlo,monospace;font-size:17px;line-height:1.6}
+ .log{flex:1;min-height:0;overflow:hidden;font-family:"JetBrains Mono",Menlo,monospace;font-size:14px;line-height:1.5}
  .log div{white-space:nowrap;color:#D9E7DE}.log div span{color:#A7DBC6;margin-right:8px}.log div em{color:#ffb86b;font-style:normal;margin-left:8px}
  .stat{position:absolute;left:48px;top:160px;width:600px;display:flex;flex-direction:column;gap:10px}
  .stat .card{padding:14px 18px}.stat .v{font-size:34px;font-weight:900}.stat .k{font-size:14px}
- .about{padding:22px 24px !important}.about .cta{font-size:40px;line-height:1.1;font-weight:900;color:#C4F7DC;text-shadow:0 2px 10px #000}.about .search{font-size:24px;margin-top:12px;color:#F0F6E8}.about .search b{color:#ffffff}.about p{margin:12px 0 0;font-size:16px;line-height:1.4}.about .store{color:#A7DBC6;font-weight:700}
+ .about{padding:20px 24px !important;flex:none}.about .cta{font-size:34px;line-height:1.1;font-weight:900;color:#C4F7DC;text-shadow:0 2px 10px #000}.about .search{font-size:22px;margin-top:10px;color:#F0F6E8}.about .search b{color:#ffffff}.about p{margin:12px 0 0;font-size:16px;line-height:1.4}.about .store{color:#A7DBC6;font-weight:700}
 </style></head>
 <body>
  <div class="live"><span class="dot"></span><b>LIVE STREAMING GAMEPLAY</b></div>
@@ -33,11 +33,11 @@
  <div class="stat">
   <div class="card"><div class="k">LEVEL</div><div class="v" id="level">1</div></div>
   <div class="card"><div class="k">RUN</div><div class="v" id="run">0 won · 0 lost</div></div>
-  <div class="card about"><div class="cta">PLAY ON YOUR SEEKER PHONE NOW!</div><div class="search">Search <b>Steal a Seeker</b> on your Seeker phone</div><p class="store">Seeker dApp Store · free to play · 1,000 levels · 7 bosses · @StealASeeker</p></div>
  </div>
  <div class="brand">STEAL A SEEKER<small>@StealASeeker · built for the Seeker phone</small></div>
  <div class="phone"><iframe id="game" src="http://127.0.0.1:8787/?build=free-campaign-store&pilot=jev&bridge=http%3A%2F%2F127.0.0.1%3A8791" allow="autoplay"></iframe></div>
  <div class="panel">
+  <div class="card about"><div class="cta">PLAY ON YOUR SEEKER PHONE NOW!</div><div class="search">Search <b>Steal a Seeker</b> on your Seeker phone</div><p class="store">Seeker dApp Store · free to play · 1,000 levels · 7 bosses</p></div>
   <div class="card log">
    <div class="jev"><img class="jevlogo" src="/show/jev-logo.png" alt="Jev by TypeSafe AI"><span class="jevmark">JEV</span><span class="k">JEV 1.13 BY TYPESAFE AI · VIA OPENROUTER</span></div>
    <div class="meta" id="meta" style="margin:0 0 12px"></div>
@@ -51,7 +51,7 @@
   async function tick(){
    try{const d=await (await fetch(bridge+'/last')).json();document.getElementById('meta').textContent=(d.mode==='jev'?'live model':'stand in, no key')+' · '+d.ms+' ms · '+d.decisions+' decisions · '+(d.tokens?Math.round(d.tokens/1000)+'k tokens':'');
     const log=await (await fetch(bridge+'/log')).json(),el=document.getElementById('log');el.replaceChildren();
-    for(const r of log.slice(-30).reverse()){const row=document.createElement('div');const n=document.createElement('span');n.textContent='#'+r.n;row.append(n,document.createTextNode((r.level?'L'+r.level+' ':'')+r.choice.replace(/_/g,' ')+' '+r.p+'%'));const m=document.createElement('em');m.textContent=r.ms+'ms';row.append(m);el.append(row);}
+    for(const r of log.slice(-24).reverse()){const row=document.createElement('div');const n=document.createElement('span');n.textContent='#'+r.n;row.append(n,document.createTextNode((r.level?'L'+r.level+' ':'')+r.choice.replace(/_/g,' ')+' '+r.p+'%'));const m=document.createElement('em');m.textContent=r.ms+'ms';row.append(m);el.append(row);}
     if(log.length){const l=log[log.length-1].level;if(l)document.getElementById('level').textContent=l;}
     document.getElementById('run').textContent=(d.won||0)+' won · '+(d.lost||0)+' lost';
    }catch{}
