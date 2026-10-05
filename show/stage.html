@@ -44,7 +44,9 @@
   <div class="card log"><div class="k" style="margin-bottom:8px">DECISION LOG</div><div id="log"></div></div>
  </div>
  <script>
-  const bridge='http://127.0.0.1:8791';let won=0,lost=0,lastLevel=null,lastStatus='playing';
+  // ?nopilot shows the stage with the game idle, for layout checks without spending decisions
+  if(location.search.includes('nopilot'))document.getElementById('game').src='http://127.0.0.1:8787/?build=free-campaign-store';
+  const bridge='http://127.0.0.1:8791';
   async function tick(){
    try{const d=await (await fetch(bridge+'/last')).json();document.getElementById('choice').textContent=d.choice?d.choice.replace(/_/g,' '):'waiting';
     const p=document.getElementById('probs');p.replaceChildren();
@@ -53,9 +55,8 @@
     const log=await (await fetch(bridge+'/log')).json(),el=document.getElementById('log');el.replaceChildren();
     for(const r of log.slice(-22).reverse()){const row=document.createElement('div');const n=document.createElement('span');n.textContent='#'+r.n;row.append(n,document.createTextNode((r.level?'L'+r.level+' ':'')+r.choice.replace(/_/g,' ')+' '+r.p+'%'));const m=document.createElement('em');m.textContent=r.ms+'ms';row.append(m);el.append(row);}
     if(log.length){const l=log[log.length-1].level;if(l)document.getElementById('level').textContent=l;}
+    document.getElementById('run').textContent=(d.won||0)+' won · '+(d.lost||0)+' lost';
    }catch{}
-   // outcome counter reads the game frame when the preview allows it; otherwise the runner's log is the record
-   try{const w=document.getElementById('game').contentWindow,s=w.__SEEKER_MVP__&&w.__SEEKER_MVP__.snapshot();if(s){if(lastStatus==='playing'&&s.status==='won')won++;if(lastStatus==='playing'&&(s.status==='caught'||s.status==='timeout'))lost++;lastStatus=s.status;document.getElementById('run').textContent=won+' won · '+lost+' lost';}}catch{}
   }
   setInterval(tick,400);
  </script>

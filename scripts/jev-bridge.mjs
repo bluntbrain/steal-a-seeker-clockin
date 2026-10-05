@@ -10,7 +10,7 @@ import {URL} from 'node:url';
 const port=Number(process.argv[2]||8791),orKey=process.env.OPENROUTER_API_KEY,tsKey=process.env.TYPESAFE_API_KEY,key=orKey||tsKey;
 const endpoint=orKey?'https://openrouter.ai/api/alpha/decisions':'https://api.typesafe.ai/v1/systemone';
 const model=process.env.JEV_MODEL||(orKey?'typesafe/jev-1.13':'jev-1.13.0');
-let last={choice:null,probabilities:{},confidence:0,mode:key?'jev':'mock',ms:0,at:0,decisions:0,tokens:0,errors:0};const log=[];
+let last={choice:null,probabilities:{},confidence:0,mode:key?'jev':'mock',ms:0,at:0,decisions:0,tokens:0,errors:0,won:0,lost:0,level:null,outcome:null};const log=[];
 function mock(criteria,meta){
  const keys=Object.keys(criteria);const score=k=>{const m=meta?.[k]??{};return (m.exposed?100:0)+(m.dist_to_goal??50)+(k==='wait'?20:0)+(k.startsWith('attack')?(m.exposed?30:-2):0);};
  const ranked=[...keys].sort((a,b)=>score(a)-score(b)),choice=ranked[0];
@@ -34,9 +34,12 @@ http.createServer(async(req,res)=>{
  if(req.method==='GET'&&req.url==='/overlay'){res.writeHead(200,{'Content-Type':'text/html'}).end(overlay);return;}
  if(req.method==='GET'&&req.url==='/log'){res.writeHead(200,{'Content-Type':'application/json'}).end(JSON.stringify(log.slice(-60)));return;}
  // the stage page and its assets live in show/; the game itself is an iframe to the preview server
- if(req.method==='GET'&&(req.url==='/stage'||req.url.startsWith('/show/'))){try{const name=req.url==='/stage'?'stage.html':req.url.slice(6).split('?')[0];const file=await readFile(new URL('../show/'+name,import.meta.url));res.writeHead(200,{'Content-Type':name.endsWith('.png')?'image/png':name.endsWith('.css')?'text/css':'text/html'}).end(file);}catch{res.writeHead(404).end();}return;}
- if(req.method!=='POST'||req.url!=='/decide'){res.writeHead(404).end();return;}
+ const route=req.url.split('?')[0];
+ if(req.method==='GET'&&(route==='/stage'||route.startsWith('/show/'))){try{const name=route==='/stage'?'stage.html':route.slice(6);const file=await readFile(new URL('../show/'+name,import.meta.url));res.writeHead(200,{'Content-Type':name.endsWith('.png')?'image/png':name.endsWith('.css')?'text/css':'text/html'}).end(file);}catch{res.writeHead(404).end();}return;}
  let body='';for await(const chunk of req)body+=chunk;
+ // the runner reports each level result here; the stage shows the tally
+ if(req.method==='POST'&&route==='/outcome'){try{const o=JSON.parse(body);last={...last,level:o.level,outcome:o.outcome,won:last.won+(o.outcome==='won'?1:0),lost:last.lost+(o.outcome==='won'?0:1)};res.writeHead(200).end('ok');}catch{res.writeHead(400).end();}return;}
+ if(req.method!=='POST'||route!=='/decide'){res.writeHead(404).end();return;}
  const started=Date.now();
  try{const {state,instructions,criteria,meta}=JSON.parse(body);if(!criteria||!Object.keys(criteria).length)throw new Error('no options');
   const answer=key?await jev(state,instructions,criteria):mock(criteria,meta);

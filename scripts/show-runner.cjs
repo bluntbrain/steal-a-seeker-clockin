@@ -43,6 +43,7 @@ const sleep=ms=>new Promise(r=>setTimeout(r,ms));
    while(Date.now()-started<240000){s=await state();if(s&&s.status!=='playing')break;await sleep(1000);}
    last=s||{status:'unknown'};
    console.log(`level ${n} attempt ${attempt+1}: ${last.status} in ${((Date.now()-started)/1000).toFixed(0)}s, ${last.decisions} decisions (${last.mode}), hp ${last.hp}, kills ${last.kills}`);
+   try{await fetch(`${bridge}/outcome`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({level:n,outcome:last.status})});}catch{}
    if(last.status==='won'){outcome='won';log.push({level:n,outcome,attempts:attempt+1,deaths,seconds:+((Date.now()-started)/1000).toFixed(1),decisions:last.decisions,mode:last.mode,score:last.score,kills:last.kills,hp:last.hp});break;}
    deaths++;if(attempt===retries-1){log.push({level:n,outcome:'skipped',attempts:retries,deaths,mode:last.mode});if(!evalMode)await seed(n);}
   }
