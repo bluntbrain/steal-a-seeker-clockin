@@ -62,10 +62,10 @@ const sleep=ms=>new Promise(r=>setTimeout(r,ms));
    if(!running)console.log(`level ${n} attempt ${attempt+1}: could not start the level (menu stuck)`);
    const started=Date.now();let s=await state(),last=null,beat=Date.now();
    while(running&&Date.now()-started<240000){s=await state();if(s&&s.status!=='playing')break;if(Date.now()-beat>30000){beat=Date.now();console.log(`  level ${n} running: tick ${s&&s.ticks}, at (${s&&s.x.toFixed(1)}, ${s&&s.y.toFixed(1)}), hp ${s&&s.hp}, decisions ${s&&s.decisions}`);}await sleep(1000);}
-   last=s||{status:'unknown'};
+   last=running?(s||{status:'unknown'}):{status:'not started',decisions:0,mode:'idle',hp:null,kills:0};
    console.log(`level ${n} attempt ${attempt+1}: ${last.status} in ${((Date.now()-started)/1000).toFixed(0)}s, ${last.decisions} decisions (${last.mode}), hp ${last.hp}, kills ${last.kills}`);
    try{await fetch(`${bridge}/outcome`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({level:n,outcome:last.status})});}catch{}
-   if(last.status==='won'){outcome='won';if(!evalMode)recordWin(n);log.push({level:n,outcome,attempts:attempt+1,deaths,seconds:+((Date.now()-started)/1000).toFixed(1),decisions:last.decisions,mode:last.mode,score:last.score,kills:last.kills,hp:last.hp});break;}
+   if(last.status==='won'&&(evalMode||(await cleared())>=n)){outcome='won';if(!evalMode)recordWin(n);log.push({level:n,outcome,attempts:attempt+1,deaths,seconds:+((Date.now()-started)/1000).toFixed(1),decisions:last.decisions,mode:last.mode,score:last.score,kills:last.kills,hp:last.hp});break;}
    deaths++;if(attempt===retries-1){log.push({level:n,outcome:'skipped',attempts:retries,deaths,mode:last.mode});}
   }
   save();
