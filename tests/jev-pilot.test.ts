@@ -12,7 +12,8 @@ test('the observation carries public facts only and the options are moves a fing
   for(const g of o.guards){assert(!('brain' in g)&&!('path' in g)&&!('lastSeen' in g),'hidden guard fields never leave the game');assert(typeof g.facing_deg==='number'&&typeof g.cone_range==='number');}
   const moves=options(s,level);assert(moves.length>=3,'walks, the objective or waiting');
   for(const m of moves){if(m.tap&&m.key.startsWith('walk'))assert(walkableSegment({x:s.x,y:s.y},m.tap,level),`${m.key} is walkable`);assert(m.text.length<240,'one line per option');}
-  assert(moves.some(m=>m.key==='wait'));
+  assert(moves.some(m=>m.key==='follow_route'),'a goal directed leg is always offered when a route exists');
+  assert.equal(moves.some(m=>m.key==='wait'),s.guards.some(g=>g.active&&g.spawned&&Math.hypot(g.x-s.x,g.y-s.y)<=4),'waiting is offered only with a patrol nearby');
  }
 });
 test('a point inside a cone is exposed and spotted play removes exposed walks and waiting',()=>{
