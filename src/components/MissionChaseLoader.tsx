@@ -1,6 +1,7 @@
 import React,{useEffect,useRef} from 'react';
 import {Asset} from 'expo-asset';
-import {Animated,Easing,Image,StyleSheet,Text,View} from 'react-native';
+import {Image,StyleSheet,Text,View} from 'react-native';
+import Animated,{cancelAnimation,Easing,runOnJS,useAnimatedStyle,useSharedValue,withSequence,withTiming} from 'react-native-reanimated';
 import type {BossId} from '../../shared/campaign-levels';
 import {BOSS_NAMES} from '../../shared/campaign-levels';
 import {BOSS_POSTERS} from './bossMotionAssets';
@@ -8,22 +9,37 @@ import {HapticPressable as Pressable} from '../feedback/HapticPressable';
 const poster=require('../../assets/mission-loading-poster-v1/poster.webp');
 let warmed:Promise<unknown>|undefined;
 export function warmMissionLoader(){return warmed??(warmed=Asset.loadAsync(poster).catch(()=>undefined));}
-/** Static artwork with progress reported by the scene, never a timed fake percentage. */
-export default function MissionChaseLoader({boss,progress=0,reduced=false,error='',onRetry,onExit}:{boss?:BossId;progress?:number;reduced?:boolean;error?:string;onRetry:()=>void;onExit:()=>void}){
- const value=Number.isFinite(progress)?Math.max(0,Math.min(1,progress)):0;
- const fill=useRef(new Animated.Value(value)).current;
+/** Estimated frontend progress stays below full until the scene actually reports ready. */
+export default function MissionChaseLoader({boss,progress=0,reduced=false,error='',onRetry,onExit,onComplete}:{boss?:BossId;progress?:number;reduced?:boolean;error?:string;onRetry:()=>void;onExit:()=>void;onComplete?:()=>void}){
+ const ready=Number.isFinite(progress)&&progress>=1,failed=!!error;
+ const fill=useSharedValue(.04),started=useRef(Date.now()),completed=useRef(false),complete=useRef(onComplete);complete.current=onComplete;
+ const finish=()=>{if(!completed.current){completed.current=true;complete.current?.();}};
  useEffect(()=>{
-  if(reduced||error){fill.setValue(value);return;}
-  const animation=Animated.timing(fill,{toValue:value,duration:180,easing:Easing.out(Easing.cubic),useNativeDriver:false});
-  animation.start();return()=>animation.stop();
- },[value,reduced,error,fill]);
+  cancelAnimation(fill);
+  if(failed)return;
+  if(ready){
+   if(reduced){fill.value=1;finish();return;}
+   // Cached assets still get one short, continuous fill; slow loads finish promptly.
+   const duration=Math.max(320,1100-(Date.now()-started.current));
+   fill.value=withTiming(1,{duration,easing:Easing.inOut(Easing.quad)},done=>{if(done)runOnJS(finish)();});
+  }else if(reduced){fill.value=.35;}
+  else{
+   fill.value=withSequence(
+    withTiming(.62,{duration:2400,easing:Easing.out(Easing.quad)}),
+    withTiming(.86,{duration:6500,easing:Easing.linear}),
+    withTiming(.94,{duration:15000,easing:Easing.out(Easing.quad)}),
+   );
+  }
+  return()=>cancelAnimation(fill);
+ },[ready,reduced,failed,fill]);
+ const fillStyle=useAnimatedStyle(()=>({width:`${fill.value*100}%`}));
  return <View testID="mission-loading" accessibilityViewIsModal style={s.screen}>
   <Image testID="mission-loading-poster" accessible={false} source={boss?BOSS_POSTERS[boss]:poster} resizeMode="cover" fadeDuration={0} style={[StyleSheet.absoluteFill,{width:"100%",height:"100%"}]}/>
   <View style={s.center}>
    <View style={s.panel}>
     <Text accessibilityLiveRegion="polite" style={s.status}>{error||(boss?`Loading ${BOSS_NAMES[boss]}’s mission…`:'Loading mission…')}</Text>
-    {!error&&<View testID="mission-loading-progress" accessibilityRole="progressbar" accessibilityLabel="Loading mission" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(value*100)} style={s.track}>
-     <Animated.View style={[s.fill,{width:fill.interpolate({inputRange:[0,1],outputRange:['0%','100%']})}]}><View style={s.highlight}/></Animated.View>
+    {!error&&<View testID="mission-loading-progress" accessibilityRole="progressbar" accessibilityLabel="Loading mission" aria-valuemin={0} aria-valuemax={100} aria-valuenow={ready?100:undefined} style={s.track}>
+     <Animated.View style={[s.fill,fillStyle]}><View style={s.highlight}/></Animated.View>
     </View>}
     {!!error&&<View style={s.actions}><Pressable accessibilityRole="button" accessibilityLabel="Retry loading mission" onPress={onRetry} style={s.retry}><Text style={s.retryText}>Retry loading</Text></Pressable><Pressable accessibilityRole="button" onPress={onExit} style={s.exit}><Text style={s.exitText}>Back to missions</Text></Pressable></View>}
    </View>

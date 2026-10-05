@@ -293,12 +293,13 @@ export function Game({onSnapshot}:{onSnapshot?:(state:GameState)=>void}){
   runOnUI(()=>{'worklet';
    if(simulationEpoch.value!==expected||sceneReady.value)return;
    accumulator.value=0;focusProgress.value=reduced?1:0;
-   if(reduced){runOnJS(finishSceneLoading)(expected);return;}
+   if(reduced)return;
    focusProgress.value=withTiming(1,{duration:650},finished=>{
-    if(finished&&simulationEpoch.value===expected){accumulator.value=0;runOnJS(finishSceneLoading)(expected);}
+    if(finished&&simulationEpoch.value===expected)accumulator.value=0;
    });
   })();
  },[sceneVersion,sceneReady,simulationEpoch,accumulator,focusProgress,finishSceneLoading]);
+ const loaderCompleted=useCallback(()=>{if(loadedScene.current===sceneVersion)finishSceneLoading(sceneVersion);},[sceneVersion,finishSceneLoading]);
  const sceneFailed=useCallback(()=>{if(sceneEpoch.current===sceneVersion)setSceneError('Could not load the map. Try again.');},[sceneVersion]);
  useEffect(()=>{if(!sceneLoading||!renderGameSurface)return;const timer=setTimeout(()=>setSceneError('The map is taking longer to load. Retry to reload its artwork.'),12000);return()=>clearTimeout(timer);},[sceneLoading,sceneVersion,renderGameSurface]);
  const appearance=useMemo(()=>({...economy.equipment,reducedEffects:settings.reducedEffects}),[economy.equipment.outfit,economy.equipment.trail,economy.equipment.frame,economy.equipment.rack,settings.reducedEffects]);
@@ -399,7 +400,7 @@ export function Game({onSnapshot}:{onSnapshot?:(state:GameState)=>void}){
  {introMission&&<MissionIntro lesson={introMission.number>12?publishedLesson(introMission):campaignLesson(introMission.mission)} onBack={()=>{setIntroMission(null);setHideoutOpen(true);}} onPlay={()=>{const next=introMission;setIntroMission(null);restart(next);}}/>}
  {entry.boss&&gameplayVisible&&<><BossHealthBand key={`health-${sceneVersion}`} boss={entry.boss} game={game}/><BossDownRibbon key={`down-${sceneVersion}`} game={game} clock={clock} reduced={!!settings.reducedEffects}/></>}
  {bossEntrance&&entry.boss&&!sceneLoading&&renderGameSurface&&!paused&&<BossEntrance key={sceneVersion} boss={entry.boss} reduced={!!settings.reducedEffects} onDone={finishBossEntrance}/>}
- {sceneLoading&&renderGameSurface&&<MissionChaseLoader boss={entry.boss??undefined} progress={sceneProgress} reduced={!!settings.reducedEffects} error={sceneError}
+ {sceneLoading&&renderGameSurface&&<MissionChaseLoader key={sceneVersion} onComplete={loaderCompleted} boss={entry.boss??undefined} progress={sceneProgress} reduced={!!settings.reducedEffects} error={sceneError}
   onRetry={()=>{sceneReady.value=false;simulationEpoch.value=++sceneEpoch.current;setSceneVersion(sceneEpoch.current);setSceneProgress(0);setSceneError('');}}
   onExit={backToMissions}/>}
  {finaleVisible&&<CampaignConfetti reduced={!!settings.reducedEffects}/>}
