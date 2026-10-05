@@ -42,13 +42,17 @@ const sleep=ms=>new Promise(r=>setTimeout(r,ms));
  // a show continues from the first locked level, never replays cleared ones and never skips ahead of an unlock
  if(!evalMode&&wins.size){let top=0;while(wins.has(top+1))top++;const have=await cleared();if(top>have){await seed(top);console.log(`restored jev's own ${top} earned unlocks into the profile`);}}
  if(!evalMode){const top=await cleared();console.log(`jev has cleared ${top} level${top===1?'':'s'} in this profile; starting at ${Math.max(from,top+1)}`);n=Math.max(from,Math.min(n,top+1),top+1);}
- for(;n<=to;n++){
-  let outcome='skipped',deaths=0;
+ while(n<=to){
+  let outcome='skipped',deaths=0,back=false;
   for(let attempt=0;attempt<retries;attempt++){
    await gotoGame();await sleep(1800);
    await game().evaluate(()=>{const b=document.querySelector('[aria-label="Skip Game Pass and play free"]');b&&b.click();});await sleep(1200);
    await game().evaluate(k=>{const el=document.querySelector(`[data-testid=mission-node-${k}]`);el&&el.scrollIntoView();},n);await sleep(400);
-   if(!await clickIf(`[data-testid=mission-node-${n}]`,3000)){console.log(`level ${n}: node not on the map`);break;}
+   // never move on because a button failed: a missing node is retried, a locked node sends the run back to the first locked level
+   const label=await game().evaluate(k=>{const el=document.querySelector(`[data-testid=mission-node-${k}]`);return el?el.getAttribute('aria-label')||'':'';},n).catch(()=>'');
+   if(!label){console.log(`level ${n}: node not on the map yet, retrying`);await sleep(3000);attempt--;continue;}
+   if(/locked/i.test(label)){const top=await cleared();console.log(`level ${n} is locked, jev has cleared ${top}; going back to ${top+1}`);n=top+1;back=true;break;}
+   if(!await clickIf(`[data-testid=mission-node-${n}]`,3000)){console.log(`level ${n}: node did not open, retrying`);attempt--;continue;}
    await sleep(900);await game().evaluate(()=>{const b=[...document.querySelectorAll('[role=button]')].find(e=>/^Start /.test(e.getAttribute('aria-label')||''));b&&b.click();});
    await sleep(1500);await game().evaluate(()=>{const b=document.querySelector('[data-testid=mission-intro-start]');b&&b.click();});
    await sleep(3500);await game().evaluate(()=>{const b=document.querySelector('[aria-label="Skip combat tutorial"]');b&&b.click();});
@@ -65,6 +69,8 @@ const sleep=ms=>new Promise(r=>setTimeout(r,ms));
    deaths++;if(attempt===retries-1){log.push({level:n,outcome:'skipped',attempts:retries,deaths,mode:last.mode});}
   }
   save();
+  if(back)continue;
+  if(outcome==='won'||evalMode)n++; // a show never leaves a level unsolved
  }
  const won=log.filter(l=>l.outcome==='won').length;console.log(`done: ${won} of ${log.length} levels won, receipt ${outFile}`);
  await browser.close();
