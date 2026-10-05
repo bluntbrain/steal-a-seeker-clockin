@@ -1,12 +1,15 @@
 import React,{useEffect,useRef} from 'react';
 import {Asset} from 'expo-asset';
 import {Animated,Easing,Image,StyleSheet,Text,View} from 'react-native';
+import type {BossId} from '../../shared/campaign-levels';
+import {BOSS_NAMES} from '../../shared/campaign-levels';
+import {BOSS_POSTERS} from './bossMotionAssets';
 import {HapticPressable as Pressable} from '../feedback/HapticPressable';
 const poster=require('../../assets/mission-loading-poster-v1/poster.webp');
 let warmed:Promise<unknown>|undefined;
 export function warmMissionLoader(){return warmed??(warmed=Asset.loadAsync(poster).catch(()=>undefined));}
 /** Static artwork with progress reported by the scene, never a timed fake percentage. */
-export default function MissionChaseLoader({progress=0,reduced=false,error='',onRetry,onExit}:{progress?:number;reduced?:boolean;error?:string;onRetry:()=>void;onExit:()=>void}){
+export default function MissionChaseLoader({boss,progress=0,reduced=false,error='',onRetry,onExit}:{boss?:BossId;progress?:number;reduced?:boolean;error?:string;onRetry:()=>void;onExit:()=>void}){
  const value=Number.isFinite(progress)?Math.max(0,Math.min(1,progress)):0;
  const fill=useRef(new Animated.Value(value)).current;
  useEffect(()=>{
@@ -15,10 +18,10 @@ export default function MissionChaseLoader({progress=0,reduced=false,error='',on
   animation.start();return()=>animation.stop();
  },[value,reduced,error,fill]);
  return <View testID="mission-loading" accessibilityViewIsModal style={s.screen}>
-  <Image testID="mission-loading-poster" accessible={false} source={poster} resizeMode="cover" fadeDuration={0} style={[StyleSheet.absoluteFill,{width:"100%",height:"100%"}]}/>
+  <Image testID="mission-loading-poster" accessible={false} source={boss?BOSS_POSTERS[boss]:poster} resizeMode="cover" fadeDuration={0} style={[StyleSheet.absoluteFill,{width:"100%",height:"100%"}]}/>
   <View style={s.center}>
    <View style={s.panel}>
-    <Text accessibilityLiveRegion="polite" style={s.status}>{error||'Loading mission…'}</Text>
+    <Text accessibilityLiveRegion="polite" style={s.status}>{error||(boss?`Loading ${BOSS_NAMES[boss]}’s mission…`:'Loading mission…')}</Text>
     {!error&&<View testID="mission-loading-progress" accessibilityRole="progressbar" accessibilityLabel="Loading mission" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(value*100)} style={s.track}>
      <Animated.View style={[s.fill,{width:fill.interpolate({inputRange:[0,1],outputRange:['0%','100%']})}]}><View style={s.highlight}/></Animated.View>
     </View>}

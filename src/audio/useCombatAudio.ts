@@ -38,7 +38,8 @@ export function useCombatAudio(state:GameState,enabled:boolean,volume:number,onD
     if(cue==='aim')lastAim.current=state.ticks;
     const heavy=state.guards.some(g=>g.active&&g.gunPhase==='fire'&&(g.combatRole==='heavy'||g.combatRole==='warden'));
     const defeated=state.guards.filter((g,i)=>g.hp<=0&&(previousHP.current[i]??0)>0);
-    const finish=defeated.some(g=>g.combatRole==='heavy'||g.combatRole==='warden')?heavyKO:defeated.some(g=>g.combatRole==='drone')?droneKO:c.kills%2?knockout:knockoutB;
+    const bossDown=state.guards.some((g,i)=>g.hp<=0&&(previousHP.current[i]??0)>0&&!!state.definition?.patrols[i]?.boss);
+    const finish=bossDown?heavyKO:defeated.some(g=>g.combatRole==='heavy'||g.combatRole==='warden')?heavyKO:defeated.some(g=>g.combatRole==='drone')?droneKO:c.kills%2?knockout:knockoutB;
     const player={swing:(c.melee?.swings??0)%2?swing:swingB,slash,clang,shot:c.shots%2?shotA:shotB,enemy:heavy?enemyB:enemyA,hit,damage,knockout:finish,aim}[cue];
     player.volume=volume*({swing:.55,slash:.65,clang:.6,shot:.8,enemy:.55,hit:.28,damage:.58,knockout:.68,aim:.48}[cue]);
     const run=epoch.current;

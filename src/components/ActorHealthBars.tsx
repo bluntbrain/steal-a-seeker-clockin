@@ -8,8 +8,8 @@ type Props={game:SharedValue<GameState>;alpha:SharedValue<number>};
 function Bar({game,alpha,index,font}:{game:Props['game'];alpha:Props['alpha'];index:number;font:SkFont}){
  const courier=index<0,g=game.value.guards[index],armored=g?.combatRole==='heavy'||g?.combatRole==='warden',bossId=courier?undefined:stateLevel(game.value).patrols[index]?.boss as BossId|undefined;
  const bossName=bossId?(BOSS_NAMES[bossId]??bossId).toUpperCase():'';
- const width=courier?1.22:armored?1.36:1.14;
- const lift=courier?.58:g?.combatRole==='drone'?.60:armored?.76:.55;
+ const width=courier?1.22:bossId?1.65:armored?1.36:1.14;
+ const lift=courier?.58:bossId?1.0:g?.combatRole==='drone'?.60:armored?.76:.55;
  // position interpolates every frame; health, label and text layout only change on simulation ticks
  const transform=useDerivedValue(()=>{const s=game.value,a=index<0?s:s.guards[index];if(!a)return [];return [{translateX:a.px+(a.x-a.px)*alpha.value-width/2},{translateY:a.py+(a.y-a.py)*alpha.value+lift}];});
  const state=useDerivedValue(()=>{

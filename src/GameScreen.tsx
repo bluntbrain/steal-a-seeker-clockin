@@ -1,3 +1,4 @@
+import BossHealthBand,{BossDownRibbon} from './components/BossHealthBand';
 import BossEntrance from './components/BossEntrance';
 import LaunchSplash from './components/LaunchSplash';
 import {exitWindowSeconds} from './controls/exit-window';
@@ -396,8 +397,9 @@ export function Game({onSnapshot}:{onSnapshot?:(state:GameState)=>void}){
  {!testMission&&!trial.active&&!guide.active&&guide.retries===0&&hud.status==='won'&&completedReplay&&!paused&&<View style={{position:'absolute',bottom:insets.bottom+3,zIndex:46}}><CampaignSubmission state={hud} replay={completedReplay} target={entry.number>12?{level:entry.number,rulesHash:entry.rulesHash}:{mission:entry.mission}} quiet retrySignal={rewardRetry} onReward={account.preview?undefined:rewardResolved}/></View>}
  {claimVisible&&<CreditClaim requiresWallet={!account.preview&&!account.wallet&&guide.retries===0} connecting={connectingClaim} onConnect={connectToClaim} autoClaim={autoClaim} reward={creditReward} balance={economy.balance} onRetry={creditReward.amount===null?(account.preview?saveLocalReward:()=>{rewardResolved(null);setRewardRetry(n=>n+1);}):undefined} stars={starsFor(hud)} mission={level.title} onDone={()=>setRewardClaimed(true)}/>}
  {introMission&&<MissionIntro lesson={introMission.number>12?publishedLesson(introMission):campaignLesson(introMission.mission)} onBack={()=>{setIntroMission(null);setHideoutOpen(true);}} onPlay={()=>{const next=introMission;setIntroMission(null);restart(next);}}/>}
+ {entry.boss&&gameplayVisible&&<><BossHealthBand key={`health-${sceneVersion}`} boss={entry.boss} game={game}/><BossDownRibbon key={`down-${sceneVersion}`} game={game} clock={clock} reduced={!!settings.reducedEffects}/></>}
  {bossEntrance&&entry.boss&&!sceneLoading&&renderGameSurface&&!paused&&<BossEntrance key={sceneVersion} boss={entry.boss} reduced={!!settings.reducedEffects} onDone={finishBossEntrance}/>}
- {sceneLoading&&renderGameSurface&&<MissionChaseLoader progress={sceneProgress} reduced={!!settings.reducedEffects} error={sceneError}
+ {sceneLoading&&renderGameSurface&&<MissionChaseLoader boss={entry.boss??undefined} progress={sceneProgress} reduced={!!settings.reducedEffects} error={sceneError}
   onRetry={()=>{sceneReady.value=false;simulationEpoch.value=++sceneEpoch.current;setSceneVersion(sceneEpoch.current);setSceneProgress(0);setSceneError('');}}
   onExit={backToMissions}/>}
  {finaleVisible&&<CampaignConfetti reduced={!!settings.reducedEffects}/>}

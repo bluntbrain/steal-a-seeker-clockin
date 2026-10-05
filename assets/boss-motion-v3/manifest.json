@@ -1,0 +1,65 @@
+{
+  "provider": "OpenAI image generation",
+  "cell": 256,
+  "columns": 4,
+  "rows": 2,
+  "frames": {
+    "walk": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "entrance": [
+      4,
+      5,
+      6,
+      7
+    ]
+  },
+  "facing": "walk +X, entrance viewer",
+  "characters": [
+    {
+      "name": "toly",
+      "file": "toly.webp",
+      "bytes": 186120,
+      "sha256": "341df4230ff5a9b7388320ab029df9d2ee974dfbafd80a439d5c329989e24dbf"
+    },
+    {
+      "name": "mert",
+      "file": "mert.webp",
+      "bytes": 172956,
+      "sha256": "858cb95c50328af646da7bdb290f461587407b30d8396f7ee506f8e191b4dc18"
+    },
+    {
+      "name": "chase",
+      "file": "chase.webp",
+      "bytes": 222850,
+      "sha256": "d6a925c2c280cc5e39aaefbc5e6c80c73d5889da90de194759a748a2e66631f1"
+    },
+    {
+      "name": "lily",
+      "file": "lily.webp",
+      "bytes": 195076,
+      "sha256": "56e58f46c174950bba5c7e5be397a2bd4e046515d7b742fbdbf4d198a9cd3498"
+    },
+    {
+      "name": "vibhu",
+      "file": "vibhu.webp",
+      "bytes": 199406,
+      "sha256": "a212a952c7cbaf979afaca9617b65594a17313da539411784a71c549e0742733"
+    },
+    {
+      "name": "akshay",
+      "file": "akshay.webp",
+      "bytes": 183442,
+      "sha256": "3eb8653cc0e1e4ee51c4cdd6123f8d82aebf64bed27b868788fcd64cc084e701"
+    },
+    {
+      "name": "beeman",
+      "file": "beeman.webp",
+      "bytes": 167504,
+      "sha256": "9c5b6474325fa028c2432d18670602f8703c24356547210377e447cbec423eaa"
+    }
+  ]
+}
