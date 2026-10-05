@@ -14,7 +14,7 @@ const AUTHORED=['practice','cone-lesson','battery-dash','crossing-signals','swee
 const keyOf=n=>n<=12?AUTHORED[n-1]:`campaign:${n}`;
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 (async()=>{
- const browser=await chromium.launch({headless,executablePath:'/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',args:[stage?'--window-size=1920,1080':'--window-size=430,900']});
+ const browser=await chromium.launch({headless,executablePath:'/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',args:[stage?'--window-size=1920,1080':'--window-size=430,900','--autoplay-policy=no-user-gesture-required']});
  const page=await browser.newPage({viewport:stage?{width:1920,height:1080}:{width:390,height:844}});
  if(stage)await page.goto(`${bridge}/stage`);
  // in stage mode every game action targets the iframe; the frame is found by its url after each navigation
