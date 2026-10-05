@@ -77,3 +77,7 @@ verification/qa/*/screenshots/
 # Finder metadata and local marketing captures (video, not shipped)
 .DS_Store
 /marketing/
+
+# chrome profiles used by the jev show runner
+.jev-profile/
+.jev-profile-eval/
