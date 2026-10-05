@@ -1,0 +1,13 @@
+{
+  "version": "1.0.5",
+  "versionCode": 51,
+  "sha256": "6b5435c722bdae5a44caf02f9228d7b9aba447bdff8ac3dac64dabb52b90a9e2",
+  "bytes": 94409266,
+  "certificateSha256": "4fa3e9942238f110824fb67dc99438fc1d70ef48a273e4a79331d5f8a1e1e913",
+  "sameSignerAsCode50": true,
+  "sourceHashesVerified": 279,
+  "zipIntegrity": true,
+  "zipAlignment16KB": true,
+  "physicalDeviceTested": false,
+  "storeUploaded": false
+}
