@@ -76,4 +76,4 @@ verification/qa/*/screenshots/
 
 # Finder metadata and local marketing captures (video, not shipped)
 .DS_Store
-marketing/
+/marketing/
