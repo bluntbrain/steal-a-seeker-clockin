@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>Steal a Seeker, Jev live</title>
+<style>
+ /* 1920 by 1080 stage for obs window capture: art behind, game centre, jev panel right */
+ html,body{margin:0;width:1920px;height:1080px;overflow:hidden;background:#0b1f18 url(/show/bg.png) center/cover no-repeat;font-family:Inter,system-ui,-apple-system,sans-serif;color:#F0F6E8}
+ .live{position:absolute;left:48px;top:40px;display:flex;align-items:center;gap:14px}
+ .dot{width:18px;height:18px;border-radius:50%;background:#ff2a2a;box-shadow:0 0 18px #ff2a2a;animation:blink 1.1s infinite}
+ @keyframes blink{50%{opacity:.25}}
+ .live b{font-size:40px;font-weight:900;letter-spacing:.06em;color:#ff2a2a;text-shadow:0 2px 12px #000}
+ .sub{position:absolute;left:48px;top:98px;font-size:18px;font-weight:700;letter-spacing:.14em;color:#C4F7DC;text-shadow:0 2px 8px #000}
+ .brand{position:absolute;left:48px;bottom:44px;font-size:30px;font-weight:900;color:#F4F3E9;text-shadow:0 2px 10px #000}
+ .brand small{display:block;font-size:14px;font-weight:600;letter-spacing:.12em;color:#A7DBC6}
+ .phone{position:absolute;left:720px;top:40px;width:480px;height:1000px;border-radius:38px;background:#07110e;box-shadow:0 30px 80px rgba(0,0,0,.6),0 0 0 6px #142923;overflow:hidden}
+ .phone iframe{position:absolute;left:0;top:0;width:390px;height:844px;border:0;transform:scale(1.2308);transform-origin:0 0;background:#0c1011}
+ .panel{position:absolute;right:48px;top:40px;width:560px;height:1000px;display:flex;flex-direction:column;gap:18px}
+ .card{background:#091917EE;border:1px solid #2F4C43;border-radius:18px;padding:18px 22px;box-shadow:0 12px 40px rgba(0,0,0,.45)}
+ .k{font-size:12px;letter-spacing:.16em;color:#A7DBC6;font-weight:700}
+ .choice{font-size:34px;font-weight:900;margin:6px 0 10px;text-transform:capitalize}
+ .bar{height:10px;background:#1C352C;border-radius:5px;overflow:hidden;margin:4px 0 10px}.bar i{display:block;height:100%;background:#C4F7DC}
+ .meta{color:#ADC5BA;font-size:14px;margin-top:6px}
+ .jev{display:flex;align-items:center;gap:12px;margin-bottom:6px}
+ .jevmark{font-size:26px;font-weight:900;letter-spacing:.08em;color:#C4F7DC;border:2px solid #C4F7DC;border-radius:10px;padding:2px 10px}
+ .log{flex:1;overflow:hidden;font-family:"JetBrains Mono",Menlo,monospace;font-size:14px;line-height:1.55}
+ .log div{white-space:nowrap;color:#D9E7DE}.log div span{color:#A7DBC6;margin-right:8px}.log div em{color:#ffb86b;font-style:normal;margin-left:8px}
+ .stat{position:absolute;left:48px;top:150px;width:600px;display:flex;flex-direction:column;gap:10px}
+ .stat .card{padding:14px 18px}.stat .v{font-size:28px;font-weight:900}
+</style></head>
+<body>
+ <div class="live"><span class="dot"></span><b>LIVE STREAMING GAMEPLAY</b></div>
+ <div class="sub">JEV DECIDES. THE GAME WALKS. NO LEADERBOARD ENTRY.</div>
+ <div class="stat">
+  <div class="card"><div class="k">LEVEL</div><div class="v" id="level">1</div></div>
+  <div class="card"><div class="k">RUN</div><div class="v" id="run">0 won · 0 lost</div></div>
+ </div>
+ <div class="brand">STEAL A SEEKER<small>@StealASeeker · built for the Seeker phone</small></div>
+ <div class="phone"><iframe id="game" src="http://127.0.0.1:8787/?build=free-campaign-store&pilot=jev&bridge=http%3A%2F%2F127.0.0.1%3A8791" allow="autoplay"></iframe></div>
+ <div class="panel">
+  <div class="card">
+   <div class="jev"><span class="jevmark">JEV</span><span class="k">TYPESAFE JEV 1.13 VIA OPENROUTER</span></div>
+   <div class="k">CURRENT CHOICE</div><div class="choice" id="choice">waiting</div>
+   <div id="probs"></div>
+   <div class="meta" id="meta"></div>
+  </div>
+  <div class="card log"><div class="k" style="margin-bottom:8px">DECISION LOG</div><div id="log"></div></div>
+ </div>
+ <script>
+  const bridge='http://127.0.0.1:8791';let won=0,lost=0,lastLevel=null,lastStatus='playing';
+  async function tick(){
+   try{const d=await (await fetch(bridge+'/last')).json();document.getElementById('choice').textContent=d.choice?d.choice.replace(/_/g,' '):'waiting';
+    const p=document.getElementById('probs');p.replaceChildren();
+    for(const [k,v] of Object.entries(d.probabilities||{}).sort((a,b)=>b[1]-a[1]).slice(0,5)){const l=document.createElement('div');l.className='k';l.textContent=k.replace(/_/g,' ')+'  '+Math.round(v*100)+'%';const bar=document.createElement('div');bar.className='bar';const i=document.createElement('i');i.style.width=Math.round(v*100)+'%';bar.append(i);p.append(l,bar);}
+    document.getElementById('meta').textContent=(d.mode==='jev'?'live model':'stand in, no key')+' · '+d.ms+' ms · '+d.decisions+' decisions · '+(d.tokens?Math.round(d.tokens/1000)+'k tokens':'');
+    const log=await (await fetch(bridge+'/log')).json(),el=document.getElementById('log');el.replaceChildren();
+    for(const r of log.slice(-22).reverse()){const row=document.createElement('div');const n=document.createElement('span');n.textContent='#'+r.n;row.append(n,document.createTextNode((r.level?'L'+r.level+' ':'')+r.choice.replace(/_/g,' ')+' '+r.p+'%'));const m=document.createElement('em');m.textContent=r.ms+'ms';row.append(m);el.append(row);}
+    if(log.length){const l=log[log.length-1].level;if(l)document.getElementById('level').textContent=l;}
+   }catch{}
+   // outcome counter reads the game frame when the preview allows it; otherwise the runner's log is the record
+   try{const w=document.getElementById('game').contentWindow,s=w.__SEEKER_MVP__&&w.__SEEKER_MVP__.snapshot();if(s){if(lastStatus==='playing'&&s.status==='won')won++;if(lastStatus==='playing'&&(s.status==='caught'||s.status==='timeout'))lost++;lastStatus=s.status;document.getElementById('run').textContent=won+' won · '+lost+' lost';}}catch{}
+  }
+  setInterval(tick,400);
+ </script>
+</body></html>

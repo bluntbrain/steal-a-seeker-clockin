@@ -4,11 +4,13 @@
 // so the loop can be tested; the mode is always reported so the overlay can say which one is playing.
 // usage: OPENROUTER_API_KEY=... node scripts/jev-bridge.mjs [port]   endpoints: POST /decide, GET /last, GET /overlay
 import http from 'node:http';
+import {readFile} from 'node:fs/promises';
+import {URL} from 'node:url';
 // two routes to the same model: openrouter's decisions api (OPENROUTER_API_KEY) or typesafe directly (TYPESAFE_API_KEY)
 const port=Number(process.argv[2]||8791),orKey=process.env.OPENROUTER_API_KEY,tsKey=process.env.TYPESAFE_API_KEY,key=orKey||tsKey;
 const endpoint=orKey?'https://openrouter.ai/api/alpha/decisions':'https://api.typesafe.ai/v1/systemone';
 const model=process.env.JEV_MODEL||(orKey?'typesafe/jev-1.13':'jev-1.13.0');
-let last={choice:null,probabilities:{},confidence:0,mode:key?'jev':'mock',ms:0,at:0,decisions:0,tokens:0,errors:0};
+let last={choice:null,probabilities:{},confidence:0,mode:key?'jev':'mock',ms:0,at:0,decisions:0,tokens:0,errors:0};const log=[];
 function mock(criteria,meta){
  const keys=Object.keys(criteria);const score=k=>{const m=meta?.[k]??{};return (m.exposed?100:0)+(m.dist_to_goal??50)+(k==='wait'?20:0)+(k.startsWith('attack')?(m.exposed?30:-2):0);};
  const ranked=[...keys].sort((a,b)=>score(a)-score(b)),choice=ranked[0];
@@ -30,12 +32,16 @@ http.createServer(async(req,res)=>{
  if(req.method==='OPTIONS'){res.writeHead(204).end();return;}
  if(req.method==='GET'&&req.url==='/last'){res.writeHead(200,{'Content-Type':'application/json'}).end(JSON.stringify(last));return;}
  if(req.method==='GET'&&req.url==='/overlay'){res.writeHead(200,{'Content-Type':'text/html'}).end(overlay);return;}
+ if(req.method==='GET'&&req.url==='/log'){res.writeHead(200,{'Content-Type':'application/json'}).end(JSON.stringify(log.slice(-60)));return;}
+ // the stage page and its assets live in show/; the game itself is an iframe to the preview server
+ if(req.method==='GET'&&(req.url==='/stage'||req.url.startsWith('/show/'))){try{const name=req.url==='/stage'?'stage.html':req.url.slice(6).split('?')[0];const file=await readFile(new URL('../show/'+name,import.meta.url));res.writeHead(200,{'Content-Type':name.endsWith('.png')?'image/png':name.endsWith('.css')?'text/css':'text/html'}).end(file);}catch{res.writeHead(404).end();}return;}
  if(req.method!=='POST'||req.url!=='/decide'){res.writeHead(404).end();return;}
  let body='';for await(const chunk of req)body+=chunk;
  const started=Date.now();
  try{const {state,instructions,criteria,meta}=JSON.parse(body);if(!criteria||!Object.keys(criteria).length)throw new Error('no options');
   const answer=key?await jev(state,instructions,criteria):mock(criteria,meta);
   last={...last,...answer,mode:key?'jev':'mock',ms:Date.now()-started,at:started,decisions:last.decisions+1};
+  log.push({n:last.decisions,at:started,choice:answer.choice,p:Math.round((answer.probabilities?.[answer.choice]??0)*100),confidence:+answer.confidence.toFixed(2),ms:last.ms,level:state?.level?.number??null,hp:state?.courier?.hp??null});if(log.length>200)log.shift();
   res.writeHead(200,{'Content-Type':'application/json'}).end(JSON.stringify({choice:answer.choice,probabilities:answer.probabilities,confidence:answer.confidence,mode:last.mode,ms:last.ms}));
  }catch(e){last.errors++;console.error('decide failed:',e instanceof Error?e.message:e);res.writeHead(502,{'Content-Type':'application/json'}).end(JSON.stringify({error:String(e instanceof Error?e.message:e)}));}
 }).listen(port,'127.0.0.1',()=>console.log(`jev bridge on http://127.0.0.1:${port} (${key?model+' via '+(orKey?'openrouter':'typesafe'):'stand in, set OPENROUTER_API_KEY or TYPESAFE_API_KEY for jev'})`));
