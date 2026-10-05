@@ -17,6 +17,9 @@ try {
   // the server seeds the bundled campaign levels on boot, so the bundle ships with the api context
   fs.mkdirSync(path.join(stage, 'src/campaign'), {recursive: true});
   fs.copyFileSync(path.join(root, 'src/campaign/published-levels.json'), path.join(stage, 'src/campaign/published-levels.json'));
+  // the api publishes levels itself, so the solver ships with it
+  fs.mkdirSync(path.join(stage, 'scripts'), {recursive: true});
+  for (const name of ['scripts/qa-combat.ts', 'scripts/qa-tactical.ts']) fs.copyFileSync(path.join(root, name), path.join(stage, name));
   for (const name of ['Dockerfile.api', 'railway.toml', '.dockerignore']) fs.copyFileSync(path.join(root, name), path.join(stage, name));
   const files = fs.readdirSync(stage, {recursive: true}).map(name => path.join(stage, name)).filter(file => fs.statSync(file).isFile());
   const bytes = files.reduce((sum, file) => sum + fs.statSync(file).size, 0);

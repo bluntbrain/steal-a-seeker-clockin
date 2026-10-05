@@ -27,7 +27,7 @@ export const BOSS_ARENAS:readonly BossArena[]=[
    wall(8.6,4.6,.8,5),wall(8.6,10.8,.8,4.6),
    // pillars break the line from gate to gate
    wall(5.4,7,1.2,1),wall(5.4,12,1.2,1),
-   crate(1.1,6,.9,.9),crate(1.1,11,.9,.9),crate(10,8,.9,.9),crate(10,13.5,.9,.9),
+   crate(1.9,6,.7,.9),crate(1.9,11,.7,.9),crate(9.4,8,.7,.9),crate(9.4,13.5,.7,.9),
   ],
   anchor:{x:6,y:10},posts:[{x:1.6,y:9.5},{x:10.4,y:6},{x:6,y:5.3},{x:6,y:14.7}]},
  {id:'arena-vault-ring',name:'Vault Ring',question:'A ring corridor around the vault. The boss circles it; the side pockets are the only places to wait.',

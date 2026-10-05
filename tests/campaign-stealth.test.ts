@@ -31,7 +31,7 @@ test('version 3 maze rooms are deterministic, dense, short sighted and reachable
   assert(l.blockers.some(b=>b.kind==='crate'),`${n}: a yard crate exists`);
   const exit={x:l.exit.x+l.exit.w/2,y:l.exit.y+l.exit.h/2};
   for(const p of l.targets??[l.phone]){assert(findPath(l.spawn,p,l).length,`${n}: phone reachable`);assert(findPath(p,exit,l).length,`${n}: exit reachable`);}
-  for(const g of l.patrols)for(const p of g.roam??g.route)assert(walkableSegment(p,p,l),`${n}: patrol inside a wall`);
+  for(const g of l.patrols){for(const p of g.roam??g.route)assert(walkableSegment(p,p,l),`${n}: patrol inside a wall`);assert(findPath(l.spawn,g.route[0]!,l).length,`${n}: guard at ${g.route[0]!.x},${g.route[0]!.y} is reachable`);}
  }
 });
 test('boss levels use every arena, hold the boss at the anchor and reach the Seeker through the arena band',()=>{
@@ -45,6 +45,7 @@ test('boss levels use every arena, hold the boss at the anchor and reach the See
   assert(Math.hypot(boss.route[0]!.x-anchor.x,boss.route[0]!.y-anchor.y)<=2.3,`${r.number}: boss within reach of the anchor`);
   const exit={x:l.exit.x+l.exit.w/2,y:l.exit.y+l.exit.h/2};
   assert(findPath(l.spawn,l.phone,l).length&&findPath(l.phone,exit,l).length,`${r.number}: objectives reachable`);
+  for(const g of l.patrols)assert(findPath(l.spawn,g.route[0]!,l).length,`${r.number}: guard at ${g.route[0]!.x},${g.route[0]!.y} is reachable`);
  }
  assert.equal(used.size,BOSS_ARENAS.length);
 });
