@@ -5,7 +5,10 @@ import {walkableSegment,findPath} from '../src/game/navigation';
 import {CAMPAIGN_STEALTH_LAYOUTS} from './campaign-stealth-layouts';
 import {WEEKLY_LAYOUTS} from './weekly-layouts';
 import {BOSS_TRAITS} from '../src/game/heist-guards-v17';
-export const CAMPAIGN_GENERATOR_VERSION=2;
+import {carveMaze,type MazeParams} from './campaign-maze';
+import {BOSS_ARENAS,type BossArena} from './campaign-arenas';
+// version 3 (5 October 2026): seeded maze rooms for every level and authored arenas for bosses
+export const CAMPAIGN_GENERATOR_VERSION=3;
 export const FIRST_PUBLISHED_LEVEL=13;
 export const BOSS_EVERY=3;
 export const BOSSES=['toly','mert','chase','lily','vibhu','akshay','beeman'] as const;
@@ -13,7 +16,7 @@ export type BossId=typeof BOSSES[number];
 export const BOSS_NAMES:Record<BossId,string>={toly:'Toly',mert:'Mert',chase:'Chase',lily:'Lily',vibhu:'Vibhu',akshay:'Akshay',beeman:'Beeman'};
 export type CampaignZone='warehouse'|'rooftops'|'powerworks';
 export type CampaignModifier='none'|'blackout'|'double-haul'|'exit-window';
-export type CampaignRecipe={version:1|2;number:number;template:string;mirror:boolean;flip:boolean;seed:string;modifier:CampaignModifier;band:number;mission:MissionId;zone:CampaignZone;boss?:BossId;roster:{drones:number;scouts:number;sentries:number;heavies:number;warden:number};reinforcements:number;targetSeconds:number;hardLimitSeconds:number;title:string};
+export type CampaignRecipe={version:1|2|3;number:number;template:string;mirror:boolean;flip:boolean;seed:string;modifier:CampaignModifier;band:number;mission:MissionId;zone:CampaignZone;boss?:BossId;roster:{drones:number;scouts:number;sentries:number;heavies:number;warden:number};reinforcements:number;targetSeconds:number;hardLimitSeconds:number;title:string;maze?:MazeParams};
 export const campaignLevelKey=(n:number)=>`campaign:${n}`;
 export const campaignLevelNumber=(key:string)=>{const m=/^campaign:(\d+)$/.exec(key);return m?Number(m[1]):null;};
 export const ZONES:readonly CampaignZone[]=['warehouse','rooftops','powerworks'];
@@ -22,6 +25,8 @@ export const campaignZone=(n:number):CampaignZone=>n<FIRST_PUBLISHED_LEVEL?(n>=9
 export const isBossLevel=(n:number)=>n>=FIRST_PUBLISHED_LEVEL&&n%BOSS_EVERY===0;
 // the rotation starts with toly on the first boss level and cycles through the seven
 export const bossFor=(n:number):BossId|undefined=>isBossLevel(n)?BOSSES[(n/BOSS_EVERY-Math.ceil(FIRST_PUBLISHED_LEVEL/BOSS_EVERY))%BOSSES.length]:undefined;
+const MAZE_TITLES=['Brick Run','Switchbacks','Cold Stacks','Iron Lanes','Hollow Cellars','Narrow Spines','Blind Corners','Freight Warren','Rusted Loops','Dead Letter Yard','Split Cellars','Quiet Burrows'];
+const MAZE_QUESTION='Brick corridors and blind corners. Keep a wall between you and every cone, and use the pockets to let a patrol pass.';
 const ZONE_MISSION:Record<CampaignZone,MissionId>={warehouse:'practice',rooftops:'sweep-window',powerworks:'power-trade'};
 const ZONE_FLOOR:Record<CampaignZone,string>={warehouse:'#253A37',rooftops:'#253649',powerworks:'#343D40'};
 /** small deterministic prng keyed by a string; the same key always yields the same level */
@@ -33,23 +38,27 @@ export function makeCampaignRecipes(from:number,to:number,seedSalt=0):CampaignRe
  const out:CampaignRecipe[]=[];const history:string[]=[];
  for(let n=FIRST_PUBLISHED_LEVEL;n<=to;n++){
   const next=seededRandom(`campaign-v${CAMPAIGN_GENERATOR_VERSION}:${n}:${seedSalt}`);
-  const recent=new Set(history.slice(-4)),rooms=CAMPAIGN_STEALTH_LAYOUTS.map(t=>t.id).filter(id=>!recent.has(id));
-  const template=shuffled(rooms,next)[0]!;history.push(template);
   const zone=campaignZone(n),boss=bossFor(n),steps=n-FIRST_PUBLISHED_LEVEL;
+  const recent=new Set(history.slice(-4));
+  const template=boss?shuffled(BOSS_ARENAS.map(a=>a.id).filter(id=>!recent.has(id)),next)[0]!:'maze';
+  const mazeName=shuffled(MAZE_TITLES.filter(t=>!recent.has(t)),next)[0]!;history.push(boss?template:mazeName);
+  // mazes tighten with the band: fewer pockets to hide in, shorter straight runs, fewer open yards
+  const maze:MazeParams|undefined=boss?undefined:{braid:+(0.25+Math.min(.3,steps*.005)).toFixed(3),pockets:Math.max(2,4-Math.floor(steps/24)),yards:steps<12?2:1,maxRun:steps<12?5:4};
   // difficulty rises slowly: the pressure band climbs one step every twelve levels and stops at the authored maximum
   const band=Math.min(12,5+Math.floor(steps/12));
   const modifier:CampaignModifier=boss?'none':steps%5===4?(['blackout','exit-window','double-haul'] as const)[Math.floor(steps/5)%3]!:'none';
   const count=Math.min(8,3+Math.floor(steps/6)),drones=(steps>=30?2:1)+(boss==='beeman'?2:0),heavies=steps<8?0:steps<48?1:2;
   const warden=boss?1:0,fill=Math.max(0,count-drones-heavies-warden),sentries=Math.floor(fill*(.35+next()*.3)),scouts=fill-sentries;
-  const name=CAMPAIGN_STEALTH_LAYOUTS.find(t=>t.id===template)!.name;
-  out.push({version:2,number:n,template,mirror:next()>.5,flip:next()>.5,seed:`campaign-v${CAMPAIGN_GENERATOR_VERSION}:${n}:${seedSalt}`,modifier,band,mission:ZONE_MISSION[zone],zone,...(boss?{boss}:{}),roster:{drones,scouts,sentries,heavies,warden},reinforcements:steps<18?1:2,targetSeconds:modifier==='double-haul'?160:100+Math.min(30,Math.floor(steps/4)*2),hardLimitSeconds:modifier==='double-haul'?240:210,title:boss?`${BOSS_NAMES[boss]} holds ${name}`:name});
+  const name=boss?BOSS_ARENAS.find(a=>a.id===template)!.name:mazeName;
+  out.push({version:3,number:n,template,...(maze?{maze}:{}),mirror:next()>.5,flip:next()>.5,seed:`campaign-v${CAMPAIGN_GENERATOR_VERSION}:${n}:${seedSalt}`,modifier,band,mission:ZONE_MISSION[zone],zone,...(boss?{boss}:{}),roster:{drones,scouts,sentries,heavies,warden},reinforcements:steps<18?1:2,targetSeconds:modifier==='double-haul'?160:100+Math.min(30,Math.floor(steps/4)*2),hardLimitSeconds:modifier==='double-haul'?240:210,title:boss?`${BOSS_NAMES[boss]} holds ${name}`:name});
  }
  return out.filter(r=>r.number>=from);
 }
 export const makeCampaignRecipe=(n:number,seedSalt=0)=>makeCampaignRecipes(n,n,seedSalt)[0]!;
 /** builds the frozen level for a recipe. throws when the room cannot host the roster, so the publisher can bump the seed salt */
 export function buildCampaignLevel(recipe:CampaignRecipe):LevelDefinition{
- const template=(recipe.version===1?WEEKLY_LAYOUTS:CAMPAIGN_STEALTH_LAYOUTS).find(t=>t.id===recipe.template);if(!template)throw new Error(`unknown room ${recipe.template}`);
+ const arena:BossArena|undefined=recipe.version===3&&recipe.template!=='maze'?BOSS_ARENAS.find(a=>a.id===recipe.template):undefined;
+ const template=recipe.version===3?(arena??(recipe.maze?{id:'maze',name:recipe.title,question:MAZE_QUESTION,cover:carveMaze(recipe.seed,recipe.maze).cover}:undefined)):(recipe.version===1?WEEKLY_LAYOUTS:CAMPAIGN_STEALTH_LAYOUTS).find(t=>t.id===recipe.template);if(!template)throw new Error(`unknown room ${recipe.template}`);
  const next=seededRandom(recipe.seed+':build'),{mirror,flip,modifier}=recipe;
  const point=(p:Point):Point=>({x:mirror?12-p.x:p.x,y:flip?20-p.y:p.y});
  const box=(b:Box):Box=>({...b,x:mirror?12-b.x-b.w:b.x,y:flip?20-b.y-b.h:b.y});
@@ -59,11 +68,14 @@ export function buildCampaignLevel(recipe:CampaignRecipe):LevelDefinition{
  const level:LevelDefinition={id:campaignLevelKey(recipe.number),mission:recipe.mission,title:recipe.title,number:recipe.band,width:12,height:20,spawn,phone,exit:{x:exitP.x-.7,y:exitP.y-.65,w:1.4,h:1.3},blockers:[...boundary,...template.cover.map(box)],patrols:[],combat:{version:2,revision:recipe.version===1?17:18},decoys:0,targetSeconds:recipe.targetSeconds,hardLimitSeconds:recipe.hardLimitSeconds,briefing,floorColor:ZONE_FLOOR[recipe.zone],...(modifier==='double-haul'?{targets:[phone,point({x:phone.x===point({x:2,y:2}).x?10:2,y:2})]}:{}),...(modifier==='exit-window'?{exitWindow:{period:8,openSeconds:4,phase:0}}:{})};
  const nodes:Point[]=[];for(let y=4;y<=14;y+=1)for(let x=1.5;x<=10.5;x+=1){const p=point({x,y});if(walkableSegment(p,p,level)&&Math.hypot(p.x-spawn.x,p.y-spawn.y)>=6)nodes.push(p);}
  let spots=shuffled(nodes,next);const occupied:Point[]=[];
+ const posts=arena?arena.posts.map(point):[];const anchor=arena?point(arena.anchor):undefined;
+ const nearest=(target:Point)=>[...spots].filter(p=>occupied.every(q=>Math.hypot(p.x-q.x,p.y-q.y)>=2.6)).sort((a,b)=>Math.hypot(a.x-target.x,a.y-target.y)-Math.hypot(b.x-target.x,b.y-target.y))[0];
  // the boss takes the warden slot: armoured, more health, placed first so it holds the room
  const r=recipe.roster,roles:NonNullable<GuardSpec['combatRole']>[]=[...Array(r.warden).fill('warden'),...Array(r.drones).fill('drone'),...Array(r.heavies).fill('heavy'),...Array(r.sentries).fill('sentry'),...Array(r.scouts).fill('scout')];
  const blackout=modifier==='blackout'?.8:1;
  level.patrols=[...roles.filter(role=>role==='warden'),...shuffled(roles.filter(role=>role!=='warden'),next)].map(role=>{
-  const at=spots.find(p=>occupied.every(q=>Math.hypot(p.x-q.x,p.y-q.y)>=2.6));if(!at)throw new Error(`no safe enemy position in ${recipe.template} for level ${recipe.number}`);occupied.push(at);spots=spots.filter(p=>p!==at);
+  const post=role==='warden'?anchor:role==='drone'?undefined:posts.shift();
+  const at=(post?nearest(post):undefined)??spots.find(p=>occupied.every(q=>Math.hypot(p.x-q.x,p.y-q.y)>=2.6));if(!at)throw new Error(`no safe enemy position in ${recipe.template} for level ${recipe.number}`);occupied.push(at);spots=spots.filter(p=>p!==at);
   const roam=shuffled(nodes.filter(p=>Math.hypot(p.x-at.x,p.y-at.y)>.8&&Math.hypot(p.x-at.x,p.y-at.y)<=2.8&&walkableSegment(at,p,level)),next).slice(0,3);
   if(!roam.length)throw new Error(`no patrol lane in ${recipe.template} for level ${recipe.number}`);
   const armored=role==='heavy'||role==='warden';
