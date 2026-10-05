@@ -68,6 +68,8 @@ import {alarmSpeedPercent,decoyMessage} from './game/feedback';
 import {initialState,idleInput,step,nearPhone,nearSwitch,exitOpen,stateLevel,type GameState} from './game/simulation';
 import {LEVEL,getLevel,TUNING,MISSIONS,type MissionId,type Point} from './game/level';
 type Stats={fps:number;p95:number;frames:number;slow:number};
+// a pilot run on the web keeps playing when the window loses focus; the stream operator clicks other apps
+const PILOT_RUN=Platform.OS==='web'&&typeof window!=='undefined'&&new URLSearchParams(window.location.search).has('pilot');
 const zeroStats={fps:0,p95:0,frames:0,slow:0};
 const time=(n:number)=>`${Math.floor(n/60).toString().padStart(2,'0')}:${Math.floor(n%60).toString().padStart(2,'0')}`;
 // memoised so hud publishes do not re-render the hidden overlay panels
@@ -255,20 +257,20 @@ export function Game({onSnapshot}:{onSnapshot?:(state:GameState)=>void}){
  // Explicit exits must open the map even when Hideout remembers a briefing or store tab.
  const backToMissions=()=>{pause(true);economy.setTab('map');setMissionMapRequest(n=>n+1);setHideoutOpen(true);};
  const introduceMission=(next:CampaignEntry)=>{if(!next.playable)return;if(testMission){restart(next);return;}pause(true);setHideoutOpen(false);setIntroMission(next);};
- useEffect(()=>{const subscription=AppState.addEventListener('change',state=>{if(state!=='active'){finaleAudio.pause();objectiveAudio.pause();if(game.value.status==='playing')pause(true);}});return()=>subscription.remove();},[pause,game,finaleAudio,objectiveAudio]);
+ useEffect(()=>{const subscription=AppState.addEventListener('change',state=>{if(state!=='active'&&!PILOT_RUN){finaleAudio.pause();objectiveAudio.pause();if(game.value.status==='playing')pause(true);}});return()=>subscription.remove();},[pause,game,finaleAudio,objectiveAudio]);
  useEffect(()=>{
    if(Platform.OS!=='web')return;
    const keys=new Set<string>();
    const sync=()=>{if(combatMode)return;const x=Number(keys.has('d')||keys.has('arrowright'))-Number(keys.has('a')||keys.has('arrowleft'));const y=Number(keys.has('s')||keys.has('arrowdown'))-Number(keys.has('w')||keys.has('arrowup'));input.modify(v=>{v.x=x;v.y=y;v.interact=keys.has('e');return v;});};
    const down=(e:KeyboardEvent)=>{const k=e.key.toLowerCase();if(introMission||walletOpen||hideoutOpen||mapOpen||settingsOpen||rewardsOpen)return;if(['w','a','s','d','arrowup','arrowdown','arrowleft','arrowright','e',' ','escape','r','q'].includes(k))e.preventDefault();keys.add(k);sync();if(!combatMode&&k===' '&&!e.repeat)input.modify(v=>{v.dash++;return v;});if(!combatMode&&k==='q'&&!e.repeat)input.modify(v=>{v.tool=(v.tool??0)+1;return v;});if(k==='escape'&&!e.repeat&&game.value.status==='playing')pause(!suspended.value);if(k==='r'&&!e.repeat){keys.clear();restart();}};
    const up=(e:KeyboardEvent)=>{keys.delete(e.key.toLowerCase());sync();};
-   const blur=()=>{keys.clear();if(game.value.status==='playing')pause(true);};
+   const blur=()=>{keys.clear();if(!PILOT_RUN&&game.value.status==='playing')pause(true);};
    window.addEventListener('keydown',down);window.addEventListener('keyup',up);window.addEventListener('blur',blur);
    const visibility=()=>{if(document.hidden)blur();};document.addEventListener('visibilitychange',visibility);
    // Read-only diagnostics for reproducible local playtests. No teleport, score or win hooks.
    (window as unknown as {__SEEKER_MVP__:unknown}).__SEEKER_MVP__={renderer:'2d-skia',rulesHash:rulesManifest.rulesHash,snapshot:()=>({...game.value,guards:game.value.guards.map(g=>({...g}))}),metrics:()=>({...latestStats.current}),get hud(){return latest.current;},get camera(){return {...camera.value};},replay:()=>({version:(combatMode?2:1) as 1|2,chunks:recording.value.map(c=>({...c}))}),get level(){return stateLevel(game.value);},
     // a pilot taps here in world units: same queue, same duplicate rule, same rules as a finger. nothing else moves the courier
-    tap:(x:number,y:number)=>{if(suspended.value||!sceneReady.value||!game.value.combat||game.value.status!=='playing')return false;const tap={x:Math.round(x*100)/100,y:Math.round(y*100)/100,at:Date.now()};if(isDuplicateTap(previousTap.value,tap))return false;previousTap.value=tap;pendingTap.value=tap;return true;}};
+    get suspended(){return suspended.value;},tap:(x:number,y:number)=>{if(suspended.value||!sceneReady.value||!game.value.combat||game.value.status!=='playing')return false;const tap={x:Math.round(x*100)/100,y:Math.round(y*100)/100,at:Date.now()};if(isDuplicateTap(previousTap.value,tap))return false;previousTap.value=tap;pendingTap.value=tap;return true;}};
    return()=>{window.removeEventListener('keydown',down);window.removeEventListener('keyup',up);window.removeEventListener('blur',blur);document.removeEventListener('visibilitychange',visibility);};
  },[input,pause,restart,suspended,recording,introMission,walletOpen,hideoutOpen,mapOpen,settingsOpen,rewardsOpen,sceneReady,pendingTap,previousTap]);
  const teachingTarget=guideTarget(guide.stage,hud);

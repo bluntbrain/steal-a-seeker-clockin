@@ -44,7 +44,7 @@ http.createServer(async(req,res)=>{
  try{const {state,instructions,criteria,meta}=JSON.parse(body);if(!criteria||!Object.keys(criteria).length)throw new Error('no options');
   const answer=key?await jev(state,instructions,criteria):mock(criteria,meta);
   last={...last,...answer,mode:key?'jev':'mock',ms:Date.now()-started,at:started,decisions:last.decisions+1};
-  log.push({n:last.decisions,at:started,choice:answer.choice,p:Math.round((answer.probabilities?.[answer.choice]??0)*100),confidence:+answer.confidence.toFixed(2),ms:last.ms,level:state?.level?.number??null,hp:state?.courier?.hp??null});if(log.length>200)log.shift();
+  log.push({n:last.decisions,at:started,choice:answer.choice,p:Math.round((answer.probabilities?.[answer.choice]??0)*100),confidence:+answer.confidence.toFixed(2),ms:last.ms,level:state?.level?.number??null,hp:state?.courier?.hp??null,x:state?.courier?.x??null,y:state?.courier?.y??null});if(log.length>200)log.shift();
   res.writeHead(200,{'Content-Type':'application/json'}).end(JSON.stringify({choice:answer.choice,probabilities:answer.probabilities,confidence:answer.confidence,mode:last.mode,ms:last.ms}));
  }catch(e){last.errors++;console.error('decide failed:',e instanceof Error?e.message:e);res.writeHead(502,{'Content-Type':'application/json'}).end(JSON.stringify({error:String(e instanceof Error?e.message:e)}));}
 }).listen(port,'127.0.0.1',()=>console.log(`jev bridge on http://127.0.0.1:${port} (${key?model+' via '+(orKey?'openrouter':'typesafe'):'stand in, set OPENROUTER_API_KEY or TYPESAFE_API_KEY for jev'})`));

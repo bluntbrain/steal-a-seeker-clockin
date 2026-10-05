@@ -57,7 +57,7 @@ export function options(s:GameState,level:LevelDefinition):MoveOption[]{
  if(!spotted&&guardNear)out.push({key:'wait',text:'Stand still for half a second and let the nearby patrol pass. Costs time.',tap:from,meta:{dist_to_goal:goalDist,exposed:exposed(from,s)}});
  return out;
 }
-type Mvp={snapshot:()=>GameState;level:LevelDefinition;camera:{x:number;y:number;zoom:number};tap:(x:number,y:number)=>boolean};
+type Mvp={snapshot:()=>GameState;level:LevelDefinition;camera:{x:number;y:number;zoom:number};suspended?:boolean;tap:(x:number,y:number)=>boolean};
 export type PilotStats={decisions:number;mode:string;last:Decision|null;lastOption:string;errors:number;running:boolean};
 /** polls the game, asks the bridge, taps. exposed on window.__JEV_PILOT__ for the overlay and the runner */
 export function startJevPilot(bridge='http://127.0.0.1:8791',intervalMs=500){
@@ -66,6 +66,7 @@ export function startJevPilot(bridge='http://127.0.0.1:8791',intervalMs=500){
  let busy=false,last:Observation['last_move']=null,lastTap:Point|null=null;const recent:string[]=[];
  const timer=setInterval(()=>{
   const mvp=(window as unknown as {__SEEKER_MVP__?:Mvp}).__SEEKER_MVP__;if(!mvp||busy)return;
+  if(mvp.suspended)return; // paused or loading: no decision, no tokens
   const s=mvp.snapshot();if(s.status!=='playing'||!s.combat)return;
   const level=mvp.level,moves=options(s,level);if(!moves.length)return;
   if(lastTap)last={option:stats.lastOption,result:Math.hypot(lastTap.x-s.x,lastTap.y-s.y)<.5?'arrived':s.guards.some(g=>g.seesPlayer)?'spotted':'walking'};
