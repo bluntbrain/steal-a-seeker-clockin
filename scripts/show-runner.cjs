@@ -17,7 +17,8 @@ const keyOf=n=>n<=12?AUTHORED[n-1]:`campaign:${n}`;
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 (async()=>{
  // one persistent profile: progress, unlocked levels and the tutorial flag survive restarts
- const browser=await chromium.launchPersistentContext(path.resolve(evalMode?'.jev-profile-eval':'.jev-profile'),{headless,executablePath:'/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',args:[stage?'--window-size=1920,1080':'--window-size=430,900','--autoplay-policy=no-user-gesture-required'],viewport:stage?{width:1920,height:1080}:{width:390,height:844}});
+ // stage mode uses the real window size (the stage scales itself) and hides chrome's automation and sandbox bars
+ const browser=await chromium.launchPersistentContext(path.resolve(evalMode?'.jev-profile-eval':'.jev-profile'),{headless,executablePath:'/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',ignoreDefaultArgs:['--enable-automation','--no-sandbox'],args:[stage?'--window-size=1920,1080':'--window-size=430,900','--autoplay-policy=no-user-gesture-required'],viewport:stage?null:{width:390,height:844}});
  const page=browser.pages()[0]||await browser.newPage();
  process.on('SIGTERM',async()=>{try{await browser.close();}catch{}process.exit(0);});process.on('SIGINT',async()=>{try{await browser.close();}catch{}process.exit(0);});
  const winsFile=path.join('verification/jev','wins.json');const wins=new Set(fs.existsSync(winsFile)?JSON.parse(fs.readFileSync(winsFile,'utf8')):[]);

@@ -2,7 +2,9 @@
 <html lang="en"><head><meta charset="utf-8"><title>Steal a Seeker, Jev live</title>
 <style>
  /* 1920 by 1080 stage for obs window capture: art behind, game centre, jev panel right */
- html,body{margin:0;width:1920px;height:1080px;overflow:hidden;background:#0b1f18 url(/show/bg.png) center/cover no-repeat;font-family:Inter,system-ui,-apple-system,sans-serif;color:#F0F6E8}
+ /* the stage is designed at 1920 by 1080 and scaled to fit any window, so a smaller screen never crops it */
+ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#04140f}
+ #stage{position:absolute;left:0;top:0;width:1920px;height:1080px;transform-origin:0 0;background:#0b1f18 url(/show/bg.png) center/cover no-repeat;font-family:Inter,system-ui,-apple-system,sans-serif;color:#F0F6E8}
  .live{position:absolute;left:48px;top:40px;display:flex;align-items:center;gap:14px}
  .dot{width:18px;height:18px;border-radius:50%;background:#ff2a2a;box-shadow:0 0 18px #ff2a2a;animation:blink 1.1s infinite}
  @keyframes blink{50%{opacity:.25}}
@@ -28,6 +30,7 @@
  .about{padding:16px 22px !important;flex:none}.about .cta{font-size:30px;line-height:1.1;font-weight:900;color:#C4F7DC;text-shadow:0 2px 10px #000}.about .search{font-size:20px;margin-top:8px;color:#F0F6E8}.about .search b{color:#ffffff}.about p{margin:12px 0 0;font-size:16px;line-height:1.4}.about .store{color:#A7DBC6;font-weight:700}
 </style></head>
 <body>
+<div id="stage">
  <div class="live"><span class="dot"></span><b>LIVE STREAMING GAMEPLAY</b></div>
  <div class="sub">JEV DECIDES. THE GAME WALKS. NO LEADERBOARD ENTRY.</div>
  <div class="stat">
@@ -43,7 +46,9 @@
    <div class="k" style="margin-bottom:8px">DECISION LOG</div><div id="log"></div>
   </div>
  </div>
+ </div>
  <script>
+  const fit=()=>{const k=Math.min(innerWidth/1920,innerHeight/1080),el=document.getElementById('stage');el.style.transform=`translate(${(innerWidth-1920*k)/2}px,${(innerHeight-1080*k)/2}px) scale(${k})`;};addEventListener('resize',fit);fit();
   // ?nopilot shows the stage with the game idle, for layout checks without spending decisions
   if(location.search.includes('nopilot'))document.getElementById('game').src='http://127.0.0.1:8787/?build=free-campaign-store';
   const bridge='http://127.0.0.1:8791';
