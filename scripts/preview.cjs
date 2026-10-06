@@ -3,6 +3,13 @@ const root=path.resolve(process.env.PREVIEW_ROOT||path.join(__dirname,'../dist')
 const types={'.html':'text/html','.js':'text/javascript','.json':'application/json','.wasm':'application/wasm','.png':'image/png','.webp':'image/webp','.mp4':'video/mp4','.m4a':'audio/mp4','.ogg':'audio/ogg','.mp3':'audio/mpeg','.wav':'audio/wav','.txt':'text/plain'};
 http.createServer(async(req,res)=>{
  let name;try{name=decodeURIComponent(new URL(req.url,'http://localhost').pathname);}catch{res.writeHead(400);return res.end();}
+ // Published campaign levels are public and read-only. Only the numeric from/to range is forwarded.
+ if(req.method==='GET'&&name==='/api/campaign/levels'){
+  const q=new URL(req.url,'http://localhost').searchParams,range=new URLSearchParams();
+  for(const k of ['from','to']){const v=q.get(k);if(v!==null){if(!/^\d{1,6}$/.test(v)){res.writeHead(400);return res.end();}range.set(k,v);}}
+  try{const response=await fetch('https://seeker-api-production-41b3.up.railway.app/campaign/levels'+(range.size?'?'+range:''),{signal:AbortSignal.timeout(20000)});res.writeHead(response.status,{'Content-Type':'application/json','Cache-Control':'no-store'});return res.end(await response.text());}
+  catch{res.writeHead(503,{'Content-Type':'application/json'});return res.end(JSON.stringify({error:'Public game service unavailable'}));}
+ }
  // Preview public pricing and rankings. Explicit allowlist; never forward auth, queries or writes.
  if(req.method==='GET'&&(name==='/api/catalog'||name==='/api/campaign/leaderboard')){
   try{const response=await fetch('https://seeker-api-production-41b3.up.railway.app'+name.slice(4),{signal:AbortSignal.timeout(12000)});res.writeHead(response.status,{'Content-Type':'application/json','Cache-Control':'no-store'});return res.end(await response.text());}
