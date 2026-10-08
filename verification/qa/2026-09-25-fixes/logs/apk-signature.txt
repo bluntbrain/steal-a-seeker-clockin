@@ -1,4 +1,0 @@
-Signer #1 certificate DN: CN=Steal a Seeker, OU=Android Distribution
-Signer #1 certificate SHA-256 digest: 4fa3e9942238f110824fb67dc99438fc1d70ef48a273e4a79331d5f8a1e1e913
-Signer #1 certificate SHA-1 digest: 5d31ed46ff8b484019b9beca8a3b6a9b89e1554e
-Signer #1 certificate MD5 digest: a97e076673cbe853e5ce5aa24d2d8889

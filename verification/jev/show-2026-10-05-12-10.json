@@ -1,0 +1,32 @@
+{
+ "url": "http://127.0.0.1:8787/?build=free-campaign-store&pilot=jev&bridge=http%3A%2F%2F127.0.0.1%3A8791",
+ "from": 1,
+ "to": 100,
+ "evalMode": false,
+ "levels": [
+  {
+   "level": 1,
+   "outcome": "won",
+   "attempts": 2,
+   "deaths": 1,
+   "seconds": 13,
+   "decisions": 32,
+   "mode": "jev",
+   "score": 8300,
+   "kills": 2,
+   "hp": 25
+  },
+  {
+   "level": 2,
+   "outcome": "won",
+   "attempts": 2,
+   "deaths": 1,
+   "seconds": 40.1,
+   "decisions": 86,
+   "mode": "jev",
+   "score": 7879,
+   "kills": 4,
+   "hp": 25
+  }
+ ]
+}

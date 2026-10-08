@@ -1,4 +1,0 @@
-
-> steal-a-seeker-mvp@0.3.27 typecheck
-> tsc --noEmit
-

@@ -1,0 +1,15 @@
+{
+ "url": "http://127.0.0.1:8787/?build=free-campaign-store&pilot=jev&bridge=http%3A%2F%2F127.0.0.1%3A8791",
+ "from": 2,
+ "to": 100,
+ "evalMode": false,
+ "levels": [
+  {
+   "level": 2,
+   "outcome": "skipped",
+   "attempts": 3,
+   "deaths": 3,
+   "mode": "idle"
+  }
+ ]
+}

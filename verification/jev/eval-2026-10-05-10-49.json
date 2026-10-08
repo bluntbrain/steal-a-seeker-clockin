@@ -1,0 +1,27 @@
+{
+ "url": "http://127.0.0.1:8787/?build=free-campaign-store&pilot=jev&bridge=http%3A%2F%2F127.0.0.1%3A8791",
+ "from": 1,
+ "to": 3,
+ "evalMode": true,
+ "levels": [
+  {
+   "level": 1,
+   "outcome": "skipped",
+   "attempts": 2,
+   "deaths": 2,
+   "mode": "mock"
+  },
+  {
+   "level": 2,
+   "outcome": "won",
+   "attempts": 2,
+   "deaths": 1,
+   "seconds": 23.1,
+   "decisions": 57,
+   "mode": "mock",
+   "score": 9140,
+   "kills": 4,
+   "hp": 75
+  }
+ ]
+}

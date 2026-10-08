@@ -1,0 +1,87 @@
+{
+ "url": "http://127.0.0.1:8787/?build=free-campaign-store&pilot=jev&bridge=http%3A%2F%2F127.0.0.1%3A8791",
+ "from": 1,
+ "to": 100,
+ "evalMode": false,
+ "levels": [
+  {
+   "level": 1,
+   "outcome": "won",
+   "attempts": 3,
+   "deaths": 2,
+   "seconds": 15.1,
+   "decisions": 40,
+   "mode": "jev",
+   "score": 8294,
+   "kills": 2,
+   "hp": 25
+  },
+  {
+   "level": 2,
+   "outcome": "won",
+   "attempts": 3,
+   "deaths": 2,
+   "seconds": 27.1,
+   "decisions": 66,
+   "mode": "jev",
+   "score": 9589,
+   "kills": 4,
+   "hp": 100
+  },
+  {
+   "level": 3,
+   "outcome": "won",
+   "attempts": 2,
+   "deaths": 1,
+   "seconds": 49.1,
+   "decisions": 99,
+   "mode": "jev",
+   "score": 9275,
+   "kills": 5,
+   "hp": 100
+  },
+  {
+   "level": 4,
+   "outcome": "won",
+   "attempts": 3,
+   "deaths": 2,
+   "seconds": 25.1,
+   "decisions": 61,
+   "mode": "jev",
+   "score": 7997,
+   "kills": 7,
+   "hp": 19
+  },
+  {
+   "level": 5,
+   "outcome": "won",
+   "attempts": 2,
+   "deaths": 1,
+   "seconds": 68.2,
+   "decisions": 142,
+   "mode": "jev",
+   "score": 7379,
+   "kills": 7,
+   "hp": 19
+  },
+  {
+   "level": 6,
+   "outcome": "skipped",
+   "attempts": 3,
+   "deaths": 3,
+   "mode": "jev"
+  },
+  {
+   "level": 7,
+   "outcome": "won",
+   "attempts": 1,
+   "deaths": 0,
+   "seconds": 35.1,
+   "decisions": 81,
+   "mode": "jev",
+   "score": 8913,
+   "kills": 3,
+   "hp": 72
+  }
+ ]
+}
