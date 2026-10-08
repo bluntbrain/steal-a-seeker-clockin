@@ -23,7 +23,7 @@ const transactions=new Map<string,unknown>(),references=new Map<string,string[]>
 let chainHeight=100,chainUnavailable=false;
 const chain:PaymentChain={ready:async()=>{},verify:async(o,s)=>verifyPayment(o,s,transactions.get(s)??null),find:async r=>{if(chainUnavailable)throw new Error('RPC unavailable');return references.get(r)||[];},lifetime:async()=>({blockhash:pub(),lastValidBlockHeight:String(chainHeight+150),contextSlot:String(chainHeight+1000)}),height:async()=>chainHeight};
 let service:CommerceService,app:Awaited<ReturnType<typeof createApp>>;
-before(async()=>{assert.equal((await pool.query('SELECT current_database() AS name')).rows[0].name,'seeker_clockin_test');await migrate(pool);await pool.query('TRUNCATE league_weeks,daily_manifests,campaign_level_versions,campaign_levels,wallets,auth_challenges,sessions,orders,order_attempts,payment_receipts,entitlements,transfer_receipts CASCADE');const mint=pub(),recipient=pub();const [destination]=await findAssociatedTokenPda({owner:address(recipient),mint:address(mint),tokenProgram:address(TOKEN_PROGRAM)});service=new CommerceService(pool,chain,{mint,recipient,destination,decimals:6,identityUri:'https://github.com/bluntbrain'});app=await createApp(service);});
+before(async()=>{assert.equal((await pool.query('SELECT current_database() AS name')).rows[0].name,'seeker_clockin_test');await migrate(pool);await pool.query('TRUNCATE skr_domains,league_weeks,daily_manifests,campaign_level_versions,campaign_levels,wallets,auth_challenges,sessions,orders,order_attempts,payment_receipts,entitlements,transfer_receipts CASCADE');const mint=pub(),recipient=pub();const [destination]=await findAssociatedTokenPda({owner:address(recipient),mint:address(mint),tokenProgram:address(TOKEN_PROGRAM)});service=new CommerceService(pool,chain,{mint,recipient,destination,decimals:6,identityUri:'https://github.com/bluntbrain'});app=await createApp(service);});
 after(async()=>{await app.close();await pool.end();});
 let testClient=0;
 async function login(){const remoteAddress=`127.0.1.${++testClient}`,keys=generateKeyPairSync('ed25519'),wallet=b58(keys.publicKey.export({type:'spki',format:'der'}).subarray(-32));const response=await app.inject({method:'POST',url:'/auth/challenge',remoteAddress,payload:{wallet}});assert.equal(response.statusCode,200);const c=response.json<SignInChallenge>(),message=createSignInMessage(c.payload),signature=sign(null,message,keys.privateKey);const payload={id:c.id,wallet,signedMessage:Buffer.from(message).toString('base64'),signature:signature.toString('base64')};const auth=await app.inject({method:'POST',url:'/auth/verify',remoteAddress,payload});assert.equal(auth.statusCode,200,auth.body);return {keys,wallet,token:auth.json().token,headers:{authorization:`Bearer ${auth.json().token}`},payload};}
@@ -609,6 +609,31 @@ test('the campaign leaderboard ranks total points from each wallet best verified
  assert.equal((await campaign.leaderboard()).personal,null,'an anonymous request has no own row');
  const viaApi=await app.inject({method:'GET',url:'/campaign/leaderboard',headers:b.headers});assert.equal(viaApi.statusCode,200);assert.equal(viaApi.json().personal.wallet,b.wallet);
  const anon=await app.inject({method:'GET',url:'/campaign/leaderboard'});assert.equal(anon.json().personal,null);
+});
+test('the .skr directory copies every field from the public list and friend search ranks players first',async()=>{
+ const {CampaignService}=await import('./campaign-service'),{syncSkrDirectory,importSkrDirectoryOnce}=await import('./wallet-names'),rules=(await import('../shared/rules-manifest.json')).default,{solveCombat}=await import('../scripts/qa-combat'),{combatLevel}=await import('../src/game/combat-levels');
+ const campaign=new CampaignService(pool,new ReturnService(pool,undefined,{mint:service.config.mint,treasury:service.config.recipient,source:service.config.destination,decimals:6}));
+ const player=await login(),idle=pub(),record=(subdomain:string,owner:string,rank:number)=>({domain:'.skr',subdomain,created_at:'2026-03-02T00:33:29.000Z',subdomain_tx:'',subdomain_tx_blocktime:'2026-03-02T00:33:29.000Z',name_account:'',tld_account:'',owner,rank,non_transferable:false});
+ const pages=[[record('frienda',idle,1),record('friendb',player.wallet,2),record('friendb',player.wallet,2),{domain:'.sol',subdomain:'x',owner:idle}],[record('friend_c',idle,3),record('bad',  'not-a-wallet',4)]],urls:string[]=[];
+ const fake=(async(url:string)=>{urls.push(url);const page=Number(new URL(url).searchParams.get('page'));return new Response(JSON.stringify({pagination:{totalPages:2},data:pages[page-1]}));}) as typeof fetch;
+ assert.equal(await syncSkrDirectory(pool,{fetch:fake,pauseMs:0}),3,'duplicates, other tlds and bad owners are skipped');
+ assert.equal(urls.length,2);assert(urls.every(u=>u.startsWith('https://seekertracker.com/api/domains?')));
+ const row=(await pool.query("SELECT * FROM skr_domains WHERE name='friendb.skr'")).rows[0];
+ assert.equal(row.owner,player.wallet);assert.equal(row.rank,2);assert.equal(row.non_transferable,false);assert.equal(row.subdomain_tx,null);assert.equal(row.raw.subdomain,'friendb');
+ assert.equal(await syncSkrDirectory(pool,{fetch:fake,pauseMs:0}),3,'a second sync updates in place');
+ assert.equal(Number((await pool.query("SELECT count(*) FROM skr_domains WHERE name LIKE 'friend%'")).rows[0].count),3);
+ assert.equal(await importSkrDirectoryOnce(pool,{fetch:fake,pauseMs:0}),0,'a filled table is never fetched again');assert.equal(urls.length,4);
+ const win=solveCombat(combatLevel('practice'))!;await campaign.submit(player.wallet,{mission:'practice'},rules.rulesHash,win.replay);
+ const found=await campaign.players('FRIEND');
+ assert.equal(found[0]?.name,'friendb.skr','the name with a verified run comes first');assert.equal(found[0]?.standing?.cleared,1);
+ assert.equal(found.find(p=>p.name==='frienda.skr')?.standing,null,'a name that never played has no standing');
+ assert.deepEqual((await campaign.players('friend_')).map(p=>p.name),['friend_c.skr'],'underscore is matched literally');
+ assert.deepEqual((await campaign.players('%')),[],'a percent sign is not a wildcard');
+ const byWallet=await campaign.players(player.wallet);assert.equal(byWallet.length,1);assert.equal(byWallet[0]?.name,'friendb.skr');assert.equal(byWallet[0]?.standing?.wallet,player.wallet);
+ assert.equal((await campaign.players(idle))[0]?.standing,null);
+ assert((await campaign.players('')).some(p=>p.wallet===player.wallet&&p.name==='friendb.skr'),'an empty query lists ranked players with their names');
+ const api=await app.inject({method:'GET',url:'/campaign/players?query=friendb'});assert.equal(api.statusCode,200);assert.equal(api.json().players[0].wallet,player.wallet);
+ assert.equal((await app.inject({method:'GET',url:'/campaign/players?query='+'x'.repeat(65)})).statusCode,400);
 });
 test('the game pass grants its bundle once: credits and the ghost outfit on payment, and for existing owners at boot',async()=>{
  const {PASS_BUNDLE}=await import('../shared/commerce'),{backfillPassBundle}=await import('./service');

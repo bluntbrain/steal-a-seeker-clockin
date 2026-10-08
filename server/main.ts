@@ -1,4 +1,4 @@
-import {WalletNames,allDomainsLookup} from './wallet-names';
+import {WalletNames,allDomainsLookup,importSkrDirectoryOnce} from './wallet-names';
 import {parsePromotions} from './promotions';
 import {reconcileOrders} from './order-worker';
 import {paymentDiagnostic} from './payment-errors';
@@ -40,6 +40,8 @@ async function main(){
  let settling=false;const returnTimer=setInterval(async()=>{if(settling||!returns)return;settling=true;try{await returns.process();}catch{app.log.warn('Return reconciliation will retry.');}finally{settling=false;}},1000);
  const stop=async()=>{clearInterval(timer);clearInterval(returnTimer);await app.close();await pool.end();};process.on('SIGTERM',stop);process.on('SIGINT',stop);
  await app.listen({port:Number(process.env.PORT||8790),host:process.env.HOST||'127.0.0.1'});console.log('Steal a Seeker API ready on '+network.cluster);
+ // our own copy of every .skr name for friend search: copied once into an empty table, never fetched on a request
+ if(process.env.SKR_DIRECTORY_IMPORT!=='false')void importSkrDirectoryOnce(pool).then(n=>{if(n)console.log(`skr directory: ${n} names stored`);},e=>console.warn('skr directory import failed, the next boot retries: '+(e instanceof Error?e.message:String(e))));
  // CAMPAIGN_TARGET_LEVEL publishes more levels in the background: build, solve, verify, insert, one at a time
  const target=Number(process.env.CAMPAIGN_TARGET_LEVEL);if(target>12)void publishToTarget(pool,target,message=>console.log(message)).catch(e=>console.warn('campaign publisher stopped: '+(e instanceof Error?e.message:String(e))));
 }

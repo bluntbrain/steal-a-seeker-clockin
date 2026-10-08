@@ -49,6 +49,8 @@ export async function createApp(service:CommerceService,names?:WalletNames){
  const day=z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine(v=>{try{return new Date(`${v}T00:00:00Z`).toISOString().slice(0,10)===v;}catch{return false;}}),rulesHash=z.string().regex(/^[a-f0-9]{64}$/);
  app.get('/campaign',async req=>campaign.summary((await account(req.headers.authorization)).wallet));
  app.get('/campaign/leaderboard',async req=>{const board=await campaign.leaderboard(req.headers.authorization?(await account(req.headers.authorization)).wallet:undefined);return names?names.enrich(board):board;});
+ // friend search for the head-to-head card. public like the leaderboard; reads only our own tables
+ app.get('/campaign/players',{config:{rateLimit:{max:60,timeWindow:'1 minute'}}},async req=>({players:await campaign.players(z.object({query:z.string().max(64).default('')}).parse(req.query).query)}));
  app.addHook('onClose',async()=>names?.close());
  app.post('/campaign/claim',async req=>{z.object({}).strict().parse(req.body);return campaign.claim((await account(req.headers.authorization)).wallet);});
  app.post('/campaign/runs',{bodyLimit:1024*1024,config:{rateLimit:{max:12,timeWindow:'1 minute'}}},async req=>{const a=await account(req.headers.authorization),b=z.object({mission:z.enum(CAMPAIGN_IDS as [MissionId,...MissionId[]]).optional(),level:z.number().int().min(13).max(1000000).optional(),rulesHash,replay:z.unknown()}).strict().refine(v=>(v.mission===undefined)!==(v.level===undefined),'Name one mission or one level.').parse(req.body);return campaign.submit(a.wallet,b.level!==undefined?{level:b.level}:{mission:b.mission!},b.rulesHash,b.replay);});

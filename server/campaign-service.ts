@@ -6,12 +6,21 @@ import {campaignCreditTarget} from './campaign-credit-versions';
 import {createHash,randomUUID} from 'node:crypto';
 import type {Pool} from 'pg';
 import {CAMPAIGN_IDS,type MissionId} from '../src/game/level';
-import {compareRun,type CampaignPerformance,type CampaignSummary,type CampaignRank,type CampaignBoard} from '../shared/economy';
+import {compareRun,type CampaignPerformance,type CampaignSummary,type CampaignRank,type CampaignBoard,type CampaignPlayer} from '../shared/economy';
+import {address} from '@solana/kit';
 import {ServiceError} from './service';
 import {ReturnService} from './returns';
 import {transaction} from './db';
 import {replayInput} from './replay';
 import {verifyReplayInWorker} from './replay-runner';
+// every wallet's total from its best verified run per level, ranked; exact ties share a rank
+const RANKED=`WITH best AS (
+    SELECT DISTINCT ON(wallet,mission) wallet,mission,result FROM campaign_runs WHERE result->>'status'='won'
+    ORDER BY wallet,mission,(result->>'score')::int DESC,(result->>'ticks')::int ASC,(result->>'spotted')::boolean ASC,(result->>'battery')::int DESC,id
+   ), totals AS (SELECT wallet,count(*)::int AS cleared,sum((result->>'score')::int)::int AS score,sum((result->>'ticks')::int)::int AS ticks,sum(CASE WHEN (result->>'spotted')::boolean THEN 0 ELSE 1 END)::int AS clean,sum((result->>'battery')::int)::int AS battery FROM best GROUP BY wallet),
+   ranked AS (SELECT *,rank() OVER(ORDER BY score DESC,cleared DESC,ticks ASC,clean DESC,battery DESC)::int AS rank,count(*) OVER()::int AS participants FROM totals)`;
+const strip=({participants:_p,...r}:CampaignRank&{participants?:number}):CampaignRank=>r;
+const isWallet=(v:string)=>{try{address(v);return true;}catch{return false;}};
 export class CampaignService{
  constructor(public pool:Pool,public returns:ReturnService,public levels=new CampaignLevelStore(pool)){}
  async owned(wallet:string){if(!(await this.pool.query("SELECT 1 FROM entitlements WHERE wallet=$1 AND sku='campaign'",[wallet])).rowCount)throw new ServiceError(403,'Campaign pass required.');}
@@ -63,15 +72,25 @@ export class CampaignService{
  /** total points across every verified run, one best replay per level, any rules hash. the top fifty plus the
   * caller's own row when it ranks lower; exact ties share a rank */
  async leaderboard(wallet?:string):Promise<CampaignBoard>{
-  const rows=await this.pool.query(`WITH best AS (
-    SELECT DISTINCT ON(wallet,mission) wallet,mission,result FROM campaign_runs WHERE result->>'status'='won'
-    ORDER BY wallet,mission,(result->>'score')::int DESC,(result->>'ticks')::int ASC,(result->>'spotted')::boolean ASC,(result->>'battery')::int DESC,id
-   ), totals AS (SELECT wallet,count(*)::int AS cleared,sum((result->>'score')::int)::int AS score,sum((result->>'ticks')::int)::int AS ticks,sum(CASE WHEN (result->>'spotted')::boolean THEN 0 ELSE 1 END)::int AS clean,sum((result->>'battery')::int)::int AS battery FROM best GROUP BY wallet),
-   ranked AS (SELECT *,rank() OVER(ORDER BY score DESC,cleared DESC,ticks ASC,clean DESC,battery DESC)::int AS rank,count(*) OVER()::int AS participants FROM totals)
-   SELECT * FROM ranked WHERE rank<=50 OR wallet=$1 ORDER BY rank,wallet`,[wallet??'']);
+  const rows=await this.pool.query(`${RANKED} SELECT * FROM ranked WHERE rank<=50 OR wallet=$1 ORDER BY rank,wallet`,[wallet??'']);
   const all=rows.rows as (CampaignRank&{participants:number})[],participants=all[0]?.participants??0;
   const personal=wallet?all.find(r=>r.wallet===wallet)??null:null;
-  const strip=({participants:_p,...r}:CampaignRank&{participants:number}):CampaignRank=>r;
   return {board:all.filter(r=>r.rank<=50).map(strip),personal:personal?strip(personal):null,participants};
+ }
+ /** rank rows for any wallets, ranked against every player */
+ async standings(wallets:string[]):Promise<CampaignRank[]>{
+  if(!wallets.length)return [];
+  return (await this.pool.query(`${RANKED} SELECT * FROM ranked WHERE wallet=ANY($1)`,[wallets])).rows.map(strip);
+ }
+ /** friend search for the head-to-head card. empty: the top players. a wallet: that wallet. text: .skr names by
+  * prefix from our copied directory, players with a verified run first. never calls a third party */
+ async players(query:string):Promise<CampaignPlayer[]>{
+  const q=query.trim();let picks:{wallet:string;name:string|null}[];
+  if(!q)picks=(await this.pool.query(`${RANKED} SELECT r.wallet,(SELECT d.name FROM skr_domains d WHERE d.owner=r.wallet ORDER BY d.rank NULLS LAST,d.name LIMIT 1) AS name FROM ranked r ORDER BY r.rank,r.wallet LIMIT 50`)).rows;
+  else if(isWallet(q))picks=[{wallet:q,name:(await this.pool.query('SELECT name FROM skr_domains WHERE owner=$1 ORDER BY rank NULLS LAST,name LIMIT 1',[q])).rows[0]?.name??null}];
+  else picks=(await this.pool.query(`SELECT d.owner AS wallet,d.name FROM skr_domains d WHERE lower(d.name) LIKE $1
+    ORDER BY EXISTS(SELECT 1 FROM campaign_runs c WHERE c.wallet=d.owner AND c.result->>'status'='won') DESC,length(d.name),d.name LIMIT 20`,[q.toLowerCase().replace(/[\\%_]/g,m=>'\\'+m)+'%'])).rows;
+  const standing=new Map((await this.standings([...new Set(picks.map(p=>p.wallet))])).map(r=>[r.wallet,r]));
+  return picks.map(p=>({wallet:p.wallet,name:p.name,standing:standing.get(p.wallet)??null}));
  }
 }

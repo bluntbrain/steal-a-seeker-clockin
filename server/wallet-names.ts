@@ -2,6 +2,7 @@ import {PublicKey,Connection} from '@solana/web3.js';
 import {TldParser} from '@onsol/tldparser';
 import {isSkrName} from '../shared/wallet-name';
 import type {CampaignBoard} from '../shared/economy';
+import type {Pool} from 'pg';
 
 export type NameLookup=(wallets:string[],signal:AbortSignal,onResult?:(wallet:string,name:string|null)=>void)=>Promise<Map<string,string|null>>;
 type Parser={getMainDomains(wallets:string[]):Promise<(string|null)[]>;getParsedAllUserDomainsFromTld(wallet:string,tld:string,concurrency?:number):Promise<{domain:string}[]>;getOwnerFromDomainTld(name:string):Promise<{toString():string}|string|undefined>};
@@ -92,4 +93,43 @@ export class WalletNames{
   return {...board,board:board.board.map(decorate),personal:board.personal?decorate(board.personal):null,namesPending:wallets.some(w=>this.pending.has(w))};
  }
  close(){this.stopped=true;this.queued.clear();this.pending.clear();this.active?.abort();}
+}
+
+// the public .skr list from seekertracker.com, copied once page by page into skr_domains. every field the api returns
+// is kept, the original record in raw. names grow slowly, so there is no scheduled refresh
+const UPSERT=`INSERT INTO skr_domains(name,owner,rank,created_at,subdomain_tx,subdomain_tx_blocktime,name_account,tld_account,non_transferable,raw,synced_at)
+ SELECT name,owner,rank,created_at,subdomain_tx,subdomain_tx_blocktime,name_account,tld_account,non_transferable,raw,now()
+ FROM jsonb_to_recordset($1::jsonb) AS r(name text,owner text,rank integer,created_at timestamptz,subdomain_tx text,subdomain_tx_blocktime timestamptz,name_account text,tld_account text,non_transferable boolean,raw jsonb)
+ ON CONFLICT(name) DO UPDATE SET owner=excluded.owner,rank=excluded.rank,created_at=excluded.created_at,subdomain_tx=excluded.subdomain_tx,subdomain_tx_blocktime=excluded.subdomain_tx_blocktime,
+  name_account=excluded.name_account,tld_account=excluded.tld_account,non_transferable=excluded.non_transferable,raw=excluded.raw,synced_at=now()`;
+const text=(v:unknown)=>typeof v==='string'&&v?v:null,base58=/^[1-9A-HJ-NP-Za-km-z]{32,44}$/;
+/** one api record to a row, or null when it is not a well-formed .skr name with an owner wallet */
+export function directoryRow(raw:unknown){
+ if(!raw||typeof raw!=='object')return null;
+ const r=raw as Record<string,unknown>,name=`${r.subdomain??''}${r.domain??''}`;
+ if(r.domain!=='.skr'||!isSkrName(name)||typeof r.owner!=='string'||!base58.test(r.owner))return null;
+ return {name,owner:r.owner,rank:Number.isInteger(r.rank)?r.rank as number:null,created_at:text(r.created_at),subdomain_tx:text(r.subdomain_tx),subdomain_tx_blocktime:text(r.subdomain_tx_blocktime),
+  name_account:text(r.name_account),tld_account:text(r.tld_account),non_transferable:typeof r.non_transferable==='boolean'?r.non_transferable:null,raw:r};
+}
+export async function syncSkrDirectory(pool:Pool,options:{fetch?:typeof fetch;pageSize?:number;pauseMs?:number}={}):Promise<number>{
+ const get=options.fetch??fetch,size=options.pageSize??5000;
+ let page=1,pages=1,stored=0;
+ while(page<=pages){
+  const response=await get(`https://seekertracker.com/api/domains?page=${page}&pageSize=${size}&sortBy=oldest`,{signal:AbortSignal.timeout(60000)});
+  if(!response.ok)throw new Error(`page ${page} returned HTTP ${response.status}`);
+  const body=await response.json() as {pagination?:{totalPages?:unknown};data?:unknown};
+  pages=Math.min(1000,Math.max(1,Number(body.pagination?.totalPages)||1));
+  // one row per name: a repeated name inside one statement would make the upsert fail
+  const rows=[...new Map((Array.isArray(body.data)?body.data:[]).map(directoryRow).filter(r=>!!r).map(r=>[r.name,r])).values()];
+  if(rows.length)stored+=(await pool.query(UPSERT,[JSON.stringify(rows)])).rowCount??0;
+  page++;
+  if(page<=pages)await new Promise(r=>setTimeout(r,options.pauseMs??400));
+ }
+ return stored;
+}
+/** the one-time copy: runs only while the table is empty. a failed copy is removed so the next boot starts clean */
+export async function importSkrDirectoryOnce(pool:Pool,options:Parameters<typeof syncSkrDirectory>[1]={}):Promise<number>{
+ if((await pool.query('SELECT 1 FROM skr_domains LIMIT 1')).rowCount)return 0;
+ try{return await syncSkrDirectory(pool,options);}
+ catch(error){await pool.query('TRUNCATE skr_domains');throw error;}
 }

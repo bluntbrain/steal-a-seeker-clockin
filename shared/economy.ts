@@ -12,4 +12,6 @@ export type CampaignStats=ReturnType<typeof campaignStats>;
 export function compareCampaign(a:CampaignStats,b:CampaignStats){return b.score-a.score||b.cleared-a.cleared||a.ticks-b.ticks||b.clean-a.clean||b.battery-a.battery;}
 export type CampaignSummary={creditAward?:{mission:string;credits:number;balance?:number};runs:CampaignPerformance[];rebate:number;state:'legacy'|'locked'|'ready'|'queued'|'pending'|'settled'|'review';returnId?:string;signature?:string};
 export type CampaignRank=CampaignStats&{wallet:string;displayName?:string;rank:number};
+/** a friend candidate: any wallet or .skr owner, with their standing once they have a verified run */
+export type CampaignPlayer={wallet:string;name:string|null;standing:CampaignRank|null};
 export type CampaignBoard={board:CampaignRank[];personal:CampaignRank|null;participants:number;namesPending?:boolean};

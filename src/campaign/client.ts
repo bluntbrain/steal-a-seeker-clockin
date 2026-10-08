@@ -1,7 +1,7 @@
 import {createOutbox} from './outbox';
 import {NETWORK_NAME} from '../wallet/config';
 import {api} from '../commerce/client';
-import type {CampaignSummary,CampaignBoard} from '../../shared/economy';
+import type {CampaignSummary,CampaignBoard,CampaignPlayer} from '../../shared/economy';
 import type {Replay} from '../../shared/replay';
 import type {MissionId} from '../game/level';
 import {readSave,writeSave} from '../progress/storage';
@@ -18,7 +18,14 @@ const outbox=createOutbox<Pending,CampaignSummary>({
  send:(token,item)=>api<CampaignSummary>('/campaign/runs',{token,body:item}),
 });
 const pending=(target:CampaignTarget,replay:Replay):Pending=>({...target,rulesHash:'level' in target?(target.rulesHash??rules.rulesHash):rules.rulesHash,replay});
-export const campaignApi={summary:(token:string)=>api<CampaignSummary>('/campaign',{token}),board:(token?:string)=>api<CampaignBoard>('/campaign/leaderboard',token?{token}:{}),claim:(token:string)=>api<CampaignSummary>('/campaign/claim',{token,body:{}})};
+export const campaignApi={summary:(token:string)=>api<CampaignSummary>('/campaign',{token}),board:(token?:string)=>api<CampaignBoard>('/campaign/leaderboard',token?{token}:{}),claim:(token:string)=>api<CampaignSummary>('/campaign/claim',{token,body:{}}),
+ players:(query:string)=>api<{players:CampaignPlayer[]}>(`/campaign/players?query=${encodeURIComponent(query.trim().slice(0,64))}`).then(r=>Array.isArray(r?.players)?r.players:[])};
+
+// the friend picked for the head-to-head card lives on this device only
+const FRIEND_KEY='seeker.compete.friend.v1';
+export type Friend={wallet:string;name:string|null};
+export async function readFriend():Promise<Friend|null>{try{const v=JSON.parse((await readSave(FRIEND_KEY))||'null');return v&&typeof v.wallet==='string'?{wallet:v.wallet,name:typeof v.name==='string'?v.name:null}:null;}catch{return null;}}
+export const writeFriend=(friend:Friend|null)=>writeSave(FRIEND_KEY,friend?JSON.stringify(friend):'');
 export async function enqueue(wallet:string,target:CampaignTarget,replay:Replay){await outbox.enqueue(wallet,pending(target,replay));}
 export async function submitCampaignRun(wallet:string,token:string,target:CampaignTarget,replay:Replay){return outbox.submit(wallet,token,pending(target,replay));}
 export async function syncCampaign(wallet:string,token:string,onAward?:(mission:string,credits:number|null)=>void){await outbox.flush(wallet,token,(item,receipt)=>onAward?.(pendingKey(item),receipt.creditAward?.credits??null));return campaignApi.summary(token);}

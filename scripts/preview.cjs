@@ -10,6 +10,12 @@ http.createServer(async(req,res)=>{
   try{const response=await fetch('https://seeker-api-production-41b3.up.railway.app/campaign/levels'+(range.size?'?'+range:''),{signal:AbortSignal.timeout(20000)});res.writeHead(response.status,{'Content-Type':'application/json','Cache-Control':'no-store'});return res.end(await response.text());}
   catch{res.writeHead(503,{'Content-Type':'application/json'});return res.end(JSON.stringify({error:'Public game service unavailable'}));}
  }
+ // Friend search is public and read-only. Only the query text is forwarded.
+ if(req.method==='GET'&&name==='/api/campaign/players'){
+  const query=(new URL(req.url,'http://localhost').searchParams.get('query')||'').slice(0,64);
+  try{const response=await fetch('https://seeker-api-production-41b3.up.railway.app/campaign/players?'+new URLSearchParams({query}),{signal:AbortSignal.timeout(12000)});res.writeHead(response.status,{'Content-Type':'application/json','Cache-Control':'no-store'});return res.end(await response.text());}
+  catch{res.writeHead(503,{'Content-Type':'application/json'});return res.end(JSON.stringify({error:'Public game service unavailable'}));}
+ }
  // Preview public pricing and rankings. Explicit allowlist; never forward auth, queries or writes.
  if(req.method==='GET'&&(name==='/api/catalog'||name==='/api/campaign/leaderboard')){
   try{const response=await fetch('https://seeker-api-production-41b3.up.railway.app'+name.slice(4),{signal:AbortSignal.timeout(12000)});res.writeHead(response.status,{'Content-Type':'application/json','Cache-Control':'no-store'});return res.end(await response.text());}
