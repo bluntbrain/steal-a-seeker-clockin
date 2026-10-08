@@ -2,8 +2,8 @@
   "mode": "mainnet",
   "application": {
     "package": "com.bluntbrain.stealaseeker",
-    "version": "1.0.7",
-    "versionCode": 54
+    "version": "1.0.8",
+    "versionCode": 55
   },
   "publicConfig": {
     "phoneRenderer": "filament",
@@ -14,10 +14,10 @@
   },
   "sourceFiles": {
     "App.tsx": "1a5d6bc4cce668236bafed0e0b2c456dcfc76cd0f1eb208eedc0ef87e0337c61",
-    "android/app/build.gradle": "68e3d5d6d547631ecaa378fa91fb2493d10b239315231aa4f23d3a6628726bcf",
+    "android/app/build.gradle": "ccbefa10d200c82b57d6778bb618e15965a1598849ac456ed66de32b7c11e5f1",
     "android/app/src/debug/AndroidManifest.xml": "fb1795032c764d975376e1612ab7022058eca2268a45efbe731a47a5d3ac0f60",
     "android/app/src/debugOptimized/AndroidManifest.xml": "fb1795032c764d975376e1612ab7022058eca2268a45efbe731a47a5d3ac0f60",
-    "android/app/src/main/AndroidManifest.xml": "016a0038a61db1eb0597d1e7685dd88b2494bc5eb9430f9eb06924af4c786b68",
+    "android/app/src/main/AndroidManifest.xml": "91a22f38b6c8c647b1300b9e982307be6048266c7c7db7abeb4b096dc962505c",
     "android/app/src/main/java/com/bluntbrain/stealaseeker/MainActivity.kt": "05992d390d051e808ecb993341f255673825d6f29da8d86d043584e2c9813626",
     "android/app/src/main/java/com/bluntbrain/stealaseeker/MainApplication.kt": "fb14a4c26eb12c4c92b3825be41c786c4c14be678366b831333c3bc497d6b573",
     "android/app/src/main/res/drawable-hdpi/splashscreen_logo.png": "721c895579cb08ec4c9a0fe7dadafe9a97c33ef758d3578ad5e8b540de59f974",
@@ -48,12 +48,12 @@
     "android/app/src/main/res/values/colors.xml": "dd2b2d78bd1e97238a0c4c345f20bbea6c797a02131c269e04e6d22494eb8605",
     "android/app/src/main/res/values/strings.xml": "47ed7faad16726043974dbd24d27e27bcb250344fae7988248589e9899f050e0",
     "android/app/src/main/res/values/styles.xml": "b49f11b528f21d1690a07f9b582289b42cc1d55698c4eb00c252ec98e466e051",
-    "app.json": "f461467c25ec4211bcb5e7f6055c40b11d583731dead41f7bb25d8d6d2aac8a5",
+    "app.json": "2ae97d6b0c5a8808791c1b3b059e219464ab27e4fd082b9a685659ad472433fc",
     "babel.config.js": "883b928138618186133ce4ef4eafd9495d85d2d60182627fe231c0105b067fe9",
     "index.ts": "2370dec3b8100307cb6b459d1dc50bd97d028d11be3cfff6e995111d004c41bc",
     "metro.config.js": "6a814fa8146b6d313edeeb79ed6cede3f25bf2d033912663495d31ed2de50223",
-    "package-lock.json": "fee44037cbf29511e44cc0860f4e25bcebbaf48353d89dfa36be10d4faf25947",
-    "package.json": "9f0fe90214396d6bc016b1d6fd577631f224c4e0403d56d4522bea4ed6164a26",
+    "package-lock.json": "02cf42c3b65f824861fef07450c537adaae33b590990c24c6f50a85e0f3deb8c",
+    "package.json": "55bdf3e8384360e2cfd0528508bb41a74d800e31578c51ca70610c2da21c03f7",
     "patches/react-native-filament+1.11.0.patch": "1e3d763174aa7afaffc91b28fb4db025484eb01ebbd312cd4d9998548f3596f5",
     "patches/react-native-worklets-core+1.6.3.patch": "58894d57c5cf25240af032083da960bf0ad5dc05d28d9b1273e85083805c3cd3",
     "shared/campaign-arenas.ts": "7cee491f0517f86ab87796edb26cb861521b7ad05ad922844aa9560bee6e221b",
@@ -294,17 +294,13 @@
     "src/wallet/signInFallback.ts": "d483b760a4393f01fba79cd0db0735489303814c49bb08fe3a4545d095fe2944",
     "src/wallet/useLoggedWallet.ts": "a628b09c8140d7f2b006704c1990ee8afe5737eea7ae2e3dc763b3246655d02c"
   },
-  "sha256": "2fad91cc268d0250cd658726d00e38d4f6e94b1787e12620a80e6965323a7d8e",
-  "bytes": 94479583,
-  "builtAt": "2026-10-08T08:37:41.116Z",
-  "head": "95b722bd9ab1441d6d93d43d2d601f53e67a7ef2",
+  "sha256": "7263c3b4842b9d53b7819b979e4fb2161f7fc4c55e8cc509da752b21a6dc5961",
+  "bytes": 94479663,
+  "builtAt": "2026-10-08T18:59:25.982Z",
+  "head": "b931bd7ba7a5f8094a62e39a63ee7c9a5d7d037a",
   "workingTree": [
     "M android/app/build.gradle",
     " M app.json",
-    " M releases/steal-a-seeker-mainnet.apk.json",
-    " M src/campaign/CampaignBoard.tsx",
-    " M src/components/GameCanvas.tsx",
-    " M src/components/MissionPreview.tsx",
     "?? design/loot-v2/",
     "?? docs/plans/REWARDING-KNOCKOUTS-2026-10-04.md",
     "?? releases/steal-a-seeker-mainnet-v1.0.6-code52.apk.json",
@@ -312,6 +308,7 @@
     "?? releases/steal-a-seeker-mainnet-v1.0.7-code54.apk.json",
     "?? submission/2026-10-06/",
     "?? verification/compete-2026-10-08/",
+    "?? verification/fixes-2026-10-08/",
     "?? verification/jev/"
   ],
   "architectures": [
