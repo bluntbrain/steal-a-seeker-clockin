@@ -2,8 +2,8 @@
   "mode": "mainnet",
   "application": {
     "package": "com.bluntbrain.stealaseeker",
-    "version": "1.0.5",
-    "versionCode": 51
+    "version": "1.0.6",
+    "versionCode": 52
   },
   "publicConfig": {
     "phoneRenderer": "filament",
@@ -14,7 +14,7 @@
   },
   "sourceFiles": {
     "App.tsx": "1a5d6bc4cce668236bafed0e0b2c456dcfc76cd0f1eb208eedc0ef87e0337c61",
-    "android/app/build.gradle": "a5324675a39c4aace70f97fbf6060ff842a8039ef3e0508aa0c9af053bf75682",
+    "android/app/build.gradle": "6ef8f0a5a277f590f030fb6cf49079128dd797fb1c502a0342e59ed340023ade",
     "android/app/src/debug/AndroidManifest.xml": "fb1795032c764d975376e1612ab7022058eca2268a45efbe731a47a5d3ac0f60",
     "android/app/src/debugOptimized/AndroidManifest.xml": "fb1795032c764d975376e1612ab7022058eca2268a45efbe731a47a5d3ac0f60",
     "android/app/src/main/AndroidManifest.xml": "016a0038a61db1eb0597d1e7685dd88b2494bc5eb9430f9eb06924af4c786b68",
@@ -48,7 +48,7 @@
     "android/app/src/main/res/values/colors.xml": "dd2b2d78bd1e97238a0c4c345f20bbea6c797a02131c269e04e6d22494eb8605",
     "android/app/src/main/res/values/strings.xml": "47ed7faad16726043974dbd24d27e27bcb250344fae7988248589e9899f050e0",
     "android/app/src/main/res/values/styles.xml": "b49f11b528f21d1690a07f9b582289b42cc1d55698c4eb00c252ec98e466e051",
-    "app.json": "77c4987965839415245bd8d80646401b8cb1da833e4485c3712abc7e92477642",
+    "app.json": "d90bc62892ae8d6852f8faf0532b594ea0c1966ec480daf0e06e209121856da3",
     "babel.config.js": "883b928138618186133ce4ef4eafd9495d85d2d60182627fe231c0105b067fe9",
     "index.ts": "2370dec3b8100307cb6b459d1dc50bd97d028d11be3cfff6e995111d004c41bc",
     "metro.config.js": "6a814fa8146b6d313edeeb79ed6cede3f25bf2d033912663495d31ed2de50223",
@@ -62,7 +62,7 @@
     "shared/campaign-stealth-layouts.ts": "26a6bd1de37efc5c1a688728e2cc0e1258ee959d99033f29f1bd82c549ff508e",
     "shared/commerce.ts": "3ec6a094a08f0bdef6e9d84bc4178b66473590b6f331cdb6b84d08ef498c9aa7",
     "shared/costumes.ts": "9095cf3d2797b3febec8b0a47b20528e5eab07d3e5f395a2002343d3524c7cb0",
-    "shared/economy.ts": "19157b3c4d6df29cbe7e4e5a90f84e70639226ddab114b43ea8e3369074f9c9b",
+    "shared/economy.ts": "5f841a4d46487971adf60d048acd4a82a6a31bd9c9e53491f845d935d252d942",
     "shared/network.ts": "57f06531d3017814b1a22939aec6c764a9af105586fdecf14a70ccaf6b405b1a",
     "shared/pricing.ts": "12b16bcfd6ada281d78445392652fb53da9c63e8129a00a0f8b62bf213877a82",
     "shared/promotions.ts": "2472490aa1b267348b3fe6a8227b17801fc96660abe425a1e752f1442ff46e78",
@@ -73,7 +73,7 @@
     "shared/wallet-name.ts": "931fe9a6d44ec4bba4c39470f9e1c08bbb237f5af3943a651fb767497adf62d1",
     "shared/weekly-engine.json": "f0d13803a744edbec30c09e2c37063d99387a8175a36eb8476ead440ee686faa",
     "shared/weekly-layouts.ts": "40545e5927c2dfe497d416f32107a2bdfb670ae27b83d1f0e3b1c0e600eecc75",
-    "src/GameScreen.tsx": "093c81457e430957c74fcd08177a10cf71377d1b22ea73ff65b52395653b215a",
+    "src/GameScreen.tsx": "8d6041e222c13027a4929e821e14764bc968c7b600fb8188b4e3e82514a72da2",
     "src/NativeParityProbe.tsx": "c02677167a288748975acf6f725c06f705d6ad0dc91add933b53153d5db7a0c1",
     "src/art/wall-depth-art.ts": "48c3aaf2b3f532b43012388e1faed0f8973f266861285c733138e264c0feb89c",
     "src/art/wall-depth.ts": "e61854c58bb3b9ba5fd0889ccc0ceaa270e646a96b25e050601e628c57e670fb",
@@ -93,14 +93,14 @@
     "src/audio/useLootAudio.ts": "c51a23e6f3c593f57194d2fc507674a6ff975c16cc6f019dec7cb37a9fff31b4",
     "src/camera/geometry.ts": "79d98a1c76494f1c97757b4c0648ad2d6692ce432b0efdaf0bca72e3d39aa8b2",
     "src/camera/useFollowCamera.ts": "cf78c1e2aa0c405c0784901d83738dd269097fe5c1d7d3debc5d24f594c374be",
-    "src/campaign/CampaignBoard.tsx": "185974b1da8297eb620b8519f2c41f2bcf47a9500209e887f681bb3681163de2",
+    "src/campaign/CampaignBoard.tsx": "520ae0d0c3d0aa690664016f802088a9a3e62a10e240214b4c60d78b95b4e718",
     "src/campaign/CampaignSubmission.tsx": "ad7358131e0761608952b0bdd60f5d3a4209812e17526f712b96c94b48a7b142",
     "src/campaign/CampaignSubmission.web.tsx": "fb55df30e55f2109cb6090c5c5c1d292be9d37f431e1840d9b1da8c2dc61c4c5",
     "src/campaign/CompletionCard.tsx": "28c8d5492b0043c1a4a968d58b50cc357fe0872ae999c854eb208a94b4b538ba",
     "src/campaign/RewardsPanel.tsx": "72049f0d2a05b3f4fb5bf55b3e09042e6e01d33c60d40d68cf43e99778767dd7",
     "src/campaign/RewardsPanel.web.tsx": "e12c48ff02d2c917a1b9311422863dd065b38488d8df4b37dc7b985354d721ae",
     "src/campaign/RewardsView.tsx": "234df04cd44019f90cfdba2b0f3f36d94cf400ae6b67cc229148da4db7026932",
-    "src/campaign/client.ts": "b38dfe0fcbe1a2d903a5b61e52563373d6233d5c5c84554fbfb2d4755f9e8652",
+    "src/campaign/client.ts": "f9064aaa9c2ad41abab389593dca94c260fa407da2e6e9fd60107783acf0ed42",
     "src/campaign/completion.ts": "e3fa1bd02e5d1a0e5bfa392097313b32366c31875fbace9ab77596962064590c",
     "src/campaign/credit-claim-state.ts": "91b33dd065ee37483986a455c2d2fbb975cb0f1f040c5f81eff49cdaa5433d15",
     "src/campaign/levels.ts": "66af99c3666586dfa12d57541a6c28bdec27cc16c9930c694c31ad957b11f2f1",
@@ -255,6 +255,7 @@
     "src/playtest/DefeatFxLab.web.tsx": "516af66e79878550361b128a84d238182f5c26f4614b8119a0770672532ad268",
     "src/playtest/Panel.tsx": "37405339d5a2f6780bd9d9d65fd8e6b4d7429810f4d80277afa7dc6a6aaf8c73",
     "src/playtest/WallDepthLab.tsx": "3809ff317b2f277374b7f709a4e281f0f5eb97a1363f2d5b2605d03117469d67",
+    "src/playtest/jev-pilot.ts": "9959c0c703137ee6e0b9848ea3ca2fa9e5e002060848d5d5158573b9049dbbf9",
     "src/playtest/mission.ts": "780dba990e8a931468b9a08a05facf0af206017ffc54b15e83ad0c0e332f15cb",
     "src/playtest/mission.web.ts": "14905f65f15859c6aa6c3d33e2f83d6208e72e2f468abf30fb2b09b7b777086d",
     "src/playtest/store.ts": "eda6fc1fce7a95aaf00752adfa8cc8dd00875e4a52da44a87992e0aad076fb06",
@@ -293,16 +294,17 @@
     "src/wallet/signInFallback.ts": "d483b760a4393f01fba79cd0db0735489303814c49bb08fe3a4545d095fe2944",
     "src/wallet/useLoggedWallet.ts": "a628b09c8140d7f2b006704c1990ee8afe5737eea7ae2e3dc763b3246655d02c"
   },
-  "sha256": "6b5435c722bdae5a44caf02f9228d7b9aba447bdff8ac3dac64dabb52b90a9e2",
-  "bytes": 94409266,
-  "builtAt": "2026-10-05T06:55:08.205Z",
-  "head": "b933d362e627799e323a250e019379032d482db6",
+  "sha256": "ba557c3c0e011216fee2f50b226820b454e19e393768ac29ac2095187c41d038",
+  "bytes": 94455839,
+  "builtAt": "2026-10-08T06:50:52.626Z",
+  "head": "cb275b36877280b87de9e500f090f9483c70db33",
   "workingTree": [
+    "M android/app/build.gradle",
+    " M app.json",
     "?? design/loot-v2/",
     "?? docs/plans/REWARDING-KNOCKOUTS-2026-10-04.md",
-    "?? verification/campaign-levels/levels-101-101.json",
-    "?? verification/campaign-levels/levels-102-102.json",
-    "?? verification/campaign-levels/levels-323-323.json"
+    "?? submission/2026-10-06/",
+    "?? verification/jev/"
   ],
   "architectures": [
     "arm64-v8a"
