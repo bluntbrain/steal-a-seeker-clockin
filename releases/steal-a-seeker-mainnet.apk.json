@@ -3,7 +3,7 @@
   "application": {
     "package": "com.bluntbrain.stealaseeker",
     "version": "1.0.6",
-    "versionCode": 52
+    "versionCode": 53
   },
   "publicConfig": {
     "phoneRenderer": "filament",
@@ -14,7 +14,7 @@
   },
   "sourceFiles": {
     "App.tsx": "1a5d6bc4cce668236bafed0e0b2c456dcfc76cd0f1eb208eedc0ef87e0337c61",
-    "android/app/build.gradle": "6ef8f0a5a277f590f030fb6cf49079128dd797fb1c502a0342e59ed340023ade",
+    "android/app/build.gradle": "4935a9862b963ebdbbe5be8aa6b8fc672c65df94ad08c3f60151ddc8d601bab0",
     "android/app/src/debug/AndroidManifest.xml": "fb1795032c764d975376e1612ab7022058eca2268a45efbe731a47a5d3ac0f60",
     "android/app/src/debugOptimized/AndroidManifest.xml": "fb1795032c764d975376e1612ab7022058eca2268a45efbe731a47a5d3ac0f60",
     "android/app/src/main/AndroidManifest.xml": "016a0038a61db1eb0597d1e7685dd88b2494bc5eb9430f9eb06924af4c786b68",
@@ -48,7 +48,7 @@
     "android/app/src/main/res/values/colors.xml": "dd2b2d78bd1e97238a0c4c345f20bbea6c797a02131c269e04e6d22494eb8605",
     "android/app/src/main/res/values/strings.xml": "47ed7faad16726043974dbd24d27e27bcb250344fae7988248589e9899f050e0",
     "android/app/src/main/res/values/styles.xml": "b49f11b528f21d1690a07f9b582289b42cc1d55698c4eb00c252ec98e466e051",
-    "app.json": "d90bc62892ae8d6852f8faf0532b594ea0c1966ec480daf0e06e209121856da3",
+    "app.json": "863bf8595a3fa87d91f2ae9c871ea6833459d9504c7acd473a1c0ae06b46667a",
     "babel.config.js": "883b928138618186133ce4ef4eafd9495d85d2d60182627fe231c0105b067fe9",
     "index.ts": "2370dec3b8100307cb6b459d1dc50bd97d028d11be3cfff6e995111d004c41bc",
     "metro.config.js": "6a814fa8146b6d313edeeb79ed6cede3f25bf2d033912663495d31ed2de50223",
@@ -294,16 +294,18 @@
     "src/wallet/signInFallback.ts": "d483b760a4393f01fba79cd0db0735489303814c49bb08fe3a4545d095fe2944",
     "src/wallet/useLoggedWallet.ts": "a628b09c8140d7f2b006704c1990ee8afe5737eea7ae2e3dc763b3246655d02c"
   },
-  "sha256": "ba557c3c0e011216fee2f50b226820b454e19e393768ac29ac2095187c41d038",
-  "bytes": 94455839,
-  "builtAt": "2026-10-08T06:50:52.626Z",
-  "head": "cb275b36877280b87de9e500f090f9483c70db33",
+  "sha256": "945e3ff9fae57a54b7fe96ae0589e652024b8434ea361300e6a502d4599be6d3",
+  "bytes": 94479015,
+  "builtAt": "2026-10-08T07:05:05.863Z",
+  "head": "8f51eb83f183057a9dbb5cd451f7d8156e51a66e",
   "workingTree": [
     "M android/app/build.gradle",
     " M app.json",
     "?? design/loot-v2/",
     "?? docs/plans/REWARDING-KNOCKOUTS-2026-10-04.md",
+    "?? releases/steal-a-seeker-mainnet-v1.0.6-code52.apk.json",
     "?? submission/2026-10-06/",
+    "?? verification/compete-2026-10-08/",
     "?? verification/jev/"
   ],
   "architectures": [
