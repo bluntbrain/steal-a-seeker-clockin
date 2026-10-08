@@ -1,4 +1,7 @@
 const $=id=>document.getElementById(id);
+// report text is escaped once on load, so every template below receives plain text, never markup
+const safe=v=>typeof v==='string'?v.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])):Array.isArray(v)?v.map(safe):v&&typeof v==='object'?Object.fromEntries(Object.entries(v).map(([k,x])=>[k,safe(x)])):v;
+
 let data,selected=0,tick=0,playing=false,previous=0;
 const materials=['warehouse','rooftop','vault'].map(name=>{const i=new Image();i.src='../campaign-audit/'+name+'-cap.jpg';i.onload=()=>data&&draw();return i;});
 const ctx=$('map').getContext('2d'),fmt=n=>Number(n).toFixed(1),pressure=n=>'<span class="pressure" aria-label="'+n+' out of 5">'+[1,2,3,4,5].map(i=>'<i class="'+(i<=n?'on':'')+'"></i>').join('')+'</span>';
@@ -25,7 +28,7 @@ function draw(){if(!data)return;const d=data.levels[selected],l=d.level,samples=
 }
 function animate(ts){const elapsed=previous?Math.min(.1,(ts-previous)/1000):0;previous=ts;if(playing&&data){const a=data.levels[selected].solution.samples,max=a[a.length-1].tick;tick=Math.min(max,tick+elapsed*30*Number($('speed').value));if(tick>=max){playing=false;$('play').textContent='Play replay';}draw();}requestAnimationFrame(animate);}
 $('play').onclick=()=>{if(!data)return;const a=data.levels[selected].solution.samples;if(tick>=a[a.length-1].tick)tick=0;playing=!playing;$('play').textContent=playing?'Pause replay':'Play replay';};$('restart').onclick=()=>{tick=0;draw();};$('seek').oninput=()=>{const a=data.levels[selected].solution.samples;tick=Number($('seek').value)/1000*a[a.length-1].tick;draw();};$('heat').onchange=draw;
-fetch('data.json').then(r=>{if(!r.ok)throw Error('Could not load audit data');return r.json();}).then(d=>{data=d;
+fetch('data.json').then(r=>{if(!r.ok)throw Error('Could not load audit data');return r.json();}).then(d=>{data=safe(d);
  $('table').innerHTML=d.levels.map(({report:r},i)=>'<tr data-level="'+i+'"><td><b>'+String(i+1).padStart(2,'0')+' · '+r.title+'</b></td><td>'+r.before.hp+' → '+r.solution.hp+'</td><td>'+r.before.shooting+' → '+(r.profiles.reactive.wins+r.profiles.slow.wins)+'</td><td>'+r.before.mild+' → '+r.profiles.mild.wins+'</td><td>'+r.judgment.label+'</td></tr>').join('');
  $('table').querySelectorAll('tr').forEach(row=>{row.onclick=()=>{choose(Number(row.dataset.level));$('viewer').scrollIntoView({behavior:'smooth'});};});
  $('levels').innerHTML=d.levels.map((_,i)=>'<button aria-label="Inspect mission '+(i+1)+'" aria-selected="false">'+String(i+1).padStart(2,'0')+'</button>').join('');$('levels').querySelectorAll('button').forEach((b,i)=>b.onclick=()=>choose(i));

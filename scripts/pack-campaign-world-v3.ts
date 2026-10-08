@@ -2,6 +2,7 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import crypto from 'node:crypto';
 import sharp from 'sharp';
+import type {OverlayOptions} from 'sharp';
 import {campaignRoadSvgPath,MAP_ASPECT} from '../src/components/campaignRoad';
 const root=path.resolve('assets/campaign-world-v3'),W=768,H=W*MAP_ASPECT;
 const wrap=(body:string)=>Buffer.from(`<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}">${body}</svg>`);
@@ -25,7 +26,7 @@ async function main(){
  for(const scheme of schemes){
   // The first and last 80 pixels are identical for every tile. No overlap or masking of the road at joins.
   const ground=wrap(`<defs><radialGradient id="soft"><stop stop-color="#345D4F" stop-opacity=".3"/><stop offset="1" stop-color="#16352F" stop-opacity="0"/></radialGradient></defs><rect width="${W}" height="${H}" fill="#16352F"/><ellipse cx="${W*.5}" cy="${H*.5}" rx="${W*.8}" ry="${H*.44}" fill="url(#soft)"/>`);
-  const layers:sharp.OverlayOptions[]=[];
+  const layers:OverlayOptions[]=[];
   for(let n=0;n<3;n++){
    const bay=[0,3,4][n]!,centerX=(bay%2===0?.215:.785)*W,centerY=(bay*.5+.25)*W;
    layers.push({input:actors[scheme.characters[n]!]!,left:Math.round(centerX-168),top:Math.round(centerY-168)});

@@ -2,6 +2,7 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import crypto from 'node:crypto';
 import sharp from 'sharp';
+import type {OverlayOptions} from 'sharp';
 import {CAMPAIGN_WORLDS} from '../src/components/campaignWorlds';
 import {campaignRoadSvgPath,MAP_ASPECT} from '../src/components/campaignRoad';
 const root=path.resolve('assets/campaign-world-v4'),W=768,H=W*MAP_ASPECT;
@@ -42,7 +43,7 @@ async function main(){
  for(const scheme of schemes){
   // Matching edge colors and curve tangents avoid masking the road at joins.
   const ground=wrap(`<defs><radialGradient id="soft"><stop stop-color="${scheme.accent}" stop-opacity=".3"/><stop offset="1" stop-color="#16352F" stop-opacity="0"/></radialGradient></defs><rect width="${W}" height="${H}" fill="#16352F"/><ellipse cx="${W*.5}" cy="${H*.5}" rx="${W*.8}" ry="${H*.44}" fill="url(#soft)"/>`);
-  const layers:sharp.OverlayOptions[]=[];
+  const layers:OverlayOptions[]=[];
   for(let n=0;n<3;n++){
    const bay=[0,3,4][n]!,centerX=(bay%2===0?.215:.785)*W,centerY=(bay*.5+.25)*W;
    layers.push({input:actors[scheme.actors[n]!]!,left:Math.round(centerX-168),top:Math.round(centerY-168)});
@@ -68,7 +69,7 @@ async function main(){
   console.log(`${scheme.id}: ${Math.round(output.length/1024)} KiB`);
  }
  await fs.writeFile(path.join(root,'manifest.json'),JSON.stringify({generator:'Built-in image_gen (24 new transparent dioramas plus 8 original character scenes)',packing:'sharp compositing, native road geometry from src/components/campaignRoad.ts',individualSprites:repairs.map(r=>r.key),excludedConcepts:['beeman-break'],scenes:manifest},null,2)+'\n');
- const overview:sharp.OverlayOptions[]=[];
+ const overview:OverlayOptions[]=[];
  let topEdge:Buffer|undefined,bottomEdge:Buffer|undefined;
  for(let i=0;i<manifest.length;i++){
   const scene=manifest[i]!,file=path.join(root,scene.id+'.webp');
