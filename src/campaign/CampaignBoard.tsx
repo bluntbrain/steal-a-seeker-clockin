@@ -2,7 +2,7 @@
 // runs are listed; a browser guest sees the board and the total from this device, which is not ranked.
 // compete with a friend: a wallet player picks one seeker id and sees both totals side by side above the board
 import React,{useCallback,useEffect,useRef,useState} from 'react';
-import {Image,Modal,Pressable as PlainPressable,ScrollView,StyleSheet,Text,TextInput,View} from 'react-native';
+import {Image,Keyboard,KeyboardAvoidingView,Modal,Pressable as PlainPressable,ScrollView,StyleSheet,Text,TextInput,View} from 'react-native';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {HapticPressable as Pressable} from '../feedback/HapticPressable';
 import {useAccount} from '../commerce/account-context';
@@ -128,7 +128,8 @@ function FriendSheet({visible,own,current,onClose,onPick}:{visible:boolean;own?:
  },[visible,query,own]);
  const note=failed?'Search is not reachable right now. Try again in a moment.':busy&&!results.length?'Searching…':!results.length?(query.trim()?`No Seeker ID starts with “${query.trim()}”.`:'No ranked players yet.'):'';
  return <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose} statusBarTranslucent>
-  <View style={s.sheetRoot}>
+  {/* padding lifts the sheet above the keyboard; it measures its own frame, so a window that already resized is not lifted twice */}
+  <KeyboardAvoidingView behavior="padding" style={s.sheetRoot}>
    <PlainPressable style={StyleSheet.absoluteFill} onPress={onClose} accessibilityRole="button" accessibilityLabel="Close friend picker"/>
    <View style={[s.sheet,{paddingBottom:12+insets.bottom}]} accessibilityViewIsModal testID="friend-sheet">
     <View style={s.handle}/>
@@ -137,7 +138,7 @@ function FriendSheet({visible,own,current,onClose,onPick}:{visible:boolean;own?:
     <TextInput value={query} onChangeText={setQuery} placeholder="Search a .skr name or paste a wallet" placeholderTextColor="#6F8C80" autoCapitalize="none" autoCorrect={false} maxLength={64} style={s.search} accessibilityLabel="Search a .skr name or paste a wallet" testID="friend-search"/>
     <Text style={s.sheetSection}>{query.trim()?'SEEKER IDS':'TOP PLAYERS'}</Text>
     <ScrollView style={s.sheetList} contentContainerStyle={{gap:6}} keyboardShouldPersistTaps="handled">
-     {results.map(p=>{const on=chosen?.wallet===p.wallet,label=friendLabel(p);return <Pressable key={`${p.wallet}:${p.name??''}`} accessibilityRole="radio" accessibilityState={{checked:on}} accessibilityLabel={label} onPress={()=>setChosen(on?null:p)} style={[s.pickRow,on&&s.pickRowOn]} testID="friend-row">
+     {results.map(p=>{const on=chosen?.wallet===p.wallet,label=friendLabel(p);return <Pressable key={`${p.wallet}:${p.name??''}`} accessibilityRole="radio" accessibilityState={{checked:on}} accessibilityLabel={label} onPress={()=>{Keyboard.dismiss();setChosen(on?null:p);}} style={[s.pickRow,on&&s.pickRowOn]} testID="friend-row">
       <Image accessible={false} source={portrait} style={s.avatar}/>
       <View style={s.nameCell}><Text style={s.name} numberOfLines={1}>{label}</Text><Text style={s.rowDetail} numberOfLines={1}>{p.standing?`#${p.standing.rank} · ${p.standing.cleared} ${p.standing.cleared===1?'level':'levels'} · ${p.standing.score.toLocaleString()} points`:'Has not played yet'}</Text></View>
       <View style={[s.tick,on&&s.tickOn]}>{on&&<Text style={s.tickMark}>✓</Text>}</View>
@@ -149,7 +150,7 @@ function FriendSheet({visible,own,current,onClose,onPick}:{visible:boolean;own?:
      <Pressable accessibilityRole="button" accessibilityState={{disabled:!chosen}} disabled={!chosen} onPress={()=>{if(chosen)onPick(chosen);}} style={[s.sheetPrimary,!chosen&&{opacity:.4}]} testID="friend-compare"><Text style={s.sheetPrimaryText}>Compare</Text></Pressable>
     </View>
    </View>
-  </View>
+  </KeyboardAvoidingView>
  </Modal>;
 }
 const s=StyleSheet.create({
@@ -171,11 +172,11 @@ const s=StyleSheet.create({
  nameCell:{flex:1,gap:2},name:{fontSize:14,fontWeight:'800',color:'#E8F3EE'},rowDetail:{fontSize:10,color:'#8FAD9D'},rowScore:{alignItems:'flex-end'},points:{fontSize:16,fontWeight:'900',color:'#E8F3EE'},rowPointsLabel:{fontSize:7,letterSpacing:1.2,fontWeight:'800',color:'#8FAD9D'},
  empty:{borderRadius:14,overflow:'hidden',padding:18,alignItems:'center',gap:8},emptyAvatar:{width:52,height:52,borderRadius:26},emptyTitle:{fontSize:16,fontWeight:'800',color:'#E8F3EE'},emptyText:{fontSize:11,color:'#A9C3B8',textAlign:'center'},
  sheetRoot:{flex:1,justifyContent:'flex-end',backgroundColor:'#05080BA6'},
- sheet:{width:'100%',maxWidth:480,alignSelf:'center',maxHeight:'86%',backgroundColor:'#0F2520',borderTopLeftRadius:24,borderTopRightRadius:24,borderWidth:1,borderColor:'#36524A',paddingHorizontal:16,paddingTop:8,gap:10},
+ sheet:{width:'100%',maxWidth:480,alignSelf:'center',maxHeight:'86%',flexShrink:1,backgroundColor:'#0F2520',borderTopLeftRadius:24,borderTopRightRadius:24,borderWidth:1,borderColor:'#36524A',paddingHorizontal:16,paddingTop:8,gap:10},
  handle:{alignSelf:'center',width:44,height:5,borderRadius:3,backgroundColor:'#3E5D53',marginBottom:4},
  sheetTitle:{fontSize:20,fontWeight:'900',color:'#F4F3E9'},sheetText:{fontSize:12,lineHeight:17,color:'#B5D4C6'},
  search:{minHeight:46,borderRadius:12,borderWidth:1,borderColor:'#416A5D',backgroundColor:'#0B1C18',paddingHorizontal:14,fontSize:14,color:'#F4FFF8'},
- sheetSection:{fontSize:9,letterSpacing:1.4,fontWeight:'800',color:'#8FAD9D',marginTop:2},sheetList:{flexGrow:0},
+ sheetSection:{fontSize:9,letterSpacing:1.4,fontWeight:'800',color:'#8FAD9D',marginTop:2},sheetList:{flexGrow:0,flexShrink:1},
  pickRow:{flexDirection:'row',alignItems:'center',gap:10,minHeight:56,paddingHorizontal:10,borderRadius:12,backgroundColor:'#132E28',borderWidth:1,borderColor:'#132E28'},pickRowOn:{borderColor:'#9FF0C8',backgroundColor:'#163A31'},
  tick:{width:26,height:26,borderRadius:13,borderWidth:2,borderColor:'#4E7366',alignItems:'center',justifyContent:'center'},tickOn:{backgroundColor:'#9FF0C8',borderColor:'#9FF0C8'},tickMark:{fontSize:14,fontWeight:'900',color:'#0B1F18'},
  sheetNote:{fontSize:12,color:'#A9C3B8',textAlign:'center',paddingVertical:16},
