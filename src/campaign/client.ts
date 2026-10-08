@@ -38,19 +38,36 @@ const merge=(extra:unknown[])=>{const byNumber=new Map(published.map(l=>[l.numbe
 const setPublished=(next:PublishedLevel[])=>{if(next.length===published.length)return;published=next;for(const l of listeners)l();};
 export const publishedLevels={subscribe:(l:()=>void)=>{listeners.add(l);return()=>{listeners.delete(l);};},get:()=>published};
 const contiguousTop=(list:readonly PublishedLevel[])=>{let top=12;for(const l of list){if(l.number===top+1)top=l.number;else if(l.number>top+1)break;}return top;};
-let cacheRead=false;
-export async function loadPublishedLevels(){
- if(!cacheRead){cacheRead=true;try{const raw=await readSave(LEVELS_KEY);if(raw)setPublished(merge(JSON.parse(raw)));}catch{/* the bundle stays */}}
+let cacheRead=false,hadCache=false,loading:Promise<void>|null=null;
+// a first install has no saved levels, so the map shows a loader while they download; later launches never wait
+type LevelDownload={active:boolean;progress:number};
+let download:LevelDownload={active:false,progress:0};const downloadListeners=new Set<()=>void>();
+const setDownload=(next:LevelDownload)=>{download=next;for(const l of downloadListeners)l();};
+export const levelDownload={subscribe:(l:()=>void)=>{downloadListeners.add(l);return()=>{downloadListeners.delete(l);};},get:()=>download};
+type Page={latest:number;levels:unknown[]};
+/** cached levels first, then any newer pages. concurrent callers share one run, so two screens never download twice */
+export function loadPublishedLevels(){return loading??=loadOnce().finally(()=>{loading=null;});}
+async function loadOnce(){
+ if(!cacheRead){cacheRead=true;try{const raw=await readSave(LEVELS_KEY);const cached=raw?JSON.parse(raw):[];if(Array.isArray(cached)&&cached.length){hadCache=true;setPublished(merge(cached));}}catch{/* the bundle stays */}}
+ const before=published.length,showLoader=!hadCache;
+ if(showLoader)setDownload({active:true,progress:0});
  try{
-  let latest=Infinity,top=contiguousTop(published);const before=published.length;
-  while(top<latest){
-   const page=await api<{latest:number;levels:unknown[]}>(`/campaign/levels?from=${top+1}`);
-   latest=Number(page.latest);if(!Array.isArray(page.levels)||!page.levels.length)break;
-   setPublished(merge(page.levels));const next=contiguousTop(published);if(next===top)break;top=next;
+  // the first page says how many levels exist; the rest download together, which takes one page time instead of nine
+  const top=contiguousTop(published),first=await api<Page>(`/campaign/levels?from=${top+1}`);
+  const latest=Number(first.latest),size=Array.isArray(first.levels)?first.levels.length:0;let found=size?first.levels:[];
+  if(size&&Number.isFinite(latest)&&top+size<latest){
+   const starts:number[]=[];for(let from=top+1+size;from<=latest;from+=size)starts.push(from);
+   let done=1;const total=starts.length+1;if(showLoader)setDownload({active:true,progress:done/total});
+   const pages=await Promise.allSettled(starts.map(from=>api<Page>(`/campaign/levels?from=${from}`).then(page=>{done++;if(showLoader)setDownload({active:true,progress:done/total});return page.levels;})));
+   for(const page of pages)if(page.status==='fulfilled'&&Array.isArray(page.value))found=found.concat(page.value);
   }
-  // the cache can hold hundreds of levels, so it is rewritten only when this call added some
-  if(top>bundledTop&&published.length>before)await writeSave(LEVELS_KEY,JSON.stringify(published.filter(l=>l.number>bundledTop)));
- }catch{/* offline: bundled and cached levels remain */}
+  // one update for every downloaded level, so the map changes once instead of once per page
+  if(found.length)setPublished(merge(found));
+ }catch{/* offline: bundled, cached and already downloaded levels remain */}
+ finally{if(showLoader)setDownload({active:false,progress:1});}
+ // pages that arrived are kept even when another page failed, so the next launch only fetches the gap.
+ // the cache can hold hundreds of levels, so it is rewritten only when this run added some
+ if(published.length>before)try{await writeSave(LEVELS_KEY,JSON.stringify(published.filter(l=>l.number>bundledTop)));hadCache=true;}catch{/* retried next launch */}
 }
 
 // Import only server-verified guest replays. Never trust the device balance,

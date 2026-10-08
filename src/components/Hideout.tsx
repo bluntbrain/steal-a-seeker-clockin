@@ -13,6 +13,7 @@ import {Linking,Platform} from 'react-native';
 import {Image,Modal,ScrollView,StyleSheet,Text,View,useWindowDimensions} from 'react-native';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {useAccount} from '../commerce/account-context';
+import {homeShown} from '../commerce/pass-intro';
 import {CAMPAIGN_IDS} from '../game/level';
 import {PHONE_EDITIONS,editionIndex,phoneEdition} from '../game/collection';
 import type {Progress} from '../progress/model';
@@ -47,7 +48,7 @@ export default function Hideout({initialTab='map',mapRequest=0,visible,onClose,o
  const registerShare=useCallback((fn:(()=>Promise<void>)|null)=>{shareFn.current=fn;setShareReady(!!fn);},[]);
  const shareSaved_=useCallback(()=>setShareSaved(true),[]);
  const action=(label:string,name:string,onPress:()=>void,primary=false,disabled=false,fluid=false)=><Pressable accessibilityRole="button" accessibilityLabel={name} onPress={onPress} disabled={disabled} style={[s.button,fluid&&{flexGrow:1,flexBasis:0,minWidth:0},primary&&s.primary,disabled&&{opacity:.4}]}><Text style={[s.buttonText,primary&&{color:'#173739'}]}>{label}</Text></Pressable>;
- return <Modal visible={visible} transparent animationType="none" onRequestClose={onClose}><View style={[s.overlay,(tab==='rack'||tab==='leaderboard')&&{backgroundColor:tab==='rack'?'#0B1612':'#0B1711'},{paddingTop:insets.top+8,paddingBottom:insets.bottom+8}]}><View style={{width:w,flex:1,maxHeight:980}}>
+ return <Modal visible={visible} transparent animationType="none" onRequestClose={onClose} onShow={homeShown}><View style={[s.overlay,(tab==='rack'||tab==='leaderboard')&&{backgroundColor:tab==='rack'?'#0B1612':'#0B1711'},{paddingTop:insets.top+8,paddingBottom:insets.bottom+8}]}><View style={{width:w,flex:1,maxHeight:980}}>
  {tab==='leaderboard'&&<View pointerEvents="none" style={{position:'absolute',width:500,height:540,top:-80,right:-110,opacity:.75}}><Image accessible={false} source={require('../../assets/leaderboard-v3/header-glow.webp')} resizeMode="stretch" style={{width:'100%',height:'100%'}}/></View>}
  {tab==='map'&&<View style={s.mapHeader}>
   <View style={s.mapTopline}><BrandWordmark/><View style={s.mapTools}><CreditBalance/><Pressable accessibilityRole="button" accessibilityLabel="Settings" onPress={onSettings} style={s.mapSettings}><Text style={{color:'#B6D2C7',fontSize:20}}>⚙</Text></Pressable></View></View>

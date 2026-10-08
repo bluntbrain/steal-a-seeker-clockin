@@ -7,7 +7,7 @@ import MissionIntro from './components/MissionIntro';
 import MissionChaseLoader,{warmMissionLoader} from './components/MissionChaseLoader';
 import {campaignLesson,publishedLesson} from './onboarding/mission-lessons';
 import {authoredEntry,campaignEntries,nextEntry,type CampaignEntry} from './campaign/levels';
-import {publishedLevels} from './campaign/client';
+import {loadPublishedLevels,publishedLevels} from './campaign/client';
 import {HapticPressable as Pressable} from './feedback/HapticPressable';
 import EconomyProvider,{useEconomy} from './commerce/EconomyProvider';
 import CreditBalance from './components/CreditBalance';
@@ -158,6 +158,8 @@ export function Game({onSnapshot}:{onSnapshot?:(state:GameState)=>void}){
  const campaignFinished=!trial.active&&!testMission&&completedCampaign(progress.progress,hud);
  const finaleVisible=!sceneLoading&&campaignFinished&&!claimVisible&&!paused&&!hideoutOpen&&!walletOpen&&!settingsOpen;
  const published=useSyncExternalStore(publishedLevels.subscribe,publishedLevels.get),entries=useMemo(()=>campaignEntries(published),[published]);
+ // read the saved levels at launch, behind the welcome screen, so the map opens with every known level
+ useEffect(()=>{void loadPublishedLevels();},[]);
  const nextMission=(n=>n?.playable?n:undefined)(nextEntry(entries,entry.key));
  const shareAction=useRef<(()=>Promise<void>)|null>(null),[shareReady,setShareReady]=useState(false);
  const registerShare=useCallback((fn:(()=>Promise<void>)|null)=>{shareAction.current=fn;setShareReady(!!fn);},[]);

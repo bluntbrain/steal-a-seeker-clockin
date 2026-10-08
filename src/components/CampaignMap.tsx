@@ -2,7 +2,9 @@
 // FlatList keeps GPU surfaces and decoded images bounded while scrolling.
 import {useHaptics} from '../feedback/useHaptics';
 import React,{useCallback,useMemo} from 'react';
-import {FlatList,Image,Pressable,StyleSheet,Text,View} from 'react-native';
+import {ActivityIndicator,FlatList,Image,Pressable,StyleSheet,Text,View} from 'react-native';
+import Animated,{FadeOut} from 'react-native-reanimated';
+import {levelDownload} from '../campaign/client';
 import {entryUnlocked,padLevel,type CampaignEntry} from '../campaign/levels';
 import type {Progress} from '../progress/model';
 import {BOSS_NAMES} from '../../shared/campaign-levels';
@@ -24,17 +26,25 @@ const art={
 };
 export default function CampaignMap({entries,progress,current,onSelect}:{entries:readonly CampaignEntry[];progress:Progress;current:CampaignEntry;onSelect:(entry:CampaignEntry)=>void}){
  const haptic=useHaptics();
+ // a first install downloads every mission behind a loader; it never blocks the map for more than 12 seconds
+ const download=React.useSyncExternalStore(levelDownload.subscribe,levelDownload.get),[waited,setWaited]=React.useState(false);
+ React.useEffect(()=>{if(!download.active)return;const timer=setTimeout(()=>setWaited(true),12000);return()=>clearTimeout(timer);},[download.active]);
+ const loadingMissions=download.active&&!waited;
  const [{width,height},setSize]=React.useState({width:0,height:0});
  const list=React.useRef<FlatList<MapScene>>(null),positioned=React.useRef('');
- const {scenes}=useMemo(()=>campaignMapLayout(entries,width),[entries,width]);
+ // the list runs from level 1 upward (inverted, so it still reads bottom to top). downloaded levels append above the
+ // highest scene, so nothing already on screen moves or remounts while the 1,000 levels arrive in pages
+ const scenes=useMemo(()=>campaignMapLayout(entries,width).scenes.slice().reverse(),[entries,width]);
+ const sceneHeight=scenes[0]?.height??0;
  const currentScene=Math.max(0,scenes.findIndex(s=>s.nodes.some(n=>n.entry.key===current.key)));
  const position=useCallback(()=>{
-  const key=`${width}:${entries.length}`;
+  const key=`${width}:${current.key}`;
   if(!width||!height||positioned.current===key)return;
   const scene=scenes[currentScene],node=scene?.nodes.find(n=>n.entry.key===current.key);
-  if(scene&&node&&list.current){list.current.scrollToOffset({offset:Math.max(0,scene.offset+node.y-height*.65),animated:false});positioned.current=key;}
- },[width,height,entries.length,scenes,currentScene,current.key]);
- const getItemLayout=useCallback((_:unknown,index:number)=>({length:scenes[index]?.height??0,offset:scenes[index]?.offset??0,index}),[scenes]);
+  // offsets count from the bottom: keep the current level 35% up from the bottom edge, as before
+  if(scene&&node&&list.current){list.current.scrollToOffset({offset:Math.max(0,currentScene*sceneHeight+scene.height-node.y-height*.35),animated:false});positioned.current=key;}
+ },[width,height,scenes,sceneHeight,currentScene,current.key]);
+ const getItemLayout=useCallback((_:unknown,index:number)=>({length:sceneHeight,offset:sceneHeight*index,index}),[sceneHeight]);
  const render=useCallback(({item}:{item:MapScene})=>{
   return <View style={{height:item.height,overflow:'hidden'}}>
    <Image accessible={false} source={art[item.world]} resizeMode="contain" style={{position:'absolute',left:0,top:0,width,height:item.imageHeight}}/>
@@ -52,11 +62,18 @@ export default function CampaignMap({entries,progress,current,onSelect}:{entries
  },[width,progress,entries,current.key,haptic,onSelect]);
  const extra=useMemo(()=>({progress,width,current:current.key}),[progress,width,current.key]);
  return <View testID="mission-districts" style={s.list} onLayout={e=>{const {width:w,height:h}=e.nativeEvent.layout;setSize(old=>old.width===w&&old.height===h?old:{width:w,height:h});}}>
-  {width>0&&<FlatList key={`${width}:${entries.length}`} ref={list} data={scenes} extraData={extra} renderItem={render} keyExtractor={r=>r.key} getItemLayout={getItemLayout} initialScrollIndex={currentScene} initialNumToRender={2} windowSize={5} maxToRenderPerBatch={3} showsVerticalScrollIndicator={false} onContentSizeChange={position} onScrollToIndexFailed={position}/>}
+  {width>0&&<FlatList key={String(width)} inverted ref={list} data={scenes} extraData={extra} renderItem={render} keyExtractor={r=>r.key} getItemLayout={getItemLayout} initialScrollIndex={currentScene} initialNumToRender={2} windowSize={5} maxToRenderPerBatch={3} showsVerticalScrollIndicator={false} onContentSizeChange={position} onScrollToIndexFailed={position}/>}
+  {loadingMissions&&<Animated.View exiting={FadeOut.duration(220)} testID="missions-loading" accessibilityLiveRegion="polite" style={s.loader}>
+   <ActivityIndicator color="#9FF0C8" size="large"/>
+   <Text style={s.loaderTitle}>Loading missions</Text>
+   <View style={s.loaderTrack}><View style={[s.loaderFill,{width:`${Math.round(Math.max(.06,download.progress)*100)}%`}]}/></View>
+  </Animated.View>}
  </View>;
 }
 const s=StyleSheet.create({
  list:{flex:1,minHeight:0,overflow:'hidden',backgroundColor:'#16352F'},
+ loader:{...StyleSheet.absoluteFillObject,backgroundColor:'#16352F',alignItems:'center',justifyContent:'center',gap:14},loaderTitle:{fontSize:15,fontWeight:'800',letterSpacing:.4,color:'#E8F6EE'},
+ loaderTrack:{width:180,height:6,borderRadius:3,backgroundColor:'#0E2621',overflow:'hidden'},loaderFill:{height:6,borderRadius:3,backgroundColor:'#9FF0C8'},
  target:{position:'absolute',width:60,alignItems:'center',paddingTop:4},
  node:{borderWidth:2,borderColor:'#A0BCAF',backgroundColor:'#18342E',alignItems:'center',justifyContent:'center',overflow:'hidden'},
  open:{borderColor:'#B7E5D4',backgroundColor:'#19352F',shadowColor:'#9BE8CE',shadowRadius:7,shadowOpacity:.55,shadowOffset:{width:0,height:0}},
