@@ -17,16 +17,25 @@ const portrait=require('../../assets/leaderboard-v2/courier-avatar.png');
 const bannerArt=require('../../assets/leaderboard-v2/compete-banner.webp');
 const short=(wallet:string)=>`${wallet.slice(0,5)}…${wallet.slice(-5)}`;
 const friendLabel=(f:{wallet:string;name:string|null})=>f.name??short(f.wallet);
+type Pick=Friend&{standing?:CampaignRank|null};
 type Props={entries:readonly CampaignEntry[];progress:Progress;onShare:()=>void;onRewards:()=>void};
 export default function CampaignBoard({entries,progress,onShare,onRewards}:Props){
  const account=useAccount(),accountRef=useRef(account);accountRef.current=account;
  const [data,setData]=useState<Board>(),[loading,setLoading]=useState(false),[error,setError]=useState('');
- const [friend,setFriend]=useState<Friend|null>(null),[friendRow,setFriendRow]=useState<CampaignPlayer|null>(null),[picking,setPicking]=useState(false),[gateNote,setGateNote]=useState('');
+ const [friend,setFriend]=useState<Friend|null>(null),[friendRow,setFriendRow]=useState<CampaignPlayer|null>(null),[duelFailed,setDuelFailed]=useState(false),[picking,setPicking]=useState(false),[gateNote,setGateNote]=useState('');
+ // undefined: not looked up yet. null: the wallet has no verified run
+ const [mine,setMine]=useState<CampaignRank|null>();
  const friendRef=useRef(friend);friendRef.current=friend;
  const namePolls=useRef(0);
+ // both sides come from the server: the friend, and this wallet's public standing (a session is not needed)
  const loadFriend=useCallback(async(f:Friend|null)=>{
   if(!f){setFriendRow(null);return;}
-  try{const [row]=await campaignApi.players(f.wallet);setFriendRow(row??{...f,standing:null});}catch{/* the last known totals stay */}
+  const a=accountRef.current,own=a.wallet&&!a.preview?a.wallet:undefined;
+  try{
+   const [them,me]=await Promise.all([campaignApi.players(f.wallet),own?campaignApi.players(own):Promise.resolve(undefined)]);
+   if(friendRef.current?.wallet!==f.wallet)return;// a newer pick owns the card
+   setFriendRow(them[0]??{...f,standing:null});if(me)setMine(me.find(p=>p.wallet===own)?.standing??null);setDuelFailed(false);
+  }catch{if(friendRef.current?.wallet===f.wallet)setDuelFailed(true);}
  },[]);
  const load=useCallback(async(automatic=false)=>{
   if(!automatic){namePolls.current=0;void loadFriend(friendRef.current);}
@@ -35,6 +44,7 @@ export default function CampaignBoard({entries,progress,onShare,onRewards}:Props
   catch(e){setError(e instanceof ApiError&&e.status<500?e.message:'The live leaderboard is not reachable from here.');}
   finally{setLoading(false);}
  },[loadFriend]);
+ useEffect(()=>{setMine(undefined);},[account.wallet]);
  useEffect(()=>{void load();},[load,account.wallet]);
  useEffect(()=>{void readFriend().then(f=>{setFriend(f);void loadFriend(f);});},[loadFriend]);
  useEffect(()=>{if(!data?.namesPending||loading||namePolls.current>=10)return;const timer=setTimeout(()=>{namePolls.current++;void load(true);},3000);return()=>clearTimeout(timer);},[data,loading,load]);
@@ -44,15 +54,23 @@ export default function CampaignBoard({entries,progress,onShare,onRewards}:Props
   if(!accountRef.current.wallet){try{await accountRef.current.connect();}catch{setGateNote('Connect a wallet to compete with a friend.');return;}}
   setPicking(true);
  },[]);
- const pick=useCallback((f:Friend|null)=>{setPicking(false);setFriend(f);setFriendRow(f?{...f,standing:null}:null);void writeFriend(f);void loadFriend(f);},[loadFriend]);
+ // a row from the sheet carries the standing the server just returned; an unchanged pick keeps the card as it is
+ const pick=useCallback((p:Pick|null)=>{
+  setPicking(false);const f=p?{wallet:p.wallet,name:p.name}:null,same=!!f&&friendRef.current?.wallet===f.wallet;
+  friendRef.current=f;setFriend(f);void writeFriend(f);
+  if(p&&p.standing!==undefined)setFriendRow({...f!,standing:p.standing});else if(!same)setFriendRow(null);
+  setDuelFailed(false);void loadFriend(f);
+ },[loadFriend]);
  const closeSheet=useCallback(()=>setPicking(false),[]);
  const localPoints=Object.values(progress.missions).reduce((n,b)=>n+(b?.score??0),0),localCleared=entries.filter(e=>!!progress.missions[e.key]).length;
  const personal=data?.personal??null,rows=data?.board??[],guest=!account.wallet||account.preview;
  const points=personal?personal.score:localPoints,cleared=personal?personal.cleared:localCleared;
  const hint=loading&&!data?'Fetching verified scores…':guest?'Connect a wallet and clear a level to be listed.':error?error:personal?`${data?.participants??0} couriers ranked · best verified run per level`:'Clear a level with your wallet connected to join the board.';
  const name=(p:CampaignRank)=>leaderboardName(p,account.wallet);
- const rival=friendRow?.standing??null,rivalName=friend?friendLabel(friendRow??friend):'',gap=points-(rival?.score??0);
- const lead=!rival?`${rivalName} has not cleared a verified level yet. Send them the game.`:gap>0?`You lead by ${gap.toLocaleString()} points.`:gap<0?`${rivalName} leads by ${(-gap).toLocaleString()} points.`:'You are tied on points.';
+ // a wallet's own side is its verified standing only; the browser playtest has no server identity, so it uses this device
+ const me=account.preview?undefined:(personal??mine??null),myPoints=account.preview?localPoints:me?.score??0,myLevels=account.preview?localCleared:me?.cleared??0;
+ const rival=friendRow?.standing??null,rivalName=friend?friendLabel(friendRow??friend):'',gap=myPoints-(rival?.score??0);
+ const lead=!friendRow?(duelFailed?'Scores are not reachable right now. Tap refresh to try again.':'Loading scores…'):!rival?`${rivalName} has not cleared a verified level yet. Send them the game.`:gap>0?`You lead by ${gap.toLocaleString()} points.`:gap<0?`${rivalName} leads by ${(-gap).toLocaleString()} points.`:'You are tied on points.';
  const side=(label:string,levels:number,score:number,rank:number|undefined,you:boolean)=><View style={[s.duelSide,!you&&{alignItems:'flex-end'}]}>
   <Text style={[s.duelName,you&&{color:'#BAEDDC'}]} numberOfLines={1}>{label}</Text>
   <Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={.6} style={s.duelPoints}>{score.toLocaleString()}</Text>
@@ -73,10 +91,10 @@ export default function CampaignBoard({entries,progress,onShare,onRewards}:Props
    {friend?<View style={s.duel} testID="compete-card">
     <LeagueSurface kind="row"/>
     <Text style={s.duelEyebrow}>HEAD TO HEAD</Text>
-    <View style={s.duelSides}>{side('You',cleared,points,personal?.rank,true)}<Text style={s.vs}>VS</Text>{side(rivalName,rival?.cleared??0,rival?.score??0,rival?.rank,false)}</View>
+    <View style={s.duelSides}>{side('You',myLevels,myPoints,me?.rank,true)}<Text style={s.vs}>VS</Text>{side(rivalName,rival?.cleared??0,rival?.score??0,rival?.rank,false)}</View>
     <View style={s.hintRow}><Text style={s.positionHint} numberOfLines={2}>{lead}</Text><Pressable accessibilityRole="button" accessibilityLabel="Change the friend you compare with" onPress={()=>void compete()} style={s.share}><Text style={s.shareText}>Change</Text></Pressable></View>
    </View>:<Pressable accessibilityRole="button" accessibilityLabel="Compete with a friend" onPress={()=>void compete()} style={s.banner} testID="compete-banner">
-    <Image accessible={false} source={bannerArt} style={s.bannerArt} resizeMode="cover"/>
+    <View style={s.bannerArt}><Image accessible={false} source={bannerArt} style={s.bannerImage} resizeMode="cover"/></View>
     <View style={s.bannerBody}>
      <View style={{flex:1,gap:3}}><Text style={s.bannerTitle}>Compete with a friend</Text><Text style={s.bannerText}>{account.wallet?'Pick a Seeker ID and see who is ahead.':'Connect your wallet, pick a Seeker ID and see who is ahead.'}</Text></View>
      <View style={s.bannerCta}><Text style={s.bannerCtaText}>{account.wallet?'Pick a friend':'Connect'}</Text></View>
@@ -98,9 +116,9 @@ export default function CampaignBoard({entries,progress,onShare,onRewards}:Props
 }
 
 // a contact-list sheet: the top players by default, .skr search or a pasted wallet, one tick at a time
-function FriendSheet({visible,own,current,onClose,onPick}:{visible:boolean;own?:string;current:Friend|null;onClose:()=>void;onPick:(f:Friend|null)=>void}){
+function FriendSheet({visible,own,current,onClose,onPick}:{visible:boolean;own?:string;current:Friend|null;onClose:()=>void;onPick:(p:Pick|null)=>void}){
  const insets=useSafeAreaInsets();
- const [query,setQuery]=useState(''),[results,setResults]=useState<CampaignPlayer[]>([]),[busy,setBusy]=useState(false),[failed,setFailed]=useState(false),[chosen,setChosen]=useState<Friend|null>(current);
+ const [query,setQuery]=useState(''),[results,setResults]=useState<CampaignPlayer[]>([]),[busy,setBusy]=useState(false),[failed,setFailed]=useState(false),[chosen,setChosen]=useState<Pick|null>(current);
  useEffect(()=>{if(visible){setChosen(current);setQuery('');}},[visible,current]);
  useEffect(()=>{
   if(!visible)return;
@@ -119,7 +137,7 @@ function FriendSheet({visible,own,current,onClose,onPick}:{visible:boolean;own?:
     <TextInput value={query} onChangeText={setQuery} placeholder="Search a .skr name or paste a wallet" placeholderTextColor="#6F8C80" autoCapitalize="none" autoCorrect={false} maxLength={64} style={s.search} accessibilityLabel="Search a .skr name or paste a wallet" testID="friend-search"/>
     <Text style={s.sheetSection}>{query.trim()?'SEEKER IDS':'TOP PLAYERS'}</Text>
     <ScrollView style={s.sheetList} contentContainerStyle={{gap:6}} keyboardShouldPersistTaps="handled">
-     {results.map(p=>{const on=chosen?.wallet===p.wallet,label=friendLabel(p);return <Pressable key={`${p.wallet}:${p.name??''}`} accessibilityRole="radio" accessibilityState={{checked:on}} accessibilityLabel={label} onPress={()=>setChosen(on?null:{wallet:p.wallet,name:p.name})} style={[s.pickRow,on&&s.pickRowOn]} testID="friend-row">
+     {results.map(p=>{const on=chosen?.wallet===p.wallet,label=friendLabel(p);return <Pressable key={`${p.wallet}:${p.name??''}`} accessibilityRole="radio" accessibilityState={{checked:on}} accessibilityLabel={label} onPress={()=>setChosen(on?null:p)} style={[s.pickRow,on&&s.pickRowOn]} testID="friend-row">
       <Image accessible={false} source={portrait} style={s.avatar}/>
       <View style={s.nameCell}><Text style={s.name} numberOfLines={1}>{label}</Text><Text style={s.rowDetail} numberOfLines={1}>{p.standing?`#${p.standing.rank} · ${p.standing.cleared} ${p.standing.cleared===1?'level':'levels'} · ${p.standing.score.toLocaleString()} points`:'Has not played yet'}</Text></View>
       <View style={[s.tick,on&&s.tickOn]}>{on&&<Text style={s.tickMark}>✓</Text>}</View>
@@ -140,7 +158,7 @@ const s=StyleSheet.create({
  position:{borderRadius:16,overflow:'hidden',padding:14,gap:12,backgroundColor:'#142F28',borderWidth:1,borderColor:'#416A5D'},positionTop:{flexDirection:'row',alignItems:'center',gap:12},positionRank:{width:52,fontSize:32,lineHeight:38,fontWeight:'900',color:'#D4F8E8'},positionIdentity:{flex:1,minWidth:0,gap:5},positionLabel:{fontSize:11,letterSpacing:.6,fontWeight:'800',color:'#E8F6EE'},progress:{fontSize:13,fontWeight:'700',color:'#B5D4C6'},
  scoreCell:{alignItems:'flex-end'},positionPoints:{fontSize:26,lineHeight:30,fontWeight:'900',color:'#F4FFF8'},pointsLabel:{fontSize:8,letterSpacing:1.4,fontWeight:'800',color:'#B5D4C6'},
  hintRow:{flexDirection:'row',alignItems:'center',justifyContent:'space-between',gap:8,borderTopWidth:1,borderTopColor:'#426357',paddingTop:10},positionHint:{flex:1,fontSize:11,lineHeight:16,color:'#C5DED2'},share:{minHeight:34,paddingHorizontal:12,justifyContent:'center',borderRadius:17,backgroundColor:'#0E2A24'},shareText:{color:'#CDEBD9',fontSize:11,fontWeight:'800'},
- banner:{borderRadius:16,overflow:'hidden',backgroundColor:'#0E2621',borderWidth:1,borderColor:'#3F7A66'},bannerArt:{width:'100%',aspectRatio:3},
+ banner:{borderRadius:16,overflow:'hidden',backgroundColor:'#0E2621',borderWidth:1,borderColor:'#3F7A66'},bannerArt:{width:'100%',aspectRatio:3,overflow:'hidden'},bannerImage:{position:'absolute',top:0,left:0,width:'100%',height:'100%'},
  bannerBody:{flexDirection:'row',alignItems:'center',gap:12,padding:12},bannerTitle:{fontSize:16,fontWeight:'900',color:'#F4FFF8'},bannerText:{fontSize:11,lineHeight:15,color:'#B5D4C6'},
  bannerCta:{minHeight:36,paddingHorizontal:14,justifyContent:'center',borderRadius:18,backgroundColor:'#9FF0C8'},bannerCtaText:{fontSize:12,fontWeight:'900',color:'#0B1F18'},
  gateNote:{fontSize:11,color:'#F3C98B',paddingHorizontal:4},

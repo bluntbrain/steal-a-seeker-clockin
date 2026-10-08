@@ -127,9 +127,11 @@ export async function syncSkrDirectory(pool:Pool,options:{fetch?:typeof fetch;pa
  }
  return stored;
 }
-/** the one-time copy: runs only while the table is empty. a failed copy is removed so the next boot starts clean */
+/** the one-time copy: skipped once a finished copy is recorded. an interrupted copy reruns on the next boot, and the
+ * upsert fills whatever pages it missed */
 export async function importSkrDirectoryOnce(pool:Pool,options:Parameters<typeof syncSkrDirectory>[1]={}):Promise<number>{
- if((await pool.query('SELECT 1 FROM skr_domains LIMIT 1')).rowCount)return 0;
- try{return await syncSkrDirectory(pool,options);}
- catch(error){await pool.query('TRUNCATE skr_domains');throw error;}
+ if((await pool.query('SELECT 1 FROM skr_directory_imports LIMIT 1')).rowCount)return 0;
+ const stored=await syncSkrDirectory(pool,options);
+ await pool.query('INSERT INTO skr_directory_imports(names) VALUES($1)',[stored]);
+ return stored;
 }
