@@ -16,6 +16,10 @@
     "courier-avatar.png": [
       128,
       128
+    ],
+    "compete-banner.webp": [
+      1200,
+      400
     ]
   },
   "sampleScoresInReferenceOnly": true,
