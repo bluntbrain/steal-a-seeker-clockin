@@ -23,7 +23,7 @@ The audit ran on commit `aa4657d` on 8 October 2026 and reported 174 findings. E
 | 142 leaked secrets in `releases/*.apk.json` and `verification/` | Not secrets. These lines are SHA-256 checksums of source files in build manifests, and the public key fingerprints of the release signing certificate. Nothing was exposed, so no key was rotated. The files stay because the release notes in `docs/` link to them as evidence. |
 | `sharp` 0.34.5 advisories | Fixed. Updated to 0.35.5. It is a build-time image tool and is not part of the app. |
 | `stream-json` and `uuid` advisories in the server | Not reachable. Both arrive through `@solana/web3.js` 1.x via `jayson`. The server does not use the affected stream-json filters or uuid v3, v5 or v6 with a buffer. The only fix is web3.js 3, a breaking upgrade that is tracked separately. |
-| Other server dependencies | Fixed. `fastify` is updated to 5.12.5, which also brings patched `fast-uri` and `ip-address`. |
+| Other server dependencies | Fixed. `fastify` is updated to 5.12.5, and `fast-uri` and `ip-address` to their patched versions. |
 | `android:allowBackup` is true | Fixed. Backup is now off in `app.json` and the Android manifest. |
 | Docker base image pulled by tag | Fixed. `Dockerfile.api` pins `node:22-bookworm-slim` by digest. |
 | Data written into a page as HTML | Not shipped. These are internal design review pages in `design/visual-v2/`. Report data is now escaped when it loads; the remaining arrays are written by hand inside the page. |
