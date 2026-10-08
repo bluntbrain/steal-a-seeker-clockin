@@ -21,7 +21,7 @@ export default function MissionBriefing({entry,available,onBack,onPlay}:{entry:C
  return <View testID="campaign-briefing" style={s.screen}>
   <View style={s.heading}><Pressable accessibilityRole="button" accessibilityLabel="Back to district map" onPress={onBack} style={s.back}><Text style={s.backArrow}>‹</Text></Pressable><View style={s.headingText}><Text style={s.eyebrow}>LEVEL {String(entry.number).padStart(2,'0')}{entry.boss?' · BOSS':''}</Text><Text accessibilityRole="header" numberOfLines={1} adjustsFontSizeToFit minimumFontScale={.75} style={s.title}>{level.title.toUpperCase()}</Text></View></View>
   <View style={s.scene} onLayout={event=>{const {width,height}=event.nativeEvent.layout;setArea(old=>old.width===width&&old.height===height?old:{width,height});}}>
-   {area.width>0&&area.height>0&&<View testID="mission-preview" style={s.preview}><MissionPreview mission={entry.mission} definition={level} size={size}/></View>}
+   {area.width>0&&area.height>0&&<View testID="mission-preview" style={s.preview}><MissionPreview key={entry.key} mission={entry.mission} definition={level} size={size}/></View>}
   </View>
   <View style={s.details}>
    <View style={s.stats}><View style={s.stat}><StatIcon kind="guards"/><View><Text style={s.value}>{initial}</Text><Text style={s.label}>Patrol guards</Text></View></View><View style={s.stat}><StatIcon kind="clock"/><View><Text style={s.value}>{target}</Text><Text style={s.label}>Target time</Text></View></View></View>
