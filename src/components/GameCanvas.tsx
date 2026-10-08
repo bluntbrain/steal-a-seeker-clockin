@@ -27,7 +27,7 @@ import type {Camera} from '../camera/geometry';
 import CombatLayer from './CombatLayer';
 import EncounterFloor from './EncounterFloor';
 import {GateAsset,SwitchAsset,PowerCable} from './GateMechanism';
-type Props={wallStyle?:WallStyle;onReady?:()=>void;onProgress?:(progress:number)=>void;onLoadError?:()=>void;camera?:SharedValue<Camera>;size:number;height?:number;input:SharedValue<Input>;game:SharedValue<GameState>;alpha:SharedValue<number>;clock:SharedValue<number>;level:LevelDefinition;appearance?:{outfit?:string;trail?:string;reducedEffects?:boolean}};
+type Props={wallStyle?:WallStyle;onReady?:()=>void;onSceneDrawn?:()=>void;onProgress?:(progress:number)=>void;onLoadError?:()=>void;camera?:SharedValue<Camera>;size:number;height?:number;input:SharedValue<Input>;game:SharedValue<GameState>;alpha:SharedValue<number>;clock:SharedValue<number>;level:LevelDefinition;appearance?:{outfit?:string;trail?:string;reducedEffects?:boolean}};
 function DecoyLayer({game,input,reduced}:{game:SharedValue<GameState>;input:SharedValue<Input>;reduced:boolean}){
  const landing=useDerivedValue(()=>decoyLanding(game.value,input.value));
  const aim=useDerivedValue(()=>{const p=Skia.Path.Make();p.moveTo(game.value.x,game.value.y);p.lineTo(landing.value.x,landing.value.y);return p;});
@@ -43,7 +43,7 @@ function DecoyLayer({game,input,reduced}:{game:SharedValue<GameState>;input:Shar
  </>;
 }
 const TOP_FRAMES=topdownFrames as {name:string;x:number;y:number;width:number;height:number}[];
-export default memo(function GameCanvas({camera,size,height=size*20/12,input,game,alpha,clock,level,appearance={},onReady,onProgress,onLoadError,wallStyle=currentWallStyle()}:Props){
+export default memo(function GameCanvas({camera,size,height=size*20/12,input,game,alpha,clock,level,appearance={},onReady,onSceneDrawn,onProgress,onLoadError,wallStyle=currentWallStyle()}:Props){
  const cameraTransform=useDerivedValue(()=>{const c=camera?.value??{x:0,y:0,zoom:1},scale=size/12*c.zoom;return [{translateX:-c.x*scale},{translateY:-c.y*scale},{scale}];});
  const guardOrder=useMemo(()=>level.patrols.map((_,i)=>i).sort((a,b)=>Number(!!level.patrols[a]!.boss)-Number(!!level.patrols[b]!.boss)),[level]);
  const district=zoneFor(level),environment=environmentFor(level);
@@ -71,6 +71,10 @@ export default memo(function GameCanvas({camera,size,height=size*20/12,input,gam
  const requiredImages=[wallTexture,floor,phones,droneSprite,guardSprite,heavySprite,defeatSprite,lootCoin,sprite,...(bossId?[bossSprite,bossWalk,bossDefeat]:[])];
  const decodedCount=requiredImages.filter(Boolean).length,requiredCount=requiredImages.length;
  useEffect(()=>{onProgress?.(.9*decodedCount/requiredCount);},[decodedCount,requiredCount,onProgress]);
+ // the sheets a still frame shows. a preview can appear once these decode; the knockout and coin sheets, the largest
+ // files, only matter once play starts
+ const sceneDrawn=!!(wallTexture&&floor&&phones&&sprite&&droneSprite&&guardSprite&&heavySprite&&(!bossId||bossSprite));
+ useEffect(()=>{if(sceneDrawn)onSceneDrawn?.();},[sceneDrawn,onSceneDrawn]);
  // Each scene is keyed by the parent. Never acknowledge a previous district's
  // retained image while a new source is decoding. Let the new canvas paint first.
  useEffect(()=>{
