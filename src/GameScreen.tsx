@@ -3,9 +3,8 @@ import BossEntrance from './components/BossEntrance';
 import LaunchSplash from './components/LaunchSplash';
 import {exitWindowSeconds} from './controls/exit-window';
 import TutorialHand from './components/TutorialHand';
-import MissionIntro from './components/MissionIntro';
 import MissionChaseLoader,{warmMissionLoader} from './components/MissionChaseLoader';
-import {campaignLesson,publishedLesson} from './onboarding/mission-lessons';
+import {missionHint} from './onboarding/mission-lessons';
 import {authoredEntry,campaignEntries,nextEntry,type CampaignEntry} from './campaign/levels';
 import {loadPublishedLevels,publishedLevels} from './campaign/client';
 import {HapticPressable as Pressable} from './feedback/HapticPressable';
@@ -89,7 +88,6 @@ function WalletGame(){
 }
 export function Game({onSnapshot}:{onSnapshot?:(state:GameState)=>void}){
  const trial=useTrial(),testMission=localTestMission();
- const [introMission,setIntroMission]=useState<CampaignEntry|null>(null);
  const [rewardsOpen,setRewardsOpen]=useState(false),[returnHome,setReturnHome]=useState(false);
  const closeOverlay=(close:(open:boolean)=>void)=>{close(false);if(returnHome){setHideoutOpen(true);setReturnHome(false);}};
  const startMission=testMission??'practice',startEntry=localTestEntry()??authoredEntry(startMission);
@@ -129,13 +127,13 @@ export function Game({onSnapshot}:{onSnapshot?:(state:GameState)=>void}){
  const availableHeight=Math.max(240,height-insets.top-insets.bottom-(combatMode?0:48));
  const size=fullViewport?width-2:Math.max(144,Math.min(width-16,(height-insets.top-insets.bottom-(combatMode?16:174))*.6,480));
  const boardHeight=fullViewport?availableHeight-2:size*20/12;
- const renderGameSurface=!introMission&&!hideoutOpen&&!walletOpen&&!settingsOpen&&!rewardsOpen&&!economy.checkoutOpen;
+ const renderGameSurface=!hideoutOpen&&!walletOpen&&!settingsOpen&&!rewardsOpen&&!economy.checkoutOpen;
  const camera=useFollowCamera(game,alpha,!fullViewport,boardHeight*12/size,renderGameSurface&&!paused);
  const worldOverlayStyle=useAnimatedStyle(()=>{const c=camera.value,scale=size/12*c.zoom;return {transform:[{translateX:(c.zoom-1)*size/2-c.x*scale},{translateY:(c.zoom-1)*boardHeight/2-c.y*scale},{scale:c.zoom}]};});
  const damagePulse=useSharedValue(0);
  const showDamage=useCallback(()=>{damagePulse.value=settingsRef.current.reducedEffects?.45:1;damagePulse.value=withTiming(0,{duration:settingsRef.current.reducedEffects?160:280});},[damagePulse,haptic]);
  const showGameplayHeader=paused||hud.status!=='playing';
- const gameplayVisible=renderGameSurface&&!bossEntrance&&!introMission&&!sceneLoading&&!paused&&!hideoutOpen&&!walletOpen&&!mapOpen&&!settingsOpen&&!rewardsOpen;
+ const gameplayVisible=renderGameSurface&&!bossEntrance&&!sceneLoading&&!paused&&!hideoutOpen&&!walletOpen&&!mapOpen&&!settingsOpen&&!rewardsOpen;
  useLootAudio(game,clock,settings.sound&&gameplayVisible,settings.volume);
  useCombatAudio(hud,settings.sound&&gameplayVisible,settings.volume,showDamage,gameplayVisible);
  useEffect(()=>{if(!gameplayVisible||hud.ticks===0)damagePulse.value=0;},[gameplayVisible,hud.ticks===0,damagePulse]);
@@ -258,13 +256,14 @@ export function Game({onSnapshot}:{onSnapshot?:(state:GameState)=>void}){
  const restart=useCallback((next:CampaignEntry=entryRef.current)=>{if(trial.active){trial.finish();return;}sceneReady.value=false;suspended.value=true;pendingTap.value=null;previousTap.value=null;tapElapsed.value=TAP_INTERVAL_MS;simulationEpoch.value=++sceneEpoch.current;setSceneVersion(sceneEpoch.current);setSceneLoading(true);setSceneProgress(0);setBossEntrance(!!next.boss);setSceneError('');recording.value=[];setCompletedReplay(undefined);rewardEpoch.current++;setEarnedNotice('');setCreditReward({amount:null});setRewardClaimed(false);setAutoClaim(false);setRewardRetry(0);connectClaimPending.current=false;recorded.current=false;setMission(next.mission);setEntry(next);levelRef.current=next.definition;const fresh=(next.key==='practice'?guide.start('practice'):null)??initialState(next.mission,combatMode?next.definition:undefined);game.value=fresh;input.value=idleInput();accumulator.value=0;alpha.value=0;clock.value=0;sampleIndex.value=0;sampleCount.value=0;frameTotal.value=0;slowTotal.value=0;reportClock.value=0;hudClock.value=0;setHud(fresh);latest.current=fresh;suspended.value=false;setPaused(false);setStats(zeroStats);},[game,input,accumulator,alpha,clock,samples,frameTotal,slowTotal,reportClock,hudClock,suspended,recording,trial,guide.start,combatMode,sceneReady,pendingTap,previousTap,tapElapsed,simulationEpoch]);
  // Explicit exits must open the map even when Hideout remembers a briefing or store tab.
  const backToMissions=()=>{pause(true);economy.setTab('map');setMissionMapRequest(n=>n+1);setHideoutOpen(true);};
- const introduceMission=(next:CampaignEntry)=>{if(!next.playable)return;if(testMission){restart(next);return;}pause(true);setHideoutOpen(false);setIntroMission(next);};
+ // a tapped mission starts at once: the loader shows its hint, bosses get their entrance, then play
+ const introduceMission=(next:CampaignEntry)=>{if(!next.playable)return;setHideoutOpen(false);restart(next);};
  useEffect(()=>{const subscription=AppState.addEventListener('change',state=>{if(state!=='active'&&!PILOT_RUN){finaleAudio.pause();objectiveAudio.pause();if(game.value.status==='playing')pause(true);}});return()=>subscription.remove();},[pause,game,finaleAudio,objectiveAudio]);
  useEffect(()=>{
    if(Platform.OS!=='web')return;
    const keys=new Set<string>();
    const sync=()=>{if(combatMode)return;const x=Number(keys.has('d')||keys.has('arrowright'))-Number(keys.has('a')||keys.has('arrowleft'));const y=Number(keys.has('s')||keys.has('arrowdown'))-Number(keys.has('w')||keys.has('arrowup'));input.modify(v=>{v.x=x;v.y=y;v.interact=keys.has('e');return v;});};
-   const down=(e:KeyboardEvent)=>{const k=e.key.toLowerCase();if(introMission||walletOpen||hideoutOpen||mapOpen||settingsOpen||rewardsOpen)return;if(['w','a','s','d','arrowup','arrowdown','arrowleft','arrowright','e',' ','escape','r','q'].includes(k))e.preventDefault();keys.add(k);sync();if(!combatMode&&k===' '&&!e.repeat)input.modify(v=>{v.dash++;return v;});if(!combatMode&&k==='q'&&!e.repeat)input.modify(v=>{v.tool=(v.tool??0)+1;return v;});if(k==='escape'&&!e.repeat&&game.value.status==='playing')pause(!suspended.value);if(k==='r'&&!e.repeat){keys.clear();restart();}};
+   const down=(e:KeyboardEvent)=>{const k=e.key.toLowerCase();if(walletOpen||hideoutOpen||mapOpen||settingsOpen||rewardsOpen)return;if(['w','a','s','d','arrowup','arrowdown','arrowleft','arrowright','e',' ','escape','r','q'].includes(k))e.preventDefault();keys.add(k);sync();if(!combatMode&&k===' '&&!e.repeat)input.modify(v=>{v.dash++;return v;});if(!combatMode&&k==='q'&&!e.repeat)input.modify(v=>{v.tool=(v.tool??0)+1;return v;});if(k==='escape'&&!e.repeat&&game.value.status==='playing')pause(!suspended.value);if(k==='r'&&!e.repeat){keys.clear();restart();}};
    const up=(e:KeyboardEvent)=>{keys.delete(e.key.toLowerCase());sync();};
    const blur=()=>{keys.clear();if(!PILOT_RUN&&game.value.status==='playing')pause(true);};
    window.addEventListener('keydown',down);window.addEventListener('keyup',up);window.addEventListener('blur',blur);
@@ -274,7 +273,7 @@ export function Game({onSnapshot}:{onSnapshot?:(state:GameState)=>void}){
     // a pilot taps here in world units: same queue, same duplicate rule, same rules as a finger. nothing else moves the courier
     get suspended(){return suspended.value;},tap:(x:number,y:number)=>{if(suspended.value||!sceneReady.value||!game.value.combat||game.value.status!=='playing')return false;const tap={x:Math.round(x*100)/100,y:Math.round(y*100)/100,at:Date.now()};if(isDuplicateTap(previousTap.value,tap))return false;previousTap.value=tap;pendingTap.value=tap;return true;}};
    return()=>{window.removeEventListener('keydown',down);window.removeEventListener('keyup',up);window.removeEventListener('blur',blur);document.removeEventListener('visibilitychange',visibility);};
- },[input,pause,restart,suspended,recording,introMission,walletOpen,hideoutOpen,mapOpen,settingsOpen,rewardsOpen,sceneReady,pendingTap,previousTap]);
+ },[input,pause,restart,suspended,recording,walletOpen,hideoutOpen,mapOpen,settingsOpen,rewardsOpen,sceneReady,pendingTap,previousTap]);
  const teachingTarget=guideTarget(guide.stage,hud);
  const tapBoard=useMemo(()=>Gesture.Tap().maxDuration(650).onBegin(e=>{
   'worklet';if(suspended.value||!sceneReady.value||!game.value.combat||game.value.status!=='playing')return;
@@ -398,15 +397,14 @@ export function Game({onSnapshot}:{onSnapshot?:(state:GameState)=>void}){
   stats={!finaleVisible&&hud.status==='won'&&!paused?`${time(hud.elapsed)} · ${hud.battery}% ${combatMode?'health':'charge'} · ${hud.score.toLocaleString()} pts`:undefined}
   stars={!finaleVisible&&hud.status==='won'&&!paused?'★'.repeat(starsFor(hud))+'☆'.repeat(3-starsFor(hud)):undefined}
   primary={finaleVisible?{label:'Share card ↗',accessibilityLabel:'Share campaign completion card on X',disabled:!shareReady,onPress:()=>void shareAction.current?.()}:{label:trial.active&&!paused?'View campaign pass':paused?'Resume':hud.status==='won'?(nextMission?'Next mission ↗':'Missions'):'Retry ↗',accessibilityLabel:trial.active&&!paused?'Finish free trial':paused?'Resume run':hud.status==='won'?(nextMission?'View next mission':'View missions'):'Retry level',disabled:false,spinner:!paused&&!trial.active,onPress:()=>trial.active&&!paused?trial.finish():paused?pause(false):hud.status==='won'?(nextMission?introduceMission(nextMission):backToMissions()):restart()}}
-  secondary={trial.active?undefined:paused?{label:'Restart',accessibilityLabel:'Restart level',spinner:true,onPress:()=>restart()}:{label:hud.status==='won'?'Replay':'Back to missions',accessibilityLabel:hud.status==='won'?'Retry level':'View missions',spinner:true,onPress:()=>hud.status==='won'?restart():backToMissions()}}
+  secondary={trial.active||(!paused&&hud.status==='won')?undefined:paused?{label:'Restart',accessibilityLabel:'Restart level',spinner:true,onPress:()=>restart()}:{label:'Back to missions',accessibilityLabel:'View missions',spinner:true,onPress:backToMissions}}
   utility={trial.active?paused?{label:'Exit trial',onPress:()=>trial.finish()}:undefined:(paused||hud.status==='won')?{label:'Back to missions',onPress:backToMissions}:undefined}
  >{finaleVisible&&<CompletionCard data={completionData} reduced={!!settings.reducedEffects} registerShare={registerShare}/>} {paused&&<Pressable accessibilityRole="button" accessibilityLabel="Toggle frame statistics" onPress={()=>setDetails(!details)}><Text style={s.stats}>{details?`${Math.round(stats.fps)} FPS · p95 ${stats.p95.toFixed(1)}ms · ${stats.slow} slow frames`:'Performance details'}</Text></Pressable>}</ResultSheet>}
  {!testMission&&!trial.active&&!guide.active&&guide.retries===0&&hud.status==='won'&&completedReplay&&!paused&&<View style={{position:'absolute',bottom:insets.bottom+3,zIndex:46}}><CampaignSubmission state={hud} replay={completedReplay} target={entry.number>12?{level:entry.number,rulesHash:entry.rulesHash}:{mission:entry.mission}} quiet retrySignal={rewardRetry} onReward={account.preview?undefined:rewardResolved}/></View>}
  {claimVisible&&<CreditClaim requiresWallet={!account.preview&&!account.wallet&&guide.retries===0} connecting={connectingClaim} onConnect={connectToClaim} autoClaim={autoClaim} reward={creditReward} balance={economy.balance} onRetry={creditReward.amount===null?(account.preview?saveLocalReward:()=>{rewardResolved(null);setRewardRetry(n=>n+1);}):undefined} stars={starsFor(hud)} mission={level.title} onDone={()=>setRewardClaimed(true)}/>}
- {introMission&&<MissionIntro lesson={introMission.number>12?publishedLesson(introMission):campaignLesson(introMission.mission)} onBack={()=>{setIntroMission(null);setHideoutOpen(true);}} onPlay={()=>{const next=introMission;setIntroMission(null);restart(next);}}/>}
  {entry.boss&&gameplayVisible&&<><BossHealthBand key={`health-${sceneVersion}`} boss={entry.boss} game={game}/><BossDownRibbon key={`down-${sceneVersion}`} game={game} clock={clock} reduced={!!settings.reducedEffects}/></>}
  {bossEntrance&&entry.boss&&!sceneLoading&&renderGameSurface&&!paused&&<BossEntrance key={sceneVersion} boss={entry.boss} reduced={!!settings.reducedEffects} onDone={finishBossEntrance}/>}
- {sceneLoading&&renderGameSurface&&<MissionChaseLoader key={sceneVersion} onComplete={loaderCompleted} boss={entry.boss??undefined} progress={sceneProgress} reduced={!!settings.reducedEffects} error={sceneError}
+ {sceneLoading&&renderGameSurface&&<MissionChaseLoader key={sceneVersion} onComplete={loaderCompleted} boss={entry.boss??undefined} hint={missionHint(entry)} progress={sceneProgress} reduced={!!settings.reducedEffects} error={sceneError}
   onRetry={()=>{sceneReady.value=false;simulationEpoch.value=++sceneEpoch.current;setSceneVersion(sceneEpoch.current);setSceneProgress(0);setSceneError('');}}
   onExit={backToMissions}/>}
  {finaleVisible&&<CampaignConfetti reduced={!!settings.reducedEffects}/>}

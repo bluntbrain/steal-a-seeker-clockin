@@ -28,3 +28,34 @@ export function publishedLesson(entry:CampaignEntry):MissionLesson{
  const n=String(entry.number).padStart(2,'0'),boss=entry.boss;
  return {weapon:'knife',id:entry.key,kicker:`LEVEL ${n}${boss?' · BOSS':''}`,title:boss?`${BOSS_NAMES[boss]} holds this room`:entry.title,body:entry.definition.briefing,cue:boss?'FLANK THE ARMOR → TAKE → ESCAPE':'BREAK SIGHT → TAKE → ESCAPE',edition:(entry.number-1)%12,collection:false,footer:boss?'Boss levels pay double credits. Take the Seeker and get out.':'Each clear pays credits and opens the next level on the map.',playLabel:`PLAY LEVEL ${n}  →`};
 }
+
+// one short line on the loading screen before each mission, read while the level loads. levels 1 to 12 teach the
+// mechanic they introduce; later levels rotate general tips, and bosses get their own
+const AUTHORED_HINTS=[
+ 'Tap a guard to target it and attack.',
+ 'Drones do not shoot. They alert the guards nearby.',
+ 'Crossing a laser alerts the guards nearby.',
+ 'Taking the phone raises the alarm. Plan your way out.',
+ 'Walls stop bullets. Move from cover to cover.',
+ 'Heavy guards block hits from the front. Strike from behind.',
+ 'Short routes cross lasers. Long routes stay in cover.',
+ 'Two phones this time. Bring each one to the exit.',
+ 'Hit the switch first to open the vault.',
+ 'The exit opens and closes. Wait for green.',
+ 'Break sight and change rooms to lose them.',
+ 'Taking the last phone alerts both entrances.',
+] as const;
+const GENERAL_HINTS=[
+ 'Hit an unaware guard from behind for a silent takedown.',
+ 'Stay out of the flashlight cones.',
+ 'Guards hear footsteps when you pass close by.',
+ 'Drones do not shoot. They alert the guards nearby.',
+ 'Heavy guards block hits from the front. Strike from behind.',
+ 'Spotted? Break sight. Guards search, then give up.',
+ 'Finish fast with health left for three stars.',
+] as const;
+export function missionHint(entry:Pick<CampaignEntry,'number'|'boss'>):string{
+ if(entry.number<=AUTHORED_HINTS.length)return AUTHORED_HINTS[entry.number-1]!;
+ if(entry.boss)return `${BOSS_NAMES[entry.boss]} is armoured in front. Circle round and strike from behind.`;
+ return GENERAL_HINTS[(entry.number-AUTHORED_HINTS.length-1)%GENERAL_HINTS.length]!;
+}

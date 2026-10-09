@@ -10,7 +10,9 @@ const poster=require('../../assets/mission-loading-poster-v1/poster.webp');
 let warmed:Promise<unknown>|undefined;
 export function warmMissionLoader(){return warmed??(warmed=Asset.loadAsync(poster).catch(()=>undefined));}
 /** Estimated frontend progress stays below full until the scene actually reports ready. */
-export default function MissionChaseLoader({boss,progress=0,reduced=false,error='',onRetry,onExit,onComplete}:{boss?:BossId;progress?:number;reduced?:boolean;error?:string;onRetry:()=>void;onExit:()=>void;onComplete?:()=>void}){
+// the hint needs about two seconds to read, so the loader never finishes sooner than this
+const MIN_SHOWN_MS=2000;
+export default function MissionChaseLoader({boss,hint,progress=0,reduced=false,error='',onRetry,onExit,onComplete}:{boss?:BossId;hint?:string;progress?:number;reduced?:boolean;error?:string;onRetry:()=>void;onExit:()=>void;onComplete?:()=>void}){
  const ready=Number.isFinite(progress)&&progress>=1,failed=!!error;
  const fill=useSharedValue(.04),started=useRef(Date.now()),completed=useRef(false),complete=useRef(onComplete);complete.current=onComplete;
  const finish=()=>{if(!completed.current){completed.current=true;complete.current?.();}};
@@ -18,9 +20,10 @@ export default function MissionChaseLoader({boss,progress=0,reduced=false,error=
   cancelAnimation(fill);
   if(failed)return;
   if(ready){
-   if(reduced){fill.value=1;finish();return;}
-   // Cached assets still get one short, continuous fill; slow loads finish promptly.
-   const duration=Math.max(320,1100-(Date.now()-started.current));
+   const left=MIN_SHOWN_MS-(Date.now()-started.current);
+   if(reduced){fill.value=1;if(left<=0){finish();return;}const timer=setTimeout(finish,left);return()=>clearTimeout(timer);}
+   // Cached assets still get one continuous fill that ends after the minimum; slow loads finish promptly.
+   const duration=Math.max(320,left);
    fill.value=withTiming(1,{duration,easing:Easing.inOut(Easing.quad)},done=>{if(done)runOnJS(finish)();});
   }else if(reduced){fill.value=.35;}
   else{
@@ -38,6 +41,7 @@ export default function MissionChaseLoader({boss,progress=0,reduced=false,error=
   <View style={s.center}>
    <View style={s.panel}>
     <Text accessibilityLiveRegion="polite" style={s.status}>{error||(boss?`Loading ${BOSS_NAMES[boss]}’s mission…`:'Loading mission…')}</Text>
+    {!error&&!!hint&&<Text testID="mission-loading-hint" style={s.hint}>{hint}</Text>}
     {!error&&<View testID="mission-loading-progress" accessibilityRole="progressbar" accessibilityLabel="Loading mission" aria-valuemin={0} aria-valuemax={100} aria-valuenow={ready?100:undefined} style={s.track}>
      <Animated.View style={[s.fill,fillStyle]}><View style={s.highlight}/></Animated.View>
     </View>}
@@ -51,6 +55,7 @@ const s=StyleSheet.create({
  center:{...StyleSheet.absoluteFillObject,justifyContent:'center',alignItems:'center',paddingHorizontal:32},
  panel:{width:'100%',maxWidth:290,paddingHorizontal:14,paddingVertical:18,borderRadius:20,backgroundColor:'#0C1812E8',gap:18},
  status:{fontSize:16,lineHeight:23,fontWeight:'700',letterSpacing:.3,color:'#F0E9D9',textAlign:'center'},
+ hint:{fontSize:15,lineHeight:21,fontWeight:'600',color:'#A8E3CC',textAlign:'center',marginTop:-6},
  track:{height:12,borderRadius:6,overflow:'hidden',backgroundColor:'#203E33',borderWidth:1,borderColor:'#608E7D'},
  fill:{height:'100%',borderRadius:5,backgroundColor:'#A8E3CC',overflow:'hidden'},
  highlight:{position:'absolute',top:1,left:3,right:3,height:2,borderRadius:1,backgroundColor:'#EDF8DB'},
