@@ -33,7 +33,7 @@ const atlases={
 };
 // strict top-down sheets for play; costumes without their own sheet fall back to the default until generated
 const topdown:Partial<Record<string,number>>={
- 'default':require('../../assets/courier-topdown-v2/default.webp'),
+ 'default':require('../../assets/courier-topdown-v3/default.webp'),
  'frost-runner':require('../../assets/courier-topdown-v2/frost-runner.webp'),
  'night-courier':require('../../assets/courier-topdown-v2/night-courier.webp'),
  'circuit-scout':require('../../assets/courier-topdown-v2/circuit-scout.webp'),
@@ -41,6 +41,8 @@ const topdown:Partial<Record<string,number>>={
  'ghost-signal':require('../../assets/courier-topdown-v2/ghost-signal.webp'),
 };
 export const topdownAtlas=(id?:string)=>topdown[costumeFor(id).asset]??topdown.default!;
+// The default sheet includes phone-carrying poses. Unavailable skins already fall back to it.
+export const topdownHasCarry=(id?:string)=>costumeFor(id).asset==='default'||!topdown[costumeFor(id).asset];
 export const costumePortrait=(id?:string)=>portraits[costumeFor(id).asset];
 export const bossPortrait=(boss:string)=>portraits[`solana-${boss}` as keyof typeof portraits];
 export const costumeAtlas=(id?:string)=>atlases[costumeFor(id).asset];

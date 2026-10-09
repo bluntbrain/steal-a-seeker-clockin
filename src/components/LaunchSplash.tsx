@@ -3,7 +3,7 @@ import {ActivityIndicator,ImageBackground,Platform,Pressable,StyleSheet,Text,Vie
 import {Asset} from 'expo-asset';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 const ART=require('../../assets/splash-v3/heist.webp');
-const BOOT_ASSETS=[ART,require('../../assets/loot-v2/coin-spin.png'),require('../../assets/defeats-v2/robots.webp'),require('../../assets/melee-v2/default-atlas.webp'),require('../../assets/drones-v2/scout.webp'),require('../../assets/guards-v2/patrol.webp'),require('../../assets/guards-v2/heavy.webp'),require('../../assets/world-v3/floor.webp'),require('../../assets/walls-v5/warehouse-cap.jpg'),require('../../assets/world-v3/phones.webp')];
+const BOOT_ASSETS=[ART,require('../../assets/loot-v2/coin-spin.png'),require('../../assets/defeats-v2/robots.webp'),require('../../assets/melee-v2/default-atlas.webp'),require('../../assets/drones-v2/scout.webp'),require('../../assets/guards-v2/patrol.webp'),require('../../assets/guards-v2/heavy.webp'),require('../../assets/world-v3/floor.webp'),require('../../assets/walls-v6/warehouse-cap.jpg'),require('../../assets/world-v3/phones.webp')];
 export default function LaunchSplash({children}:{children:ReactNode}){
  const [complete,setComplete]=useState(0),[done,setDone]=useState(false),[error,setError]=useState(false),[retry,setRetry]=useState(0);
  const insets=useSafeAreaInsets(),{width,height}=useWindowDimensions();

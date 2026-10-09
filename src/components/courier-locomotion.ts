@@ -8,19 +8,20 @@ export function courierMoving(s: Pick<GameState,'x'|'y'|'px'|'py'|'status'>) {
  'worklet';
  return s.status==='playing' && Math.hypot(s.x-s.px,s.y-s.py)>.0001;
 }
-export function courierTopFrame(s: CourierPoseState) {
+export function courierTopFrame(s: CourierPoseState,bakedCarry=false) {
  'worklet';
  const melee=s.combat?.melee;
- if(melee&&s.status==='playing') {const pose=attackPose(s.ticks-melee.started);if(pose>=0)return 4+pose;}
- if(!courierMoving(s))return s.carrying?7:0;
+ const offset=bakedCarry&&s.carrying?8:0;
+ if(melee&&s.status==='playing') {const pose=attackPose(s.ticks-melee.started);if(pose>=0)return offset+4+pose;}
+ if(!courierMoving(s))return offset|| (s.carrying?7:0);
  // Both loaded and empty-handed couriers use the same distance-driven gait.
  const phase=Math.floor(s.walked*2/FOOTSTEP_STRIDE+1e-8)%4;
- return phase===0?1:phase===2?3:2;
+ return offset+(phase===0?1:phase===2?3:2);
 }
-/** The idle carry sprite contains its phone. Other poses need the live edition prop. */
+/** Loaded v3 frames contain the phone. Older costume sheets still use the edition prop while moving. */
 export function courierNeedsPhone(carrying:boolean,frame:number) {
  'worklet';
- return carrying&&frame!==7;
+ return carrying&&frame!==7&&frame<8;
 }
 export function courierPhoneHand(frame:number) {
  'worklet';

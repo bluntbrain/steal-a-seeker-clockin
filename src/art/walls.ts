@@ -6,9 +6,10 @@ import type {Box} from '../game/level';
 // centre tile at the corner scale, so a long wall reads as one continuous slab
 // instead of a row of framed modules.
 const FRAME=.10;
-export function drawWallPanels(canvas:SkCanvas,image:SkImage,box:Box){
+export function drawWallPanels(canvas:SkCanvas,image:SkImage,box:Box,raised=false){
  const paint=Skia.Paint();paint.setAntiAlias(true);paint.setColor(Skia.Color('#FFFFFF'));
- const left=box.x+.025,top=box.y+.025,width=box.w-.05,height=box.h-.19;
+ // Raised walls already have a separate front face; only flat walls reserve a lip here.
+ const left=box.x+.025,top=box.y+.025,width=box.w-.05,height=box.h-(raised?.05:.19);
  const iw=image.width(),ih=image.height();
  const edge=Math.min(.2,width*.25,height*.25),tile=edge*(1-2*FRAME)/FRAME;
  const sx=[0,iw*FRAME,iw*(1-FRAME),iw],sy=[0,ih*FRAME,ih*(1-FRAME),ih];

@@ -1,0 +1,24 @@
+{
+  "tool": "Built-in imagegen",
+  "date": "2026-10-10",
+  "prompts": [
+    {
+      "name": "warehouse",
+      "prompt": "Use case: stylized-concept. Asset type: production 2D top-down mobile game nine-slice WALL CAP texture. Generate ONE square 1024x1024 opaque texture, wall top fills the entire square to the image edges. Warm burnt terracotta brick masonry, light copper clay bricks, tiny pale mortar lines; chunky charcoal steel perimeter edging with evenly spaced rivets. Distinct from dark grey floor. Brick color #BC8058. Use first reference ONLY for material inspiration. Strict orthographic top view, no perspective, no side faces, no cast shadow. Detailed hand-painted game realism with readable broad surfaces and restrained fine texture. The outer 10 percent on all four sides is a continuous raised dark metal rim, centre 80 percent is the repeating material. Narrow bevel highlights, tiny bolts on perimeter only. Centre material must tile cleanly without a central emblem. NO crates, props, characters, UI, words, letters, numbers, warning tape, logo, blood, floor, background, margins, transparent corner or checkerboard. The game engine supplies the side faces and shadows separately. This is an original game material, not a screenshot."
+    },
+    {
+      "name": "rooftop",
+      "prompt": "Use case: stylized-concept. Asset type: production 2D top-down mobile game nine-slice WALL CAP texture. Generate ONE square 1024x1024 opaque texture, wall top fills the entire square to the image edges. Warm ivory sandstone concrete, fine subtle weathering and shallow panel joints; chunky graphite steel perimeter edging with evenly spaced rivets. Cream limestone color #CEBD92 contrasts strongly with cool slate-blue floor. Original rooftop parapet texture. Strict orthographic top view, no perspective, no side faces, no cast shadow. Detailed hand-painted game realism with readable broad surfaces and restrained fine texture. The outer 10 percent on all four sides is a continuous raised dark metal rim, centre 80 percent is the repeating material. Narrow bevel highlights, tiny bolts on perimeter only. Centre material must tile cleanly without a central emblem. NO crates, props, characters, UI, words, letters, numbers, warning tape, logo, blood, floor, background, margins, transparent corner or checkerboard. The game engine supplies the side faces and shadows separately. This is an original game material, not a screenshot."
+    },
+    {
+      "name": "powerworks",
+      "prompt": "Use case: stylized-concept. Asset type: production 2D top-down mobile game nine-slice WALL CAP texture. Generate ONE square 1024x1024 opaque texture, wall top fills the entire square to the image edges. Medium muted lavender purple enamel steel top, subtle scuffs and shallow large rectangular plate seams; chunky navy graphite steel perimeter edging with evenly spaced rivets. Purple #84729F contrasts against pale grey floor. Original power-station barrier texture. Strict orthographic top view, no perspective, no side faces, no cast shadow. Detailed hand-painted game realism with readable broad surfaces and restrained fine texture. The outer 10 percent on all four sides is a continuous raised dark metal rim, centre 80 percent is the repeating material. Narrow bevel highlights, tiny bolts on perimeter only. Centre material must tile cleanly without a central emblem. NO crates, props, characters, UI, words, letters, numbers, warning tape, logo, blood, floor, background, margins, transparent corner or checkerboard. The game engine supplies the side faces and shadows separately. This is an original game material, not a screenshot."
+    }
+  ],
+  "sourceFiles": {
+    "warehouse": "exec-a2907615-a33f-4cff-a492-b7655a8c794b.png",
+    "rooftop": "exec-72ef3101-096d-4ed9-bf08-c154e6f11896.png",
+    "vault": "exec-685a742f-e98b-4617-98e9-dda024f5634b.png"
+  },
+  "export": "Resized to 768x768 JPEG, quality 92. No recoloring or retouching."
+}

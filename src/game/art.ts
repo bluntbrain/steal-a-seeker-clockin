@@ -4,6 +4,8 @@ import {zoneFor} from './environment';
 import {drawWallPanels} from '../art/walls';
 import {interiorWalls,type WallStyle} from '../art/wall-depth';
 import {drawRaisedWalls} from '../art/wall-depth-art';
+import {drawCargo,drawHazardBand,drawRoomRim} from '../art/industrial-props';
+import {wallShadowX} from '../art/wall-depth';
 const palette={ floor:'#20292c', line:'#293337', mint:'#cfe6e4', edge:'#465054' };
 // Code-native environment art is recorded once, not recreated on each animation frame.
 export function makeWarehouse(drawFloor=true,level:LevelDefinition=LEVEL,wallTexture?:SkImage|null,wallStyle:WallStyle='flat'){
@@ -96,21 +98,13 @@ export function makeWarehouse(drawFloor=true,level:LevelDefinition=LEVEL,wallTex
         if(power&&b.h>b.w){line(b.x+b.w*.4,b.y+.1,b.x+b.w*.4,b.y+b.h-.1,'#9B8AAE',.07);line(b.x+b.w*.7,b.y+.1,b.x+b.w*.7,b.y+b.h-.1,'#798C83',.06);}
         continue;
       }
-      round(b.x+.11,b.y+.2,b.w,b.h,.08,'#11191bc9');
-      round(b.x,b.y,b.w,b.h,.07,'#0d1417');
-      round(b.x+.04,b.y+.04,b.w-.08,b.h-.20,.06,'#465155');
-      round(b.x+.11,b.y+.10,b.w-.22,b.h-.36,.045,b.kind==='rack'?'#293438':'#354045');
-      rect(b.x+.11,b.y+b.h-.3,b.w-.22,.11,'#20292d');
-      line(b.x+.15,b.y+.12,b.x+b.w-.15,b.y+.12,'#77837f',.04);
-      if(b.kind==='crate'){
-        rect(b.x+.25,b.y+.2,.11,b.h-.7,'#475256');rect(b.x+b.w-.37,b.y+.2,.11,b.h-.7,'#475256');
-        line(b.x+.48,b.y+.38,b.x+b.w-.48,b.y+b.h-.55,'#222d31',.055);
-        line(b.x+b.w-.48,b.y+.38,b.x+.48,b.y+b.h-.55,'#222d31',.055);
-        rect(b.x+b.w/2-.24,b.y+b.h-.27,.48,.065,'#CFE6E4');
-        for(const xx of [b.x+.05,b.x+b.w-.26]){rect(xx,b.y+.04,.21,.19,'#CBD4D4');rect(xx,b.y+b.h-.36,.21,.17,'#9AA9AF');}
-      }else{
-        for(let y=b.y+.36;y<b.y+b.h-.4;y+=.5){rect(b.x+.22,y,b.w-.44,.25,'#121d21');line(b.x+.25,y+.03,b.x+b.w-.25,y+.03,'#56625f',.02);rect(b.x+.28,y+.08,.055,.055,'#8aac9d');}
-      }
+      if(b.kind==='crate'){drawCargo(c,b,district,index);continue;}
+      round(b.x+wallShadowX(b.x+b.w/2),b.y+.2,b.w,b.h,.08,'#11191b99');
+      round(b.x,b.y,b.w,b.h,.07,'#0D2025');
+      round(b.x+.04,b.y+.04,b.w-.08,b.h-.20,.06,rooftop?'#6D929E':power?'#95624D':'#4B806E');
+      rect(b.x+.08,b.y+b.h-.18,b.w-.16,.11,'#213635');
+      line(b.x+.12,b.y+.08,b.x+b.w-.12,b.y+.08,'#ABC8AE',.035);
+      for(let y=b.y+.36;y<b.y+b.h-.4;y+=.5){rect(b.x+.22,y,b.w-.44,.25,'#213B3B');line(b.x+.25,y+.03,b.x+b.w-.25,y+.03,'#8EA896',.025);rect(b.x+.28,y+.08,.055,.055,'#8aac9d');}
       if(rooftop){
         // HVAC housings, fan grills and aerial equipment use the same collider footprint.
         round(b.x+.12,b.y+.12,b.w-.24,b.h-.42,.08,index%2?'#546971':'#AABBB8');
@@ -132,17 +126,8 @@ export function makeWarehouse(drawFloor=true,level:LevelDefinition=LEVEL,wallTex
         const cols=Math.max(1,Math.floor(b.w/.5));
         for(let col=0;col<cols;col++)for(let y=b.y+.3;y<b.y+b.h-.4;y+=.34){const x=b.x+.21+col*(b.w-.4)/cols;rect(x,y,(b.w-.4)/cols-.07,.19,'#3D485C');rect(x+.035,y+.04,.04,.04,(Math.floor(y*3)+col)%3?'#B7A2D7':'#A7E0D2');line(x+.12,y+.13,x+(b.w-.4)/cols-.1,y+.13,'#17242C',.03);}
         rect(b.x+.18,b.y+b.h-.27,b.w-.36,.055,'#B397D6');
-        if((level.number===9||level.number===12)&&b.kind==='crate'){
-          const cx=b.x+b.w/2,cy=b.y+(b.h-.2)/2,r=Math.min(b.w-.3,b.h-.5)/2;
-          circle(cx,cy,r,'#8DA59F');circle(cx,cy,r*.8,'#263C43');circle(cx,cy,r*.59,level.number===12?'#B3A77E':'#8CC7B3');circle(cx,cy,r*.3,'#344E52');
-          for(let k=0;k<8;k++){const a=k*Math.PI/4;line(cx+Math.cos(a)*r*.65,cy+Math.sin(a)*r*.65,cx+Math.cos(a)*r*.92,cy+Math.sin(a)*r*.92,'#D3DBCC',.07);}
-        }
-      }else if(b.kind==='crate'){
-        // Shipping straps, paper labels and inset handles.
-        rect(b.x+b.w*.26,b.y+.12,.085,b.h-.42,'#A9B9A9');rect(b.x+b.w*.73,b.y+.12,.085,b.h-.42,'#7F9389');
-        round(b.x+b.w*.4,b.y+.3,b.w*.21,.3,.025,'#D5DFCA');
-        for(let j=0;j<5;j++)line(b.x+b.w*.42+j*.04,b.y+.35,b.x+b.w*.42+j*.04,b.y+.52,'#4A5D58',.018);
       }
+      if(b.w>.65&&b.h>.65)drawHazardBand(c,b.x+.14,b.y+b.h-.32,b.w-.28,.12);
       for(const [x,y]of [[b.x+.16,b.y+.17],[b.x+b.w-.16,b.y+.17],[b.x+.16,b.y+b.h-.35],[b.x+b.w-.16,b.y+b.h-.35]]){p.setColor(Skia.Color('#97a09a'));c.drawCircle(x!,y!,.035,p);}
     }
     if(raised.length&&wallTexture)drawRaisedWalls(c,raised,wallTexture,wallStyle,district);
@@ -159,6 +144,7 @@ export function makeWarehouse(drawFloor=true,level:LevelDefinition=LEVEL,wallTex
     round(phone.x-.51,phone.y-.34,1.02,.54,.08,'#263b39');
     rect(phone.x-.3,phone.y+.34,.6,.035,'#b8ded0');
     }
+    drawRoomRim(c,level,district);
     // Boundary lights and entrance hatch.
     for(const y of [2.8,10.8,17.7]){rect(.55,y,.08,.8,'#adc6b6');rect(11.37,y,.08,.8,'#697f72');}
     round(level.spawn.x-.85,level.spawn.y+.7,1.7,.3,.06,'#0e171b');

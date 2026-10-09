@@ -33,3 +33,16 @@ test('knife attacks keep priority over the walk cycle while carrying',()=>{
  assert.equal(courierTopFrame(attacking),4);
  assert.equal(courierNeedsPhone(true,courierTopFrame(attacking)),true);
 });
+
+
+test('new default carrying sheet uses dedicated gait and attack poses without a phone overlay',()=>{
+ const state=initialState('practice',combatLevel('practice'));assert(state.combat);
+ const carrying={...state,carrying:true,x:2,px:1.9};
+ assert.deepEqual([0,.36,.72,1.08,1.44].map(walked=>courierTopFrame({...carrying,walked},true)),[9,10,11,10,9]);
+ assert.equal(courierTopFrame({...carrying,px:2},true),8);
+ const melee={...meleeState(state),started:10,angle:0,target:0};
+ const attacking={...carrying,ticks:10,combat:{...state.combat,melee}};
+ assert.equal(courierTopFrame(attacking,true),12);
+ for(let frame=8;frame<16;frame++)assert.equal(courierNeedsPhone(true,frame),false);
+ assert.equal(courierTopFrame({...state,x:2,px:1.9,walked:0},true),1);
+});

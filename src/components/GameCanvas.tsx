@@ -16,8 +16,8 @@ import {targetPhone,decoyLanding,type GameState,type Input} from '../game/simula
 import {editionIndex} from '../game/collection';
 import phoneAtlas from '../../assets/world-v3/phones.frames.json';
 import frames from '../../assets/costumes-v4/frames.json';
-import {costumeAtlas,topdownAtlas} from './costumeAssets';
-import topdownFrames from '../../assets/courier-topdown-v2/frames.json';
+import {costumeAtlas,topdownAtlas,topdownHasCarry} from './costumeAssets';
+import topdownFrames from '../../assets/courier-topdown-v3/frames.json';
 import {costumeFrame} from '../../shared/costumes';
 import {BOSS_MOTION} from './bossMotionAssets';
 import GuardLayer from './GuardLayer';
@@ -47,7 +47,7 @@ export default memo(function GameCanvas({camera,size,height=size*20/12,input,gam
  const cameraTransform=useDerivedValue(()=>{const c=camera?.value??{x:0,y:0,zoom:1},scale=size/12*c.zoom;return [{translateX:-c.x*scale},{translateY:-c.y*scale},{scale}];});
  const guardOrder=useMemo(()=>level.patrols.map((_,i)=>i).sort((a,b)=>Number(!!level.patrols[a]!.boss)-Number(!!level.patrols[b]!.boss)),[level]);
  const district=zoneFor(level),environment=environmentFor(level);
- const wallTexture=useImage(district==='rooftops'?require('../../assets/walls-v5/rooftop-cap.jpg'):district==='powerworks'?require('../../assets/walls-v5/vault-cap.jpg'):require('../../assets/walls-v5/warehouse-cap.jpg'),onLoadError);
+ const wallTexture=useImage(district==='rooftops'?require('../../assets/walls-v6/rooftop-cap.jpg'):district==='powerworks'?require('../../assets/walls-v6/vault-cap.jpg'):require('../../assets/walls-v6/warehouse-cap.jpg'),onLoadError);
  const world=useMemo(()=>wallTexture?makeWarehouse(false,level,wallTexture,wallStyle):null,[level,wallTexture,wallStyle]);
  const wallOcclusion=useMemo(()=>makeWallOcclusion(interiorWalls(level.blockers,level.width,level.height),wallStyle),[level,wallStyle]);
  const courierClip=useDerivedValue(()=>wallActorClip(wallOcclusion,game.value.py+(game.value.y-game.value.py)*alpha.value));
@@ -90,13 +90,14 @@ export default memo(function GameCanvas({camera,size,height=size*20/12,input,gam
  // heading is presentation only: the attack angle while slashing, otherwise the movement direction; it holds while idle
  const heading=useSharedValue(-Math.PI/2);
  useAnimatedReaction(()=>{const s=game.value,m=s.combat?.melee;if(knifeMode&&m&&s.status==='playing'&&s.ticks-m.started<11)return m.angle;return Math.hypot(s.vx,s.vy)>.1?Math.atan2(s.vy,s.vx):NaN;},(angle)=>{if(!Number.isNaN(angle))heading.value=angle;},[knifeMode]);
- const topFrame=useDerivedValue(()=>courierTopFrame(game.value));
+ const bakedCarry=topdownHasCarry(appearance.outfit);
+ const topFrame=useDerivedValue(()=>courierTopFrame(game.value,bakedCarry),[bakedCarry]);
  const sprites=useDerivedValue(()=>[knifeMode?TOP_FRAMES[topFrame.value]!:actorFrames[frame.value]!]);
  const transforms=useRSXformBuffer(1,(transform)=>{
   'worklet';
-  if(knifeMode){const f=TOP_FRAMES[topFrame.value]!,scale=1.5/f.width,rot=heading.value+Math.PI/2,a=Math.cos(rot)*scale,b=Math.sin(rot)*scale,ax=f.width/2,ay=f.height/2;transform.set(a,b,x.value-ax*a+ay*b,y.value-ay*a-ax*b);return;}
+  if(knifeMode){const f=TOP_FRAMES[topFrame.value]!,scale=(bakedCarry?1.8:1.5)/f.width,rot=heading.value+Math.PI/2,a=Math.cos(rot)*scale,b=Math.sin(rot)*scale,ax=f.width/2,ay=f.height/2;transform.set(a,b,x.value-ax*a+ay*b,y.value-ay*a-ax*b);return;}
   const f=actorFrames[frame.value]!;const scale=1.62/f.height;const bob=reduced||attack.value>=0?0:Math.hypot(game.value.vx,game.value.vy)>.1?Math.abs(Math.sin(game.value.walked*11))*.045:Math.sin(clock.value*2)*.012;transform.set(scale,0,x.value-f.width*scale/2,y.value-f.height*scale+.12-bob);});
- // Only the idle carry frame has a baked-in phone; running keeps its full leg cycle.
+ // The default courier grips the phone in every carrying frame. Older skins retain their prop fallback.
  const carry=useDerivedValue(()=>(knifeMode?courierNeedsPhone(game.value.carrying,topFrame.value):game.value.carrying)?1:0);
  const target=useDerivedValue(()=>game.value.carrying||game.value.delivered>=(level.targets?.length??1)?0:1);
  const phonePosition=useDerivedValue(()=>[{translateX:targetPhone(game.value).x},{translateY:targetPhone(game.value).y}]);

@@ -2,6 +2,15 @@ import type {Box} from '../game/level';
 export type WallStyle='flat'|'subtle'|'strong';
 export function wallStyle(value?:string|null):WallStyle{return value==='flat'||value==='0'?'flat':value==='strong'?'strong':'subtle';}
 export function wallHeight(style:WallStyle){return style==='flat'?0:style==='strong'?.48:.30;}
+/** A shared projection keeps adjoining wall segments joined. Gameplay coordinates never change. */
+export function wallTopX(x:number,lift:number,width=12){return width/2+(x-width/2)*(1+lift*.20);}
+export function wallTopY(x:number,y:number,lift:number,width=12){return y-lift*(1-Math.min(1,Math.abs(x-width/2)/(width/2))*.8);}
+export function wallShadowX(x:number,width=12){return (width/2-x)/(width/2)*.70;}
+export function wallShadowY(x:number,width=12){return .24*(1-Math.min(1,Math.abs(x-width/2)/(width/2))*.85);}
+export function exposedVerticalEdges(walls:readonly Box[],side:'left'|'right'){
+ return exposedEdges(walls.map(b=>({...b,x:b.y,y:b.x,w:b.h,h:b.w})),side==='left'?'top':'bottom')
+  .map(e=>({x:e.y,y:e.x,height:e.width}));
+}
 export function interiorWalls(blockers:readonly Box[],width=12,height=20){return blockers.filter(b=>b.kind==='wall'&&b.x>0&&b.y>0&&b.x+b.w<width&&b.y+b.h<height);}
 export type WallEdge={x:number;y:number;width:number};
 /** Remove shared edges, including partial joins. Only external faces cast a rim. */
