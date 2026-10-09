@@ -40,7 +40,7 @@ export default function WallDepthLab(){
    <View style={{width:width>850?400:Math.min(420,width-48),gap:18}}>
     <Text style={{color:MUTED,fontSize:11,letterSpacing:2}}>STEAL A SEEKER / ENVIRONMENT PREVIEW</Text>
     <Text style={{color:INK,fontSize:36,fontWeight:'800'}}>Brick, cargo{'\n'}and room depth.</Text>
-    <Text style={{color:MUTED,lineHeight:23}}>New overhead courier, including phone-carrying runs. Right-wall shadows fall left; left-wall shadows fall right. Central shadows fall down.</Text>
+    <Text style={{color:MUTED,lineHeight:23}}>The courier’s head stays centred. Wide forward arms swing slowly and the feet tuck beneath the body, including phone-carrying runs. Right-wall shadows fall left; left-wall shadows fall right. Central shadows fall down.</Text>
     <View style={{flexDirection:'row',gap:8,flexWrap:'wrap'}}>{(['cone-lesson','sweep-window','power-trade'] as const).map((m,i)=>btn(['Warehouse','Rooftops','Powerworks'][i]!,mission===m,()=>setMission(m)))}</View>
     <View style={{flexDirection:'row',gap:8,flexWrap:'wrap'}}>{(['flat','subtle','strong'] as const).map(s=>btn(s==='flat'?'Flat':s==='subtle'?'Subtle depth':'Stronger depth',style===s,()=>setStyle(s)))}</View>
     <View style={{flexDirection:'row',gap:8}}>{btn('Full room',fullRoom&&!courierZoom,()=>{setFullRoom(true);setCourierZoom(false);})}{btn('Close-up',!fullRoom&&!courierZoom,()=>{setFullRoom(false);setCourierZoom(false);})}{btn('Courier zoom',courierZoom,()=>{setFullRoom(false);setCourierZoom(true);})}</View>

@@ -1,4 +1,5 @@
 import {courierTopFrame,courierNeedsPhone,courierPhoneHand} from './courier-locomotion';
+import {courierSteadyFrame} from './courier-steady';
 import DefeatLootLayer from './DefeatLootLayer';
 import {MELEE_FRAMES,meleeFrame} from './melee-presentation';
 import {knifeCombat} from '../game/melee';
@@ -18,6 +19,7 @@ import phoneAtlas from '../../assets/world-v3/phones.frames.json';
 import frames from '../../assets/costumes-v4/frames.json';
 import {costumeAtlas,topdownAtlas,topdownHasCarry} from './costumeAssets';
 import topdownFrames from '../../assets/courier-topdown-v3/frames.json';
+import steadyFrames from '../../assets/courier-topdown-v5/frames.json';
 import {costumeFrame} from '../../shared/costumes';
 import {BOSS_MOTION} from './bossMotionAssets';
 import GuardLayer from './GuardLayer';
@@ -91,14 +93,15 @@ export default memo(function GameCanvas({camera,size,height=size*20/12,input,gam
  const heading=useSharedValue(-Math.PI/2);
  useAnimatedReaction(()=>{const s=game.value,m=s.combat?.melee;if(knifeMode&&m&&s.status==='playing'&&s.ticks-m.started<11)return m.angle;return Math.hypot(s.vx,s.vy)>.1?Math.atan2(s.vy,s.vx):NaN;},(angle)=>{if(!Number.isNaN(angle))heading.value=angle;},[knifeMode]);
  const bakedCarry=topdownHasCarry(appearance.outfit);
- const topFrame=useDerivedValue(()=>courierTopFrame(game.value,bakedCarry),[bakedCarry]);
- const sprites=useDerivedValue(()=>[knifeMode?TOP_FRAMES[topFrame.value]!:actorFrames[frame.value]!]);
+ const courierFrames=bakedCarry?steadyFrames:TOP_FRAMES;
+ const topFrame=useDerivedValue(()=>bakedCarry?courierSteadyFrame(game.value,clock.value):courierTopFrame(game.value),[bakedCarry]);
+ const sprites=useDerivedValue(()=>[knifeMode?courierFrames[topFrame.value]!:actorFrames[frame.value]!],[courierFrames,knifeMode]);
  const transforms=useRSXformBuffer(1,(transform)=>{
   'worklet';
-  if(knifeMode){const f=TOP_FRAMES[topFrame.value]!,scale=(bakedCarry?1.8:1.5)/f.width,rot=heading.value+Math.PI/2,a=Math.cos(rot)*scale,b=Math.sin(rot)*scale,ax=f.width/2,ay=f.height/2;transform.set(a,b,x.value-ax*a+ay*b,y.value-ay*a-ax*b);return;}
+  if(knifeMode){const f=courierFrames[topFrame.value]!,scale=(bakedCarry?2.3:1.5)/f.width,rot=heading.value+(bakedCarry?0:Math.PI/2),a=Math.cos(rot)*scale,b=Math.sin(rot)*scale,ax=f.width/2,ay=f.height/2;transform.set(a,b,x.value-ax*a+ay*b,y.value-ay*a-ax*b);return;}
   const f=actorFrames[frame.value]!;const scale=1.62/f.height;const bob=reduced||attack.value>=0?0:Math.hypot(game.value.vx,game.value.vy)>.1?Math.abs(Math.sin(game.value.walked*11))*.045:Math.sin(clock.value*2)*.012;transform.set(scale,0,x.value-f.width*scale/2,y.value-f.height*scale+.12-bob);});
  // The default courier grips the phone in every carrying frame. Older skins retain their prop fallback.
- const carry=useDerivedValue(()=>(knifeMode?courierNeedsPhone(game.value.carrying,topFrame.value):game.value.carrying)?1:0);
+ const carry=useDerivedValue(()=>(knifeMode?!bakedCarry&&courierNeedsPhone(game.value.carrying,topFrame.value):game.value.carrying)?1:0,[knifeMode,bakedCarry]);
  const target=useDerivedValue(()=>game.value.carrying||game.value.delivered>=(level.targets?.length??1)?0:1);
  const phonePosition=useDerivedValue(()=>[{translateX:targetPhone(game.value).x},{translateY:targetPhone(game.value).y}]);
  const phoneGlow=useDerivedValue(()=>reduced?.34:.22+.22*(.5+.5*Math.sin(clock.value*2.2)));

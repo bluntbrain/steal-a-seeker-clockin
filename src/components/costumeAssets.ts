@@ -33,7 +33,7 @@ const atlases={
 };
 // strict top-down sheets for play; costumes without their own sheet fall back to the default until generated
 const topdown:Partial<Record<string,number>>={
- 'default':require('../../assets/courier-topdown-v3/default.webp'),
+ 'default':require('../../assets/courier-topdown-v5/default.webp'),
  'frost-runner':require('../../assets/courier-topdown-v2/frost-runner.webp'),
  'night-courier':require('../../assets/courier-topdown-v2/night-courier.webp'),
  'circuit-scout':require('../../assets/courier-topdown-v2/circuit-scout.webp'),
