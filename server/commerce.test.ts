@@ -23,7 +23,7 @@ const transactions=new Map<string,unknown>(),references=new Map<string,string[]>
 let chainHeight=100,chainUnavailable=false;
 const chain:PaymentChain={ready:async()=>{},verify:async(o,s)=>verifyPayment(o,s,transactions.get(s)??null),find:async r=>{if(chainUnavailable)throw new Error('RPC unavailable');return references.get(r)||[];},lifetime:async()=>({blockhash:pub(),lastValidBlockHeight:String(chainHeight+150),contextSlot:String(chainHeight+1000)}),height:async()=>chainHeight};
 let service:CommerceService,app:Awaited<ReturnType<typeof createApp>>;
-before(async()=>{assert.equal((await pool.query('SELECT current_database() AS name')).rows[0].name,'seeker_clockin_test');await migrate(pool);await pool.query('TRUNCATE skr_directory_imports,skr_domains,league_weeks,daily_manifests,campaign_level_versions,campaign_levels,wallets,auth_challenges,sessions,orders,order_attempts,payment_receipts,entitlements,transfer_receipts CASCADE');const mint=pub(),recipient=pub();const [destination]=await findAssociatedTokenPda({owner:address(recipient),mint:address(mint),tokenProgram:address(TOKEN_PROGRAM)});service=new CommerceService(pool,chain,{mint,recipient,destination,decimals:6,identityUri:'https://github.com/bluntbrain'});app=await createApp(service);});
+before(async()=>{assert.equal((await pool.query('SELECT current_database() AS name')).rows[0].name,'seeker_clockin_test');await migrate(pool);await pool.query('TRUNCATE app_opens,skr_directory_imports,skr_domains,league_weeks,daily_manifests,campaign_level_versions,campaign_levels,wallets,auth_challenges,sessions,orders,order_attempts,payment_receipts,entitlements,transfer_receipts CASCADE');const mint=pub(),recipient=pub();const [destination]=await findAssociatedTokenPda({owner:address(recipient),mint:address(mint),tokenProgram:address(TOKEN_PROGRAM)});service=new CommerceService(pool,chain,{mint,recipient,destination,decimals:6,identityUri:'https://github.com/bluntbrain'});app=await createApp(service);});
 after(async()=>{await app.close();await pool.end();});
 let testClient=0;
 async function login(){const remoteAddress=`127.0.1.${++testClient}`,keys=generateKeyPairSync('ed25519'),wallet=b58(keys.publicKey.export({type:'spki',format:'der'}).subarray(-32));const response=await app.inject({method:'POST',url:'/auth/challenge',remoteAddress,payload:{wallet}});assert.equal(response.statusCode,200);const c=response.json<SignInChallenge>(),message=createSignInMessage(c.payload),signature=sign(null,message,keys.privateKey);const payload={id:c.id,wallet,signedMessage:Buffer.from(message).toString('base64'),signature:signature.toString('base64')};const auth=await app.inject({method:'POST',url:'/auth/verify',remoteAddress,payload});assert.equal(auth.statusCode,200,auth.body);return {keys,wallet,token:auth.json().token,headers:{authorization:`Bearer ${auth.json().token}`},payload};}
@@ -637,6 +637,14 @@ test('the .skr directory copies every field from the public list and friend sear
  assert((await campaign.players('')).some(p=>p.wallet===player.wallet&&p.name==='friendb.skr'),'an empty query lists ranked players with their names');
  const api=await app.inject({method:'GET',url:'/campaign/players?query=friendb'});assert.equal(api.statusCode,200);assert.equal(api.json().players[0].wallet,player.wallet);
  assert.equal((await app.inject({method:'GET',url:'/campaign/players?query='+'x'.repeat(65)})).statusCode,400);
+});
+test('the anonymous open signal stores one row per install per day and nothing else',async()=>{
+ const install=randomUUID(),send=(body:unknown)=>app.inject({method:'POST',url:'/telemetry/open',payload:body as object});
+ assert.equal((await send({install,version:'1.1.5'})).statusCode,204);
+ assert.equal((await send({install,version:'1.1.5'})).statusCode,204,'a second open the same day is accepted');
+ const rows=(await pool.query('SELECT * FROM app_opens WHERE install_id=$1',[install])).rows;
+ assert.equal(rows.length,1,'one row per install per day');assert.deepEqual(Object.keys(rows[0]).sort(),['day','install_id','version']);
+ for(const bad of [{install:'not-a-uuid',version:'1.1.5'},{install,version:'1.1.5; drop'},{install,version:'1.1.5',wallet:'x'},{install}])assert.equal((await send(bad)).statusCode,400);
 });
 test('the game pass grants its bundle once: credits and the ghost outfit on payment, and for existing owners at boot',async()=>{
  const {PASS_BUNDLE}=await import('../shared/commerce'),{backfillPassBundle}=await import('./service');

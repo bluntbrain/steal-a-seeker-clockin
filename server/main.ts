@@ -42,6 +42,8 @@ async function main(){
  await app.listen({port:Number(process.env.PORT||8790),host:process.env.HOST||'127.0.0.1'});console.log('Steal a Seeker API ready on '+network.cluster);
  // our own copy of every .skr name for friend search: copied once into an empty table, never fetched on a request
  if(process.env.SKR_DIRECTORY_IMPORT!=='false')void importSkrDirectoryOnce(pool).then(n=>{if(n)console.log(`skr directory: ${n} names stored`);},e=>console.warn('skr directory import failed, the next boot retries: '+(e instanceof Error?e.message:String(e))));
+ // anonymous open signals are kept for a year, as the privacy page says
+ const purgeOpens=()=>pool.query("DELETE FROM app_opens WHERE day<current_date-365").catch(()=>undefined);void purgeOpens();setInterval(()=>void purgeOpens(),86400000).unref();
  // CAMPAIGN_TARGET_LEVEL publishes more levels in the background: build, solve, verify, insert, one at a time
  const target=Number(process.env.CAMPAIGN_TARGET_LEVEL);if(target>12)void publishToTarget(pool,target,message=>console.log(message)).catch(e=>console.warn('campaign publisher stopped: '+(e instanceof Error?e.message:String(e))));
 }

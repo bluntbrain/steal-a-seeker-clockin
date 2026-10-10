@@ -51,6 +51,12 @@ export async function createApp(service:CommerceService,names?:WalletNames){
  app.get('/campaign/leaderboard',async req=>{const board=await campaign.leaderboard(req.headers.authorization?(await account(req.headers.authorization)).wallet:undefined);return names?names.enrich(board):board;});
  // friend search for the head-to-head card. public like the leaderboard; reads only our own tables
  app.get('/campaign/players',{config:{rateLimit:{max:60,timeWindow:'1 minute'}}},async req=>({players:await campaign.players(z.object({query:z.string().max(64).default('')}).parse(req.query).query)}));
+ // anonymous daily open signal for retention counts: a random install id and the app version, never a wallet or ip
+ app.post('/telemetry/open',{config:{rateLimit:{max:20,timeWindow:'1 minute'}}},async(req,reply)=>{
+  const b=z.object({install:uuid,version:z.string().regex(/^\d{1,3}\.\d{1,3}\.\d{1,3}$/)}).strict().parse(req.body);
+  await service.pool.query('INSERT INTO app_opens(install_id,day,version) VALUES($1,current_date,$2) ON CONFLICT DO NOTHING',[b.install,b.version]);
+  return reply.code(204).send();
+ });
  app.addHook('onClose',async()=>names?.close());
  app.post('/campaign/claim',async req=>{z.object({}).strict().parse(req.body);return campaign.claim((await account(req.headers.authorization)).wallet);});
  app.post('/campaign/runs',{bodyLimit:1024*1024,config:{rateLimit:{max:12,timeWindow:'1 minute'}}},async req=>{const a=await account(req.headers.authorization),b=z.object({mission:z.enum(CAMPAIGN_IDS as [MissionId,...MissionId[]]).optional(),level:z.number().int().min(13).max(1000000).optional(),rulesHash,replay:z.unknown()}).strict().refine(v=>(v.mission===undefined)!==(v.level===undefined),'Name one mission or one level.').parse(req.body);return campaign.submit(a.wallet,b.level!==undefined?{level:b.level}:{mission:b.mission!},b.rulesHash,b.replay);});
