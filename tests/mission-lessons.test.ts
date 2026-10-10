@@ -32,7 +32,7 @@ test('published levels get a knife lesson from their recipe and bosses are named
 test('every level has one short loading hint, and bosses get their own',()=>{
  const entries=entriesFor(BUNDLED);
  assert.equal(missionHint(entries[0]!),'Tap a guard to target it and attack.');
- assert.match(missionHint(entries[1]!),/Drones do not shoot/);
+ assert.match(missionHint(entries[1]!),/every guard before you exit/,'level 2 introduces the kill-all rule');
  for(const entry of entries){
   const hint=missionHint(entry);
   assert(hint.length>0&&hint.length<=80,`level ${entry.number} hint stays short enough to read in two seconds`);
@@ -40,11 +40,14 @@ test('every level has one short loading hint, and bosses get their own',()=>{
  }
 });
 
-test('jev ai lines compare against its best run and stay silent where it never won',()=>{
- assert.equal(jevLine(1),'Jev AI scored 8,808 on its first try.');
- assert.equal(jevLine(2),'Jev AI scored 9,589 after 3 tries.');
- assert.equal(jevResult(1,9000),'You beat Jev AI by 192 points.');
- assert.equal(jevResult(1,8808),'You tied Jev AI.');
- assert.equal(jevResult(1,8000),'Jev AI scored 808 more here.');
- assert.equal(jevLine(14),undefined);assert.equal(jevResult(14,9000),undefined);
+test('jev ai lines compare only runs that obey the kill-all rule, and stay silent where none did',()=>{
+ const entries=entriesFor(BUNDLED),level=(n:number)=>entries[n-1]!;
+ assert.equal(jevLine(level(1)),'Jev AI scored 8,808 on its first try.','level 1 is the tutorial, so any run counts');
+ assert.equal(jevLine(level(2)),'Jev AI scored 9,589 after 3 tries.');
+ assert.equal(jevLine(level(3)),'Jev AI scored 8,968 on its first try.','its 9,275 run left a guard standing');
+ assert.equal(jevResult(level(1),9000),'You beat Jev AI by 192 points.');
+ assert.equal(jevResult(level(1),8808),'You tied Jev AI.');
+ assert.equal(jevResult(level(1),8000),'Jev AI scored 808 more here.');
+ const stealthOnly=entries.find(e=>e.number>5&&!jevLine(e));assert(stealthOnly,'later levels without a full clear show no comparison');
+ assert.equal(jevResult(stealthOnly,9000),undefined);
 });

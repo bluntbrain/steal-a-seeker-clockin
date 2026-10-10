@@ -9,6 +9,7 @@ import {CAMPAIGN_IDS,type MissionId} from '../src/game/level';
 import {compareRun,type CampaignPerformance,type CampaignSummary,type CampaignRank,type CampaignBoard,type CampaignPlayer} from '../shared/economy';
 import {address} from '@solana/kit';
 import {ServiceError} from './service';
+import {requiresClearAll} from '../shared/clear-rule';
 import {ReturnService} from './returns';
 import {transaction} from './db';
 import {replayInput} from './replay';
@@ -27,14 +28,14 @@ export class CampaignService{
  /** a claim names either one of the twelve authored missions or a published level number */
  async submit(wallet:string,target:{mission:MissionId}|{level:number},rulesHash:string,input:unknown){
   const replay=replayInput.parse(input),hash=createHash('sha256').update(JSON.stringify(replay)).digest('hex');
-  let key:string,verify:()=>Promise<Awaited<ReturnType<typeof verifyReplayInWorker>>>,targetFor:()=>number|undefined,reward:(stars:number)=>number,storedHash=rulesHash;
+  let key:string,verify:()=>Promise<Awaited<ReturnType<typeof verifyReplayInWorker>>>,targetFor:()=>number|undefined,reward:(stars:number)=>number,storedHash=rulesHash,levelNumber:number,guardCount:number;
   if('level' in target){
    // published levels verify against the frozen definition and the hash they were published under, never client input
    const row=await this.levels.get(target.level,rulesHash);if(!row)throw new ServiceError(404,'Unknown campaign level. Update the game or wait for the next batch.');
-   key=campaignLevelKey(row.number);storedHash=row.rulesHash;verify=()=>verifyReplayInWorker(row.definition.mission,replay,{rulesHash:row.rulesHash,definition:row.definition});targetFor=()=>row.definition.targetSeconds;reward=stars=>publishedCreditReward(stars,!!row.boss);
+   key=campaignLevelKey(row.number);storedHash=row.rulesHash;verify=()=>verifyReplayInWorker(row.definition.mission,replay,{rulesHash:row.rulesHash,definition:row.definition});targetFor=()=>row.definition.targetSeconds;reward=stars=>publishedCreditReward(stars,!!row.boss);levelNumber=row.number;guardCount=row.definition.patrols.length;
   }else{
    const mission=target.mission;if(!CAMPAIGN_IDS.includes(mission))throw new ServiceError(409,'Update the game before recording a campaign reward run.');
-   key=mission;verify=()=>verifyReplayInWorker(mission,replay,{rulesHash});targetFor=()=>campaignCreditTarget(rulesHash,mission);reward=creditReward;
+   key=mission;verify=()=>verifyReplayInWorker(mission,replay,{rulesHash});targetFor=()=>campaignCreditTarget(rulesHash,mission);reward=creditReward;levelNumber=CAMPAIGN_IDS.indexOf(mission)+1;guardCount=combatLevel(mission).patrols.length;
   }
   const mission=key;
   const prior=await this.pool.query('SELECT result FROM campaign_runs WHERE wallet=$1 AND mission=$2 AND rules_hash=$3 AND replay_hash=$4',[wallet,mission,storedHash,hash]);
@@ -45,6 +46,13 @@ export class CampaignService{
   let result=prior.rows[0]?.result;
   if(!result){try{result=await verify();}catch(e){if(e instanceof ReplayInvalidError)throw new ServiceError(422,'This run does not follow the game rules, so it cannot be counted.');throw e;}}
   if(result.status!=='won')throw new ServiceError(400,'A completed extraction is required. This run does not earn campaign credit.');
+  // the kill-all rule (shared/clear-rule.ts): from level 2 a win counts only with every guard down. the switch stays off
+  // until the app that enforces it is in the store, so players on the previous version keep their wins
+  if(process.env.CLEAR_ALL_RULE==='on'&&requiresClearAll(levelNumber)){
+   if(result.kills===undefined)throw new ServiceError(409,'Update the game to record this level.');
+   const left=guardCount-result.kills;
+   if(left>0)throw new ServiceError(422,`Take down every guard before you exit. This run left ${left} standing.`);
+  }
   let awardedCredits=0,creditBalance=0;
   await transaction(this.pool,async db=>{
    const locked=await db.query('SELECT credits FROM wallets WHERE address=$1 FOR UPDATE',[wallet]);creditBalance=Number(locked.rows[0].credits);

@@ -1,10 +1,11 @@
-import BossHealthBand,{BossDownRibbon} from './components/BossHealthBand';
+import {BossDownRibbon} from './components/BossHealthBand';
 import BossEntrance from './components/BossEntrance';
 import LaunchSplash from './components/LaunchSplash';
 import {exitWindowSeconds} from './controls/exit-window';
 import TutorialHand from './components/TutorialHand';
 import MissionChaseLoader,{warmMissionLoader} from './components/MissionChaseLoader';
 import {jevLine,jevResult,missionHint} from './onboarding/mission-lessons';
+import {exitGuard,exitShut,guardsLeft,insideExit,requiresClearAll} from '../shared/clear-rule';
 import {authoredEntry,campaignEntries,nextEntry,type CampaignEntry} from './campaign/levels';
 import {loadPublishedLevels,publishedLevels} from './campaign/client';
 import {sendDailyOpen} from './telemetry/store';
@@ -37,7 +38,7 @@ import {AppState,Platform,StyleSheet,Text,View,useWindowDimensions} from 'react-
 import {StatusBar} from 'expo-status-bar';
 import {SafeAreaProvider,SafeAreaView,useSafeAreaInsets} from 'react-native-safe-area-context';
 import {Gesture,GestureDetector,GestureHandlerRootView} from 'react-native-gesture-handler';
-import Animated,{runOnJS,runOnUI,useAnimatedStyle,useFrameCallback,useSharedValue,withTiming} from 'react-native-reanimated';
+import Animated,{FadeIn,FadeOut,runOnJS,runOnUI,useAnimatedStyle,useFrameCallback,useSharedValue,withTiming} from 'react-native-reanimated';
 import {useGameAudio as useAudioPlayer} from './audio/useGameAudio';
 import {useHaptics} from './feedback/useHaptics';
 import type {HapticCue} from './feedback/haptic-policy';
@@ -106,6 +107,7 @@ export function Game({onSnapshot}:{onSnapshot?:(state:GameState)=>void}){
  const finishBossEntrance=useCallback(()=>setBossEntrance(false),[]);
  const sceneReady=useSharedValue(false),simulationEpoch=useSharedValue(0),focusProgress=useSharedValue(1);
  const pendingTap=useSharedValue<PendingTap|null>(null),previousTap=useSharedValue<PendingTap|null>(null),tapElapsed=useSharedValue(TAP_INTERVAL_MS);
+ const clearAll=useSharedValue(false),exitBackX=useSharedValue(0),exitBackY=useSharedValue(0),exitGuardSeq=useSharedValue(0);
  const recording=useSharedValue<ReplayChunk[]>([]),[completedReplay,setCompletedReplay]=useState<Replay>();
  const game=useSharedValue(initial),input=useSharedValue(idleInput()),alpha=useSharedValue(0),clock=useSharedValue(0),accumulator=useSharedValue(0),suspended=useSharedValue(homeFirst);
  const samples=useSharedValue<number[]>(Array.from({length:120},()=>0)),sampleIndex=useSharedValue(0),sampleCount=useSharedValue(0),reportClock=useSharedValue(0),hudClock=useSharedValue(0),frameTotal=useSharedValue(0),slowTotal=useSharedValue(0);
@@ -197,6 +199,11 @@ export function Game({onSnapshot}:{onSnapshot?:(state:GameState)=>void}){
  const callStats=useCallback((value:Stats)=>jsRef.current.publishStats(value),[]);
  const callEvent=useCallback((kind:Parameters<typeof event>[0])=>jsRef.current.event(kind),[]);
  const callBeginGuide=useCallback(()=>jsRef.current.beginGuide(),[]);
+ // from level 2 the final exit stays shut until every guard is down (shared/clear-rule.ts); the centre notice says so
+ const clearAllRun=requiresClearAll(entry.number),[exitNotice,setExitNotice]=useState<{left:number;at:number}|null>(null);
+ const callExitShut=useCallback((left:number)=>{setExitNotice({left,at:Date.now()});jsRef.current.event('blocked');},[]);
+ useEffect(()=>{clearAll.value=clearAllRun;},[clearAllRun,clearAll]);
+ useEffect(()=>{if(!exitNotice)return;const timer=setTimeout(()=>setExitNotice(null),2400);return()=>clearTimeout(timer);},[exitNotice]);
  const frameDriver=useFrameCallback(useCallback((frame:{timeSincePreviousFrame:number|null})=>{
    'worklet';
    // null marks the first callback after registration, which now happens once per mount
@@ -207,10 +214,13 @@ export function Game({onSnapshot}:{onSnapshot?:(state:GameState)=>void}){
     const point=pendingTap.value!;pendingTap.value=null;tapElapsed.value=0;
     const seq=Math.max(game.value.combat?.commandSeen??0,input.value.command?.seq??0)+1;
     const tapped=assistedCombatTap(game.value,point.x,point.y,seq);
-    const command=guideStage.value>=0?guideCommand(guideStage.value,tapped):tapped;
+    const proposed=guideStage.value>=0?guideCommand(guideStage.value,tapped):tapped;
+    // a tap on a shut exit explains the rule instead of walking there
+    const shut=clearAll.value&&proposed?.kind==='exit'&&exitShut(game.value),command=shut?null:proposed;
     if(command){input.modify(v=>{v.command=command;return v;});if(guideWaiting.value){guideWaiting.value=false;runOnJS(callBeginGuide)();}}
     // the thumb learns what the tap did: a tick for a move, a firmer pulse for a target, a double tick for nothing
-    runOnJS(callEvent)(command?(command.kind==='move'||command.kind==='stop'?'tapMove':'tapTarget'):'blocked');
+    if(shut)runOnJS(callExitShut)(guardsLeft(game.value));
+    else runOnJS(callEvent)(command?(command.kind==='move'||command.kind==='stop'?'tapMove':'tapTarget'):'blocked');
    }
    if(guideWaiting.value){accumulator.value=0;return;}
    const dt=Math.min(raw/1000,.1);clock.value+=dt;
@@ -225,9 +235,16 @@ export function Game({onSnapshot}:{onSnapshot?:(state:GameState)=>void}){
    hudClock.value+=dt;
    // frames without a simulation step change nothing, so they only advance interpolation
    if(accumulator.value+1e-9<TUNING.step){alpha.value=accumulator.value/TUNING.step;return;}
+   // the app's half of the kill-all rule: carrying the last phone into the exit with guards standing sends the courier
+   // back to where it last stood outside, well before the extraction hold ends. the move is an ordinary recorded command
+   if(clearAll.value&&game.value.carrying&&insideExit(game.value)){
+    const seq=Math.max(game.value.combat?.commandSeen??0,input.value.command?.seq??0)+1,guard=exitGuard(game.value,{x:exitBackX.value,y:exitBackY.value},seq);
+    if(guard&&input.value.command?.seq!==exitGuardSeq.value){exitGuardSeq.value=guard.seq;input.modify(v=>{v.command=guard;return v;});runOnJS(callExitShut)(guardsLeft(game.value));}
+   }
    const previousDamage=game.value.combat?.damageTaken??0,previousDecoys=game.value.decoysLeft,previousAlert=game.value.alert,previousPower=game.value.power,previousRelaySum=relaySum(game.value.relayTimers),previousCarry=game.value.carrying,previousDashes=game.value.dashes,previousTool=game.value.toolSeen,previousStatus=game.value.status,previousKills=game.value.combat?.kills??0,previousHits=game.value.combat?.hitEvents??0,previousBlocks=game.value.combat?.melee?.blocks??0,previousHunting=anyHunting(game.value),previousSuspicious=countSuspicious(game.value),previousExtract=Math.floor(game.value.extraction/.3);
    game.modify(s=>{recording.modify(chunks=>{while(accumulator.value+1e-9>=TUNING.step){recordStep(s,input.value,chunks);accumulator.value-=TUNING.step;}return chunks;});return s;},true);
    alpha.value=accumulator.value/TUNING.step;
+   if(clearAll.value&&!insideExit(game.value)){exitBackX.value=game.value.x;exitBackY.value=game.value.y;}
    if(game.value.decoysLeft<previousDecoys)runOnJS(callEvent)('decoy');
    if((!combatMode&&previousAlert<=0&&game.value.alert>0)||(combatMode&&!previousHunting&&anyHunting(game.value)))runOnJS(callEvent)('spotted');
    if(countSuspicious(game.value)>previousSuspicious)runOnJS(callEvent)('suspicion');
@@ -247,7 +264,7 @@ export function Game({onSnapshot}:{onSnapshot?:(state:GameState)=>void}){
    if(game.value.status==='won'&&previousStatus!=='won')runOnJS(callEvent)('success');
    if(game.value.status==='caught'&&previousStatus!=='caught')runOnJS(callEvent)('caught');
    if(hudClock.value>=.12||previousDamage!==(game.value.combat?.damageTaken??0)||previousTool!==game.value.toolSeen||previousCarry!==game.value.carrying||previousStatus!==game.value.status||previousDashes!==game.value.dashes){runOnJS(callPublish)(fullSnapshots.value?{...game.value}:{...game.value,definition:undefined,guards:game.value.guards.map(g=>({...g,path:NO_PATH,brain:undefined}))},simulationEpoch.value);hudClock.value=0;}
- },[suspended,sceneReady,pendingTap,tapElapsed,game,input,guideStage,guideWaiting,fullSnapshots,clock,frameTotal,slowTotal,samples,sampleIndex,sampleCount,reportClock,accumulator,recording,alpha,hudClock,simulationEpoch,combatMode,callPublish,callStats,callEvent,callBeginGuide]));
+ },[suspended,sceneReady,pendingTap,tapElapsed,game,input,guideStage,guideWaiting,fullSnapshots,clock,frameTotal,slowTotal,samples,sampleIndex,sampleCount,reportClock,accumulator,recording,alpha,hudClock,simulationEpoch,combatMode,callPublish,callStats,callEvent,callBeginGuide,clearAll,exitBackX,exitBackY,exitGuardSeq,callExitShut]));
  useEffect(()=>{frameDriver.setActive(renderGameSurface&&!paused);return()=>frameDriver.setActive(false);},[renderGameSurface,paused,frameDriver]);
  const pause=useCallback((value:boolean)=>{
   suspended.value=value;pendingTap.value=null;previousTap.value=null;
@@ -363,7 +380,7 @@ export function Game({onSnapshot}:{onSnapshot?:(state:GameState)=>void}){
     {guide.active&&hud.status==='playing'&&<><View testID="tutorial-target" style={{position:'absolute',left:(teachingTarget?.x??0)*size/12-23,top:(teachingTarget?.y??0)*size/12-23,width:46,height:46,borderRadius:23,borderWidth:3,borderColor:'#DEFFD9',backgroundColor:'#BCECCB30'}}/>{guide.waiting&&teachingTarget&&gameplayVisible&&<TutorialHand x={teachingTarget.x*size/12} y={teachingTarget.y*size/12} width={size} height={boardHeight} reduced={!!settings.reducedEffects}/>}</>}
     <View pointerEvents="none" style={StyleSheet.absoluteFill}><Text style={[s.mapLabel,{top:size/12*(level.exit.y+.23),left:size/12*level.exit.x,width:size/12*level.exit.w,color:'#d6f4e4'}]}>EXIT</Text></View>
     </Animated.View>
-    {!guide.active&&hud.status==='playing'&&<PhoneObjectivePill state={hud} total={level.targets?.length??1} level={level}/>}
+    {!guide.active&&hud.status==='playing'&&<PhoneObjectivePill state={hud} total={level.targets?.length??1} level={level} left={clearAllRun?guardsLeft(hud):0}/>}
     <CleanCombo state={hud} run={`${mission}:${sceneVersion}`} active={gameplayVisible&&!guide.active} sound={settings.sound} volume={settings.volume} reduced={!!settings.reducedEffects}/>
 
 
@@ -394,7 +411,7 @@ export function Game({onSnapshot}:{onSnapshot?:(state:GameState)=>void}){
   art={paused?'pause':hud.status==='won'?'success':hud.status==='caught'?'caught':'timeout'}
   eyebrow={finaleVisible?'12 / 12 HEISTS':paused?'RUN PAUSED':hud.status==='won'?'HEIST COMPLETE':hud.status==='caught'?'PATROL '+(hud.caughtBy+1):'TIME LIMIT'}
   title={finaleVisible?'Every Seeker. Secured.':paused?'Take a breather.':hud.status==='won'?'Seeker secured.':hud.status==='caught'?combatMode?'Out of health.':'They spotted you.':'Out of time.'}
-  detail={finaleVisible?'Your campaign is complete. Keep the card.':trial.active&&!paused?'Your free attempt is complete. Unlock the campaign for all 12 missions and unlimited retries.':paused?(combatMode?((level.combat?.revision??0)>=15?'Tap the floor to move. Tap a guard to approach and slash. Flank armored guards. Tap the phone, then the exit.':'Tap the floor to move. Tap a guard to approach and shoot. Tap the phone, then the exit.'):'Drag to move. Stop and hold TAKE. Use ACT at switches. More help in Settings.'):hud.status==='won'?(`${entry.number>12?`Level ${entry.number} cleared.`:`${phoneEdition(mission).name} added to your rack.`}${(r=>r?' '+r:'')(jevResult(entry.number,hud.score))}${earnedNotice?' '+earnedNotice:''}`):hud.status==='caught'?(combatMode?'Move when a guard aims. Cover stops their shots.':level.decoys?'Use cover. Tap DISTRACT, then go the other way.':'Break line of sight behind cover. Dash after taking the phone.'):'Take the phone and reach the mint exit.'}
+  detail={finaleVisible?'Your campaign is complete. Keep the card.':trial.active&&!paused?'Your free attempt is complete. Unlock the campaign for all 12 missions and unlimited retries.':paused?(combatMode?((level.combat?.revision??0)>=15?(clearAllRun?'Tap the floor to move. Tap a guard to approach and slash. Flank armored guards. Take down every guard, then bring the phone to the exit.':'Tap the floor to move. Tap a guard to approach and slash. Flank armored guards. Tap the phone, then the exit.'):'Tap the floor to move. Tap a guard to approach and shoot. Tap the phone, then the exit.'):'Drag to move. Stop and hold TAKE. Use ACT at switches. More help in Settings.'):hud.status==='won'?(`${entry.number>12?`Level ${entry.number} cleared.`:`${phoneEdition(mission).name} added to your rack.`}${(r=>r?' '+r:'')(jevResult(entry,hud.score))}${earnedNotice?' '+earnedNotice:''}`):hud.status==='caught'?(combatMode?'Move when a guard aims. Cover stops their shots.':level.decoys?'Use cover. Tap DISTRACT, then go the other way.':'Break line of sight behind cover. Dash after taking the phone.'):(clearAllRun?'Take down every guard, then bring the phone to the exit.':'Take the phone and reach the mint exit.')}
   stats={!finaleVisible&&hud.status==='won'&&!paused?`${time(hud.elapsed)} · ${hud.battery}% ${combatMode?'health':'charge'} · ${hud.score.toLocaleString()} pts`:undefined}
   stars={!finaleVisible&&hud.status==='won'&&!paused?'★'.repeat(starsFor(hud))+'☆'.repeat(3-starsFor(hud)):undefined}
   primary={finaleVisible?{label:'Share card ↗',accessibilityLabel:'Share campaign completion card on X',disabled:!shareReady,onPress:()=>void shareAction.current?.()}:{label:trial.active&&!paused?'View campaign pass':paused?'Resume':hud.status==='won'?(nextMission?'Next mission ↗':'Missions'):'Retry ↗',accessibilityLabel:trial.active&&!paused?'Finish free trial':paused?'Resume run':hud.status==='won'?(nextMission?'View next mission':'View missions'):'Retry level',disabled:false,spinner:!paused&&!trial.active,onPress:()=>trial.active&&!paused?trial.finish():paused?pause(false):hud.status==='won'?(nextMission?introduceMission(nextMission):backToMissions()):restart()}}
@@ -403,15 +420,17 @@ export function Game({onSnapshot}:{onSnapshot?:(state:GameState)=>void}){
  >{finaleVisible&&<CompletionCard data={completionData} reduced={!!settings.reducedEffects} registerShare={registerShare}/>} {paused&&<Pressable accessibilityRole="button" accessibilityLabel="Toggle frame statistics" onPress={()=>setDetails(!details)}><Text style={s.stats}>{details?`${Math.round(stats.fps)} FPS · p95 ${stats.p95.toFixed(1)}ms · ${stats.slow} slow frames`:'Performance details'}</Text></Pressable>}</ResultSheet>}
  {!testMission&&!trial.active&&!guide.active&&guide.retries===0&&hud.status==='won'&&completedReplay&&!paused&&<View style={{position:'absolute',bottom:insets.bottom+3,zIndex:46}}><CampaignSubmission state={hud} replay={completedReplay} target={entry.number>12?{level:entry.number,rulesHash:entry.rulesHash}:{mission:entry.mission}} quiet retrySignal={rewardRetry} onReward={account.preview?undefined:rewardResolved}/></View>}
  {claimVisible&&<CreditClaim requiresWallet={!account.preview&&!account.wallet&&guide.retries===0} connecting={connectingClaim} onConnect={connectToClaim} autoClaim={autoClaim} reward={creditReward} balance={economy.balance} onRetry={creditReward.amount===null?(account.preview?saveLocalReward:()=>{rewardResolved(null);setRewardRetry(n=>n+1);}):undefined} stars={starsFor(hud)} mission={level.title} onDone={()=>setRewardClaimed(true)}/>}
- {entry.boss&&gameplayVisible&&<><BossHealthBand key={`health-${sceneVersion}`} boss={entry.boss} game={game}/><BossDownRibbon key={`down-${sceneVersion}`} game={game} clock={clock} reduced={!!settings.reducedEffects}/></>}
+ {entry.boss&&gameplayVisible&&<BossDownRibbon key={`down-${sceneVersion}`} game={game} clock={clock} reduced={!!settings.reducedEffects}/>}
+ {exitNotice&&gameplayVisible&&<Animated.View key={exitNotice.at} entering={FadeIn.duration(140)} exiting={FadeOut.duration(220)} pointerEvents="none" accessibilityLiveRegion="assertive" testID="exit-shut-notice" style={s.exitNotice}><Text style={s.exitNoticeTitle}>Take down every guard first</Text><Text style={s.exitNoticeDetail}>{exitNotice.left} {exitNotice.left===1?'guard':'guards'} left before the exit opens</Text></Animated.View>}
  {bossEntrance&&entry.boss&&!sceneLoading&&renderGameSurface&&!paused&&<BossEntrance key={sceneVersion} boss={entry.boss} reduced={!!settings.reducedEffects} onDone={finishBossEntrance}/>}
- {sceneLoading&&renderGameSurface&&<MissionChaseLoader key={sceneVersion} onComplete={loaderCompleted} boss={entry.boss??undefined} hint={[missionHint(entry),jevLine(entry.number)].filter(Boolean).join('\n')} progress={sceneProgress} reduced={!!settings.reducedEffects} error={sceneError}
+ {sceneLoading&&renderGameSurface&&<MissionChaseLoader key={sceneVersion} onComplete={loaderCompleted} boss={entry.boss??undefined} hint={[missionHint(entry),jevLine(entry)].filter(Boolean).join('\n')} progress={sceneProgress} reduced={!!settings.reducedEffects} error={sceneError}
   onRetry={()=>{sceneReady.value=false;simulationEpoch.value=++sceneEpoch.current;setSceneVersion(sceneEpoch.current);setSceneProgress(0);setSceneError('');}}
   onExit={backToMissions}/>}
  {finaleVisible&&<CampaignConfetti reduced={!!settings.reducedEffects}/>}
  <Animated.View pointerEvents="none" testID="alarm-wash" style={[StyleSheet.absoluteFill,{backgroundColor:'#FF253E'},alarmWash]}/><Animated.View pointerEvents="none" testID="alarm-border" style={[StyleSheet.absoluteFill,{borderWidth:7,borderColor:'#FF4255'},alarmBorder]}/><View pointerEvents="none" style={StyleSheet.absoluteFill}><Animated.Image testID="damage-glow" source={require('../assets/ui/damage-vignette.png')} resizeMode="stretch" style={[StyleSheet.absoluteFill,{width:'100%',height:'100%'},damageStyle]}/></View></SafeAreaView>;
 }
 const s=StyleSheet.create({
+ exitNotice:{position:'absolute',top:'38%',alignSelf:'center',maxWidth:320,marginHorizontal:16,paddingVertical:14,paddingHorizontal:22,borderRadius:14,borderWidth:1,borderColor:'#F2B8A8',backgroundColor:'#2A1714F2',alignItems:'center',gap:4,zIndex:46},exitNoticeTitle:{color:'#FFE3DA',fontSize:18,fontWeight:'900',textAlign:'center'},exitNoticeDetail:{color:'#F2C9BD',fontSize:13,fontWeight:'600',textAlign:'center'},
  securityBanner:{minHeight:36,borderWidth:1,borderRadius:10,paddingHorizontal:10,paddingVertical:5,justifyContent:'center',gap:3},securityTitle:{fontSize:9,fontWeight:'800',letterSpacing:.4},securityDetail:{fontSize:8,color:'#C5CCD1'},
  screen:{flex:1,backgroundColor:'#0C0C0E',alignItems:'center',justifyContent:'center'},shell:{alignItems:'center',paddingHorizontal:8},
  missions:{height:28,flexDirection:'row',gap:8,marginBottom:4},missionButton:{flex:1,justifyContent:'center',alignItems:'center',borderWidth:1,borderColor:'#333B40',borderRadius:9},missionSelected:{backgroundColor:'#22282C',borderColor:'#88ad9d'},missionText:{color:'#A8B8BB',fontSize:11,fontWeight:'600'},

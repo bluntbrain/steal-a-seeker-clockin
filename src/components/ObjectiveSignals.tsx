@@ -21,10 +21,10 @@ export function SecurityEntrances({level,state,size,reduced}:{level:LevelDefinit
   </View>;
  })}</>;
 }
-export function PhoneObjectivePill({state,total,level}:{state:GameState;total:number;level:LevelDefinition}){
+export function PhoneObjectivePill({state,total,level,left=0}:{state:GameState;total:number;level:LevelDefinition;left?:number}){
  const hint=mechanismHint(state,level);
  return <View pointerEvents="none" testID="phone-objective" accessibilityLiveRegion="polite" style={s.objective}>
-  {hint?<Text style={[s.label,{fontSize:16}]}>⏻</Text>:<View style={s.phone}><View style={s.phoneLine}/></View>}<Text style={s.label}>{hint??phoneObjective(state,total)}</Text>
+  {hint?<Text style={[s.label,{fontSize:16}]}>⏻</Text>:<View style={s.phone}><View style={s.phoneLine}/></View>}<Text style={s.label}>{hint??phoneObjective(state,total,left)}</Text>
  </View>;
 }
 export function MechanismLabels({level,state,size}:{level:LevelDefinition;state:GameState;size:number}){

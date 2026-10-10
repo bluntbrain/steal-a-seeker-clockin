@@ -44,3 +44,29 @@ test('rear opening defeats a sentry; an armored survivor cannot be stun-locked',
  l.patrols[0]!.combatRole='warden';const a=initialState(l.mission,l);tick(a,10,order(a,4,10,1));assert.equal(a.guards[0]!.hp,150);assert.equal(a.guards[0]!.angle,0,'No instant spin when the shot lands');
  tick(a,12);assert.equal(a.guards[0]!.reactionTicks,0,'Follow-up hits do not restart the stagger');assert(a.guards[0]!.angle>0,'The guard turns gradually after reacting');
 });
+
+test('kill-all rule: from level 2 the final exit stays shut until every guard is down',async()=>{
+ const {requiresClearAll,campaignLevelOf,guardsLeft,exitShut,insideExit,exitGuard}=await import('../shared/clear-rule');
+ const {solveCombat}=await import('../scripts/qa-combat');
+ assert.equal(requiresClearAll(1),false,'level 1 stays the guided tutorial');assert.equal(requiresClearAll(2),true);
+ assert.equal(campaignLevelOf({id:'campaign:13',number:5}),13,'published levels keep their zone edition in number');assert.equal(campaignLevelOf({id:'cone-lesson',number:2}),2);
+ const level=combatLevel('cone-lesson'),s=initialState(level.mission,level);
+ assert.equal(exitShut(s),false,'nothing to guard before the phone');
+ s.carrying=true;assert.equal(exitShut(s),true);assert.equal(guardsLeft(s),level.patrols.length);
+ const e=level.exit;s.x=e.x+e.w/2;s.y=e.y+e.h/2;assert(insideExit(s));
+ assert.deepEqual(exitGuard(s,{x:4.123,y:9.876},7),{seq:7,kind:'move',target:-1,x:4.12,y:9.88},'sent back to where it last stood outside');
+ s.combat!.kills=level.patrols.length;assert.equal(exitGuard(s,{x:4,y:9},8),null,'every guard down: the exit opens');
+ const two={...level,targets:[level.phone,{x:level.phone.x+1,y:level.phone.y}]},t=initialState(two.mission,two);t.carrying=true;assert.equal(exitShut(t),false,'an earlier phone may still be delivered');t.delivered=1;assert.equal(exitShut(t),true);
+ // a stealth run replayed with the app's guard never finishes the exit while guards stand
+ const stealth=solveCombat(level,false)!;assert(stealth.kills<level.patrols.length,'the stealth route leaves guards standing');
+ const r=initialState(level.mission,level);let back={x:r.x,y:r.y},seq=0,blocked=0;
+ for(const chunk of stealth.replay.chunks)for(let i=0;i<chunk.ticks&&r.status==='playing';i++){
+  let command=i===0?chunk.command:undefined;if(command)seq=Math.max(seq,command.seq);
+  const guard=exitGuard(r,back,seq+1);if(guard){seq++;blocked++;command=guard;}
+  step(r,{...idleInput(),command});if(!insideExit(r))back={x:r.x,y:r.y};
+ }
+ assert(blocked>0,'the stealth route reached the exit and was sent back');assert.notEqual(r.status,'won');
+ // the clear-all bot wins, and the pinned verifier agrees on every guard down
+ const win=solveCombat(level)!,check=verifyReplay(level.mission,win.replay,level);
+ assert.equal(check.status,'won');assert.equal(check.kills,level.patrols.length);assert.equal(check.score,win.score);
+});

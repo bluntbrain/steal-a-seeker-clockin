@@ -26,10 +26,11 @@ test('the engine fingerprint matches the hashed rule files',async()=>{
  assert.deepEqual(await currentWeeklyEngine(),engine);
  assert.notEqual(manifest.rulesHash,rules.rulesHash);
 });
+// these tests pin engine behaviour across revisions, so the solver runs in its original stealth mode, not kill-all
 test('the frozen active week has identical winning and delayed outcomes in its archived verifier',async()=>{
  const archived=await import((await checkRuleBundle(manifest.rulesHash)).href);
  for(const c of manifest.contracts){
-  const win=solveCombat(c.level);assert(win,`${c.name}: no winning input sequence`);
+  const win=solveCombat(c.level,false);assert(win,`${c.name}: no winning input sequence`);
   assert.equal(verifyReplay(c.level.mission,win.replay,c.level).status,'won');
   for(const delay of [0,6,15,30,60,120]){
    const s=initialState(c.level.mission,c.level),replay:Replay={version:2,chunks:[]};
@@ -45,7 +46,7 @@ test('scout encounters preserve revision-6 published wins and delayed replay out
  const week=frozen6 as unknown as WeeklyCompatibility;
  const archived=await import((await checkRuleBundle(week.rulesHash)).href);
  for(const c of week.contracts){
-  const win=solveCombat(c.level);assert(win);
+  const win=solveCombat(c.level,false);assert(win);
   for(const delay of [0,15,60,120]){
    const state=initialState(c.level.mission,c.level),replay:Replay={version:2,chunks:[]};
    for(const chunk of [...(delay?[{ticks:delay,command:undefined}]:[]),...win.replay.chunks])for(let i=0;i<chunk.ticks&&state.status==='playing';i++)recordStep(state,{...idleInput(),command:chunk.command},replay.chunks);
@@ -59,7 +60,7 @@ test('revision 7 campaigns retain their archived verifier outcomes after roaming
  const {legacyCombatLevel}=await import('../src/game/combat-levels');
  const {CAMPAIGN_IDS}=await import('../src/game/level');
  const archived=await import((await checkRuleBundle(hash)).href);
- for(const mission of CAMPAIGN_IDS){const level=legacyCombatLevel(mission),win=solveCombat(level);assert(win);
+ for(const mission of CAMPAIGN_IDS){const level=legacyCombatLevel(mission),win=solveCombat(level,false);assert(win);
   for(const delay of [0,45,120]){const state=initialState(mission,level),replay:Replay={version:2,chunks:[]};
    for(const chunk of [...(delay?[{ticks:delay,command:undefined}]:[]),...win.replay.chunks])for(let i=0;i<chunk.ticks&&state.status==='playing';i++)recordStep(state,{...idleInput(),command:chunk.command},replay.chunks);
    assert.deepEqual(verifyReplay(mission,replay,level),archived.verifyReplay(mission,replay,level));
@@ -69,7 +70,7 @@ test('revision 7 campaigns retain their archived verifier outcomes after roaming
 
 test('revision 8 replays keep their published outcomes after combat contact is fixed',async()=>{
  const archived=await import((await checkRuleBundle(campaign8.rulesHash)).href);
- for(const level of campaign8.levels as LevelDefinition[]){const win=solveCombat(level);assert(win);
+ for(const level of campaign8.levels as LevelDefinition[]){const win=solveCombat(level,false);assert(win);
   for(const delay of [0,45,120]){const state=initialState(level.mission,level),replay:Replay={version:2,chunks:[]};
    for(const chunk of [...(delay?[{ticks:delay,command:undefined}]:[]),...win.replay.chunks])for(let i=0;i<chunk.ticks&&state.status==='playing';i++)recordStep(state,{...idleInput(),command:chunk.command},replay.chunks);
    assert.deepEqual(verifyReplay(level.mission,replay,level),archived.verifyReplay(level.mission,replay,level),`${level.title}: delay ${delay}`);
@@ -79,7 +80,7 @@ test('revision 8 replays keep their published outcomes after combat contact is f
 
 test('revision 9 campaign replays retain their published results after heist encounters',async()=>{
  const archived=await import((await checkRuleBundle(campaign9.rulesHash)).href);
- for(const level of campaign9.levels as LevelDefinition[]){const win=solveCombat(level);assert(win);
+ for(const level of campaign9.levels as LevelDefinition[]){const win=solveCombat(level,false);assert(win);
   for(const delay of [0,45,120]){const state=initialState(level.mission,level),replay:Replay={version:2,chunks:[]};
    for(const chunk of [...(delay?[{ticks:delay,command:undefined}]:[]),...win.replay.chunks])for(let i=0;i<chunk.ticks&&state.status==='playing';i++)recordStep(state,{...idleInput(),command:chunk.command},replay.chunks);
    assert.deepEqual(verifyReplay(level.mission,replay,level),archived.verifyReplay(level.mission,replay,level),`${level.title}: delay ${delay}`);
@@ -90,7 +91,7 @@ test('revision 9 campaign replays retain their published results after heist enc
 test('revision 10 outcomes and weekly eligibility survive the revision 11 pressure increase',async()=>{
  const archived=await import((await checkRuleBundle(campaign10.rulesHash)).href);
  for(const level of campaign10.levels as LevelDefinition[]){
-  const win=solveCombat(level);assert(win);
+  const win=solveCombat(level,false);assert(win);
   for(const delay of [0,45,120]){
    const state=initialState(level.mission,level),replay:Replay={version:2,chunks:[]};
    for(const chunk of [...(delay?[{ticks:delay,command:undefined}]:[]),...win.replay.chunks])for(let i=0;i<chunk.ticks&&state.status==='playing';i++)recordStep(state,{...idleInput(),command:chunk.command},replay.chunks);
@@ -102,7 +103,7 @@ test('revision 10 outcomes and weekly eligibility survive the revision 11 pressu
 test('shipped revision 11 replays and frozen weeks keep their original movement',async()=>{
  const archived=await import((await checkRuleBundle(campaign11.rulesHash)).href);
  for(const level of campaign11.levels as LevelDefinition[]){
-  const win=solveCombat(level);assert(win);
+  const win=solveCombat(level,false);assert(win);
   for(const delay of [0,45,120]){
    const state=initialState(level.mission,level),replay:Replay={version:2,chunks:[]};
    for(const chunk of [...(delay?[{ticks:delay,command:undefined}]:[]),...win.replay.chunks])for(let i=0;i<chunk.ticks&&state.status==='playing';i++)recordStep(state,{...idleInput(),command:chunk.command},replay.chunks);
@@ -114,7 +115,7 @@ test('shipped revision 11 replays and frozen weeks keep their original movement'
 test('revision 12 movement stays unchanged when district speed boosts ship',async()=>{
  const archived=await import((await checkRuleBundle(campaign12.rulesHash)).href);
  for(const level of campaign12.levels as LevelDefinition[]){
-  const win=solveCombat(level);assert(win);
+  const win=solveCombat(level,false);assert(win);
   for(const delay of [0,45,120]){
    const state=initialState(level.mission,level),replay:Replay={version:2,chunks:[]};
    for(const chunk of [...(delay?[{ticks:delay,command:undefined}]:[]),...win.replay.chunks])for(let i=0;i<chunk.ticks&&state.status==='playing';i++)recordStep(state,{...idleInput(),command:chunk.command},replay.chunks);
@@ -127,7 +128,7 @@ test('revision 13 replays and active weeks remain unchanged after target followi
  const fixture=(await import('./fixtures/campaign-revision13.json')).default;
  const archived=await import((await checkRuleBundle(fixture.rulesHash)).href);
  for(const level of fixture.levels as LevelDefinition[]){
-  const win=solveCombat(level);assert(win,level.title);
+  const win=solveCombat(level,false);assert(win,level.title);
   assert.deepEqual(verifyReplay(level.mission,win.replay,level),archived.verifyReplay(level.mission,win.replay,level));
  }
 });
@@ -170,7 +171,7 @@ test('revision 16 guards stay unchanged when the revision 17 engine ships',async
  assert.equal(campaign16.engineHash,'2dff16c1583573a1d66fa23b3249529d77224ca8da0b997de4834e593cb729f4');assert.notEqual(engine.engineHash,campaign16.engineHash);
  const archived=await import((await checkRuleBundle(campaign16.rulesHash)).href);
  for(const level of campaign16.levels as LevelDefinition[]){
-  assert.equal(level.combat?.revision,16);const win=solveCombat(level);assert(win,level.title);
+  assert.equal(level.combat?.revision,16);const win=solveCombat(level,false);assert(win,level.title);
   for(const delay of [0,45,120]){
    const state=initialState(level.mission,level),replay:Replay={version:2,chunks:[]};
    for(const chunk of [...(delay?[{ticks:delay,command:undefined}]:[]),...win.replay.chunks])for(let i=0;i<chunk.ticks&&state.status==='playing';i++)recordStep(state,{...idleInput(),command:chunk.command},replay.chunks);

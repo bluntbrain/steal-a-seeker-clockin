@@ -589,6 +589,22 @@ test('published campaign levels verify against the frozen row, pay the published
 
 });
 
+test('with the kill-all rule on, a win from level 2 counts only when every guard is down',async()=>{
+ const {CampaignService}=await import('./campaign-service'),{solveCombat}=await import('../scripts/qa-combat'),rules=(await import('../shared/rules-manifest.json')).default;
+ const u=await login(),campaign=new CampaignService(pool,new ReturnService(pool,undefined,{mint:service.config.mint,treasury:service.config.recipient,source:service.config.destination,decimals:6}));
+ const row=(await campaign.levels.get(13))!,guards=row.definition.patrols.length;
+ const stealth=solveCombat(row.definition,false)!,clear=solveCombat(row.definition)!;
+ assert(stealth.kills<guards,'the stealth bot leaves guards standing');assert.equal(clear.kills,guards);
+ process.env.CLEAR_ALL_RULE='on';
+ try{
+  await assert.rejects(campaign.submit(u.wallet,{level:13},row.rulesHash,stealth.replay),(e:unknown)=>e instanceof ServiceError&&e.status===422&&/every guard/.test(e.message));
+  assert((await campaign.submit(u.wallet,{level:13},row.rulesHash,clear.replay)).creditAward.credits>0);
+  // a legacy stealth replay cannot show its kills, so level 2 asks for the update; level 1 stays the open tutorial
+  await assert.rejects(campaign.submit(u.wallet,{mission:'cone-lesson'},rules.rulesHash,fixtureReplay('cone-lesson').replay),(e:unknown)=>e instanceof ServiceError&&e.status===409);
+  assert((await campaign.submit(u.wallet,{mission:'practice'},rules.rulesHash,fixtureReplay('practice').replay)).creditAward.credits>0);
+ }finally{delete process.env.CLEAR_ALL_RULE;}
+});
+
 test('the code 36 build keeps earning campaign credits through the archived revision 16 bundle after revision 17 ships',async()=>{
  const {CampaignService}=await import('./campaign-service'),frozen=(await import('../tests/fixtures/campaign-revision16.json')).default,{solveCombat}=await import('../scripts/qa-combat'),{combatLevel}=await import('../src/game/combat-levels'),rules=(await import('../shared/rules-manifest.json')).default;
  assert.notEqual(frozen.rulesHash,rules.rulesHash);
