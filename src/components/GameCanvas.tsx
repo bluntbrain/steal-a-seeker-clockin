@@ -26,7 +26,7 @@ import GuardLayer from './GuardLayer';
 import {GUARD_SPRITES,BOSS_SPRITES,DEFEAT_SPRITES} from './enemy-presentation';
 import CameraSignals from './CameraSignals';
 import type {Camera} from '../camera/geometry';
-import CombatLayer from './CombatLayer';
+import CombatLayer,{CombatRoute} from './CombatLayer';
 import EncounterFloor from './EncounterFloor';
 import {GateAsset,SwitchAsset,PowerCable} from './GateMechanism';
 type Props={wallStyle?:WallStyle;onReady?:()=>void;onSceneDrawn?:()=>void;onProgress?:(progress:number)=>void;onLoadError?:()=>void;camera?:SharedValue<Camera>;size:number;height?:number;input:SharedValue<Input>;game:SharedValue<GameState>;alpha:SharedValue<number>;clock:SharedValue<number>;level:LevelDefinition;appearance?:{outfit?:string;trail?:string;reducedEffects?:boolean}};
@@ -134,6 +134,7 @@ export default memo(function GameCanvas({camera,size,height=size*20/12,input,gam
     <Group transform={useDerivedValue(()=>[{translateY:phoneBob.value}])}><Atlas image={phones} sprites={phoneSprites} transforms={phoneTransforms}/></Group>
     <RoundedRect x={0-.55} y={0+.65} width={pickupWidth} height={.07} r={.025} color="#d9fff0"/>
    </Group>
+   {!!level.combat&&<CombatRoute game={game} alpha={alpha} input={input}/>}
    {guardOrder.map(index=><GuardLayer key={index} game={game} alpha={alpha} index={index} clock={clock} reduced={reduced} droneSprite={droneSprite} guardSprite={guardSprite} heavySprite={heavySprite} bossSprite={bossSprite} bossWalk={bossWalk} defeatSprite={defeatSprite} bossDefeat={bossDefeat} wallOcclusion={wallOcclusion}/>)}
    {level.switches?.map((_,index)=><SwitchAsset key={index} game={game} level={level} index={index} clock={clock} reduced={reduced}/>)}
    {!level.combat&&<DecoyLayer game={game} input={input} reduced={reduced}/>}
