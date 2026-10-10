@@ -1,0 +1,37 @@
+Steal a Seeker anti-cheat proof, 2026-10-10T12:43:49.625Z
+Rules hash 4d11d0900909ae4ccb9b965ce1dd171787f8c1a31a308047286c526a890ebe76
+Level 1 run: 139 input chunks, recorded by the game's own simulation (tests/fixtures/replay.ts)
+
+Part 1: the server verifier, offline (server/replay.ts)
+PASS  valid run is accepted and scored by the server
+      status won, server score 12245, 328 ticks, health 100
+PASS  a run that sends its own score of 999,999 is rejected
+      rejected: replay: Unrecognized key: "score"
+PASS  a run with inputs removed does not count as a win
+      rejected: Replay continues after a terminal result.
+PASS  an impossible move is rejected
+      rejected: chunks.0.x: Too big: expected number to be <=127
+PASS  inputs sent after the win are rejected
+      rejected: Replay continues after a terminal result.
+PASS  an oversized run is rejected
+      rejected: Replay exceeds the mission time limit.
+
+Part 2: the live production server (https://seeker-api-production-41b3.up.railway.app)
+PASS  throwaway wallet signs in with a Sign In With Solana message
+      wallet 5yR2arGUTNsd81ngKYnQxisUw13MUEWw5to2zcjFe6zf, HTTP 200, session token [hidden]
+PASS  forged score is refused before any leaderboard update
+      HTTP 400: Invalid request.
+PASS  altered inputs are refused
+      HTTP 422: This run does not follow the game rules, so it cannot be counted.
+PASS  impossible input is refused
+      HTTP 400: Invalid request.
+PASS  the leaderboard has no row for this wallet after three bad runs
+      personal row: null
+PASS  the valid run is accepted and the server stores its own score
+      HTTP 200, stored score 12245, credits awarded 60
+PASS  sending the same run again earns nothing
+      HTTP 200, credits awarded 0
+PASS  the leaderboard now ranks this wallet with the server score
+      rank 6, 1 level, 12245 points
+
+All checks passed
