@@ -4,6 +4,7 @@ import {appendRun,emptyLog,type PlaytestRun,type PlaytestLog} from './model';
 import rules from '../../shared/rules-manifest.json';
 import app from '../../app.json';
 import {Platform} from 'react-native';
+import {API_URL} from '../commerce/client';
 const key='seeker.playtest-report.v1',listeners=new Set<()=>void>();
 let value=emptyLog(),loaded=false,ready=false,error='',queue=Promise.resolve();
 function notify(){listeners.forEach(f=>f());}
@@ -14,3 +15,15 @@ export function setRecording(enabled:boolean){if(!ready)return;value={...value,e
 export function clearReport(){value=emptyLog();persist();notify();}
 export function reportJson(){return JSON.stringify({version:1,appVersion:app.expo.version,rulesHash:rules.rulesHash,platform:Platform.OS,exportedAt:new Date().toISOString(),summary:'Voluntary local playtest. No wallet addresses or input replay.',runs:value.runs},null,2);}
 export function usePlaytestLog(){useEffect(()=>{void loadLog();},[]);const log=useSyncExternalStore(f=>{listeners.add(f);return()=>{listeners.delete(f);};},()=>value,()=>value);const status=useSyncExternalStore(f=>{listeners.add(f);return()=>{listeners.delete(f);};},()=>`${ready}:${error}`,()=>`${ready}:${error}`);return {log,ready:status.startsWith('true:'),error:status.slice(status.indexOf(':')+1)};}
+// at most one anonymous open a day for retention counts: a random install code made on this device and the app
+// version. no wallet, no account. the code is saved before the first send so a failed send never makes a new one
+const OPEN_KEY='seeker.install.v1';
+export async function sendDailyOpen(){try{
+ if(!API_URL||Platform.OS==='web')return;
+ const today=new Date().toISOString().slice(0,10),saved=JSON.parse((await readSave(OPEN_KEY))||'{}') as {id?:unknown;day?:unknown};
+ if(saved.day===today)return;
+ const id=typeof saved.id==='string'?saved.id:crypto.randomUUID();
+ if(id!==saved.id)await writeSave(OPEN_KEY,JSON.stringify({id}));
+ const response=await fetch(`${API_URL.replace(/\/$/,'')}/telemetry/open`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({install:id,version:app.expo.version})});
+ if(response.ok)await writeSave(OPEN_KEY,JSON.stringify({id,day:today}));
+}catch{}}
