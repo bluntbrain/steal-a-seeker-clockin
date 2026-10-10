@@ -5,7 +5,7 @@ import {getBase58Decoder,address} from '@solana/kit';
 import {findAssociatedTokenPda} from '@solana-program/token';
 import {createSignInMessage} from '@solana/wallet-standard-util';
 import {database,migrate} from './db';
-import {CommerceService} from './service';
+import {CommerceService,ServiceError} from './service';
 import {createApp} from './app';
 import {verifyPayment,TOKEN_PROGRAM,MEMO_PROGRAM,type PaymentChain} from './chain';
 import type {Order,PaymentQuote,SignInChallenge} from '../shared/commerce';
@@ -350,6 +350,11 @@ test('free campaign grants verified credits once; forged progress and invalid re
  const u=await login(),campaign=new CampaignService(pool,new ReturnService(pool,undefined,{mint:service.config.mint,treasury:service.config.recipient,source:service.config.destination,decimals:6}));
  await service.syncProgress(u.wallet,{version:1,missions:{practice:{stars:3,seconds:1,score:99999,battery:100,completions:999}}});assert.equal((await service.me(u.wallet)).credits,0);
  await assert.rejects(campaign.submit(u.wallet,{mission:'practice'},rules.rulesHash,{version:1,chunks:[{ticks:1,x:0,y:0,buttons:0}]}),/extraction/);
+ // inputs after the win break the rules: refused for good with 422, not a retryable 503, over the service and HTTP
+ const broken=fixtureReplay().replay;broken.chunks.push({x:0,y:0,buttons:0,ticks:1});
+ await assert.rejects(campaign.submit(u.wallet,{mission:'practice'},rules.rulesHash,broken),(e:unknown)=>e instanceof ServiceError&&e.status===422);
+ const refused=await app.inject({method:'POST',url:'/campaign/runs',headers:u.headers,payload:{mission:'practice',rulesHash:rules.rulesHash,replay:broken}});
+ assert.equal(refused.statusCode,422,refused.body);assert.match(refused.json().error,/game rules/);
  const replay=fixtureReplay().replay;const receipts=await Promise.all([campaign.submit(u.wallet,{mission:'practice'},rules.rulesHash,replay),campaign.submit(u.wallet,{mission:'practice'},rules.rulesHash,replay)]);assert.equal(receipts.filter(r=>r.creditAward.credits>0).length,1);assert(receipts.every(r=>r.creditAward.mission==='practice'));assert(receipts.some(r=>r.creditAward.credits===0));
  const balance=(await service.me(u.wallet)).credits!;assert(balance>=50&&balance<=60);assert.equal(receipts.reduce((n,r)=>n+r.creditAward.credits,0),balance);assert.equal((await campaign.submit(u.wallet,{mission:'practice'},rules.rulesHash,replay)).creditAward.credits,0);assert.equal((await service.me(u.wallet)).credits,balance);assert(receipts.every(r=>r.creditAward.balance===balance));assert.equal((await campaign.submit(u.wallet,{mission:'practice'},rules.rulesHash,replay)).creditAward.balance,balance);assert(!(await service.me(u.wallet)).entitlements.includes('campaign'));
 });

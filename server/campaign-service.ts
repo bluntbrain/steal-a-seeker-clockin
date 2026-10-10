@@ -12,7 +12,7 @@ import {ServiceError} from './service';
 import {ReturnService} from './returns';
 import {transaction} from './db';
 import {replayInput} from './replay';
-import {verifyReplayInWorker} from './replay-runner';
+import {verifyReplayInWorker,ReplayInvalidError} from './replay-runner';
 // every wallet's total from its best verified run per level, ranked; exact ties share a rank
 const RANKED=`WITH best AS (
     SELECT DISTINCT ON(wallet,mission) wallet,mission,result FROM campaign_runs WHERE result->>'status'='won'
@@ -40,7 +40,10 @@ export class CampaignService{
   const prior=await this.pool.query('SELECT result FROM campaign_runs WHERE wallet=$1 AND mission=$2 AND rules_hash=$3 AND replay_hash=$4',[wallet,mission,storedHash,hash]);
   // Even an older verified replay may not have a credit award yet.
 
-  const result=prior.rows[0]?.result??await verify();
+  // a run that breaks the game rules is refused for good (422), so clients stop retrying it; busy or failed
+  // verification stays a retryable 503
+  let result=prior.rows[0]?.result;
+  if(!result){try{result=await verify();}catch(e){if(e instanceof ReplayInvalidError)throw new ServiceError(422,'This run does not follow the game rules, so it cannot be counted.');throw e;}}
   if(result.status!=='won')throw new ServiceError(400,'A completed extraction is required. This run does not earn campaign credit.');
   let awardedCredits=0,creditBalance=0;
   await transaction(this.pool,async db=>{
