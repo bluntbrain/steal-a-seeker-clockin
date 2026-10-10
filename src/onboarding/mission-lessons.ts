@@ -3,6 +3,7 @@ import {phoneEdition} from '../game/collection';
 import type {Mechanic} from './mechanic-demo';
 import {BOSS_NAMES} from '../../shared/campaign-levels';
 import type {CampaignEntry} from '../campaign/levels';
+import jev from '../campaign/jev-runs.json';
 export type MissionLesson={weapon?:'knife'|'ranged';id:string;kicker:string;title:string;body:string;cue:string;edition:number;collection:boolean;footer:string;tip?:string;playLabel?:string;demo?:Mechanic};
 const lessons=[
  ['Your first clean getaway','Tap the floor to move. Tap a guard to approach and attack with your knife. Take the phone, then reach the exit.','MOVE → TAKE → ESCAPE'],
@@ -58,4 +59,17 @@ export function missionHint(entry:Pick<CampaignEntry,'number'|'boss'>):string{
  if(entry.number<=AUTHORED_HINTS.length)return AUTHORED_HINTS[entry.number-1]!;
  if(entry.boss)return `${BOSS_NAMES[entry.boss]} is armoured in front. Circle round and strike from behind.`;
  return GENERAL_HINTS[(entry.number-AUTHORED_HINTS.length-1)%GENERAL_HINTS.length]!;
+}
+
+// jev ai played the campaign on a livestream; its best winning run per level gives players a score to chase.
+// it is jev's own run, not a verified record, so the copy always names jev
+const jevRun=(n:number)=>(jev.levels as Record<string,{score:number;tries:number}|undefined>)[String(n)];
+export function jevLine(n:number):string|undefined{
+ const run=jevRun(n);
+ return run&&`Jev AI scored ${run.score.toLocaleString()} here ${run.tries>1?`after ${run.tries} tries`:'on the first try'}.`;
+}
+export function jevResult(n:number,score:number):string|undefined{
+ const run=jevRun(n);if(!run)return undefined;
+ const gap=score-run.score;
+ return gap>0?`You beat Jev AI by ${gap.toLocaleString()} points.`:gap===0?'You tied Jev AI.':`Jev AI scored ${(-gap).toLocaleString()} more here.`;
 }

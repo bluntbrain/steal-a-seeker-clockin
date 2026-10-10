@@ -2,7 +2,7 @@ import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {CAMPAIGN_IDS} from '../src/game/level';
 import {combatLevel} from '../src/game/combat-levels';
-import {campaignLesson,missionHint,publishedLesson} from '../src/onboarding/mission-lessons';
+import {campaignLesson,jevLine,jevResult,missionHint,publishedLesson} from '../src/onboarding/mission-lessons';
 import {welcomeOffer} from '../src/commerce/welcome-offer';
 import {campaignEntries as entriesFor,BUNDLED_LEVELS as BUNDLED} from '../src/campaign/levels';
 test('campaign lessons match actual collection, drones and mission mechanics',()=>{
@@ -38,4 +38,13 @@ test('every level has one short loading hint, and bosses get their own',()=>{
   assert(hint.length>0&&hint.length<=80,`level ${entry.number} hint stays short enough to read in two seconds`);
   if(entry.boss)assert.match(hint,/strike from behind/);
  }
+});
+
+test('jev ai lines compare against its best run and stay silent where it never won',()=>{
+ assert.equal(jevLine(1),'Jev AI scored 8,808 here on the first try.');
+ assert.equal(jevLine(2),'Jev AI scored 9,589 here after 3 tries.');
+ assert.equal(jevResult(1,9000),'You beat Jev AI by 192 points.');
+ assert.equal(jevResult(1,8808),'You tied Jev AI.');
+ assert.equal(jevResult(1,8000),'Jev AI scored 808 more here.');
+ assert.equal(jevLine(14),undefined);assert.equal(jevResult(14,9000),undefined);
 });
