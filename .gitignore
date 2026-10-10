@@ -62,3 +62,6 @@ docs/readme/banner-prompt.txt
 docs/plans/REWARDING-KNOCKOUTS-2026-10-04.md
 releases/steal-a-seeker-mainnet-v1.1.1-code58.apk.json
 releases/steal-a-seeker-mainnet-v1.1.2-code59.apk.json
+# Courier v4 was replaced by courier-topdown-v5, which the game loads
+assets/courier-topdown-v4/
+scripts/pack-courier-v4.mjs
