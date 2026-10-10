@@ -25,34 +25,13 @@ __pycache__/
 *.keystore
 !android/app/debug.keystore
 
-# Generated component gallery; rebuilt by export:web
-design/visual-v2/sheets/preview.js
-design/visual-v2/sheets/assets/
-
-# Rebuilt paywall preview
-design/visual-v2/economy/paywall/preview.js
-design/visual-v2/economy/paywall/assets/
+# Design review pages and submission media stay local, not in this repository
+/design/
+/submission/
 
 # Private artifact build cache
 .submission-build/
 android/.kotlin/
-
-# Rebuilt native checkout preview
-design/checkout/preview.js
-design/checkout/assets/
-
-# Rebuilt leaderboard review fixtures
-design/visual-v2/leaderboard-v2/preview.js
-design/visual-v2/leaderboard-v2/preview.html
-design/visual-v2/leaderboard-v2/screen-reference.png
-design/visual-v2/leaderboard-v2/assets/
-
-# Rebuilt leaderboard A component gallery
-design/visual-v2/leaderboard-a/preview.js
-design/visual-v2/leaderboard-a/assets/
-
-# Rebuilt Courier Card review bundle
-design/visual-v2/courier-card-v2/preview.js
 
 # Never commit signing backups, credential configs or treasury key files
 release-signing.json
@@ -62,12 +41,6 @@ credentials.env
 *signing-backup*.zip
 mainnet-treasury.json
 devnet-treasury.json
-
-# Regenerated campaign celebration preview
-design/visual-v2/completion-options/preview.js
-
-# Generated credit claim review bundle
-design/visual-v2/credit-claim/preview.js
 
 # Heavy emulator QA media stays local; text evidence is tracked
 verification/qa/*/videos/
@@ -81,3 +54,11 @@ verification/qa/*/screenshots/
 # chrome profiles used by the jev show runner
 .jev-profile/
 .jev-profile-eval/
+
+# Local drafts and superseded builds, not part of the game
+/README.proposed.md
+docs/readme/banner.png
+docs/readme/banner-prompt.txt
+docs/plans/REWARDING-KNOCKOUTS-2026-10-04.md
+releases/steal-a-seeker-mainnet-v1.1.1-code58.apk.json
+releases/steal-a-seeker-mainnet-v1.1.2-code59.apk.json
