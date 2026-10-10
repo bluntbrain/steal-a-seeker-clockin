@@ -66,7 +66,7 @@ export function missionHint(entry:Pick<CampaignEntry,'number'|'boss'>):string{
 const jevRun=(n:number)=>(jev.levels as Record<string,{score:number;tries:number}|undefined>)[String(n)];
 export function jevLine(n:number):string|undefined{
  const run=jevRun(n);
- return run&&`Jev AI scored ${run.score.toLocaleString()} here ${run.tries>1?`after ${run.tries} tries`:'on the first try'}.`;
+ return run&&`Jev AI scored ${run.score.toLocaleString()} ${run.tries>1?`after ${run.tries} tries`:'on its first try'}.`;
 }
 export function jevResult(n:number,score:number):string|undefined{
  const run=jevRun(n);if(!run)return undefined;

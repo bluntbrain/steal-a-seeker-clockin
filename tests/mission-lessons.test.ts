@@ -41,8 +41,8 @@ test('every level has one short loading hint, and bosses get their own',()=>{
 });
 
 test('jev ai lines compare against its best run and stay silent where it never won',()=>{
- assert.equal(jevLine(1),'Jev AI scored 8,808 here on the first try.');
- assert.equal(jevLine(2),'Jev AI scored 9,589 here after 3 tries.');
+ assert.equal(jevLine(1),'Jev AI scored 8,808 on its first try.');
+ assert.equal(jevLine(2),'Jev AI scored 9,589 after 3 tries.');
  assert.equal(jevResult(1,9000),'You beat Jev AI by 192 points.');
  assert.equal(jevResult(1,8808),'You tied Jev AI.');
  assert.equal(jevResult(1,8000),'Jev AI scored 808 more here.');
