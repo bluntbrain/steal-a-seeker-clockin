@@ -66,12 +66,13 @@ async function liveProof(){
  if(!token)return;
  const submit=(run:unknown)=>call('POST','/campaign/runs',{mission:'practice',rulesHash:rules.rulesHash,replay:run},token);
  const error=(r:{json:Record<string,unknown>})=>String((r.json as {error?:string}).error??JSON.stringify(r.json)).slice(0,160);
+ // exact codes, so a rate limit (429) can never pass as a rejection
  const r1=await submit(forged);
- check('forged score is refused before any leaderboard update',r1.status>=400&&r1.status<500,`HTTP ${r1.status}: ${error(r1)}`);
+ check('forged score is refused before any leaderboard update',r1.status===400,`HTTP ${r1.status}: ${error(r1)}`);
  const r2=await submit(altered);
- check('altered inputs are refused',r2.status>=400&&r2.status<500,`HTTP ${r2.status}: ${error(r2)}`);
+ check('altered inputs are refused',r2.status===422,`HTTP ${r2.status}: ${error(r2)}`);
  const r3=await submit(impossible);
- check('impossible input is refused',r3.status>=400&&r3.status<500,`HTTP ${r3.status}: ${error(r3)}`);
+ check('impossible input is refused',r3.status===400,`HTTP ${r3.status}: ${error(r3)}`);
  const before=await call('GET','/campaign/leaderboard',undefined,token);
  check('the leaderboard has no row for this wallet after three bad runs',before.status===200&&(before.json as {personal:unknown}).personal===null,`personal row: ${JSON.stringify((before.json as {personal:unknown}).personal)}`);
  const r4=await submit(replay);

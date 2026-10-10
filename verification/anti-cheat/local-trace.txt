@@ -1,4 +1,4 @@
-Steal a Seeker anti-cheat proof, 2026-10-10T12:44:01.586Z
+Steal a Seeker anti-cheat proof, 2026-10-10T13:00:00.261Z
 Rules hash 4d11d0900909ae4ccb9b965ce1dd171787f8c1a31a308047286c526a890ebe76
 Level 1 run: 139 input chunks, recorded by the game's own simulation (tests/fixtures/replay.ts)
 

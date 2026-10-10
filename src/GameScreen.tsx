@@ -157,8 +157,8 @@ export function Game({onSnapshot}:{onSnapshot?:(state:GameState)=>void}){
  const campaignFinished=!trial.active&&!testMission&&completedCampaign(progress.progress,hud);
  const finaleVisible=!sceneLoading&&campaignFinished&&!claimVisible&&!paused&&!hideoutOpen&&!walletOpen&&!settingsOpen;
  const published=useSyncExternalStore(publishedLevels.subscribe,publishedLevels.get),entries=useMemo(()=>campaignEntries(published),[published]);
- // read the saved levels at launch, behind the welcome screen, so the map opens with every known level; also send the anonymous daily open
- useEffect(()=>{void loadPublishedLevels();void sendDailyOpen();},[]);
+ // read the saved levels at launch, behind the welcome screen, so the map opens with every known level; also send the anonymous daily open, again when the app returns from the background
+ useEffect(()=>{void loadPublishedLevels();void sendDailyOpen();const subscription=AppState.addEventListener('change',state=>{if(state==='active')void sendDailyOpen();});return()=>subscription.remove();},[]);
  const nextMission=(n=>n?.playable?n:undefined)(nextEntry(entries,entry.key));
  const shareAction=useRef<(()=>Promise<void>)|null>(null),[shareReady,setShareReady]=useState(false);
  const registerShare=useCallback((fn:(()=>Promise<void>)|null)=>{shareAction.current=fn;setShareReady(!!fn);},[]);
