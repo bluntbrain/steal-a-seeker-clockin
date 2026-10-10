@@ -37,7 +37,7 @@ export default function SettingsPanel({visible, onClose, mission, onReplayTips}:
       <PromotionEntry onDiscount={code=>{onClose();economy.openPass(code);}}/>
       <PlaytestControls/>
       {onReplayTips&&<Pressable accessibilityRole="button" onPress={onReplayTips} style={styles.button}><Text style={styles.buttonText}>Replay first-mission tips</Text></Pressable>}
-      <Text style={styles.detail}>Version {app.expo.version} · {Platform.OS === 'web' ? 'Browser preview · no payments' : IS_MAINNET ? 'Solana Mainnet · real payments' : 'Devnet · test tokens'}{'\n'}Preferences are saved on this device.</Text>
+      <Text style={styles.detail}>Version {app.expo.version} ({app.expo.android.versionCode}) · {Platform.OS === 'web' ? 'Browser preview · no payments' : IS_MAINNET ? 'Solana Mainnet · real payments' : 'Devnet · test tokens'}{'\n'}Preferences are saved on this device.</Text>
     </ScrollView><Pressable accessibilityRole="button" accessibilityLabel="Close settings" onPress={onClose} style={[styles.button,{margin:12}]}><Text style={styles.buttonText}>Close settings</Text></Pressable></View></View>
   </Modal>;
 }
