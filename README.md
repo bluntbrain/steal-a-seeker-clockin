@@ -4,7 +4,7 @@
 
 [![checks](https://github.com/bluntbrain/steal-a-seeker-clockin/actions/workflows/ci.yml/badge.svg)](https://github.com/bluntbrain/steal-a-seeker-clockin/actions/workflows/ci.yml)
 
-**Sneak past guards, grab a Seeker phone, and escape.** A free Android stealth game built for Solana Mobile and available on the Solana dApp Store. Tap the floor to move, tap a guard to attack, and use walls to stay out of sight.
+**Take down every guard, grab a Seeker phone, and escape.** A free Android stealth game built for Solana Mobile and available on the Solana dApp Store. Tap the floor to move, tap a guard to attack, and use walls to stay out of sight. From level 2, the exit opens only when every guard is down.
 
 [Website](https://stealaseeker.bluntbrain.com/) · [Gameplay](https://x.com/bluntbrain/status/2102319437173191157) · [Jev livestream](https://x.com/i/broadcasts/1XxygweZEYnGM) · [Updates](https://x.com/StealASeeker)
 

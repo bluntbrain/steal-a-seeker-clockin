@@ -47,11 +47,14 @@ npx tsx scripts/prove-anti-cheat.ts --live   # the same checks against productio
 | The name lookup fails | A failed lookup is not shown as "no name", and it never blocks scores. | [server/wallet-names.test.ts](server/wallet-names.test.ts): "RPC errors are not represented as a confirmed absence", "cache never blocks scores" |
 | A signed sign-in message is changed | The server refuses it. Each challenge works once. | [tests/wallet-sign-in.test.ts](tests/wallet-sign-in.test.ts): "rejects modified, missing and truncated signed messages". [server/commerce.test.ts](server/commerce.test.ts): "signed authentication consumes one nonce, enforces account isolation and supports revocation" |
 | A replay is slow or the replay workers are full | The worker stops, and capacity comes back for the next run. | [server/replay-runner.test.ts](server/replay-runner.test.ts): "a timed-out worker releases capacity for the next replay" |
+| A run reaches the exit with guards standing (level 2 and later) | The app sends the courier back out and shows "Take down every guard first". From the day the `CLEAR_ALL_RULE` switch is on, the server refuses such a win (HTTP 422). | [tests/combat.test.ts](tests/combat.test.ts): "kill-all rule: from level 2 the final exit stays shut until every guard is down". [server/commerce.test.ts](server/commerce.test.ts): "with the kill-all rule on, a win from level 2 counts only when every guard is down" |
 | A run breaks the rules | No credits and no score. | [server/replay.test.ts](server/replay.test.ts): "verifier rejects impossible inputs, oversized runs, repeated edges and post-completion ticks". [server/commerce.test.ts](server/commerce.test.ts): "free campaign grants verified credits once; forged progress and invalid replays grant none" |
+
+**Kill-all rule, 10 October 2026.** From level 2 the final exit opens only when every guard is down ([shared/clear-rule.ts](shared/clear-rule.ts)). It sits outside the pinned rules, so published levels and older replays stay valid. A bot that clears every guard won 84 of the bundled levels 2 to 100 ([verification/kill-all/clear-all-audit.txt](verification/kill-all/clear-all-audit.txt)). On the other 15 the bot was caught; that shows those levels are hard, not that they are impossible.
 
 ## 3. Checks on every push
 
-[.github/workflows/ci.yml](.github/workflows/ci.yml) runs on every push to `main`: type check, game rules check, app tests, the offline anti-cheat proof, and the server tests against PostgreSQL 16. On 10 October 2026 there were 415 app tests and 79 server tests, and all of them passed (local run and GitHub Actions).
+[.github/workflows/ci.yml](.github/workflows/ci.yml) runs on every push to `main`: type check, game rules check, app tests, the offline anti-cheat proof, and the server tests against PostgreSQL 16. On 10 October 2026 there were 416 app tests and 80 server tests, and all of them passed (local run and GitHub Actions).
 
 ## 4. A real payment on a phone
 
