@@ -2,6 +2,8 @@
 
 # Steal a Seeker
 
+[![checks](https://github.com/bluntbrain/steal-a-seeker-clockin/actions/workflows/ci.yml/badge.svg)](https://github.com/bluntbrain/steal-a-seeker-clockin/actions/workflows/ci.yml)
+
 **Sneak past guards, grab a Seeker phone, and escape.** A free Android stealth game built for Solana Mobile and available on the Solana dApp Store. Tap the floor to move, tap a guard to attack, and use walls to stay out of sight.
 
 [Website](https://stealaseeker.bluntbrain.com/) · [Gameplay](https://x.com/bluntbrain/status/2102319437173191157) · [Jev livestream](https://x.com/i/broadcasts/1XxygweZEYnGM) · [Updates](https://x.com/StealASeeker)
@@ -18,7 +20,7 @@ Hunter Assassin inspired the short stealth missions. Candy Crush inspired the sc
 - **Play before connecting:** Start without a wallet. The first 100 levels are bundled; later levels are downloaded and cached. Saved progress and queued runs sync when connected.
 - **Wallet identity:** Mobile Wallet Adapter connects Android wallets. Wallet-to-`.skr` lookup displays readable leaderboard names; Seeker ID search lets you pick a friend to compare with.
 - **Optional SKR / SOL purchases:** Buy outfits and credit packs, or a Game Pass bundle. The campaign stays free, and outfits have equal gameplay stats. In-game credits are not withdrawable tokens.
-- **Verified results:** The backend replays submitted inputs before granting ranked scores and credits. Finalized payment checks and a transaction ledger prevent duplicate purchase grants.
+- **Verified results:** The backend replays submitted inputs before granting ranked scores and credits. Finalized payment checks and a transaction ledger prevent duplicate purchase grants. [EVIDENCE.md](EVIDENCE.md) has a live production trace and the test behind each edge case.
 
 ## How it works
 
