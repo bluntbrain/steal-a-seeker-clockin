@@ -20,5 +20,8 @@ const pages:Record<string,{title:string;content:string}>={
 export function registerSite(app:FastifyInstance){
  app.get('/app-icon.png',async(_req,reply)=>reply.type('image/png').header('Cache-Control','public, max-age=3600').send(await readFile(new URL('./public/app-icon.png',import.meta.url))));
  for(const [path,{title,content}] of Object.entries(pages))app.get(path,async(_req,reply)=>reply.type('text/html; charset=utf-8').header('Cache-Control','public, max-age=300').header('X-Content-Type-Options','nosniff').header('Referrer-Policy','strict-origin-when-cross-origin').header('Content-Security-Policy',"default-src 'none'; img-src 'self'; style-src 'unsafe-inline'; base-uri 'none'; frame-ancestors 'none'; form-action 'none'").send(page(title,content)));
+ // digital asset links: mobile wallet adapter wallets check that the app asking to connect is the release app signed
+ // by us (package and signing certificate) before they trust the identity uri https://stealaseeker.bluntbrain.com
+ app.get('/.well-known/assetlinks.json',async(_req,reply)=>reply.header('Cache-Control','public, max-age=3600').send([{relation:['delegate_permission/common.handle_all_urls'],target:{namespace:'android_app',package_name:'com.bluntbrain.stealaseeker',sha256_cert_fingerprints:['4F:A3:E9:94:22:38:F1:10:82:4F:B6:7D:C9:94:38:FC:1D:70:EF:48:A2:73:E4:A7:93:31:D5:F8:A1:E1:E9:13']}}]));
  app.get('/release-banner.jpg',async(_req,reply)=>reply.type('image/jpeg').header('Cache-Control','public, max-age=3600').send(await readFile(new URL('./public/release-banner.jpg',import.meta.url))));
 }
