@@ -10,6 +10,7 @@ import {compareRun,type CampaignPerformance,type CampaignSummary,type CampaignRa
 import {address} from '@solana/kit';
 import {ServiceError} from './service';
 import {requiresClearAll} from '../shared/clear-rule';
+import rules from '../shared/rules-manifest.json';
 import {ReturnService} from './returns';
 import {transaction} from './db';
 import {replayInput} from './replay';
@@ -36,6 +37,8 @@ export class CampaignService{
   }else{
    const mission=target.mission;if(!CAMPAIGN_IDS.includes(mission))throw new ServiceError(409,'Update the game before recording a campaign reward run.');
    key=mission;verify=()=>verifyReplayInWorker(mission,replay,{rulesHash});targetFor=()=>campaignCreditTarget(rulesHash,mission);reward=creditReward;levelNumber=CAMPAIGN_IDS.indexOf(mission)+1;guardCount=combatLevel(mission).patrols.length;
+   // an archived bundle may hold a different guard count, so from level 2 only the current rules record a run
+   if(process.env.CLEAR_ALL_RULE==='on'&&requiresClearAll(levelNumber)&&rulesHash!==rules.rulesHash)throw new ServiceError(409,'Update the game to record this level.');
   }
   const mission=key;
   const prior=await this.pool.query('SELECT result FROM campaign_runs WHERE wallet=$1 AND mission=$2 AND rules_hash=$3 AND replay_hash=$4',[wallet,mission,storedHash,hash]);

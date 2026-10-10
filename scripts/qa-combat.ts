@@ -9,13 +9,13 @@ import {sightDistance} from '../src/game/guards';
 import bundled from '../src/campaign/published-levels.json';
 import {verifyReplay} from '../server/replay';
 import type {ReplayChunk} from '../shared/replay';
-import {requiresClearAll,campaignLevelOf,guardsLeft,exitGuard,insideExit} from '../shared/clear-rule';
+import {requiresClearAll,campaignLevelOf,guardsLeft,watchExit} from '../shared/clear-rule';
 // Produces ordinary recorded taps. No position, health, damage or score overrides.
 // from level 2 every guard must fall before the final exit: the bot hunts, waits for reinforcements and applies the
 // app's exit guard, so its replays are the ones a player could record
 export function solveCombat(level:LevelDefinition,clearAll=requiresClearAll(campaignLevelOf(level))){
  for(let strategy=0;strategy<6;strategy++){
-  const s=initialState(level.mission,level),chunks:ReplayChunk[]=[];let seq=0,stage=-1,waypoints:Point[]=[],at=0,back={x:s.x,y:s.y};
+  const s=initialState(level.mission,level),chunks:ReplayChunk[]=[];let seq=0,stage=-1,waypoints:Point[]=[],at=0;const watch={epoch:-1,issued:0,backX:0,backY:0};
   for(let frame=0;frame<level.hardLimitSeconds*30&&s.status==='playing';frame++){
    let command:CombatCommand|undefined;
    if(frame%6===0){
@@ -37,9 +37,8 @@ export function solveCombat(level:LevelDefinition,clearAll=requiresClearAll(camp
      if(!current.order||current.order.kind!==next.kind||Math.hypot(current.order.x-next.x,current.order.y-next.y)>.1){seq++;command=next;}
     }
    }
-   const guard=clearAll?exitGuard(s,back,seq+1):null;if(guard){seq++;command=guard;}
+   const guard=clearAll?watchExit(s,watch,0,seq):null;if(guard){seq=guard.seq;command=guard;}
    recordStep(s,{...idleInput(),command},chunks);
-   if(!insideExit(s))back={x:s.x,y:s.y};
   }
   if(s.status==='won'&&(!clearAll||guardsLeft(s)===0))return {strategy,ticks:s.ticks,hp:s.combat!.hp,kills:s.combat!.kills,score:s.score,replay:{version:2 as const,chunks}};
  }

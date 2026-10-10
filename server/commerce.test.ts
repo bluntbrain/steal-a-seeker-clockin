@@ -601,6 +601,7 @@ test('with the kill-all rule on, a win from level 2 counts only when every guard
   assert((await campaign.submit(u.wallet,{level:13},row.rulesHash,clear.replay)).creditAward.credits>0);
   // a legacy stealth replay cannot show its kills, so level 2 asks for the update; level 1 stays the open tutorial
   await assert.rejects(campaign.submit(u.wallet,{mission:'cone-lesson'},rules.rulesHash,fixtureReplay('cone-lesson').replay),(e:unknown)=>e instanceof ServiceError&&e.status===409);
+  await assert.rejects(campaign.submit(u.wallet,{mission:'cone-lesson'},'0'.repeat(64),fixtureReplay('cone-lesson').replay),(e:unknown)=>e instanceof ServiceError&&e.status===409&&/Update the game/.test(e.message),'archived rules hold other guard counts');
   assert((await campaign.submit(u.wallet,{mission:'practice'},rules.rulesHash,fixtureReplay('practice').replay)).creditAward.credits>0);
  }finally{delete process.env.CLEAR_ALL_RULE;}
 });

@@ -5,7 +5,7 @@ import {findPath} from '../src/game/navigation';
 import {sightDistance} from '../src/game/guards';
 import type {LevelDefinition,Point} from '../src/game/level';
 import type {ReplayChunk} from '../shared/replay';
-import {guardsLeft,exitGuard,insideExit} from '../shared/clear-rule';
+import {guardsLeft,watchExit} from '../shared/clear-rule';
 // from level 2 the last phone goes to the exit only after every guard is down; until then the goal is the nearest guard
 function hunting(s:GameState,clearAll:boolean){const l=s.definition!;return clearAll&&s.carrying&&s.delivered+1>=(l.targets?.length??1)&&guardsLeft(s)>0;}
 function goal(s:GameState,clearAll=false):Point{const l=s.definition!;if(hunting(s,clearAll)){const g=s.guards.filter(g=>g.active&&g.hp>0).sort((a,b)=>Math.hypot(a.x-s.x,a.y-s.y)-Math.hypot(b.x-s.x,b.y-s.y))[0];return g??s;}return l.switches?.length&&!s.power?l.switches[0]!:s.carrying?{x:l.exit.x+l.exit.w/2,y:l.exit.y+l.exit.h/2}:l.targets?.[s.delivered]??l.phone;}
@@ -22,13 +22,13 @@ function advance(source:GameState,cmd:CombatCommand,ticks:number){const s=JSON.p
 function value(s:GameState,style=0,clearAll=false){const c=s.combat!;if(s.status==='won'&&clearAll&&guardsLeft(s)>0)return -1e6;return s.status==='won'?1e6:s.status!=='playing'?-1e6:c.hp*([14,22,10,18][style]??14)+c.kills*([90,160,170,55][style]??90)+s.delivered*1300+Number(s.carrying)*800+s.power*650-distance(s,clearAll)*18-s.elapsed*.6;}
 // Receding-horizon tap bot. It only emits legal commands, never edits the simulation.
 function attempt(l:LevelDefinition,style:number,clearAll:boolean){
- const s=initialState(l.mission,l),chunks:ReplayChunk[]=[];let seq=0,back={x:s.x,y:s.y};
+ const s=initialState(l.mission,l),chunks:ReplayChunk[]=[];let seq=0;const watch={epoch:-1,issued:0,backX:0,backY:0};
  for(let turn=0;turn<l.hardLimitSeconds*2&&s.status==='playing';turn++){
   const candidates=options(s,seq+1,clearAll).map(cmd=>{const state=advance(s,cmd,15);return {cmd,state,value:value(state,style,clearAll)};}).sort((a,b)=>b.value-a.value).slice(0,4);
   let best=candidates[0],bestValue=-Infinity;
   for(const candidate of candidates){let future=candidate.value;if(candidate.state.status==='playing')for(const cmd of options(candidate.state,seq+2,clearAll)){future=Math.max(future,value(advance(candidate.state,cmd,style===1?24:18),style,clearAll));}const score=future+candidate.value*.25;if(score>bestValue){best=candidate;bestValue=score;}}
   if(!best)break;if(process.env.QA_TRACE&&turn%10===0)console.log(turn,s.x.toFixed(1),s.y.toFixed(1),s.combat!.hp,s.carrying,s.combat!.kills,best.cmd.kind,goal(s));seq++;
-  for(let f=0;f<15&&s.status==='playing';f++){let command=f===0?best.cmd:undefined;const guard=clearAll?exitGuard(s,back,seq+1):null;if(guard){seq++;command=guard;}recordStep(s,{...idleInput(),command},chunks);if(!insideExit(s))back={x:s.x,y:s.y};}
+  for(let f=0;f<15&&s.status==='playing';f++){let command=f===0?best.cmd:undefined;const guard=clearAll?watchExit(s,watch,0,seq):null;if(guard){seq=guard.seq;command=guard;}recordStep(s,{...idleInput(),command},chunks);}
  }
  return s.status==='won'&&(!clearAll||guardsLeft(s)===0)?{strategy:10,ticks:s.ticks,hp:s.combat!.hp,kills:s.combat!.kills,score:s.score,replay:{version:2 as const,chunks}}:null;
 }

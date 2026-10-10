@@ -5,7 +5,7 @@ import {exitWindowSeconds} from './controls/exit-window';
 import TutorialHand from './components/TutorialHand';
 import MissionChaseLoader,{warmMissionLoader} from './components/MissionChaseLoader';
 import {jevLine,jevResult,missionHint} from './onboarding/mission-lessons';
-import {exitGuard,exitShut,guardsLeft,insideExit,requiresClearAll} from '../shared/clear-rule';
+import {exitShut,guardsLeft,reinforcementsPending,requiresClearAll,watchExit} from '../shared/clear-rule';
 import {authoredEntry,campaignEntries,nextEntry,type CampaignEntry} from './campaign/levels';
 import {loadPublishedLevels,publishedLevels} from './campaign/client';
 import {sendDailyOpen} from './telemetry/store';
@@ -107,7 +107,7 @@ export function Game({onSnapshot}:{onSnapshot?:(state:GameState)=>void}){
  const finishBossEntrance=useCallback(()=>setBossEntrance(false),[]);
  const sceneReady=useSharedValue(false),simulationEpoch=useSharedValue(0),focusProgress=useSharedValue(1);
  const pendingTap=useSharedValue<PendingTap|null>(null),previousTap=useSharedValue<PendingTap|null>(null),tapElapsed=useSharedValue(TAP_INTERVAL_MS);
- const clearAll=useSharedValue(false),exitBackX=useSharedValue(0),exitBackY=useSharedValue(0),exitGuardSeq=useSharedValue(0);
+ const clearAll=useSharedValue(false),exitEpoch=useSharedValue(-1),exitIssued=useSharedValue(0),exitBackX=useSharedValue(0),exitBackY=useSharedValue(0);
  const recording=useSharedValue<ReplayChunk[]>([]),[completedReplay,setCompletedReplay]=useState<Replay>();
  const game=useSharedValue(initial),input=useSharedValue(idleInput()),alpha=useSharedValue(0),clock=useSharedValue(0),accumulator=useSharedValue(0),suspended=useSharedValue(homeFirst);
  const samples=useSharedValue<number[]>(Array.from({length:120},()=>0)),sampleIndex=useSharedValue(0),sampleCount=useSharedValue(0),reportClock=useSharedValue(0),hudClock=useSharedValue(0),frameTotal=useSharedValue(0),slowTotal=useSharedValue(0);
@@ -200,8 +200,8 @@ export function Game({onSnapshot}:{onSnapshot?:(state:GameState)=>void}){
  const callEvent=useCallback((kind:Parameters<typeof event>[0])=>jsRef.current.event(kind),[]);
  const callBeginGuide=useCallback(()=>jsRef.current.beginGuide(),[]);
  // from level 2 the final exit stays shut until every guard is down (shared/clear-rule.ts); the centre notice says so
- const clearAllRun=requiresClearAll(entry.number),[exitNotice,setExitNotice]=useState<{left:number;at:number}|null>(null);
- const callExitShut=useCallback((left:number)=>{setExitNotice({left,at:Date.now()});jsRef.current.event('blocked');},[]);
+ const clearAllRun=requiresClearAll(entry.number),[exitNotice,setExitNotice]=useState<{left:number;pending:boolean;at:number}|null>(null);
+ const callExitShut=useCallback((left:number,pending:boolean)=>{setExitNotice({left,pending,at:Date.now()});jsRef.current.event('blocked');},[]);
  useEffect(()=>{clearAll.value=clearAllRun;},[clearAllRun,clearAll]);
  useEffect(()=>{if(!exitNotice)return;const timer=setTimeout(()=>setExitNotice(null),2400);return()=>clearTimeout(timer);},[exitNotice]);
  const frameDriver=useFrameCallback(useCallback((frame:{timeSincePreviousFrame:number|null})=>{
@@ -219,7 +219,7 @@ export function Game({onSnapshot}:{onSnapshot?:(state:GameState)=>void}){
     const shut=clearAll.value&&proposed?.kind==='exit'&&exitShut(game.value),command=shut?null:proposed;
     if(command){input.modify(v=>{v.command=command;return v;});if(guideWaiting.value){guideWaiting.value=false;runOnJS(callBeginGuide)();}}
     // the thumb learns what the tap did: a tick for a move, a firmer pulse for a target, a double tick for nothing
-    if(shut)runOnJS(callExitShut)(guardsLeft(game.value));
+    if(shut)runOnJS(callExitShut)(guardsLeft(game.value),reinforcementsPending(game.value));
     else runOnJS(callEvent)(command?(command.kind==='move'||command.kind==='stop'?'tapMove':'tapTarget'):'blocked');
    }
    if(guideWaiting.value){accumulator.value=0;return;}
@@ -237,14 +237,15 @@ export function Game({onSnapshot}:{onSnapshot?:(state:GameState)=>void}){
    if(accumulator.value+1e-9<TUNING.step){alpha.value=accumulator.value/TUNING.step;return;}
    // the app's half of the kill-all rule: carrying the last phone into the exit with guards standing sends the courier
    // back to where it last stood outside, well before the extraction hold ends. the move is an ordinary recorded command
-   if(clearAll.value&&game.value.carrying&&insideExit(game.value)){
-    const seq=Math.max(game.value.combat?.commandSeen??0,input.value.command?.seq??0)+1,guard=exitGuard(game.value,{x:exitBackX.value,y:exitBackY.value},seq);
-    if(guard&&input.value.command?.seq!==exitGuardSeq.value){exitGuardSeq.value=guard.seq;input.modify(v=>{v.command=guard;return v;});runOnJS(callExitShut)(guardsLeft(game.value));}
+   if(clearAll.value){
+    const watch={epoch:exitEpoch.value,issued:exitIssued.value,backX:exitBackX.value,backY:exitBackY.value};
+    const guard=watchExit(game.value,watch,simulationEpoch.value,Math.max(game.value.combat?.commandSeen??0,input.value.command?.seq??0));
+    exitEpoch.value=watch.epoch;exitIssued.value=watch.issued;exitBackX.value=watch.backX;exitBackY.value=watch.backY;
+    if(guard){input.modify(v=>{v.command=guard;return v;});runOnJS(callExitShut)(guardsLeft(game.value),reinforcementsPending(game.value));}
    }
    const previousDamage=game.value.combat?.damageTaken??0,previousDecoys=game.value.decoysLeft,previousAlert=game.value.alert,previousPower=game.value.power,previousRelaySum=relaySum(game.value.relayTimers),previousCarry=game.value.carrying,previousDashes=game.value.dashes,previousTool=game.value.toolSeen,previousStatus=game.value.status,previousKills=game.value.combat?.kills??0,previousHits=game.value.combat?.hitEvents??0,previousBlocks=game.value.combat?.melee?.blocks??0,previousHunting=anyHunting(game.value),previousSuspicious=countSuspicious(game.value),previousExtract=Math.floor(game.value.extraction/.3);
    game.modify(s=>{recording.modify(chunks=>{while(accumulator.value+1e-9>=TUNING.step){recordStep(s,input.value,chunks);accumulator.value-=TUNING.step;}return chunks;});return s;},true);
    alpha.value=accumulator.value/TUNING.step;
-   if(clearAll.value&&!insideExit(game.value)){exitBackX.value=game.value.x;exitBackY.value=game.value.y;}
    if(game.value.decoysLeft<previousDecoys)runOnJS(callEvent)('decoy');
    if((!combatMode&&previousAlert<=0&&game.value.alert>0)||(combatMode&&!previousHunting&&anyHunting(game.value)))runOnJS(callEvent)('spotted');
    if(countSuspicious(game.value)>previousSuspicious)runOnJS(callEvent)('suspicion');
@@ -264,7 +265,7 @@ export function Game({onSnapshot}:{onSnapshot?:(state:GameState)=>void}){
    if(game.value.status==='won'&&previousStatus!=='won')runOnJS(callEvent)('success');
    if(game.value.status==='caught'&&previousStatus!=='caught')runOnJS(callEvent)('caught');
    if(hudClock.value>=.12||previousDamage!==(game.value.combat?.damageTaken??0)||previousTool!==game.value.toolSeen||previousCarry!==game.value.carrying||previousStatus!==game.value.status||previousDashes!==game.value.dashes){runOnJS(callPublish)(fullSnapshots.value?{...game.value}:{...game.value,definition:undefined,guards:game.value.guards.map(g=>({...g,path:NO_PATH,brain:undefined}))},simulationEpoch.value);hudClock.value=0;}
- },[suspended,sceneReady,pendingTap,tapElapsed,game,input,guideStage,guideWaiting,fullSnapshots,clock,frameTotal,slowTotal,samples,sampleIndex,sampleCount,reportClock,accumulator,recording,alpha,hudClock,simulationEpoch,combatMode,callPublish,callStats,callEvent,callBeginGuide,clearAll,exitBackX,exitBackY,exitGuardSeq,callExitShut]));
+ },[suspended,sceneReady,pendingTap,tapElapsed,game,input,guideStage,guideWaiting,fullSnapshots,clock,frameTotal,slowTotal,samples,sampleIndex,sampleCount,reportClock,accumulator,recording,alpha,hudClock,simulationEpoch,combatMode,callPublish,callStats,callEvent,callBeginGuide,clearAll,exitEpoch,exitIssued,exitBackX,exitBackY,callExitShut]));
  useEffect(()=>{frameDriver.setActive(renderGameSurface&&!paused);return()=>frameDriver.setActive(false);},[renderGameSurface,paused,frameDriver]);
  const pause=useCallback((value:boolean)=>{
   suspended.value=value;pendingTap.value=null;previousTap.value=null;
@@ -421,7 +422,7 @@ export function Game({onSnapshot}:{onSnapshot?:(state:GameState)=>void}){
  {!testMission&&!trial.active&&!guide.active&&guide.retries===0&&hud.status==='won'&&completedReplay&&!paused&&<View style={{position:'absolute',bottom:insets.bottom+3,zIndex:46}}><CampaignSubmission state={hud} replay={completedReplay} target={entry.number>12?{level:entry.number,rulesHash:entry.rulesHash}:{mission:entry.mission}} quiet retrySignal={rewardRetry} onReward={account.preview?undefined:rewardResolved}/></View>}
  {claimVisible&&<CreditClaim requiresWallet={!account.preview&&!account.wallet&&guide.retries===0} connecting={connectingClaim} onConnect={connectToClaim} autoClaim={autoClaim} reward={creditReward} balance={economy.balance} onRetry={creditReward.amount===null?(account.preview?saveLocalReward:()=>{rewardResolved(null);setRewardRetry(n=>n+1);}):undefined} stars={starsFor(hud)} mission={level.title} onDone={()=>setRewardClaimed(true)}/>}
  {entry.boss&&gameplayVisible&&<BossDownRibbon key={`down-${sceneVersion}`} game={game} clock={clock} reduced={!!settings.reducedEffects}/>}
- {exitNotice&&gameplayVisible&&<Animated.View key={exitNotice.at} entering={FadeIn.duration(140)} exiting={FadeOut.duration(220)} pointerEvents="none" accessibilityLiveRegion="assertive" testID="exit-shut-notice" style={s.exitNotice}><Text style={s.exitNoticeTitle}>Take down every guard first</Text><Text style={s.exitNoticeDetail}>{exitNotice.left} {exitNotice.left===1?'guard':'guards'} left before the exit opens</Text></Animated.View>}
+ {exitNotice&&gameplayVisible&&<Animated.View key={exitNotice.at} entering={FadeIn.duration(140)} exiting={FadeOut.duration(220)} pointerEvents="none" accessibilityLiveRegion="assertive" testID="exit-shut-notice" style={s.exitNotice}><Text style={s.exitNoticeTitle}>Take down every guard first</Text><Text style={s.exitNoticeDetail}>{exitNotice.left} {exitNotice.left===1?'guard':'guards'} left{exitNotice.pending?'. Reinforcements are still on the way.':' before the exit opens'}</Text></Animated.View>}
  {bossEntrance&&entry.boss&&!sceneLoading&&renderGameSurface&&!paused&&<BossEntrance key={sceneVersion} boss={entry.boss} reduced={!!settings.reducedEffects} onDone={finishBossEntrance}/>}
  {sceneLoading&&renderGameSurface&&<MissionChaseLoader key={sceneVersion} onComplete={loaderCompleted} boss={entry.boss??undefined} hint={[missionHint(entry),jevLine(entry)].filter(Boolean).join('\n')} progress={sceneProgress} reduced={!!settings.reducedEffects} error={sceneError}
   onRetry={()=>{sceneReady.value=false;simulationEpoch.value=++sceneEpoch.current;setSceneVersion(sceneEpoch.current);setSceneProgress(0);setSceneError('');}}
