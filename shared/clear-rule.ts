@@ -3,6 +3,9 @@
 // the server refuses a won run that left any guard standing. level 1 stays the guided tutorial
 import type {GameState} from '../src/game/simulation';
 import type {CombatCommand} from '../src/game/combat';
+import type {Point} from '../src/game/level';
+import {findPath} from '../src/game/navigation';
+import {intersectsBox} from '../src/game/geometry';
 
 export const CLEAR_ALL_FROM_LEVEL=2;
 export const requiresClearAll=(level:number)=>level>=CLEAR_ALL_FROM_LEVEL;
@@ -22,23 +25,41 @@ export function reinforcementsPending(s:GameState){'worklet';return s.guards.som
 export const EXIT_CLEARANCE=.6;
 export function insideExit(s:Pick<GameState,'x'|'y'|'definition'>,margin=0){'worklet';const e=s.definition?.exit;return !!e&&s.x>=e.x-margin&&s.x<=e.x+e.w+margin&&s.y>=e.y-margin&&s.y<=e.y+e.h+margin;}
 
-/** a move back to the retreat point (or the phone's spot if that point is not clearly outside), or null */
-export function exitGuard(s:GameState,back:{x:number;y:number},seq:number):CombatCommand|null{
+/** a tap that would walk into a shut exit (the exit itself or a floor spot inside it) explains the rule instead */
+export function blocksTap(s:GameState,c:CombatCommand|null|undefined){'worklet';return !!c&&exitShut(s)&&(c.kind==='exit'||c.kind==='move'&&insideExit({x:c.x,y:c.y,definition:s.definition},.4));}
+
+// the simulation drops a move it cannot path to (combat.ts setPath: validPoint, then findPath) without a word,
+// so the retreat checks the same before it is sent
+function reachable(s:GameState,p:Point){'worklet';const l={...s.definition!,blockers:s.blockers};return p.x>.65&&p.y>.65&&p.x<l.width-.65&&p.y<l.height-.65&&!l.blockers.some(b=>intersectsBox(p.x,p.y,b,.32))&&findPath(s,p,l).length>0;}
+
+/** where to retreat: the last spot clear of the exit, else the phone's spot, else the spawn */
+export function retreatPoint(s:GameState,back:Point,skipBack=false):Point{
  'worklet';
- if(!exitShut(s)||!insideExit(s))return null;
- const p=insideExit({x:back.x,y:back.y,definition:s.definition},.3)?s.definition!.phone:back;
- return {seq,kind:'move',target:-1,x:Math.round(p.x*100)/100,y:Math.round(p.y*100)/100};
+ const l=s.definition!,candidates=skipBack?[l.phone,l.spawn]:[back,l.phone,l.spawn];
+ for(const p of candidates)if(!insideExit({x:p.x,y:p.y,definition:l},.3)&&reachable(s,p))return p;
+ return l.phone;
 }
 
-export type ExitWatch={epoch:number;issued:number;backX:number;backY:number};
+/** a move out of the shut exit, or null when the exit may be used */
+export function exitGuard(s:GameState,back:Point,seq:number,skipBack=false):CombatCommand|null{
+ 'worklet';
+ if(!exitShut(s)||!insideExit(s))return null;
+ const p=retreatPoint(s,back,skipBack);
+ return {seq,kind:'move',target:-1,x:p.x,y:p.y};
+}
+
+export type ExitWatch={epoch:number;issued:number;at:number;backX:number;backY:number};
 /** the app's exit guard for one frame, shared with the tests and the solvers. it resets when a new run starts, keeps the
- * retreat point and issues one recorded move per entry; a newer player command inside the exit gets a fresh one */
+ * retreat point and issues one recorded move per entry. a newer player command inside the exit gets a fresh move, and a
+ * courier still inside well into the extraction hold gets another that avoids the retreat point */
 export function watchExit(s:GameState,w:ExitWatch,epoch:number,lastSeq:number):CombatCommand|null{
  'worklet';
- if(w.epoch!==epoch){w.epoch=epoch;w.issued=0;const p=s.definition?.phone;w.backX=p?.x??s.x;w.backY=p?.y??s.y;}
+ if(w.epoch!==epoch){w.epoch=epoch;w.issued=0;w.at=-99;const p=s.definition?.phone;w.backX=p?.x??s.x;w.backY=p?.y??s.y;}
  if(!insideExit(s,EXIT_CLEARANCE)){w.backX=s.x;w.backY=s.y;}
- if(!s.carrying||lastSeq===w.issued&&w.issued>0)return null;
- const guard=exitGuard(s,{x:w.backX,y:w.backY},lastSeq+1);
- if(guard)w.issued=guard.seq;
+ if(!s.carrying)return null;
+ const stuck=s.extraction>.3&&s.ticks-w.at>=6;
+ if(lastSeq===w.issued&&w.issued>0&&!stuck)return null;
+ const guard=exitGuard(s,{x:w.backX,y:w.backY},lastSeq+1,stuck);
+ if(guard){w.issued=guard.seq;w.at=s.ticks;}
  return guard;
 }

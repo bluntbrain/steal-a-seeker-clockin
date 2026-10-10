@@ -15,7 +15,7 @@ import {requiresClearAll,campaignLevelOf,guardsLeft,watchExit} from '../shared/c
 // app's exit guard, so its replays are the ones a player could record
 export function solveCombat(level:LevelDefinition,clearAll=requiresClearAll(campaignLevelOf(level))){
  for(let strategy=0;strategy<6;strategy++){
-  const s=initialState(level.mission,level),chunks:ReplayChunk[]=[];let seq=0,stage=-1,waypoints:Point[]=[],at=0;const watch={epoch:-1,issued:0,backX:0,backY:0};
+  const s=initialState(level.mission,level),chunks:ReplayChunk[]=[];let seq=0,stage=-1,waypoints:Point[]=[],at=0;const watch={epoch:-1,issued:0,at:-99,backX:0,backY:0};
   for(let frame=0;frame<level.hardLimitSeconds*30&&s.status==='playing';frame++){
    let command:CombatCommand|undefined;
    if(frame%6===0){

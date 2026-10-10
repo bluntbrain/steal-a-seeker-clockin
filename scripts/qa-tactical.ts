@@ -22,7 +22,7 @@ function advance(source:GameState,cmd:CombatCommand,ticks:number){const s=JSON.p
 function value(s:GameState,style=0,clearAll=false){const c=s.combat!;if(s.status==='won'&&clearAll&&guardsLeft(s)>0)return -1e6;return s.status==='won'?1e6:s.status!=='playing'?-1e6:c.hp*([14,22,10,18][style]??14)+c.kills*([90,160,170,55][style]??90)+s.delivered*1300+Number(s.carrying)*800+s.power*650-distance(s,clearAll)*18-s.elapsed*.6;}
 // Receding-horizon tap bot. It only emits legal commands, never edits the simulation.
 function attempt(l:LevelDefinition,style:number,clearAll:boolean){
- const s=initialState(l.mission,l),chunks:ReplayChunk[]=[];let seq=0;const watch={epoch:-1,issued:0,backX:0,backY:0};
+ const s=initialState(l.mission,l),chunks:ReplayChunk[]=[];let seq=0;const watch={epoch:-1,issued:0,at:-99,backX:0,backY:0};
  for(let turn=0;turn<l.hardLimitSeconds*2&&s.status==='playing';turn++){
   const candidates=options(s,seq+1,clearAll).map(cmd=>{const state=advance(s,cmd,15);return {cmd,state,value:value(state,style,clearAll)};}).sort((a,b)=>b.value-a.value).slice(0,4);
   let best=candidates[0],bestValue=-Infinity;

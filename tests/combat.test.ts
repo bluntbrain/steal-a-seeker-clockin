@@ -46,7 +46,7 @@ test('rear opening defeats a sentry; an armored survivor cannot be stun-locked',
 });
 
 test('kill-all rule: from level 2 the final exit stays shut until every guard is down',async()=>{
- const {requiresClearAll,campaignLevelOf,guardsLeft,exitShut,insideExit,exitGuard,reinforcementsPending,watchExit}=await import('../shared/clear-rule');
+ const {requiresClearAll,campaignLevelOf,guardsLeft,exitShut,insideExit,exitGuard,retreatPoint,blocksTap,reinforcementsPending,watchExit}=await import('../shared/clear-rule');
  const {solveCombat}=await import('../scripts/qa-combat');
  assert.equal(requiresClearAll(1),false,'level 1 stays the guided tutorial');assert.equal(requiresClearAll(2),true);
  assert.equal(campaignLevelOf({id:'campaign:13',number:5}),13,'published levels keep their zone edition in number');assert.equal(campaignLevelOf({id:'cone-lesson',number:2}),2);
@@ -54,18 +54,25 @@ test('kill-all rule: from level 2 the final exit stays shut until every guard is
  assert.equal(exitShut(s),false,'nothing to guard before the phone');
  assert.equal(reinforcementsPending(s),level.patrols.some(p=>p.reserveAfter!==undefined),'reinforcements wait outside until the phone is taken');
  s.carrying=true;assert.equal(exitShut(s),true);assert.equal(guardsLeft(s),level.patrols.length);
- const e=level.exit;s.x=e.x+e.w/2;s.y=e.y+e.h/2;assert(insideExit(s));
- assert.deepEqual(exitGuard(s,{x:4.123,y:9.876},7),{seq:7,kind:'move',target:-1,x:4.12,y:9.88},'sent back to where it last stood outside');
- const edge=exitGuard(s,{x:e.x+e.w/2,y:e.y-.001},9)!;assert(!insideExit({x:edge.x,y:edge.y,definition:level},.3),'a retreat point on the edge falls back to the phone, never into the exit');
- const w={epoch:-1,issued:0,backX:0,backY:0};
+ const e=level.exit,centre={x:e.x+e.w/2,y:e.y+e.h/2};s.x=centre.x;s.y=centre.y;assert(insideExit(s));
+ // the tap check: the exit itself or a floor spot inside it, but never an attack on a guard
+ assert(blocksTap(s,{seq:1,kind:'exit',target:0,...centre}));assert(blocksTap(s,{seq:1,kind:'move',target:-1,...centre}));
+ assert(!blocksTap(s,{seq:1,kind:'move',target:-1,...level.phone}));assert(!blocksTap(s,{seq:1,kind:'attack',target:0,...centre}));
+ // the retreat goes only where the simulation will accept a move: never into the exit, never into a wall
+ assert.deepEqual(exitGuard(s,level.phone,7),{seq:7,kind:'move',target:-1,x:level.phone.x,y:level.phone.y});
+ const edge=exitGuard(s,{x:centre.x,y:e.y-.001},9)!;assert(!insideExit({x:edge.x,y:edge.y,definition:level},.3),'a retreat point on the exit edge is skipped');
+ const wall=level.blockers[0]!,inWall={x:wall.x+wall.w/2,y:wall.y+wall.h/2},safe=retreatPoint(s,inWall);
+ assert.notDeepEqual(safe,inWall,'a retreat point inside a wall is skipped');assert(findPath(s,safe,{...level,blockers:s.blockers}).length>0);
+ const w={epoch:-1,issued:0,at:-99,backX:0,backY:0};
  assert.equal(watchExit(s,w,1,10)?.seq,11);assert.equal(watchExit(s,w,1,11),null,'one move per entry');
  assert(watchExit(s,w,1,12),'a newer player command inside the exit gets a fresh move');
+ s.extraction=.5;s.ticks=w.at+6;assert(watchExit(s,w,1,w.issued),'still inside deep into the hold: the guard tries again');s.extraction=0;
  assert(watchExit(s,w,2,w.issued),'a new run never inherits the last run\'s bookkeeping');
- s.combat!.kills=level.patrols.length;assert.equal(exitGuard(s,{x:4,y:9},8),null,'every guard down: the exit opens');
+ s.combat!.kills=level.patrols.length;assert.equal(exitGuard(s,level.phone,8),null,'every guard down: the exit opens');
  const two={...level,targets:[level.phone,{x:level.phone.x+1,y:level.phone.y}]},t=initialState(two.mission,two);t.carrying=true;assert.equal(exitShut(t),false,'an earlier phone may still be delivered');t.delivered=1;assert.equal(exitShut(t),true);
  // a stealth run replayed with the app's guard never finishes the exit while guards stand
  const stealth=solveCombat(level,false)!;assert(stealth.kills<level.patrols.length,'the stealth route leaves guards standing');
- const r=initialState(level.mission,level),watch={epoch:-1,issued:0,backX:0,backY:0};let seq=0,blocked=0;
+ const r=initialState(level.mission,level),watch={epoch:-1,issued:0,at:-99,backX:0,backY:0};let seq=0,blocked=0;
  for(const chunk of stealth.replay.chunks)for(let i=0;i<chunk.ticks&&r.status==='playing';i++){
   let command=i===0?chunk.command:undefined;if(command)seq=Math.max(seq,command.seq);
   const guard=watchExit(r,watch,1,seq);if(guard){seq=guard.seq;blocked++;command=guard;}
@@ -75,4 +82,29 @@ test('kill-all rule: from level 2 the final exit stays shut until every guard is
  // the clear-all bot wins, and the pinned verifier agrees on every guard down
  const win=solveCombat(level)!,check=verifyReplay(level.mission,win.replay,level);
  assert.equal(check.status,'won');assert.equal(check.kills,level.patrols.length);assert.equal(check.score,win.score);
+});
+
+test('kill-all rule: no approach to the exit lets a carrying courier out while guards stand',async()=>{
+ // the first 1.1.6 build leaked here (32 of 99 levels): this replays the app's exact frame logic, the tap check and
+ // the exit guard, from approaches all around each exit. guards are kept harmless and alive, so only the exit is tested
+ const {blocksTap,watchExit,campaignLevelOf}=await import('../shared/clear-rule');
+ const {assistedCombatTap}=await import('../src/controls/tapDestination');
+ const published=(await import('../src/campaign/published-levels.json')).default.levels as {number:number;definition:LevelDefinition}[];
+ const levels=[...CAMPAIGN_IDS.slice(1).map(combatLevel),...published.filter(l=>[13,14,19,25,28].includes(l.number)).map(l=>l.definition)];
+ const leaks:string[]=[];
+ for(const l of levels){const e=l.exit;
+  for(let dx=-2;dx<=e.w+2;dx+=1)for(let dy=-2;dy<=e.h+2;dy+=1){
+   const s=initialState(l.mission,l);for(const g of s.guards)g.active=false;
+   s.x=s.px=l.phone.x;s.y=s.py=l.phone.y;s.carrying=true;s.delivered=(l.targets?.length??1)-1;
+   const w={epoch:-1,issued:0,at:-99,backX:0,backY:0};let seq=0;
+   for(let tick=0;tick<500&&s.status==='playing';tick++){
+    let command:CombatCommand|undefined;
+    if(tick%45===0){const c=assistedCombatTap(s,e.x+dx,e.y+dy,seq+1);if(!blocksTap(s,c)){command=c;seq=c.seq;}}
+    const guard=watchExit(s,w,1,Math.max(s.combat!.commandSeen,seq));if(guard){seq=guard.seq;command=guard;}
+    step(s,{...idleInput(),command});
+   }
+   if(s.status==='won')leaks.push(`level ${campaignLevelOf(l)} from (${(e.x+dx).toFixed(1)}, ${(e.y+dy).toFixed(1)})`);
+  }
+ }
+ assert.deepEqual(leaks,[]);
 });

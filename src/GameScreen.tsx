@@ -5,7 +5,7 @@ import {exitWindowSeconds} from './controls/exit-window';
 import TutorialHand from './components/TutorialHand';
 import MissionChaseLoader,{warmMissionLoader} from './components/MissionChaseLoader';
 import {jevLine,jevResult,missionHint} from './onboarding/mission-lessons';
-import {exitShut,guardsLeft,reinforcementsPending,requiresClearAll,watchExit} from '../shared/clear-rule';
+import {blocksTap,guardsLeft,reinforcementsPending,requiresClearAll,watchExit} from '../shared/clear-rule';
 import {authoredEntry,campaignEntries,nextEntry,type CampaignEntry} from './campaign/levels';
 import {loadPublishedLevels,publishedLevels} from './campaign/client';
 import {sendDailyOpen} from './telemetry/store';
@@ -107,7 +107,7 @@ export function Game({onSnapshot}:{onSnapshot?:(state:GameState)=>void}){
  const finishBossEntrance=useCallback(()=>setBossEntrance(false),[]);
  const sceneReady=useSharedValue(false),simulationEpoch=useSharedValue(0),focusProgress=useSharedValue(1);
  const pendingTap=useSharedValue<PendingTap|null>(null),previousTap=useSharedValue<PendingTap|null>(null),tapElapsed=useSharedValue(TAP_INTERVAL_MS);
- const clearAll=useSharedValue(false),exitEpoch=useSharedValue(-1),exitIssued=useSharedValue(0),exitBackX=useSharedValue(0),exitBackY=useSharedValue(0);
+ const clearAll=useSharedValue(false),exitEpoch=useSharedValue(-1),exitIssued=useSharedValue(0),exitAt=useSharedValue(-99),exitBackX=useSharedValue(0),exitBackY=useSharedValue(0);
  const recording=useSharedValue<ReplayChunk[]>([]),[completedReplay,setCompletedReplay]=useState<Replay>();
  const game=useSharedValue(initial),input=useSharedValue(idleInput()),alpha=useSharedValue(0),clock=useSharedValue(0),accumulator=useSharedValue(0),suspended=useSharedValue(homeFirst);
  const samples=useSharedValue<number[]>(Array.from({length:120},()=>0)),sampleIndex=useSharedValue(0),sampleCount=useSharedValue(0),reportClock=useSharedValue(0),hudClock=useSharedValue(0),frameTotal=useSharedValue(0),slowTotal=useSharedValue(0);
@@ -215,8 +215,8 @@ export function Game({onSnapshot}:{onSnapshot?:(state:GameState)=>void}){
     const seq=Math.max(game.value.combat?.commandSeen??0,input.value.command?.seq??0)+1;
     const tapped=assistedCombatTap(game.value,point.x,point.y,seq);
     const proposed=guideStage.value>=0?guideCommand(guideStage.value,tapped):tapped;
-    // a tap on a shut exit explains the rule instead of walking there
-    const shut=clearAll.value&&proposed?.kind==='exit'&&exitShut(game.value),command=shut?null:proposed;
+    // a tap into a shut exit explains the rule instead of walking there
+    const shut=clearAll.value&&blocksTap(game.value,proposed),command=shut?null:proposed;
     if(command){input.modify(v=>{v.command=command;return v;});if(guideWaiting.value){guideWaiting.value=false;runOnJS(callBeginGuide)();}}
     // the thumb learns what the tap did: a tick for a move, a firmer pulse for a target, a double tick for nothing
     if(shut)runOnJS(callExitShut)(guardsLeft(game.value),reinforcementsPending(game.value));
@@ -238,9 +238,9 @@ export function Game({onSnapshot}:{onSnapshot?:(state:GameState)=>void}){
    // the app's half of the kill-all rule: carrying the last phone into the exit with guards standing sends the courier
    // back to where it last stood outside, well before the extraction hold ends. the move is an ordinary recorded command
    if(clearAll.value){
-    const watch={epoch:exitEpoch.value,issued:exitIssued.value,backX:exitBackX.value,backY:exitBackY.value};
+    const watch={epoch:exitEpoch.value,issued:exitIssued.value,at:exitAt.value,backX:exitBackX.value,backY:exitBackY.value};
     const guard=watchExit(game.value,watch,simulationEpoch.value,Math.max(game.value.combat?.commandSeen??0,input.value.command?.seq??0));
-    exitEpoch.value=watch.epoch;exitIssued.value=watch.issued;exitBackX.value=watch.backX;exitBackY.value=watch.backY;
+    exitEpoch.value=watch.epoch;exitIssued.value=watch.issued;exitAt.value=watch.at;exitBackX.value=watch.backX;exitBackY.value=watch.backY;
     if(guard){input.modify(v=>{v.command=guard;return v;});runOnJS(callExitShut)(guardsLeft(game.value),reinforcementsPending(game.value));}
    }
    const previousDamage=game.value.combat?.damageTaken??0,previousDecoys=game.value.decoysLeft,previousAlert=game.value.alert,previousPower=game.value.power,previousRelaySum=relaySum(game.value.relayTimers),previousCarry=game.value.carrying,previousDashes=game.value.dashes,previousTool=game.value.toolSeen,previousStatus=game.value.status,previousKills=game.value.combat?.kills??0,previousHits=game.value.combat?.hitEvents??0,previousBlocks=game.value.combat?.melee?.blocks??0,previousHunting=anyHunting(game.value),previousSuspicious=countSuspicious(game.value),previousExtract=Math.floor(game.value.extraction/.3);
@@ -265,7 +265,7 @@ export function Game({onSnapshot}:{onSnapshot?:(state:GameState)=>void}){
    if(game.value.status==='won'&&previousStatus!=='won')runOnJS(callEvent)('success');
    if(game.value.status==='caught'&&previousStatus!=='caught')runOnJS(callEvent)('caught');
    if(hudClock.value>=.12||previousDamage!==(game.value.combat?.damageTaken??0)||previousTool!==game.value.toolSeen||previousCarry!==game.value.carrying||previousStatus!==game.value.status||previousDashes!==game.value.dashes){runOnJS(callPublish)(fullSnapshots.value?{...game.value}:{...game.value,definition:undefined,guards:game.value.guards.map(g=>({...g,path:NO_PATH,brain:undefined}))},simulationEpoch.value);hudClock.value=0;}
- },[suspended,sceneReady,pendingTap,tapElapsed,game,input,guideStage,guideWaiting,fullSnapshots,clock,frameTotal,slowTotal,samples,sampleIndex,sampleCount,reportClock,accumulator,recording,alpha,hudClock,simulationEpoch,combatMode,callPublish,callStats,callEvent,callBeginGuide,clearAll,exitEpoch,exitIssued,exitBackX,exitBackY,callExitShut]));
+ },[suspended,sceneReady,pendingTap,tapElapsed,game,input,guideStage,guideWaiting,fullSnapshots,clock,frameTotal,slowTotal,samples,sampleIndex,sampleCount,reportClock,accumulator,recording,alpha,hudClock,simulationEpoch,combatMode,callPublish,callStats,callEvent,callBeginGuide,clearAll,exitEpoch,exitIssued,exitAt,exitBackX,exitBackY,callExitShut]));
  useEffect(()=>{frameDriver.setActive(renderGameSurface&&!paused);return()=>frameDriver.setActive(false);},[renderGameSurface,paused,frameDriver]);
  const pause=useCallback((value:boolean)=>{
   suspended.value=value;pendingTap.value=null;previousTap.value=null;

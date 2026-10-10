@@ -72,14 +72,21 @@ test('Filament host objects retain identity across renders and worklet dependenc
 });
 
 test('the kill-all exit guard compiles to worklets and runs in an isolated runtime',async()=>{
- const module={exports:{} as any},code=babel.transformFileSync(path.resolve('shared/clear-rule.ts'),{caller,plugins:['@babel/plugin-transform-modules-commonjs']}).code;
- vm.runInNewContext(code,{module,exports:module.exports,require,global:{Error},__DEV__:false});
- const rule=module.exports;
+ // load the rule and its game imports through the native babel pipeline, as the android bundle does
+ const cache=new Map<string,{exports:any}>();
+ const load=(filename:string):any=>{
+  filename=path.resolve(filename);const old=cache.get(filename);if(old)return old.exports;
+  const module={exports:{} as any};cache.set(filename,module);
+  const code=babel.transformFileSync(filename,{caller,plugins:['@babel/plugin-transform-modules-commonjs']}).code;
+  const localRequire=(id:string)=>{if(!id.startsWith('.'))return require(id);const base=path.resolve(path.dirname(filename),id),resolved=[base,base+'.ts',base+'.json'].find(p=>fs.existsSync(p)&&fs.statSync(p).isFile());assert(resolved,`${filename}: ${id}`);return resolved.endsWith('.json')?require(resolved):load(resolved);};
+  vm.runInNewContext(code,{module,exports:module.exports,require:localRequire,global:{Error},__DEV__:false},{filename});return module.exports;
+ };
+ const rule=load('shared/clear-rule.ts');
  // the ui thread may only call worklets: every helper the frame loop reaches must be one
- for(const name of ['watchExit','exitGuard','exitShut','insideExit','guardsLeft','reinforcementsPending'])assert.equal(typeof rule[name].__workletHash,'number',`${name} is a worklet`);
+ for(const name of ['watchExit','exitGuard','retreatPoint','blocksTap','exitShut','insideExit','guardsLeft','reinforcementsPending'])assert.equal(typeof rule[name].__workletHash,'number',`${name} is a worklet`);
  const {combatLevel}=await import('../src/game/combat-levels'),{initialState}=await import('../src/game/simulation');
  const level=combatLevel('cone-lesson'),s=initialState(level.mission,level),e=level.exit;s.carrying=true;s.x=e.x+e.w/2;s.y=e.y+e.h/2;
  const isolated=vm.runInNewContext('('+rule.watchExit.__initData.code+')',{});
- const command=isolated.call(rule.watchExit,s,{epoch:-1,issued:0,backX:0,backY:0},1,4);
+ const command=isolated.call(rule.watchExit,s,{epoch:-1,issued:0,at:-99,backX:0,backY:0},1,4);
  assert.equal(command?.kind,'move');assert.equal(command?.seq,5);
 });
