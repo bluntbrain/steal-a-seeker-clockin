@@ -70,3 +70,16 @@ test('Filament host objects retain identity across renders and worklet dependenc
  assert.equal(a.__closure.engine,engine);
  assert.equal(a.__closure.engine,b.__closure.engine,'Stable native engine must not recreate/release lighting every render');
 });
+
+test('the kill-all exit guard compiles to worklets and runs in an isolated runtime',async()=>{
+ const module={exports:{} as any},code=babel.transformFileSync(path.resolve('shared/clear-rule.ts'),{caller,plugins:['@babel/plugin-transform-modules-commonjs']}).code;
+ vm.runInNewContext(code,{module,exports:module.exports,require,global:{Error},__DEV__:false});
+ const rule=module.exports;
+ // the ui thread may only call worklets: every helper the frame loop reaches must be one
+ for(const name of ['watchExit','exitGuard','exitShut','insideExit','guardsLeft','reinforcementsPending'])assert.equal(typeof rule[name].__workletHash,'number',`${name} is a worklet`);
+ const {combatLevel}=await import('../src/game/combat-levels'),{initialState}=await import('../src/game/simulation');
+ const level=combatLevel('cone-lesson'),s=initialState(level.mission,level),e=level.exit;s.carrying=true;s.x=e.x+e.w/2;s.y=e.y+e.h/2;
+ const isolated=vm.runInNewContext('('+rule.watchExit.__initData.code+')',{});
+ const command=isolated.call(rule.watchExit,s,{epoch:-1,issued:0,backX:0,backY:0},1,4);
+ assert.equal(command?.kind,'move');assert.equal(command?.seq,5);
+});
