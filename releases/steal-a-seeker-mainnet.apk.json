@@ -2,8 +2,8 @@
   "mode": "mainnet",
   "application": {
     "package": "com.bluntbrain.stealaseeker",
-    "version": "1.1.6",
-    "versionCode": 63
+    "version": "1.1.7",
+    "versionCode": 64
   },
   "publicConfig": {
     "phoneRenderer": "filament",
@@ -14,7 +14,7 @@
   },
   "sourceFiles": {
     "App.tsx": "1a5d6bc4cce668236bafed0e0b2c456dcfc76cd0f1eb208eedc0ef87e0337c61",
-    "android/app/build.gradle": "791a8433482f4d9e52f2fc595c33b3a123fbc8ebd1ffc8c55fdadf277ff07598",
+    "android/app/build.gradle": "54cc65c4e824f0ef6c913516e92e4016105d2c62547bfe3d3809af6d69309ade",
     "android/app/src/debug/AndroidManifest.xml": "fb1795032c764d975376e1612ab7022058eca2268a45efbe731a47a5d3ac0f60",
     "android/app/src/debugOptimized/AndroidManifest.xml": "fb1795032c764d975376e1612ab7022058eca2268a45efbe731a47a5d3ac0f60",
     "android/app/src/main/AndroidManifest.xml": "91a22f38b6c8c647b1300b9e982307be6048266c7c7db7abeb4b096dc962505c",
@@ -48,7 +48,7 @@
     "android/app/src/main/res/values/colors.xml": "dd2b2d78bd1e97238a0c4c345f20bbea6c797a02131c269e04e6d22494eb8605",
     "android/app/src/main/res/values/strings.xml": "47ed7faad16726043974dbd24d27e27bcb250344fae7988248589e9899f050e0",
     "android/app/src/main/res/values/styles.xml": "b49f11b528f21d1690a07f9b582289b42cc1d55698c4eb00c252ec98e466e051",
-    "app.json": "9bb15d2da895700b546baccee86b55fc9389dccc2ea9e1ec4e6a1d1e302cd4be",
+    "app.json": "a8f123a623be597b532c283f7827706fb8d61bed110967125defa471ba84ab7a",
     "babel.config.js": "883b928138618186133ce4ef4eafd9495d85d2d60182627fe231c0105b067fe9",
     "index.ts": "2370dec3b8100307cb6b459d1dc50bd97d028d11be3cfff6e995111d004c41bc",
     "metro.config.js": "6a814fa8146b6d313edeeb79ed6cede3f25bf2d033912663495d31ed2de50223",
@@ -60,7 +60,7 @@
     "shared/campaign-levels.ts": "4e7388c4436d19a9339f9845ce6bff611bb047b61fa1ebda3ba009446ce2b7cf",
     "shared/campaign-maze.ts": "f2dfb13de1f6e4ce5cdad0b936877178fbe6ec87d1b6e5c429af6535bd59287d",
     "shared/campaign-stealth-layouts.ts": "26a6bd1de37efc5c1a688728e2cc0e1258ee959d99033f29f1bd82c549ff508e",
-    "shared/clear-rule.ts": "54ac09cd92b54e009bedfb4681e14ede19753e7b65e0768d13836c4acd5b448a",
+    "shared/clear-rule.ts": "24f0332dad8ce28f6ffcdfda7ccbb5acb0bde90f53bfababea93b70b2cd7f502",
     "shared/commerce.ts": "3ec6a094a08f0bdef6e9d84bc4178b66473590b6f331cdb6b84d08ef498c9aa7",
     "shared/costumes.ts": "9095cf3d2797b3febec8b0a47b20528e5eab07d3e5f395a2002343d3524c7cb0",
     "shared/economy.ts": "5f841a4d46487971adf60d048acd4a82a6a31bd9c9e53491f845d935d252d942",
@@ -74,7 +74,7 @@
     "shared/wallet-name.ts": "931fe9a6d44ec4bba4c39470f9e1c08bbb237f5af3943a651fb767497adf62d1",
     "shared/weekly-engine.json": "f0d13803a744edbec30c09e2c37063d99387a8175a36eb8476ead440ee686faa",
     "shared/weekly-layouts.ts": "40545e5927c2dfe497d416f32107a2bdfb670ae27b83d1f0e3b1c0e600eecc75",
-    "src/GameScreen.tsx": "b46535fac204b88c99c9e13a083226c72ab9d901c5e7d0b5b0f9f63aa0213b53",
+    "src/GameScreen.tsx": "f9a49bca87367cd278f234d3751fee6248b63baeb5f8723d0e6fca508c127be4",
     "src/NativeParityProbe.tsx": "c02677167a288748975acf6f725c06f705d6ad0dc91add933b53153d5db7a0c1",
     "src/art/industrial-props.ts": "a99290e4ee1f7f6bf9aaa6445f9b275162fc69d194ccb0b47a69d87708947716",
     "src/art/wall-depth-art.ts": "6e1de9ca5df98504b134a786a4f1d244fced152bae3db1a0e3b7c9dd60c7b12c",
@@ -255,14 +255,14 @@
     "src/playtest/Panel.tsx": "37405339d5a2f6780bd9d9d65fd8e6b4d7429810f4d80277afa7dc6a6aaf8c73",
     "src/playtest/WallDepthLab.tsx": "907dd6c62e8803754d134d786c2a46209a2ca49cd14920e71656f20cbb8de75b",
     "src/playtest/jev-pilot.ts": "9959c0c703137ee6e0b9848ea3ca2fa9e5e002060848d5d5158573b9049dbbf9",
-    "src/playtest/mission.ts": "780dba990e8a931468b9a08a05facf0af206017ffc54b15e83ad0c0e332f15cb",
+    "src/playtest/mission.ts": "2b472916a14382a18cfa2e029e334d659ccba848452c031c382eb08eb796d3ca",
     "src/playtest/mission.web.ts": "14905f65f15859c6aa6c3d33e2f83d6208e72e2f468abf30fb2b09b7b777086d",
     "src/playtest/store.ts": "eda6fc1fce7a95aaf00752adfa8cc8dd00875e4a52da44a87992e0aad076fb06",
     "src/progress/model.ts": "f69f15ec2e68e41bbb6581d7cfd2fde1be8b05a0ff27b34932ab9556028e12b0",
     "src/progress/storage.ts": "91deb261302f6eb94610eebc0976a4353dcef8d0081cfba97be958575c8c4e34",
     "src/progress/storage.web.ts": "61e596f5f03f0e09aa15ba98fdf3434fece80bc2f912625ed7e50f68ed96ef87",
     "src/progress/useProgress.ts": "f887c1d49a4837c8f3af4d8558ab65da3cf23282d89420201f9596111cac290a",
-    "src/settings/SettingsPanel.tsx": "956dbd5cfbb82a2d021b0e88960574142e5f8c40107d8d9d2bdeb1bdf0ecb2d8",
+    "src/settings/SettingsPanel.tsx": "795985d7d32c847abd3e363cb5f32c5b3c4661c310f917ba1ef2dfb9a4819733",
     "src/settings/SettingsProvider.tsx": "7d6f33f2d31c73fb86c3b1460d59fe59698de7c658403eb407de539264346e2a",
     "src/settings/preferences.ts": "5c01491e42888e649c123e30cb0864c47e468aa25f5aa56b740b6a919d11e969",
     "src/telemetry/PlaytestControls.tsx": "9a5a3929941cad987085d122ebdc9d52abd057f0f7ffcb9cbdc7422f53d739e3",
@@ -293,15 +293,13 @@
     "src/wallet/signInFallback.ts": "d483b760a4393f01fba79cd0db0735489303814c49bb08fe3a4545d095fe2944",
     "src/wallet/useLoggedWallet.ts": "a628b09c8140d7f2b006704c1990ee8afe5737eea7ae2e3dc763b3246655d02c"
   },
-  "sha256": "19070a8e6f8e2128406eadba253f1db5f3431e73258a29c07c40b1c7f4b2b810",
-  "bytes": 95234507,
-  "builtAt": "2026-10-10T17:04:08.436Z",
-  "head": "6a5175a693a3e57d239d1629786ec02b70af0e08",
+  "sha256": "09a618523bd590c5447db228643c5d38ade6befe60dbf657919a0378e63b0524",
+  "bytes": 95237063,
+  "builtAt": "2026-10-10T19:30:37.347Z",
+  "head": "8d9624a407f2faa4288f20d38e080ea40d3c1041",
   "workingTree": [
     "M android/app/build.gradle",
-    " M app.json",
-    " M releases/steal-a-seeker-mainnet.apk.json",
-    "?? releases/steal-a-seeker-mainnet-v1.1.6-code63.apk.json"
+    " M app.json"
   ],
   "architectures": [
     "arm64-v8a"

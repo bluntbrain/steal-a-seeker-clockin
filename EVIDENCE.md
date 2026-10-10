@@ -54,7 +54,7 @@ npx tsx scripts/prove-anti-cheat.ts --live   # the same checks against productio
 
 ## 3. Checks on every push
 
-[.github/workflows/ci.yml](.github/workflows/ci.yml) runs on every push to `main`: type check, game rules check, app tests, the offline anti-cheat proof, and the server tests against PostgreSQL 16. On 10 October 2026 there were 417 app tests and 80 server tests, and all of them passed (local run and GitHub Actions).
+[.github/workflows/ci.yml](.github/workflows/ci.yml) runs on every push to `main`: type check, game rules check, app tests, the offline anti-cheat proof, and the server tests against PostgreSQL 16. On 10 October 2026 there were 418 app tests and 80 server tests, and all of them passed (local run and GitHub Actions).
 
 ## 4. A real payment on a phone
 
