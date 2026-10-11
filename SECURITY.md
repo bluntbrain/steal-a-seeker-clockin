@@ -22,7 +22,7 @@ The audit ran on commit `aa4657d` on 8 October 2026 and reported 174 findings. E
 |---|---|
 | 142 leaked secrets in `releases/*.apk.json` and `verification/` | Not secrets. These lines are SHA-256 checksums of source files in build manifests, and the public key fingerprints of the release signing certificate. Nothing was exposed, so no key was rotated. The old 0.3.x, devnet, judge and legacy manifests and the signature dumps were removed from this repository on 9 October 2026. |
 | `sharp` 0.34.5 advisories | Fixed. Updated to 0.35.5. It is a build-time image tool and is not part of the app. |
-| `stream-json` and `uuid` advisories in the server | Not reachable. Both arrive through `@solana/web3.js` 1.x via `jayson`. The server does not use the affected stream-json filters or uuid v3, v5 or v6 with a buffer. The only fix is web3.js 3, a breaking upgrade that is tracked separately. |
+| `stream-json` and `uuid` advisories under `@solana/web3.js` | Fixed. Both arrive through `jayson`; an npm override pins `uuid` 11.1.1 and `stream-json` 3.7.0 in both lockfiles (server on 10 October 2026, app on 11 October 2026), and the live mainnet RPC path was checked afterwards. The remaining `uuid` 7.0.3 belongs to Expo's build tooling (`xcode`) and is not inside the APK. |
 | Other server dependencies | Fixed. `fastify` is updated to 5.12.5, and `fast-uri` and `ip-address` to their patched versions. |
 | `android:allowBackup` is true | Fixed. Backup is now off in `app.json` and the Android manifest. |
 | Docker base image pulled by tag | Fixed. `Dockerfile.api` pins `node:22-bookworm-slim` by digest. |
