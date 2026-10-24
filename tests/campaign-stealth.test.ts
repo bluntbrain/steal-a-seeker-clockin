@@ -9,9 +9,12 @@ test('all 88 denser campaign levels regenerate and keep reachable extraction rou
  for(const row of bundle.levels){const l=row.definition as LevelDefinition;used.add(row.recipe.template);assert.deepEqual(buildCampaignLevel(row.recipe as CampaignRecipe),l);assert(l.blockers.length>=16);
  const exit={x:l.exit.x+l.exit.w/2,y:l.exit.y+l.exit.h/2};
  for(const p of l.targets??[l.phone]){assert(findPath(l.spawn,p,l).length,row.title);assert(findPath(p,exit,l).length,row.title);}
- for(const g of l.patrols)for(const p of g.roam??g.route)assert(walkableSegment(p,p,l),`${row.number}: patrol inside a wall`);
+ // a guard must be reachable from the spawn, not only clear of walls: six tunnel levels shipped with a guard sealed in a
+ // pocket, which the kill-all rule turned into levels nobody could finish
+ for(const g of l.patrols){for(const p of g.roam??g.route)assert(walkableSegment(p,p,l),`${row.number}: patrol inside a wall`);assert(g.route.some(p=>findPath(l.spawn,p,l).length>0),`${row.number}: guard walled off from the player`);}
  }
- assert.equal(used.size,CAMPAIGN_STEALTH_LAYOUTS.length);
+ // the bundle mixes the stealth rooms with mazes and boss arenas, so every stealth room still appears at least once
+ for(const t of CAMPAIGN_STEALTH_LAYOUTS)assert(used.has(t.id),`stealth room ${t.id} is no longer used`);
 });
 import {makeCampaignRecipe,makeCampaignRecipes} from '../shared/campaign-levels';
 import {carveMaze} from '../shared/campaign-maze';

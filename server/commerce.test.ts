@@ -571,11 +571,21 @@ test('published campaign levels verify against the frozen row, pay the published
  const viaApi=await app.inject({method:'POST',url:'/campaign/runs',headers:u.headers,payload:{level:13,rulesHash:plain.rulesHash,replay:win.replay}});assert.equal(viaApi.statusCode,200,viaApi.body);assert.equal(viaApi.json().creditAward.credits,0);
  // boot seeding publishes the bundled batch once and never rewrites rows that already exist
  const {seedCampaignLevels}=await import('./campaign-levels'),bundle=(await import('../src/campaign/published-levels.json')).default;
- assert.equal(await seedCampaignLevels(pool,()=>{throw new Error('bundle must match its recipes');}),bundle.levels.length-3);assert.equal(await seedCampaignLevels(pool),0);assert.equal(await campaign.levels.latest(),bundle.levels[bundle.levels.length-1]!.number);
- assert.equal((await campaign.levels.get(13))!.title,plain.title);
+ // the three rows published above came from the live generator, so the bundle's older layouts for 13 to 15 replace them
+ // (a layout change is a new version); the only warning that must never fire is a recipe mismatch
+ const onlyReplacements=(m:string)=>{if(!/^Replaced \d+ campaign layouts/.test(m))throw new Error(m);};
+ assert.equal(await seedCampaignLevels(pool,onlyReplacements),bundle.levels.length,'3 replaced plus the rest inserted');assert.equal(await seedCampaignLevels(pool),0);assert.equal(await campaign.levels.latest(),bundle.levels[bundle.levels.length-1]!.number);
+ assert.equal((await campaign.levels.get(13))!.title,bundle.levels[0]!.title,'the bundle layout now serves level 13');
+ assert.equal((await pool.query('SELECT count(*)::int AS n FROM campaign_level_versions WHERE number=13')).rows[0].n,1,'the generator layout is archived for its replays');
  // a hotfix before anyone played: a stale unplayed row is replaced, a played one is kept
  await pool.query("UPDATE campaign_levels SET rules_hash='0000' WHERE number IN (14,15)");
  assert.equal(await seedCampaignLevels(pool,()=>{}),2,'both layouts refresh, and old versions remain available');
+ // a fixed layout under the same rules (a guard was walled off) also refreshes, and the old definition is archived
+ await pool.query("UPDATE campaign_levels SET definition=jsonb_set(definition,'{title}','\"stale layout\"') WHERE number=13");
+ assert.deepEqual(await seedCampaignLevels(pool,()=>{}),1,'a changed definition is a new version even when the rules hash matches');
+ assert.equal((await campaign.levels.get(13))!.definition.title,(bundle.levels[0]!.definition as {title:string}).title);
+ assert.equal((await pool.query("SELECT count(*)::int AS n FROM campaign_level_versions WHERE number=13 AND definition->>'title'='stale layout'")).rows[0].n,1,'the stale layout is kept for old replays');
+ assert.ok((await campaign.levels.list(13,13))[0]!.publishedAt,'the public row says when it was published, so phones can replace a cached copy');
  assert.equal((await campaign.levels.get(14))!.rulesHash,plain.rulesHash);assert.equal((await campaign.levels.get(15))!.rulesHash,plain.rulesHash);
  assert.equal((await campaign.levels.get(15,'0000'))!.rulesHash,'0000');
  assert.equal(await campaign.levels.get(15,'unknown'),null);

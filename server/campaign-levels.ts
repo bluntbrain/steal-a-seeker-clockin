@@ -7,7 +7,7 @@ import bundled from '../src/campaign/published-levels.json';
 import rules from '../shared/rules-manifest.json';
 import engine from '../shared/weekly-engine.json';
 export type PublishedLevel={number:number;batch:number;recipe:CampaignRecipe;definition:LevelDefinition;rulesHash:string;engineHash:string;boss:string|null;title:string;zone:string;publishedAt:string};
-export type PublicLevel={number:number;title:string;zone:string;boss:string|null;definition:LevelDefinition;rulesHash:string;engineHash:string};
+export type PublicLevel={number:number;title:string;zone:string;boss:string|null;definition:LevelDefinition;rulesHash:string;engineHash:string;publishedAt:string};
 export const LEVEL_PAGE=100;
 /** the batch shipped inside the app is published on boot so a fresh database serves what the client already shows.
  * rows are regenerated from their recipes and must match the bundle bit for bit, otherwise nothing is inserted */
@@ -23,6 +23,8 @@ export async function seedCampaignLevels(pool:Pool,warn:(message:string)=>void=c
  if(replaced.length)warn(`Replaced ${replaced.length} campaign layouts while archiving previous definitions.`);
  return replaced.length+(await store.publish(rows)).length;
 }
+// jsonb comes back with its keys reordered, so a byte comparison would see every layout as changed on every boot
+const sameJson=(a:unknown,b:unknown):boolean=>{if(Array.isArray(a)||Array.isArray(b))return Array.isArray(a)&&Array.isArray(b)&&a.length===b.length&&a.every((v,i)=>sameJson(v,b[i]));if(a&&b&&typeof a==='object'&&typeof b==='object'){const ka=Object.keys(a as object).sort(),kb=Object.keys(b as object).sort();return ka.length===kb.length&&ka.every((k,i)=>k===kb[i]&&sameJson((a as Record<string,unknown>)[k],(b as Record<string,unknown>)[k]));}return a===b;};
 const columns='number,batch,recipe,definition,rules_hash AS "rulesHash",engine_hash AS "engineHash",boss,title,zone,published_at AS "publishedAt"';
 export class CampaignLevelStore{
  constructor(private pool:Pool){}
@@ -30,11 +32,11 @@ export class CampaignLevelStore{
  async get(number:number,rulesHash?:string):Promise<PublishedLevel|null>{
   const r=await this.pool.query(`SELECT ${columns} FROM campaign_levels WHERE number=$1${rulesHash?' AND rules_hash=$2':''}`,rulesHash?[number,rulesHash]:[number]);
   if(r.rows[0]||!rulesHash)return r.rows[0]??null;
-  const archived=await this.pool.query(`SELECT ${columns} FROM campaign_level_versions WHERE number=$1 AND rules_hash=$2`,[number,rulesHash]);return archived.rows[0]??null;
+  const archived=await this.pool.query(`SELECT ${columns} FROM campaign_level_versions WHERE number=$1 AND rules_hash=$2 ORDER BY published_at DESC LIMIT 1`,[number,rulesHash]);return archived.rows[0]??null;
  }
  async list(from:number,to:number):Promise<PublicLevel[]>{
   const r=await this.pool.query(`SELECT ${columns} FROM campaign_levels WHERE number BETWEEN $1 AND $2 ORDER BY number LIMIT ${LEVEL_PAGE}`,[from,to]);
-  return r.rows.map((row:PublishedLevel)=>({number:row.number,title:row.title,zone:row.zone,boss:row.boss,definition:row.definition,rulesHash:row.rulesHash,engineHash:row.engineHash}));
+  return r.rows.map((row:PublishedLevel)=>({number:row.number,title:row.title,zone:row.zone,boss:row.boss,definition:row.definition,rulesHash:row.rulesHash,engineHash:row.engineHash,publishedAt:new Date(row.publishedAt).toISOString()}));
  }
  /** Refresh shipped layouts atomically. Played definitions remain available by their rules hash;
   * stars and credits still deduplicate by mission number, so a refresh grants no duplicate rewards. */
@@ -43,8 +45,9 @@ export class CampaignLevelStore{
    await db.query('SELECT pg_advisory_xact_lock(1936024940)');
    const replaced:number[]=[];
    for(const row of rows){
-    const old=await db.query('SELECT rules_hash FROM campaign_levels WHERE number=$1 FOR UPDATE',[row.number]);
-    if(!old.rowCount||old.rows[0].rules_hash===row.rulesHash)continue;
+    const old=await db.query('SELECT rules_hash,definition FROM campaign_levels WHERE number=$1 FOR UPDATE',[row.number]);
+    // a new rules hash or a changed layout under the same rules (a fixed level) both archive the old version
+    if(!old.rowCount||(old.rows[0].rules_hash===row.rulesHash&&sameJson(old.rows[0].definition,row.definition)))continue;
     await db.query('INSERT INTO campaign_level_versions SELECT number,batch,recipe,definition,rules_hash,engine_hash,boss,title,zone,published_at FROM campaign_levels WHERE number=$1 ON CONFLICT DO NOTHING',[row.number]);
     await db.query('UPDATE campaign_levels SET batch=$2,recipe=$3,definition=$4,rules_hash=$5,engine_hash=$6,boss=$7,title=$8,zone=$9,published_at=now() WHERE number=$1',[row.number,row.batch,row.recipe,row.definition,row.rulesHash,row.engineHash,row.boss,row.title,row.zone]);
     replaced.push(row.number);

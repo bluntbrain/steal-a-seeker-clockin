@@ -3,6 +3,8 @@
 // inserted once. CAMPAIGN_TARGET_LEVEL drives publishToTarget in the background after the api starts.
 import type {Pool} from 'pg';
 import {Worker} from 'node:worker_threads';
+import {initialState} from '../src/game/simulation';
+import {findPath} from '../src/game/navigation';
 import {URL} from 'node:url';
 import {makeCampaignRecipe,buildCampaignLevel,type CampaignRecipe} from '../shared/campaign-levels';
 import {verifyReplayInWorker,ReplayBusyError} from './replay-runner';
@@ -37,6 +39,9 @@ export async function buildPublishable(number:number,batch:number):Promise<Built
  for(let salt=0;salt<12;salt++){
   let recipe:CampaignRecipe,definition;
   try{recipe=makeCampaignRecipe(number,salt);definition=buildCampaignLevel(recipe);}catch{continue;}
+  // the generator only checks the phone and the exit; a guard dropped in a sealed pocket can never be taken down,
+  // which the kill-all rule turns into an impossible level (levels 40, 46, 69, 87, 93 and 100 shipped that way)
+  if(!everyGuardReachable(definition))continue;
   const win=await solveInWorker(definition);if(!win)continue;
   const check=await verifyWithRetry(definition,win);
   if(check.status!=='won'||check.score!==win.score)throw new Error(`pinned verifier disagrees with the solver on level ${number}`);
@@ -44,6 +49,7 @@ export async function buildPublishable(number:number,batch:number):Promise<Built
  }
  throw new Error(`level ${number} has no winnable recipe within twelve salts`);
 }
+export function everyGuardReachable(definition:LevelDefinition){const s=initialState(definition.mission,definition),level={...definition,blockers:s.blockers};return definition.patrols.every(p=>p.route.some(point=>findPath(s,point,level).length>0));}
 export const batchOf=(number:number)=>Math.ceil((number-12)/50);
 /** publishes one level at a time from the latest row up to the target, at most `limit` per call.
  * solving takes tens of seconds per level, so this runs after listen and never blocks a request */

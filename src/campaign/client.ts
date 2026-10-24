@@ -34,8 +34,10 @@ export async function syncCampaign(wallet:string,token:string,onAward?:(mission:
 const LEVELS_KEY=`seeker.campaign.levels.${NETWORK_NAME}`;
 let published:PublishedLevel[]=BUNDLED_LEVELS;const listeners=new Set<()=>void>();
 const bundledTop=BUNDLED_LEVELS[BUNDLED_LEVELS.length-1]?.number??12;
-const merge=(extra:unknown[])=>{const byNumber=new Map(published.map(l=>[l.number,l] as const));for(const l of extra)if(isPublishedLevel(l)&&!byNumber.has(l.number))byNumber.set(l.number,l);return [...byNumber.values()].sort((a,b)=>a.number-b.number);};
-const setPublished=(next:PublishedLevel[])=>{if(next.length===published.length)return;published=next;for(const l of listeners)l();};
+// a level published later than the copy we hold is a fixed layout and wins; a copy without a date (the bundle) is the oldest
+const newer=(a:PublishedLevel,b:PublishedLevel)=>(a.publishedAt??'')>(b.publishedAt??'');
+const merge=(extra:unknown[])=>{const byNumber=new Map(published.map(l=>[l.number,l] as const));for(const l of extra)if(isPublishedLevel(l)){const have=byNumber.get(l.number);if(!have||newer(l,have))byNumber.set(l.number,l);}return [...byNumber.values()].sort((a,b)=>a.number-b.number);};
+const setPublished=(next:PublishedLevel[])=>{if(next.length===published.length&&next.every((l,i)=>l===published[i]))return;published=next;for(const l of listeners)l();};
 export const publishedLevels={subscribe:(l:()=>void)=>{listeners.add(l);return()=>{listeners.delete(l);};},get:()=>published};
 const contiguousTop=(list:readonly PublishedLevel[])=>{let top=12;for(const l of list){if(l.number===top+1)top=l.number;else if(l.number>top+1)break;}return top;};
 let cacheRead=false,hadCache=false,loading:Promise<void>|null=null;
@@ -67,7 +69,8 @@ async function loadOnce(){
  finally{if(showLoader)setDownload({active:false,progress:1});}
  // pages that arrived are kept even when another page failed, so the next launch only fetches the gap.
  // the cache can hold hundreds of levels, so it is rewritten only when this run added some
- if(published.length>before)try{await writeSave(LEVELS_KEY,JSON.stringify(published.filter(l=>l.number>bundledTop)));hadCache=true;}catch{/* retried next launch */}
+ // dated levels are server copies that may have replaced a bundled layout, so they are kept even below the bundle's top
+ if(published.length>before||published.some(l=>l.publishedAt))try{await writeSave(LEVELS_KEY,JSON.stringify(published.filter(l=>l.number>bundledTop||l.publishedAt)));hadCache=true;}catch{/* retried next launch */}
 }
 
 // Import only server-verified guest replays. Never trust the device balance,

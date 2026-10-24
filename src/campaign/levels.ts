@@ -7,7 +7,7 @@ import {campaignLevelKey,FIRST_PUBLISHED_LEVEL,type BossId,type CampaignZone} fr
 import engine from '../../shared/weekly-engine.json';
 import type {Progress} from '../progress/model';
 import bundled from './published-levels.json';
-export type PublishedLevel={number:number;title:string;zone:CampaignZone;boss:BossId|null;definition:LevelDefinition;rulesHash:string;engineHash:string};
+export type PublishedLevel={number:number;title:string;zone:CampaignZone;boss:BossId|null;definition:LevelDefinition;rulesHash:string;engineHash:string;publishedAt?:string};
 export type CampaignEntry={rulesHash?:string;number:number;key:string;mission:MissionId;title:string;zone:CampaignZone;boss:BossId|null;definition:LevelDefinition;playable:boolean};
 export const BUNDLED_LEVELS=bundled.levels as PublishedLevel[];
 const authored:CampaignEntry[]=CAMPAIGN_IDS.map((id,i)=>{const definition=combatLevel(id);return {number:i+1,key:id,mission:id,title:definition.title,zone:districtFor(i+1),boss:null,definition,playable:true};});
